@@ -1,0 +1,14 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "lucky-skills",
+  "description": "Skills propias de Lucky — fuente unica. El Crisol (loop jidoka de calidad) y La Brujula (anclaje al estado real).",
+  "owner": { "name": "mlandolfi90" },
+  "plugins": [
+    {
+      "name": "lucky",
+      "source": "./plugins/lucky",
+      "description": "El Crisol + La Brujula: calidad incorporada y anclaje de contexto real.",
+      "author": { "name": "mlandolfi90" }
+    }
+  ]
+}

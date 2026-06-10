@@ -1,0 +1,6 @@
+{
+  "name": "lucky",
+  "description": "El Crisol (loop jidoka de calidad para cambios de codigo) + La Brujula (ancla la sesion al estado real del repo y el deploy).",
+  "version": "1.0.0",
+  "author": { "name": "mlandolfi90" }
+}
