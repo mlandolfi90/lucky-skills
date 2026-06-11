@@ -15,6 +15,13 @@
 - [ ] Cobertura ≥ umbral del dominio. Sin baja de cobertura.
 - [ ] `lo staged == lo verificado` (diff real revisado).
 
+## A2. UI / Responsive (solo si la corrida tocó UI)
+- [ ] Render verificado en viewport móvil (~390px): sin overflow horizontal,
+      sin elementos inaccesibles, sin cuelgues con datos reales.
+- [ ] Interacciones primarias usables con touch (tap targets, scroll).
+- [ ] PASS de sandbox/desktop NO sustituye la verificación móvil (lección TDU-020:
+      "CLOSED-PASS" en sandbox, colgado en el teléfono real).
+
 ## B. Cero deuda técnica (`feedback_no_tech_debt.md`)
 - [ ] SoC: cada módulo/clase/función con UNA responsabilidad.
 - [ ] Factorizado: sin copy-paste, sin funciones gigantes, sin archivo mezcla-todo.

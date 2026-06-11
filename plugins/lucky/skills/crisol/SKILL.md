@@ -79,6 +79,11 @@ Respondé el checklist. **Cualquier "SÍ" → Tier Completo.** Todos "NO" → Fa
   pasa el Crisol y se re-promueve. Container de testing/prod = solo diagnóstico.
   **Bug post-release:** el fix-forward es una corrida nueva (entrada `ACTIVE`
   propia); la corrida `CLOSED` no se reabre.
+- **Responsive obligatorio (si la corrida toca UI):** toda app/panel/interfaz
+  que se cree o modifique debe ser consumible desde **web móvil**. El
+  Verificador valida en viewport móvil (~390px): sin overflow horizontal, sin
+  cuelgues con datos reales, interacciones usables con touch. **PASS de
+  sandbox/desktop NO cuenta como PASS móvil** — UI rota en móvil → `FAIL`.
 - **Sin secretos en artefactos:** ningún artefacto del Crisol (RUN-LEDGER, ADR,
   COLLISION-MAP, `IDEAS.md`, mensajes de commit) lleva valores reales de
   credenciales, tokens, passwords, connection strings ni API keys — solo nombres

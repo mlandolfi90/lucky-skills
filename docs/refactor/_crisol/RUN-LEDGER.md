@@ -22,3 +22,16 @@
   forja de la ley hasta unificar el parser (ahora acepta ambos). Lección: dos
   guardianes del mismo invariante = un solo formato canónico, verificado por
   fixture compartido.
+
+### main — 2026-06-11 (corrida 1)
+- STATUS: CLOSED
+- Tier: fast-path
+- Fecha: 2026-06-11
+- Alcance: regla nueva "Responsive obligatorio" en §2 (toda UI creada/modificada
+  debe ser consumible desde web móvil; Verificador valida viewport ~390px; PASS
+  de sandbox NO cuenta como PASS móvil) + sección A2 en auditor-checklist.
+  Origen: lección TDU-020 (panel "CLOSED-PASS" en sandbox, colgado en móvil real).
+- Veredictos: Verificador PASS (cambio de prosa, texto idéntico repo↔draft,
+  grep verificado). Iteraciones: 1.
+- RETRO: primera corrida kaizen juzgada por v1.0.0 — el flujo §6 funcionó sin
+  fricción.
