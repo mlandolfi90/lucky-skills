@@ -1,147 +1,265 @@
 ---
 name: crisol
 description: >-
-  El Crisol — Loop de Calidad Incorporada (jidoka) unificado para cambios de
-  código. Invocar explícitamente ("/crisol" o "corré el Crisol sobre X") ANTES
+  El Crisol — Loop de Calidad Incorporada (jidoka) para cambios de código.
+  Invocar SOLO de forma explícita ("/crisol" o "corré el Crisol sobre X") ANTES
   de tocar código que afecte contratos, múltiples archivos o arquitectura.
-  Orquesta carriles paralelos por dominio (Planificador → Arquitecto →
-  Ingeniero → Verificador), con compuerta compartida del Architecture Steward,
-  techo de iteraciones, gate de crédito técnico y run-ledger persistido. NO se
-  usa para planificar/charlar — solo para cambios de código.
-disable-model-invocation: true
+  Orquesta carriles paralelos (Planificador → Arquitecto → Ingeniero →
+  Verificador) con compuerta del Architecture Steward, veredictos binarios, techo
+  de 3 iteraciones, gate de crédito técnico y run-ledger persistido.
+  NO usar para planificar, leer, charlar ni editar docs/.md — solo código→commit.
 allowed-tools: Read, Grep, Glob, Bash, Agent, SendMessage, TodoWrite, Write, Edit
+disable-model-invocation: true
 ---
 
 # El Crisol — Loop de Calidad Incorporada
 
-> Un crisol funde y quema impurezas bajo presión hasta dejar metal puro.
-> Esto hace el Crisol con los defectos de un cambio de código.
+Tres ejes, sin excepción: **sencillo** (solo proceso), **objetivo** (todo
+veredicto es sí/no o PASS/FAIL), **duro** (nada rompe ni deja deuda técnica).
 
-**Vocabulario ancla (cero jerga inventada):** Cero Defectos (aspiración,
-Crosby) · Jidoka / calidad incorporada (mecanismo, Toyota) · Defensa en
-profundidad (ya usado en el proyecto) · corrección blameless (Edmondson).
-
-**Fuente canónica:** ADR 0018 (`docs/decisions/0018-crisol-loop-calidad-incorporada.md`).
-El Crisol **no inventa roles** — formaliza el Three-Agent Loop (ADR 0007) + el
-Architecture Steward, los endurece, los hace paralelos, gateados y enforzados.
+Corre en el **hilo líder** (los subagentes no anidan). El líder lee esta skill y
+orquesta los carriles vía Agent Team. El *porqué* y el mapeo de roles están en
+`references/contexto.md` — no hace falta para ejecutar.
 
 ---
 
-## 1. Cuándo se invoca (tiers)
+## 1. Tier (clasificación OBJETIVA)
 
-El Crisol corre en el **hilo líder** (los subagentes no anidan). El líder lee
-esta skill y orquesta los carriles vía Agent Team.
+Respondé el checklist. **Cualquier "SÍ" → Tier Completo.** Todos "NO" → Fast-path.
 
-| Tier | Cuándo | Roles que corren |
-|---|---|---|
-| **Completo** | Código que toca contratos AMQP/REST, >1 archivo, arquitectura, o establece/rompe un patrón | Planificador → Arquitecto → Ingeniero → Verificador (+ Integración si paralelo) |
-| **Fast-path** | Cambio trivial: single-file, cosmético, docstring, typo en código | Planificador (mini) → Verificador |
+- [ ] ¿Toca un contrato AMQP/REST?
+- [ ] ¿Modifica más de 1 archivo de código?
+- [ ] ¿Cambia arquitectura, o establece/rompe un patrón?
+- [ ] ¿Toca un archivo compartido (`docker-compose.yml`, `.env.example`, etc.)?
 
-Regla espejo del Steward: *cambios cosméticos no llevan ADR* → tampoco Crisol completo.
-**Planificar, leer, charlar, editar docs/.md: NO es Crisol.** El Crisol solo
-muerde en código→commit.
+| Tier | Roles que corren |
+|---|---|
+| **Completo** | Planificador → Arquitecto → Ingeniero → Verificador (+ Integración si hay paralelo) |
+| **Fast-path** | Planificador (mini) → Verificador |
 
----
-
-## 2. Mapeo canónico de roles (1:1 con lo que ya existe)
-
-| Paso (4-pasos de Vikingo) | Rol del proyecto | Veredicto | Permisos |
-|---|---|---|---|
-| **Planificador** | `<dominio>-archaeologist` (mapea → CURRENT-STATE/CALL-GRAPH/IMPACT-MATRIX) + plan accionable | plan, sin código | read-only |
-| **Arquitecto** | **Architecture Steward** (Triage → Zoom-out → Gate de Veto) | `APPROVE` / `REJECT` (= 🚨 VETO) | read-only, no feature code |
-| **Ingeniero** | `<dominio>-engineer` (implementa EXACTO lo aprobado, consulta archaeologist por intención) | código *staged*, NO commitea | writes |
-| **Verificador** | `<dominio>-quality-auditor` **+** archaeologist (revalidación estructural) — el "AMBOS aprueban" ya existente | `PASS` / `FAIL` | read-only |
-
-Solo `PASS` → commit. `REJECT`/`FAIL` → **vuelve al Planificador** (no se
-parchea en caliente).
+**Scope:** solo código→commit.
 
 ---
 
-## 3. Adaptación paralela (lo nuevo de fondo)
+## 2. Reglas duras (jidoka) — innegociables
 
-1. **N carriles por dominio en paralelo.** Naming `<dominio>-<rol>`, equipos
-   descartables (NO genéricos). Spawnear teammates con `model: "opus"`.
-2. **Archaeologists paralelizan libre** (read-only, carpetas propias).
-3. **Compuerta serializada compartida = Architecture Steward.** Ve TODOS los
-   planes de todos los carriles ANTES de que cualquier Ingeniero toque código.
-   Emite `docs/refactor/_crisol/COLLISION-MAP.md` (plantilla en
-   `templates/collision-map.md`) → marca archivos/contratos "calientes" →
-   **secuencia los carriles que chocan**. *Poka-yoke: prevenir, no detectar.*
-4. **Engineers NO paralelizan sobre archivos compartidos**
-   (`docker-compose.yml`, `.env.example`, etc.) — el team-lead los administra.
-   Cada engineer corre `git status --short` antes de tocar; si el archivo
-   aparece M/A, lee el estado real (no asume).
-5. **Verificador de Integración:** tras el doble-gate `PASS` de CADA carril, una
-   verificación del resultado **combinado** (lo que pasa aislado puede fallar
-   junto: CI serial, archivos compartidos). Recién ahí → commit.
-
----
-
-## 4. Reglas duras (jidoka)
-
-- **Independencia operacional:** Arquitecto y Verificador reciben SOLO
-  artefactos reales (diff, salida de tests que corren ELLOS) — **nunca** la
-  prosa del paso previo. Trust but verify.
+- **Anti-romper (REGLA 0):** el Verificador corre los tests ÉL MISMO. Sin verde
+  propio → `FAIL` automático. No se confía en reporte ajeno.
+  Si NO existe suite de tests: registra `TEST_COVERAGE: NONE` en el RUN-LEDGER y
+  puede emitir `PASS`, pero el tag estable `vX.Y.Z` queda **bloqueado para
+  crearse** mientras siga en `NONE` (es gate de creación: un tag ya existente sí
+  puede re-deployarse en rollback).
+- **Independencia operacional:** Arquitecto y Verificador reciben SOLO artefactos
+  reales (diff, salida de tests propia) — **nunca** la prosa del paso previo.
+  En fast-path el Verificador corre en un **contexto nuevo** (subagente fresco):
+  el líder NO verifica su propio trabajo. Ese Verificador aplica también los
+  criterios de **Diseño** (abajo): violación sin justificación → `FAIL`.
 - **Veredicto binario:** `APPROVE/REJECT`, `PASS/FAIL`. Sin "casi".
 - **`FAIL`/`REJECT` → Paso 1.** No hot-patch. Se re-planifica con la corrección.
-- **Cero scope creep:** el Ingeniero hace SOLO lo aprobado.
-- **Commit solo tras `PASS`** (y `PASS` de Integración si hubo paralelo).
-- **Techo de loop = 3 iteraciones.** Si tras 3 ciclos Plan↔REJECT/FAIL no
-  converge → el team-lead (deadlock-breaker) **escala a Vikingo** con la
-  divergencia exacta. No ciclar infinito.
-- **Gate de crédito técnico (REGLA DE ORO):** el Verificador da `FAIL` si el
-  cambio toca arquitectura y NO deposita ADR/annotation/IMPACT-MATRIX.
-- **Blameless:** la falla se asume inevitable; se exige surface honesto +
-  corrección sistémica. No se culpa, se corrige y se registra.
-- **Contenedores: terminal = solo lectura.** La terminal dentro de un
-  contenedor es SOLO para diagnosticar (logs, probar conexión, mirar). Todo
-  cambio real va por la fuente de verdad (Coolify panel/API, o el repo de la
-  app): un cambio hecho dentro del contenedor es invisible para Coolify y se
-  **pierde en el próximo redeploy**. Si hubo que parchear por terminal
-  (emergencia), replicarlo en la fuente de verdad ANTES de cerrar la corrida —
-  el Verificador da `FAIL` si queda drift sin replicar.
+- **Cero scope creep:** el Ingeniero hace SOLO lo aprobado por el Steward.
+- **Parking de ideas (anti-olvido):** toda idea, variante o mejora que surja a
+  mitad de corrida y esté fuera del scope aprobado se anota AL INSTANTE en
+  `docs/IDEAS.md` (una línea: `YYYY-MM-DD · idea · contexto-sin-secretos`) y se
+  sigue trabajando. No se implementa, no se discute, no se pierde. Las ideas
+  viajan en los WIP-commits, así que sobreviven al crash de sesión.
+- **Commit de cierre solo tras `PASS`** (y `PASS` de Integración si hubo
+  paralelo). Los WIP-commits no cuentan como cierre — ver §Versionado.
+- **Gate de crédito técnico:** si el cambio toca arquitectura y NO deposita
+  ADR (`docs/decisions/NNNN-titulo.md`)/annotation/IMPACT-MATRIX → `FAIL`.
+- **Migraciones de schema:** si el cambio incluye DDL destructivo (ALTER, DROP,
+  tabla nueva), el Planificador registra `MIGRATION_STRATEGY: reversible |
+  irreversible + estrategia` en el RUN-LEDGER. Sin ese campo → `REJECT`
+  automático. Rollback por tag NO des-migra datos: ante migración irreversible
+  decide el humano. Tras su decisión: fix-forward → corrida nueva; revertir DB
+  → la ejecuta el humano (código acompañante = corrida nueva); rollback solo de
+  código → re-deploy del tag estable anterior.
+- **Fuente de verdad:** **dev es la mesa caliente** — ahí se prueba e itera en
+  vivo, sin culpa. Pero **testing y producción NO se tocan a mano**: son
+  resultado de una promoción. Si algo falla ahí → se vuelve a dev, se corrige,
+  pasa el Crisol y se re-promueve. Container de testing/prod = solo diagnóstico.
+  **Bug post-release:** el fix-forward es una corrida nueva (entrada `ACTIVE`
+  propia); la corrida `CLOSED` no se reabre.
+- **Sin secretos en artefactos:** ningún artefacto del Crisol (RUN-LEDGER, ADR,
+  COLLISION-MAP, `IDEAS.md`, mensajes de commit) lleva valores reales de
+  credenciales, tokens, passwords, connection strings ni API keys — solo nombres
+  de variable, valores ficticios (`<host>`, `example.com`) o `<REDACTED>`. El
+  Verificador registra SOLO veredicto + conteo de casos + línea de error si
+  FAIL; **prohibido volcar stdout completo de tests** en el ledger.
+- **Techo = 3 iteraciones.** Si Plan↔REJECT/FAIL no converge en 3 ciclos → marcar
+  `STATUS: ESCALATED` con la divergencia exacta y **DETENERSE**: el agente no
+  inicia más ciclos ni busca workarounds; decide el humano. No ciclar infinito.
+
+### Diseño (agnóstico a lenguaje) — criterios de REJECT del Steward
+
+- **Open/Closed:** comportamiento nuevo se **AGREGA** (función/clase/módulo/
+  handler nuevo), NO se **EDITA** una unidad estable que ya pasó un Crisol.
+  Diff que modifica el corazón de código estable para extenderlo → `REJECT`,
+  salvo justificación explícita en el plan (bug fix o refactor deliberado).
+- **Atomicidad:** cada unidad (función/clase/módulo) tiene UNA responsabilidad,
+  recibe sus dependencias por parámetro/interfaz (cero estado global nuevo), y
+  lo grande se arma COMPONIENDO lo chico. Unidad que acumula responsabilidades
+  → se divide ANTES de extenderla.
+- **Planificar la costura:** el Planificador identifica DÓNDE va a variar el
+  sistema y pone ahí el punto de extensión (interfaz, tabla de dispatch,
+  registro de handlers). Donde NO hay evidencia de variación → código simple:
+  la generalidad especulativa también es deuda.
+- **Cuando tocar lo estable es inevitable (3 casos legales):** (a) bug → se toca
+  directo, OCP protege comportamiento correcto, no defectos; (b) falta la
+  costura → **dos corridas Crisol separadas** (cada una con su entrada `ACTIVE`
+  y su techo propio): primero el refactor que abre la costura con comportamiento
+  idéntico (verde antes y después), después la extensión entra por la costura;
+  (c) cambia el contrato → tier completo + ADR.
+- Son **invariantes del diff**, no jerga de framework: valen igual en C (punteros
+  a función), C++ (interfaces), desktop Windows, web o scripts. No chocan con
+  MVC/capas: MVC organiza lo macro, esto fija el grano de cada pieza.
+
+### Versionado y promoción por tags (CD)
+
+- **Trunk-based:** una sola rama `main`. **El entorno lo decide el tag, no la rama.**
+- **`push` a `main` = respaldo, NO promoción.** Se pushea para no perder trabajo
+  (las sesiones son efímeras): tras cada corrida `PASS`, y un **WIP-commit al
+  cierre de cada iteración que termina en `FAIL`** (fast-path termina en `PASS`
+  directo → solo el commit de cierre). El WIP no es release: solo preserva
+  trabajo ante un crash. El código cae en **dev**.
+- **WIP-commit seguro:** `git add <archivos-explícitos>` (NUNCA `-A` ni `.`) →
+  verificar en `git status` que no entren `.env`, `*.key`, `*.pem`, `*secret*`
+  → `git commit -m "wip: crisol iter N"` + push. **Si el push falla** (exit ≠ 0):
+  registrar `PUSH_FAILED: <razón>` en el ledger, avisar al humano y continuar —
+  el commit local preserva el trabajo; no reintentar en loop.
+- **Promover a testing es una decisión aparte y deliberada** (tag `-rcN`), cuando
+  el dev lo decide. `push` ≠ `promoción`.
+- **`vX.Y.Z-rcN`** → **testing** (candidato a release).
+- **`vX.Y.Z`** (semver) → **producción**. Es el release estable.
+- **Gate Crisol:** el tag estable `vX.Y.Z` nace SOLO tras una corrida `PASS`
+  cerrada en el RUN-LEDGER. **El tag ES el acto de promoción** — no se promueve
+  código que no pasó el Crisol.
+- **Se promueve lo que se probó:** el tag estable apunta al MISMO commit que pasó
+  testing — no se rebuildea código distinto.
+- **Tags inmutables:** nunca se mueve un tag publicado. `latest` es el único
+  puntero móvil (apunta al último estable). Rollback = re-deployar el tag estable
+  anterior.
+
+### Pin total (cadena de suministro) — innegociable
+
+- **Pin de TODO lo que consumimos:** cada dependencia externa (librería,
+  herramienta, imagen base, GitHub Action, fork upstream) se fija a una versión
+  exacta o digest. **Prohibido floating** (`latest`, `main`, `*`, rangos abiertos)
+  en lo que CONSUMIMOS. Una promoción ajena JAMÁS debe poder romper nuestro build.
+- **Matiz con §tags:** `latest` lo **publicamos** para nuestros propios artefactos;
+  **nunca lo consumimos** de un tercero.
+- **Fork = propiedad nuestra:** si forkeamos y modificamos un upstream, lo
+  mantenemos NOSOTROS. El fork vive en **nuestro** repo (fuente de verdad), no como
+  dependencia viva del upstream.
+- **Copia propia de lo crítico:** mantener mirror/vendor de aquello que un
+  takedown o un cambio ajeno nos rompería. Si nos puede tumbar, lo tenemos nosotros.
+- **Cambio de pin = corrida Crisol.** Bump de parche/seguridad que no toca
+  contratos → **fast-path** con `BUMP_REASON: <vieja> → <nueva>` en el ledger.
+  Bump minor/major → tier completo; brief del archaeologist: changelog entre
+  versiones, breaking changes declarados, impacto en contratos propios.
 
 ---
 
-## 5. Run-ledger (memoria del proceso + llave del enforcement)
+## 3. Paralelo (poka-yoke: prevenir, no detectar)
 
-Cada corrida se registra en `docs/refactor/_crisol/RUN-LEDGER.md` (formato en
-`templates/run-ledger.md`). El hook de enforcement (`crisol-enforcer`) **lee
-este ledger**: sin entrada `STATUS: ACTIVE` para el branch actual, todo cambio
-de código fuente queda **bloqueado**. Apertura/cierre de entrada = disciplina
-obligatoria del líder al orquestar el Crisol.
-
-Es ADR 0010 (self-awareness) aplicado al meta-proceso: el sistema acumula su
-historial de calidad, no solo el código.
-
----
-
-## 6. Procedimiento (líder)
-
-1. Clasificar **tier** (completo / fast-path). Trivial → fast-path.
-2. Abrir entrada en `RUN-LEDGER.md`: `STATUS: ACTIVE`, branch, tier, alcance,
-   carriles.
-3. Spawnear **archaeologists** (paralelo, opus) → plan(es) accionable(s).
-4. Pasar TODOS los planes al **Architecture Steward** → COLLISION-MAP +
-   `APPROVE/REJECT`. REJECT → volver a 3 (cuenta iteración).
-5. Spawnear **engineers** por carril respetando la serialización del
-   COLLISION-MAP (compartidos los maneja el líder).
-6. Cada carril → **quality-auditor + archaeologist** (`PASS/FAIL` sobre estado
-   real). FAIL → volver a 3 (cuenta iteración).
-7. Si hubo paralelo → **Verificador de Integración** sobre el combinado.
-8. Todo verde → commit. Cerrar entrada del ledger: `STATUS: CLOSED` + veredictos
-   + iteraciones + escalaciones.
-9. Iteraciones > 3 sin converger → `STATUS: ESCALATED` + reportar a Vikingo.
+1. **N carriles por dominio.** Naming `<dominio>-<rol>`, equipos descartables.
+   Model por rol: archaeologist/engineer/auditor → `sonnet`; Architecture Steward
+   y Verificador de Integración → `opus`. No quemar Opus en fan-out mecánico.
+2. **Archaeologists paralelizan libre** (read-only, carpetas propias).
+3. **Compuerta serializada = Architecture Steward.** Ve TODOS los planes ANTES de
+   que cualquier Ingeniero toque código. Emite COLLISION-MAP, marca calientes,
+   secuencia los carriles que chocan, y aplica los criterios de **Diseño** (§2)
+   a cada plan. **Dos planes que tocan el mismo contrato → `REJECT` a ambos;
+   re-planificar consolidando el contrato en UN solo plan.**
+4. **Archivos compartidos se serializan:** el carril prioridad-1 del COLLISION-MAP
+   los toca primero; el líder pasa ese estado ya modificado como base al carril
+   siguiente, y valida ausencia de pisadas antes del Verificador de Integración.
+   Cada engineer corre `git status --short` antes de tocar; si aparece M/A
+   inesperado, lee el estado real (no asume).
+5. **Verificador de Integración:** tras el doble-gate `PASS` de CADA carril,
+   verifica el resultado **combinado**. Recién ahí → commit.
 
 ---
 
-## 7. Bootstrap (honesto)
+## 4. Procedimiento (líder)
 
-El Crisol no puede dogfoodearse en su propia creación (el loop aún no existía).
-Esa única meta-implementación se revisó directo con Vikingo + team-lead, con una
-entrada de ledger `BOOTSTRAP` declarada. El primer dogfood real = el siguiente
-cambio de código después de existir el Crisol.
+**Fast-path:** 0 → 1 → 2 → Planificador (mini) → Verificador (subagente fresco)
+→ 8. Se saltan los pasos 3–7.
+
+0. Sesión nueva o retomada → correr la skill **brujula** (namespace según
+   instalación: `/brujula` o `/lucky:brujula`) para anclar el estado real.
+   Todo `N/D` → continuar, no bloquea. Working tree sucio → decidir y registrar:
+   WIP-commit (si es trabajo recuperable) o `git reset --hard` (si es basura de
+   crash); sin árbol limpio NO se abre `ACTIVE`. ¿Brújula reporta huérfana
+   `ACTIVE`? → resolverla en el paso 2 antes que nada.
+1. Clasificar **tier** con el checklist §1. Todos NO → fast-path.
+2. `git fetch && git rebase origin/main` (conflicto → resolver antes de seguir;
+   prohibido `--force` en `main`). Abrir entrada en
+   `docs/refactor/_crisol/RUN-LEDGER.md` — crear directorio/archivo si no
+   existen, con los campos mínimos:
+   ```
+   ### <branch> — <YYYY-MM-DD>
+   - STATUS: ACTIVE
+   - Tier: <completo|fast-path>
+   - Fecha: <YYYY-MM-DD>
+   ```
+   (plantilla completa: `templates/run-ledger.md`, si existe).
+   **Huérfana `ACTIVE` previa:** reportarla al humano (Fecha · Tier ·
+   iteraciones N · WIP-commits) y esperar su decisión — **reanudar** (si hay
+   COLLISION-MAP `APPROVE` → saltar al paso 5; techo restante = 3−N) o
+   **reiniciar** (cerrarla `ESCALATED · Motivo: crash-de-sesión · Iter: N ·
+   WIP: <hashes>` → paso 3). Si N ≥ 3 → solo `ESCALATED`, no se reanuda.
+3. Spawnear **archaeologists** (paralelo, sonnet) → plan(es) accionable(s).
+4. Pasar TODOS los planes al **Architecture Steward** → COLLISION-MAP
+   (`templates/collision-map.md`) + `APPROVE/REJECT`. REJECT → volver a 3 (cuenta iteración).
+5. Spawnear **engineers** en el orden del COLLISION-MAP: engineer-A → esperar su
+   `PASS` de auditor → recién entonces engineer-B. Carriles sin archivos
+   compartidos corren en paralelo.
+6. Cada carril → **quality-auditor + archaeologist** sobre estado real
+   (`templates/auditor-checklist.md`) → `PASS/FAIL`. FAIL → volver a 3 (cuenta iteración).
+7. Si hubo paralelo → **Verificador de Integración** sobre el combinado; por
+   cada archivo caliente del COLLISION-MAP, verificar que los cambios de todos
+   los carriles convivan (sin sobreescrituras entre sí).
+8. Todo verde → commit. Cerrar entrada: `STATUS: CLOSED` + veredictos +
+   iteraciones + `RETRO:` una línea sobre la fricción del PROCESO (blameless:
+   se registra la falla, no el culpable). En el resumen de cierre, listar las
+   ideas capturadas en `docs/IDEAS.md` durante la corrida.
+   - Si la corrida habilita un release → el tag estable `vX.Y.Z` se crea recién
+     con `STATUS: CLOSED` + `PASS` (§Versionado). Rollback = tag anterior; los
+     tags son inmutables.
+9. Techo de iteraciones → §2.
 
 ---
 
-Checklist del Verificador: `templates/auditor-checklist.md`.
+## 5. Run-ledger (llave del enforcement)
+
+El ledger es obligatorio **con o sin hook instalado** — el hook automatiza el
+enforcement, no lo origina. Cada corrida se registra en
+`docs/refactor/_crisol/RUN-LEDGER.md`. El hook `hooks/crisol-enforcer.sh`
+(PreToolUse Edit|Write) lo lee: **sin entrada `STATUS: ACTIVE` para el branch
+actual, todo cambio de código fuente queda bloqueado (exit 2).** Docs/.md quedan
+exentos. Conectarlo con `hooks/settings.snippet.json` en `.claude/settings.json`.
+
+**Invariante: exactamente UNA entrada `ACTIVE` por branch**, con los campos
+mínimos del paso 2 — una línea suelta con `ACTIVE` no habilita nada (el hook lo
+valida). **Fast-path:** basta la entrada mínima con `Tier: fast-path`, sin
+COLLISION-MAP ni Steward — dev sigue siendo mesa caliente con ceremonia de 30
+segundos. **Excepción DDL:** si el diff contiene `ALTER`/`DROP`/`CREATE TABLE`,
+la entrada (incluso fast-path) debe llevar `MIGRATION_STRATEGY` — sin él →
+`FAIL` del Verificador.
+
+---
+
+## 6. La ley se gobierna a sí misma
+
+Este skill vive en un repo (`lucky-skills`) y es ciudadano de su propia ley:
+cambiarlo = corrida Crisol EN ese repo, juzgada por la **versión vigente**
+(último tag) — vN juzga el diff que crea vN+1; la regresión muere por
+estratificación temporal. Promoción del skill = tag semver + subida a las
+superficies. Disparador kaizen: ~3 `RETRO:` apuntando a la misma regla → se
+abre la corrida sobre el propio skill.
+
+---
+
+**Templates:** `templates/collision-map.md` · `templates/run-ledger.md` · `templates/auditor-checklist.md`
+**Hook:** `hooks/crisol-enforcer.sh` (+ `hooks/settings.snippet.json`)
+**Fundamento / roles:** `references/contexto.md`

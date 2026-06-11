@@ -9,6 +9,9 @@
 ## A. Funcional / tests
 - [ ] Tests existen para lo nuevo/cambiado (unit + integration + e2e según capa).
 - [ ] Suite **verde** corrida por el verificador (no reportada por el Ingeniero).
+      Registrar SOLO: veredicto (PASS/FAIL) + conteo de casos + línea de error
+      si FAIL. **Prohibido volcar stdout completo** — ningún valor de env var,
+      connection string ni token en el ledger; si aparece, redactar antes de pegar.
 - [ ] Cobertura ≥ umbral del dominio. Sin baja de cobertura.
 - [ ] `lo staged == lo verificado` (diff real revisado).
 

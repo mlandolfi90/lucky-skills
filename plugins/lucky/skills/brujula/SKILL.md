@@ -1,16 +1,16 @@
 ---
 name: brujula
 description: >-
-  Brújula-Lucky — ancla la sesión al estado REAL del repo y el deploy para
+  Brújula — ancla la sesión al estado REAL del repo y el deploy para
   evitar alucinar contexto ya superado. Usar AL EMPEZAR a trabajar en un repo,
   al retomar una sesión, o cuando dudes en qué branch/estado estás
-  ("¿dónde estoy?", "ubicame", "/brujula-lucky"). Lee 3 fuentes reales (git,
+  ("¿dónde estoy?", "ubicame", "/brujula"). Lee 3 fuentes reales (git,
   docker, ADR/RUN-LEDGER) y devuelve un snapshot objetivo. REGLA DE ORO: si una
   fuente no se puede leer, dice "N/D" — JAMÁS infiere. Solo lectura, no modifica.
 allowed-tools: Bash, Read, Glob, Grep
 ---
 
-# Brújula-Lucky — ¿dónde estoy parado?
+# Brújula — ¿dónde estoy parado?
 
 Antes de tocar nada, anclá la sesión a la **verdad del terreno**. El enemigo es
 arrancar con suposiciones; esta skill las reemplaza por hechos.
@@ -28,15 +28,21 @@ bash scripts/brujula.sh
 
 ## Las 3 fuentes (todas read-only)
 
-1. **Repo** — branch actual, archivos sin commitear, adelanto/atraso vs remote, y
-   el **branch de trabajo más reciente** (excluye `main`/`master`). Si hay una
-   entrada `STATUS: ACTIVE` en el RUN-LEDGER, ese branch **manda** sobre la heurística.
+1. **Repo** — branch actual, archivos sin commitear, adelanto/atraso vs remote,
+   y **último tag** (en promoción-por-tags, el tag ES el estado de release).
+   **Trunk-based: lo esperado es `main`**, salvo que el RUN-LEDGER tenga una
+   entrada `STATUS: ACTIVE` para otro branch — esa entrada **manda**.
 2. **Deploy** — `docker ps` y, si hay compose en el repo, `docker compose ps`.
-3. **Decisiones** — último ADR en `docs/decisions/` + si el Crisol está activo.
+3. **Decisiones** — último ADR en `docs/decisions/` + estado del Crisol. Si hay
+   entrada `ACTIVE` y commits `wip: crisol iter N` recientes → reporta
+   **corrida a medias respaldada** (la sesión anterior murió; el trabajo está
+   en los WIP-commits).
 
 ## Reglas duras
 
-- **Branch inesperado / `main` / detached HEAD → bandera roja ARRIBA DE TODO.**
+- **Branch ≠ esperado / detached HEAD → bandera roja ARRIBA DE TODO.**
+  En trunk-based `main` es lo NORMAL — la anomalía es estar FUERA de `main`
+  sin entrada ACTIVE que lo justifique.
 - **Fail-closed:** fuente ilegible (sin git, sin docker, sin ADRs) → `N/D`.
   Nunca rellena, nunca infiere. Esa es la diferencia entre ubicarse y alucinar.
 - **Veredicto de branch binario:** coincide con el esperado, o no. Sin "casi".
