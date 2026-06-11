@@ -167,8 +167,11 @@ Respondé el checklist. **Cualquier "SÍ" → Tier Completo.** Todos "NO" → Fa
 ## 3. Paralelo (poka-yoke: prevenir, no detectar)
 
 1. **N carriles por dominio.** Naming `<dominio>-<rol>`, equipos descartables.
-   Model por rol: archaeologist/engineer/auditor → `sonnet`; Architecture Steward
-   y Verificador de Integración → `opus`. No quemar Opus en fan-out mecánico.
+   Model por TIER según COMPLEJIDAD (mapeo único al pie de esta skill):
+   tarea mecánica → tier-económico · juicio/decisión (Steward, Verificador de
+   Integración) → tier-alto · síntesis súper-compleja → tier-frontera.
+   El tier barato en tarea compleja sale CARO (rework). **Declarar los tiers
+   elegidos al humano ANTES de spawnear.**
 2. **Archaeologists paralelizan libre** (read-only, carpetas propias).
 3. **Compuerta serializada = Architecture Steward.** Ve TODOS los planes ANTES de
    que cualquier Ingeniero toque código. Emite COLLISION-MAP, marca calientes,
@@ -258,7 +261,7 @@ la entrada (incluso fast-path) debe llevar `MIGRATION_STRATEGY` — sin él →
 ## 6. La ley se gobierna a sí misma
 
 **Fuente de verdad: `github.com/mlandolfi90/lucky-skills` · esta copia = tag
-`v1.4.0` (cache local, NO la ley).** **Ley viva:** al invocar la skill, si la
+`v1.6.0` (cache local, NO la ley).** **Ley viva:** al invocar la skill, si la
 sesión tiene red: `git ls-remote --tags
 https://github.com/mlandolfi90/lucky-skills.git` — si existe un tag mayor al de
 esta copia, descargar y seguir LA DEL REPO
@@ -274,6 +277,9 @@ superficies. Disparador kaizen: ~3 `RETRO:` apuntando a la misma regla → se
 abre la corrida sobre el propio skill.
 
 ---
+
+**Mapeo de tiers (actualizar SOLO acá cuando cambien los modelos):**
+económico=`sonnet` · alto=`opus` · frontera=`fable`
 
 **Templates:** `templates/collision-map.md` · `templates/run-ledger.md` · `templates/auditor-checklist.md`
 **Hook:** `hooks/crisol-enforcer.sh` (+ `hooks/settings.snippet.json`)

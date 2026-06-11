@@ -55,6 +55,28 @@ else
   echo "  ↻ CLAUDE.md ya tenía la sección"
 fi
 
+# 3b. Hooks zombis: entradas de settings que apuntan a vendoreados viejos
+python - << 'PYZ'
+import json, os
+p = os.path.join(".claude", "settings.json")
+if os.path.exists(p):
+    with open(p, encoding="utf-8") as f: d = json.load(f)
+    h = d.get("hooks", {})
+    changed = False
+    for ev in list(h.keys()):
+        keep = []
+        for m in h[ev]:
+            cmds = json.dumps(m)
+            if "-lucky/" in cmds or "-lucky\\" in cmds: changed = True; continue
+            keep.append(m)
+        if keep: h[ev] = keep
+        else: del h[ev]; changed = True
+    if changed:
+        if not h: d.pop("hooks", None)
+        with open(p, "w", encoding="utf-8") as f: json.dump(d, f, indent=2, ensure_ascii=False); f.write(chr(10))
+        print("  🧟 hooks zombis eliminados de settings.json")
+PYZ
+
 # 4. Limpieza: copias vendoreadas VIEJAS (fuente de ambigüedad de versión)
 for d in ".claude/skills/crisol-lucky" ".claude/skills/brujula-lucky"; do
   if [ -d "$d" ]; then

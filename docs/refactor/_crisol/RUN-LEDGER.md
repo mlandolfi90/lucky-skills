@@ -112,3 +112,17 @@
 - Alcance: bug fix adoptar-crisol.sh — UnicodeEncodeError en Windows (python
   cp1252 no imprime emojis) → PYTHONIOENCODING=utf-8 al inicio del script.
   (cierre c6) Veredictos: smoke PASS en repo de juguete (exit 0, emojis ok). Iter: 1.
+
+### main — 2026-06-11 (corrida 7)
+- STATUS: CLOSED
+- Tier: fast-path
+- Fecha: 2026-06-11
+- Alcance: v1.6.0 — (a) §3 tiers agnósticos por complejidad (idea Vikingo:
+  declarar tiers antes de spawnear; mapeo en UN solo lugar); (b) fix
+  adoptar-crisol: limpieza de hooks zombis (RETRO de la ola, Infra lo hizo a
+  mano); (c) sellos → v1.6.0.
+  (cierre c7) Veredictos: fixture 13/13 PASS + smoke zombi PASS (zombi fuera,
+  claves ajenas preservadas, kit adentro). Iteraciones: 2 (iter 1 FAIL: capa de
+  escape comió un backslash en heredoc anidado — fix con chr(10)).
+- RETRO: heredocs anidados de 3 capas = trampa de escapes; generar scripts con
+  Edit directo, no con python-que-escribe-python.
