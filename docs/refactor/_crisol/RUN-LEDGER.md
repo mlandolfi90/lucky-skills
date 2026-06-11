@@ -104,3 +104,11 @@
 - RETRO: el Verificador independiente cazó un test que mentía verde — REGLA 0
   validada empíricamente. El fixture ahora es la fuente única de verdad de la
   regla para AMBOS enforcers.
+
+### main — 2026-06-11 (corrida 6)
+- STATUS: CLOSED
+- Tier: fast-path
+- Fecha: 2026-06-11
+- Alcance: bug fix adoptar-crisol.sh — UnicodeEncodeError en Windows (python
+  cp1252 no imprime emojis) → PYTHONIOENCODING=utf-8 al inicio del script.
+  (cierre c6) Veredictos: smoke PASS en repo de juguete (exit 0, emojis ok). Iter: 1.

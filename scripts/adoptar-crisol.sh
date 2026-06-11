@@ -3,6 +3,7 @@
 # desde la RAÍZ del repo objetivo. Idempotente. NO commitea: deja el diff
 # listo para review humano (git status) — la adopción se commitea a mano.
 set -euo pipefail
+export PYTHONIOENCODING=utf-8  # Windows: cp1252 no imprime emojis
 
 [ -d ".git" ] || { echo "❌ Corré esto desde la raíz de un repo git."; exit 1; }
 echo "⚒️  Adoptando el Crisol en: $(pwd)"
