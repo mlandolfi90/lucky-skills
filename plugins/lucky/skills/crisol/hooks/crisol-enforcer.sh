@@ -21,6 +21,9 @@ esac
 BRANCH="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo '')"
 [ -z "$BRANCH" ] && exit 0   # sin git → no aplica
 
+# 3b. OPT-IN por repo: sin adopción del Crisol (docs/refactor/_crisol/) → inerte
+[ -d "docs/refactor/_crisol" ] || exit 0
+
 # 4. ¿Hay entrada ACTIVE para ESTE branch CON campos mínimos (Tier + Fecha)?
 #    (parseo por bloque ### — los campos pueden venir en cualquier orden)
 ACTIVE="$(awk -v b="$BRANCH" '
