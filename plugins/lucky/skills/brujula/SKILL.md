@@ -50,3 +50,9 @@ bash scripts/brujula.sh
 
 Tras leer el snapshot, NO sigas con suposiciones sobre lo que muestre `N/D`:
 pedí el dato o decláralo desconocido.
+
+---
+
+**Fuente de verdad: `github.com/mlandolfi90/lucky-skills` · esta copia = tag
+`v1.2.0`.** Si el repo tiene un tag mayor, esta copia está VIEJA: avisar al
+humano y preferir la del repo.

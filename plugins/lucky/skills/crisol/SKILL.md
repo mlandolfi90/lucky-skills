@@ -256,7 +256,12 @@ la entrada (incluso fast-path) debe llevar `MIGRATION_STRATEGY` — sin él →
 
 ## 6. La ley se gobierna a sí misma
 
-Este skill vive en un repo (`lucky-skills`) y es ciudadano de su propia ley:
+**Fuente de verdad: `github.com/mlandolfi90/lucky-skills` · esta copia = tag
+`v1.2.0`.** Ante duda de frescura: `git ls-remote --tags
+https://github.com/mlandolfi90/lucky-skills.git` — si el repo tiene un tag
+mayor, esta copia está VIEJA: avisar al humano y preferir la del repo.
+
+Este skill es ciudadano de su propia ley:
 cambiarlo = corrida Crisol EN ese repo, juzgada por la **versión vigente**
 (último tag) — vN juzga el diff que crea vN+1; la regresión muere por
 estratificación temporal. Promoción del skill = tag semver + subida a las

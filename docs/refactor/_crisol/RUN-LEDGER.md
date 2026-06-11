@@ -35,3 +35,16 @@
   grep verificado). Iteraciones: 1.
 - RETRO: primera corrida kaizen juzgada por v1.0.0 — el flujo §6 funcionó sin
   fricción.
+
+### main — 2026-06-11 (corrida 2)
+- STATUS: CLOSED
+- Tier: fast-path
+- Fecha: 2026-06-11
+- Alcance: sello de procedencia en ambas skills — cada copia declara su fuente
+  de verdad (github.com/mlandolfi90/lucky-skills) y su tag (v1.2.0), con
+  instrucción de detección de drift (ls-remote vs tag local). Idea de Vikingo:
+  Pin Total aplicado a la ley misma.
+- Veredictos: Verificador PASS (prosa; grep de sello en ambos SKILL.md).
+  Iteraciones: 1.
+- RETRO: el sello incluye el tag → cada release DEBE actualizar el número en
+  los dos SKILL.md antes de taggear (paso nuevo del ritual de release).
