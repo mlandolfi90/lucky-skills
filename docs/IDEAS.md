@@ -6,4 +6,4 @@
   futuro /idea v1.1.0)
 - 2026-06-11 · mini-skill /idea: captura universal a docs/IDEAS.md, una línea,
   autoactivación ON ("anotá esto", "se me ocurrió") · diseñada en la corrida 0,
-  candidata a v1.1.0
+  candidata · ✅ CONSTRUIDA como v1.4.0 (2026-06-11)
