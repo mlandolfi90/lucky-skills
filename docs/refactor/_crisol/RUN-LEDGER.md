@@ -48,3 +48,19 @@
   Iteraciones: 1.
 - RETRO: el sello incluye el tag → cada release DEBE actualizar el número en
   los dos SKILL.md antes de taggear (paso nuevo del ritual de release).
+
+### main — 2026-06-11 (corrida 3)
+- STATUS: CLOSED
+- Tier: fast-path
+- Fecha: 2026-06-11
+- Alcance: "Ley viva" — la copia pegada pasa de ley a cache+puntero: al invocar,
+  con red se consulta el último tag del repo y se sigue ESA versión (fetch de
+  raw.githubusercontent); sin red, fallback a la copia local registrando
+  `LEY: <tag> (local, sin verificar)`. Paso 0 verifica vigencia. Pregunta de
+  Vikingo: "¿la de claude.ai quedará siempre atrás?" → ya no: es agnóstica de
+  la versión en la práctica.
+- Veredictos: Verificador PASS (prosa; sellos v1.3.0 verificados en ambos
+  SKILL.md). Iteraciones: 1.
+- RETRO: tres corridas fast-path en una noche — el ritual §6 + sello + zips
+  funciona fluido; el cuello es solo la subida manual a claude.ai, ahora casi
+  innecesaria gracias a Ley viva.

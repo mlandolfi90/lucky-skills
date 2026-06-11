@@ -192,6 +192,7 @@ Respondé el checklist. **Cualquier "SÍ" → Tier Completo.** Todos "NO" → Fa
 
 0. Sesión nueva o retomada → correr la skill **brujula** (namespace según
    instalación: `/brujula` o `/lucky:brujula`) para anclar el estado real.
+   Con red: verificar la vigencia de la ley (§6 "Ley viva").
    Todo `N/D` → continuar, no bloquea. Working tree sucio → decidir y registrar:
    WIP-commit (si es trabajo recuperable) o `git reset --hard` (si es basura de
    crash); sin árbol limpio NO se abre `ACTIVE`. ¿Brújula reporta huérfana
@@ -257,9 +258,13 @@ la entrada (incluso fast-path) debe llevar `MIGRATION_STRATEGY` — sin él →
 ## 6. La ley se gobierna a sí misma
 
 **Fuente de verdad: `github.com/mlandolfi90/lucky-skills` · esta copia = tag
-`v1.2.0`.** Ante duda de frescura: `git ls-remote --tags
-https://github.com/mlandolfi90/lucky-skills.git` — si el repo tiene un tag
-mayor, esta copia está VIEJA: avisar al humano y preferir la del repo.
+`v1.3.0` (cache local, NO la ley).** **Ley viva:** al invocar la skill, si la
+sesión tiene red: `git ls-remote --tags
+https://github.com/mlandolfi90/lucky-skills.git` — si existe un tag mayor al de
+esta copia, descargar y seguir LA DEL REPO
+(`raw.githubusercontent.com/mlandolfi90/lucky-skills/<tag>/plugins/lucky/skills/crisol/SKILL.md`)
+e informar al humano. Sin red: seguir esta copia y registrar
+`LEY: <tag> (local, sin verificar)` en la entrada del ledger.
 
 Este skill es ciudadano de su propia ley:
 cambiarlo = corrida Crisol EN ese repo, juzgada por la **versión vigente**
