@@ -81,3 +81,26 @@
   los 3 SKILL.md). Iteraciones: 1.
 - RETRO: el bump de sellos en N skills por release escala mal a mano — si la
   familia crece, automatizar con script de release (candidato a fricción).
+
+### main — 2026-06-11 (corrida 5)
+- STATUS: CLOSED
+- Tier: completo
+- Fecha: 2026-06-11
+- Alcance: kit de adopción v1.5.0 — (a) hook portado al plugin
+  (hooks/hooks.json con ${CLAUDE_PLUGIN_ROOT}) para que el gate viaje a toda
+  superficie; (b) FIX del enforcer: opt-in por repo (sin docs/refactor/_crisol/
+  → inerte; hoy bloquearía repos no-adoptados — defecto, caso legal (a) de
+  Diseño); (c) caso nuevo en el fixture; (d) scripts/adoptar-crisol.sh
+  (settings.json merge + ledger opt-in + sección CLAUDE.md + limpieza de
+  vendoreados viejos; NO commitea — deja review al operador).
+- MIGRATION_STRATEGY: N/A (sin DDL)
+  (cierre corrida 5)
+- Veredictos: Steward APPROVE con 4 condiciones (paridad MultiEdit, comillas
+  en rutas, anti-deriva de guardianes, auto-gateo del repo) — todas cumplidas.
+  Verificador PASS 13/13 (fixture corrido por él mismo, dos guardianes).
+- Iteraciones: 2 (FAIL en iter 1: harness pasaba ruta POSIX al Python de
+  Windows → fail-open; fix cygpath).
+- TEST_COVERAGE: hooks + gate global + adoptar-crisol (repo de juguete)
+- RETRO: el Verificador independiente cazó un test que mentía verde — REGLA 0
+  validada empíricamente. El fixture ahora es la fuente única de verdad de la
+  regla para AMBOS enforcers.
