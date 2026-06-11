@@ -64,3 +64,20 @@
 - RETRO: tres corridas fast-path en una noche — el ritual §6 + sello + zips
   funciona fluido; el cuello es solo la subida manual a claude.ai, ahora casi
   innecesaria gracias a Ley viva.
+
+### main — 2026-06-11 (corrida 4)
+- STATUS: CLOSED
+- Tier: fast-path
+- Fecha: 2026-06-11
+- Alcance: nace la nano-skill `/idea` (v1.4.0) — captura de ideas a
+  docs/IDEAS.md con: fallback en cascada (repo → ~/.claude/IDEAS-GLOBAL.md →
+  línea para copiar), auto commit+push de SOLO ese archivo, dedup por grep,
+  regla anti-descarrilamiento (capturar → confirmar 1 línea → volver al
+  trabajo), frontera de disparo (NO implementar-ya / NO tasks / NO memoria),
+  sin-secretos, sello + Ley viva. Autoactivación ON. Sellos de crisol y
+  brujula bumpeados a v1.4.0 (ritual del RETRO corrida 2). Idea cosechada del
+  parking (✅ construida).
+- Veredictos: Verificador PASS (frontmatter válido, grep de sello v1.4.0 en
+  los 3 SKILL.md). Iteraciones: 1.
+- RETRO: el bump de sellos en N skills por release escala mal a mano — si la
+  familia crece, automatizar con script de release (candidato a fricción).
