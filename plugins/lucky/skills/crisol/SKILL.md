@@ -117,6 +117,16 @@ Respondé el checklist. **Cualquier "SÍ" → Tier Completo.** Todos "NO" → Fa
 - Son **invariantes del diff**, no jerga de framework: valen igual en C (punteros
   a función), C++ (interfaces), desktop Windows, web o scripts. No chocan con
   MVC/capas: MVC organiza lo macro, esto fija el grano de cada pieza.
+- **Conformidad estructural (si hay skill de arquitectura):** cuando el repo
+  declaró la skill `arquitectura`, el Verificador la **localiza con `Glob`**
+  (`**/skills/*/arquitectura/templates/conformidad-checklist.md` o el namespace
+  declarado) y la **lee** sobre el diff real — es prosa para un rol LLM, igual
+  que `auditor-checklist.md`; el hook `crisol-enforcer.sh` no cambia y sigue
+  eximiendo los `.md`. La fuente de verdad de los invariantes es esa skill, no
+  este bloque; como recordatorio **no-normativo**: dependencias hacia adentro ·
+  núcleo sin I/O · un puerto por integración externa. Violación sin
+  justificación en el plan → `FAIL`. Si el `Glob` no encuentra la skill →
+  N/A → verde.
 
 ### Versionado y promoción por tags (CD)
 
@@ -178,6 +188,12 @@ Respondé el checklist. **Cualquier "SÍ" → Tier Completo.** Todos "NO" → Fa
    secuencia los carriles que chocan, y aplica los criterios de **Diseño** (§2)
    a cada plan. **Dos planes que tocan el mismo contrato → `REJECT` a ambos;
    re-planificar consolidando el contrato en UN solo plan.**
+
+   Si el repo declaró la skill de arquitectura (presencia del namespace
+   `arquitectura`/`lucky:arquitectura`), el Steward la consulta para juzgar la
+   **estructura** del plan: dónde cae cada pieza, naming y capa. El Steward NO
+   redefine la estructura: la lee de la skill. Sin skill instalada → solo los
+   criterios de Diseño (§2).
 4. **Archivos compartidos se serializan:** el carril prioridad-1 del COLLISION-MAP
    los toca primero; el líder pasa ese estado ya modificado como base al carril
    siguiente, y valida ausencia de pisadas antes del Verificador de Integración.
@@ -261,7 +277,7 @@ la entrada (incluso fast-path) debe llevar `MIGRATION_STRATEGY` — sin él →
 ## 6. La ley se gobierna a sí misma
 
 **Fuente de verdad: `github.com/mlandolfi90/lucky-skills` · esta copia = tag
-`v1.7.1` (cache local, NO la ley).** **Ley viva:** al invocar la skill, si la
+`v1.8.0` (cache local, NO la ley).** **Ley viva:** al invocar la skill, si la
 sesión tiene red: `git ls-remote --tags
 https://github.com/mlandolfi90/lucky-skills.git` — si existe un tag mayor al de
 esta copia, descargar y seguir LA DEL REPO

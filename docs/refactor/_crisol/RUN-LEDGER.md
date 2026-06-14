@@ -42,7 +42,7 @@
 - Fecha: 2026-06-11
 - Alcance: sello de procedencia en ambas skills — cada copia declara su fuente
   de verdad (github.com/mlandolfi90/lucky-skills) y su tag (v1.2.0), con
-  instrucción de detección de drift (ls-remote vs tag local). Idea de Vikingo:
+  instrucción de detección de drift (ls-remote vs tag local). Idea de MLL:
   Pin Total aplicado a la ley misma.
 - Veredictos: Verificador PASS (prosa; grep de sello en ambos SKILL.md).
   Iteraciones: 1.
@@ -57,7 +57,7 @@
   con red se consulta el último tag del repo y se sigue ESA versión (fetch de
   raw.githubusercontent); sin red, fallback a la copia local registrando
   `LEY: <tag> (local, sin verificar)`. Paso 0 verifica vigencia. Pregunta de
-  Vikingo: "¿la de claude.ai quedará siempre atrás?" → ya no: es agnóstica de
+  MLL: "¿la de claude.ai quedará siempre atrás?" → ya no: es agnóstica de
   la versión en la práctica.
 - Veredictos: Verificador PASS (prosa; sellos v1.3.0 verificados en ambos
   SKILL.md). Iteraciones: 1.
@@ -117,7 +117,7 @@
 - STATUS: CLOSED
 - Tier: fast-path
 - Fecha: 2026-06-11
-- Alcance: v1.6.0 — (a) §3 tiers agnósticos por complejidad (idea Vikingo:
+- Alcance: v1.6.0 — (a) §3 tiers agnósticos por complejidad (idea MLL:
   declarar tiers antes de spawnear; mapeo en UN solo lugar); (b) fix
   adoptar-crisol: limpieza de hooks zombis (RETRO de la ola, Infra lo hizo a
   mano); (c) sellos → v1.6.0.
@@ -169,3 +169,48 @@
   `management` agnostica (commit e12849e, verificada cero-leak x2). El v1.7.0/v1.7.1 ORIGINALES
   fueron borrados en el revert por fuga de IPs; ESTE v1.7.1 es el limpio. Legacy locales eliminadas.
 - Veredictos: sello consistente repo<->tag (grep); management cero-leak x2 (enjambre + humano-loop).
+
+### main — 2026-06-14 (forja v1.8.0 — skill arquitectura)
+- STATUS: CLOSED
+- Tier: completo
+- Fecha: 2026-06-14
+- Alcance: nace la skill `arquitectura` (v1.8.0) — define la ESTRUCTURA macro
+  (hexagonal puertos&adaptadores + MVC como adaptador de entrada + Atomic Design
+  en front + 12-factor transversal) y la hace consultable. Carga progresiva:
+  SKILL.md + 8 references + 2 templates (conformidad-checklist [fuente unica],
+  estructura). Hook fino a crisol: 4 inserciones por REFERENCIA (Steward consulta
+  · Verificador lee el checklist via Glob · item D auditor · clave Conformidad-arq
+  en run-ledger template). crisol-enforcer.sh INTACTO (conformidad = veredicto del
+  Verificador, no gate de edicion). Meta-cambio a la ley bajo excepcion §6.
+  Conformidad puede FAIL en fast-path (decision MLL). Bump de familia: las 5
+  skills a v1.8.0 en el mismo commit (decision MLL) — sanea idea (estaba stale
+  v1.6.0) y management (no tenia sello).
+- MIGRATION_STRATEGY: N/A (sin DDL)
+- Conformidad-arq: N/A (la skill se esta creando; aplica desde la proxima corrida)
+- Origen: Concejo de AI (21 Opus: 13 consejeros + sintesis + 6 escrutinios +
+  steward). Escrutinio cazo un nombre de secreto real del proyecto operador
+  usado como ejemplo en doce-factor.md → reemplazado por nombres neutrales.
+  leak-scan del Concejo 0/0/0.
+- Veredictos: Verificador independiente (3 agentes frescos sobre archivos en disco):
+  (V3 validez) PASS sin reservas — frontmatter ok, autodiscovery, router/links 1:1,
+  sello v1.8.0 + Ley viva. (V2 coherencia) PASS 5/6 — hook coherente, fuente unica
+  sin duplicar, Glob/.md real, sin solape con management, Regla 6 consistente,
+  responsive referenciado; unico major es PRE-EXISTENTE (formato de
+  templates/run-ledger.md != el que parsea crisol-enforcer.sh; el ledger REAL sí
+  usa el formato correcto) → PARKED. (V1 leak) skill arquitectura LIMPIA; el unico
+  leak estaba en ESTA entrada de ledger (nombre de secreto real re-escrito al
+  documentar el fix) → corregido. Grep propio: 0 IPs reales, 0 dominios, 0 paths.
+- Iteraciones: 1 (forja Concejo) + 1 ronda de verificacion independiente (fix de leak en ledger)
+- TEST_COVERAGE: prosa — fixture = grep anti-leak (11 archivos + 4 inserciones) +
+  grep de consistencia de sellos (5 skills en v1.8.0) + existencia del tag homonimo.
+- RETRO: (1) falso-positivo de drift: `git describe` local decia v1.6.0 porque el
+  clon no habia fetcheado el tag v1.7.1 (sí estaba en origin) → `git fetch --tags`
+  antes de juzgar versiones; anclarse al remoto, no al clon. (2) re-leak
+  auto-infligido: al DOCUMENTAR en este ledger que neutralizamos un secreto, re-escribi
+  su nombre real; lo cazo el verificador independiente. Leccion: el leak-scan debe
+  cubrir los meta-docs (ledger/RETRO), no solo el artefacto. (3) PARKED: el formato de
+  templates/run-ledger.md != el que parsea crisol-enforcer.sh (pre-existente; el ledger
+  real usa el formato correcto) → corrida fast-path aparte. (4) atribucion Vikingo→MLL
+  family-wide (decision del operador). (5) reconfirma friccion de corrida 4: bump de
+  sellos en 5 skills a mano + deriva (idea stale v1.6.0, management sin sello) →
+  candidato firme a script de release que bumpee+verifique sellos N skills antes del tag.

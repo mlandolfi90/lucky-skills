@@ -19,15 +19,16 @@ Arquitecto: APPROVE | REJECT (motivo)
 Ingeniero: <archivos staged>
 Verificador: PASS | FAIL (defecto archivo:línea)
 Integración: PASS | FAIL | N/A
+Conformidad-arq: PASS | FAIL (capa:archivo) | N/A
 Iteraciones: <n>/3
-Escalación: <none | detalle a Vikingo>
+Escalación: <none | detalle a MLL>
 Cierre: <YYYY-MM-DD HH:MM> <commit-sha>
 ```
 
 - `STATUS: ACTIVE` → corrida abierta; el código fuente del branch puede mutarse.
 - `STATUS: CLOSED` → corrida cerrada con commit; nuevas mutaciones requieren
   abrir una nueva corrida.
-- `STATUS: ESCALATED` → superó el techo (3 iteraciones); decide Vikingo.
+- `STATUS: ESCALATED` → superó el techo (3 iteraciones); decide MLL.
 - `STATUS: BOOTSTRAP` → excepción declarada (creación del propio Crisol).
 
 ---
@@ -39,7 +40,7 @@ Tier: completo
 Alcance: Creación del Crisol (skill + hook + ADR 0018 + gobernanza). Meta-cambio.
 Carriles: governance (single)
 Planificador: 3 Explore agents (ADR system / roles / infra) — grounding verbatim
-Arquitecto: APPROVE — revisión directa Vikingo + team-lead (paradoja de bootstrap)
+Arquitecto: APPROVE — revisión directa MLL + team-lead (paradoja de bootstrap)
 Ingeniero: team-lead (artefactos doc/config; sin código de feature)
 Verificador: PASS — verificación end-to-end del hook + frontmatter + suite repo
 Integración: N/A

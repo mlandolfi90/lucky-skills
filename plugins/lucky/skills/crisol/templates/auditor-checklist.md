@@ -44,6 +44,12 @@
 - [ ] No faltan conexiones que el Ingeniero no actualizó.
 - [ ] Sin dependencia circular nueva.
 - [ ] No viola Growth-First (no se tocó core para "soportar" un worker).
+- [ ] **(skill arquitectura)** Conformidad estructural: si el repo declaró
+      `arquitectura`, corre su `templates/conformidad-checklist.md` (fuente
+      única — localizar con `Glob`) sobre el diff. Resumen no-normativo:
+      dependencias hacia adentro · núcleo sin I/O (todo por puerto) · un puerto
+      por integración (capacidad nueva = adaptador nuevo, núcleo sin tocar).
+      Sin skill → N/A → verde.
 
 ## D2. Infra / contenedores (si la corrida tocó servicios desplegados)
 - [ ] Ningún cambio quedó SOLO dentro de un contenedor (terminal = solo
