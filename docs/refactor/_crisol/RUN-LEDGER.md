@@ -210,7 +210,34 @@
   su nombre real; lo cazo el verificador independiente. Leccion: el leak-scan debe
   cubrir los meta-docs (ledger/RETRO), no solo el artefacto. (3) PARKED: el formato de
   templates/run-ledger.md != el que parsea crisol-enforcer.sh (pre-existente; el ledger
-  real usa el formato correcto) → corrida fast-path aparte. (4) atribucion Vikingo→MLL
+  real usa el formato correcto) → corrida fast-path aparte. (4) atribucion del operador unificada a MLL,
   family-wide (decision del operador). (5) reconfirma friccion de corrida 4: bump de
   sellos en 5 skills a mano + deriva (idea stale v1.6.0, management sin sello) →
   candidato firme a script de release que bumpee+verifique sellos N skills antes del tag.
+
+### main — 2026-06-14 (fix: formato template run-ledger ↔ enforcer)
+- STATUS: CLOSED
+- Tier: fast-path
+- Fecha: 2026-06-14
+- Alcance: alinear templates/run-ledger.md al formato canonico que YA exigen el
+  enforcer (`### ` / `- STATUS:` / `- Tier:` / `- Fecha:`), la suite
+  tests/test-enforcer.sh y SKILL.md §4 paso 2 + el RUN-LEDGER real. El template
+  usaba `## RUN` / `Branch:` / campos SIN guion / sin `Fecha:` → una entrada
+  copiada literal NO matchea el awk. CORRECCION del diagnostico del chip: el
+  efecto real es fail-CLOSED (el gate bloquea, exit 2), NO falsamente-verde.
+  Opcion A (solo .md, enforcer y fixture intactos). Meta-cambio bajo §6.
+- MIGRATION_STRATEGY: N/A
+- Conformidad-arq: N/A (solo docs/template)
+- Veredictos: Verificador (fixture tests/test-enforcer.sh) PASS 13/13, ambos
+  guardianes (crisol-enforcer.sh + crisol_gate.py). Demostracion directa: entrada
+  en formato VIEJO del template (`## RUN` / sin guion / sin Fecha) → exit 2
+  (bloquea, fail-closed); formato NUEVO canonico → exit 0 (permite). Enforcer y
+  fixture NO tocados (solo el template .md).
+- Iteraciones: 1
+- TEST_COVERAGE: hooks (tests/test-enforcer.sh, 13/13)
+- RETRO: el chip diagnostico "gate falsamente verde" — era al reves: fail-CLOSED
+  (bloquea), lo cazo la lectura del awk antes de tocar nada (anclarse al codigo
+  real, no al resumen del verificador previo). El template era un TERCER formato
+  divergente del trio enforcer+fixture+ledger-real → reconfirma la leccion de la
+  corrida 1: un invariante = un solo formato canonico; el fixture es la fuente
+  unica de verdad y el template ahora la espeja.
