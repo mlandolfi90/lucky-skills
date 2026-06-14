@@ -160,3 +160,12 @@
 - RETRO: a diferencia de v1.7 (importacion sin OK + 4 IPs filtradas), esta vez: management
   AGNOSTICA verificada cero-leak x2 + OK explicito del usuario + SOLO management/ (legacy NO subidas).
   Pendiente: marcar DEPRECATED las legacy locales; y cortar tag/sello (release) para activar Ley Viva.
+
+### main — 2026-06-14 (release v1.7.1)
+- STATUS: CLOSED
+- Tier: fast-path
+- Fecha: 2026-06-14
+- Alcance: release v1.7.1 — sello v1.6.0->v1.7.1 (brujula+crisol) + tag v1.7.1. Incluye la skill
+  `management` agnostica (commit e12849e, verificada cero-leak x2). El v1.7.0/v1.7.1 ORIGINALES
+  fueron borrados en el revert por fuga de IPs; ESTE v1.7.1 es el limpio. Legacy locales eliminadas.
+- Veredictos: sello consistente repo<->tag (grep); management cero-leak x2 (enjambre + humano-loop).
