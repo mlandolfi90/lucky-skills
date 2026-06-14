@@ -143,3 +143,20 @@
   patrón de inicio de sesión. (2) Importar skills de TERRITORIO de otra sesión
   (Afinamiento) sin coordinar. La velocidad nunca justifica saltarse el gate de
   intención del humano.
+
+### main — 2026-06-14 (concejo: publicar management agnostica)
+- STATUS: CLOSED
+- Tier: completo
+- Fecha: 2026-06-14
+- Alcance: publicar la skill `management` (agnostica) en lucky-skills aplicando el dictamen del
+  Concejo de AI (P1-P5,P7,P8; P6 fuera = rotacion ya planificada) + fricciones de la sesion
+  Afinamiento. SOLO se publica `management/` — las legacy (centro/conectar-vps/vault-cred) NO se
+  suben: hardcodean IPs (fueron la causa del revert de v1.7). Forja por capas + full escrutinio
+  anti-leak (cero IP/dominio/secreto, repo PUBLICO) + reparacion. Push gated al OK del usuario.
+- MIGRATION_STRATEGY: N/A
+- Veredictos: Forja+escrutinio (Concejo, 12 agentes): leak_scan PASS 0/0/0; agnostico/coherencia/
+  cobertura OK. Verificador INDEPENDIENTE (humano-loop): grep 8/8 LIMPIO (0 IPs reales, 0 dominios,
+  0 secretos-valor, 0 hostnames/paths, 0 repos hardcodeados). Iteraciones: 1.
+- RETRO: a diferencia de v1.7 (importacion sin OK + 4 IPs filtradas), esta vez: management
+  AGNOSTICA verificada cero-leak x2 + OK explicito del usuario + SOLO management/ (legacy NO subidas).
+  Pendiente: marcar DEPRECATED las legacy locales; y cortar tag/sello (release) para activar Ley Viva.
