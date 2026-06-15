@@ -342,3 +342,41 @@
   release" es TACITA (no esta escrita en crisol §Versionado) — la deduje del historial recien
   DESPUES de taggear. Parked: explicitar esa regla en el skill crisol. Leccion: antes de
   taggear un release, verificar consistencia de sellos en TODAS las skills, no solo en las tocadas.
+
+### main — 2026-06-15 (regla de re-sello uniforme + chequeo de consistencia — v1.10.2)
+- STATUS: CLOSED
+- Tier: completo
+- Fecha: 2026-06-15
+- TARGET: pc-local (Git-Bash del operador) — repo de skills-CLI, sin deploy a un PaaS.
+- Alcance: AGREGA a crisol §Versionado el bullet "Sellos consistentes (precondicion del
+  Gate Crisol)": un release re-sella TODAS las skills de la familia al tag nuevo (bump de
+  sello = marcador de release, no comportamiento → no viola Open/Closed, como mover latest);
+  ANTES del tag estable el Verificador enumera los SKILL.md por Glob, greppea la LINEA de
+  sello y exige EXACTAMENTE 1 por skill, todas == el tag a nacer (conteo != N o straggler →
+  FAIL); valvula SELLO_PIN en el RUN-LEDGER para divergencia intencional declarada. Convierte
+  en LEY EXPLICITA la convencion TACITA que hizo nacer v1.10.0 incompleto. + dogfood: re-sella
+  las 6 skills a v1.10.2 (diff: 6 archivos; crisol = bullet + sello, las otras 5 = solo sello).
+- MIGRATION_STRATEGY: N/A (sin DDL)
+- Planificacion/Diseno: mini-concejo de 5 Opus + redactor (placement-wording, redteam-loophole,
+  coherencia-gate, enforcement-como, redteam-premise-minimal). Guardarrailes del red-team: grep
+  anclado a la LINEA de sello (evita falso positivo con el "tag v1.10.1" que el propio archivo
+  cita en §6), conteo ==N (atrapa skill SIN sello), Glob por namespace (zero-leak, sin nombres),
+  valvula SELLO_PIN fail-closed. Premisa red-teameada: se encoda la convencion AHORA; la causa
+  raiz (sello duplicado 6x) se PARKEA, no scope creep.
+- Conformidad-arq: N/A (prosa de skill)
+- Veredictos (Verificador fresco, independiente): REGLA 0 = test-enforcer.sh 13/13 verde (hook
+  intacto); CONSISTENCIA_SELLOS 6/6 en v1.10.2 (placeholder vX.Y.Z de la prosa NO contado);
+  OPEN_CLOSED ok (AGREGAR un bullet, "Tags inmutables" intacto); ZERO_LEAK limpio; COHERENCIA
+  ok (engancha al Gate sin duplicar; chequeo de rol-LLM, no toca el hook); LOOPHOLE sin agujero
+  (SELLO_PIN auditable, fail-closed). PASS.
+- Iteraciones: 1
+- TEST_COVERAGE: hook enforcer (crisol/tests/test-enforcer.sh, 13/13) + chequeo de consistencia de sellos (6/6)
+- PARKED: (1) sello UNICO repo-level que lea la Ley viva §6 → borra los N sellos por-skill (causa
+  raiz de la des-sincronizacion; esta regla la parchea, no la cura). (2) script forjar-release
+  que bumpee atomicamente los N sellos + cree el tag (consistencia por construccion) + automatizar
+  el grep en hook/CI. (3) normalizar el formato del sello como invariante explicito de §6 (hoy es
+  multilinea; el grep del chequeo deberia capturar ambas lineas — nota del Verificador).
+- RETRO: el loop kaizen funciono — el RETRO de v1.10.1 ("convencion tacita") disparo esta corrida
+  que la vuelve explicita y enforceable. Leccion meta: una regla que el Verificador no puede LEER
+  no se puede EXIGIR; tacito → escrito → enforceable. (Eso es justo lo que el concejo de 10 IAs no
+  pudo cazar antes: no estaba en la ley que juzgaban.)

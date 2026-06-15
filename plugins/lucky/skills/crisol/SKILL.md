@@ -159,6 +159,20 @@ Respondé el checklist. **Cualquier "SÍ" → Tier Completo.** Todos "NO" → Fa
 - **Tags inmutables:** nunca se mueve un tag publicado. `latest` es el único
   puntero móvil (apunta al último estable). Rollback = re-deployar el tag estable
   anterior.
+- **Sellos consistentes (precondición del Gate Crisol):** un release re-sella
+  TODAS las skills de la familia al tag nuevo, no solo las de contenido cambiado.
+  El bump del sello (`esta copia = tag vX.Y.Z`) es un marcador de versión del
+  ritual de release, no comportamiento — re-sellar una skill intacta es un toque
+  sancionado (como mover `latest`), NO viola Open/Closed. ANTES de crear el tag
+  estable, el Verificador enumera los `SKILL.md` de la familia con `Glob` (igual
+  que «Conformidad estructural»), greppea la LÍNEA de sello (`esta copia = tag
+  vX.Y.Z`, §6 — no menciones de versión en prosa) y exige EXACTAMENTE una por
+  skill, todas == el tag a nacer: conteo ≠ N o algún straggler atrás → `FAIL`, el
+  tag no nace. Es chequeo de rol-LLM, no del hook (que sigue eximiendo `.md`).
+  **Válvula:** una skill puede llevar sello distinto a propósito
+  (congelada/depreciada) SOLO si la divergencia está declarada en el RUN-LEDGER
+  (`SELLO_PIN: <skill> @ <tag> · motivo`); sin esa declaración = straggler =
+  `FAIL`.
 
 ### Pin total (cadena de suministro) — innegociable
 
@@ -296,7 +310,7 @@ la entrada (incluso fast-path) debe llevar `MIGRATION_STRATEGY` — sin él →
 ## 6. La ley se gobierna a sí misma
 
 **Fuente de verdad: `github.com/mlandolfi90/lucky-skills` · esta copia = tag
-`v1.10.1` (cache local, NO la ley).** **Ley viva:** al invocar la skill, si la
+`v1.10.2` (cache local, NO la ley).** **Ley viva:** al invocar la skill, si la
 sesión tiene red: `git ls-remote --tags
 https://github.com/mlandolfi90/lucky-skills.git` — si existe un tag mayor al de
 esta copia, descargar y seguir LA DEL REPO
