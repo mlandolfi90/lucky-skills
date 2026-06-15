@@ -320,3 +320,25 @@
   Fix: el TARGET es ahora campo de ledger + lo fija el Paso 0 + lo exige REGLA 0. La frontera
   limpia (mecanica en brujula, consumo en crisol) evito duplicar. Nit vigilado: el literal del
   esquema se restata en crisol con atribucion a brujula — aceptable, no dejar que derive en 2da definicion.
+
+### main — 2026-06-15 (re-sello de consistencia: 6 skills -> v1.10.1)
+- STATUS: CLOSED
+- Tier: fast-path
+- Fecha: 2026-06-15
+- TARGET: pc-local (Git-Bash del operador) — repo de skills-CLI, sin deploy a un PaaS.
+- Alcance: bump MECANICO del sello de version de las 6 SKILL.md a v1.10.1 (crisol/brujula
+  v1.10.0->; arquitectura/cargar/idea/management v1.9.0->). Corrige el release v1.10.0 que
+  re-sello solo 2 de 6 → las 4 no-bumpeadas dispararian el aviso "tag mayor" de la ley-viva
+  en cada invocacion (su contenido en el tag v1.10.0 seguia diciendo v1.9.0, nunca asentaba).
+  Convencion del repo (commit d8d7c02 @ v1.9.0): cada release re-sella TODAS las skills.
+  Decision del operador: cortar v1.10.1 (respeta "tags inmutables") en vez de mover v1.10.0.
+  Sin cambio de comportamiento; solo el string del sello (diff: 6 archivos, 6 lineas).
+- MIGRATION_STRATEGY: N/A (sin DDL)
+- Veredictos: REGLA 0 = test-enforcer.sh 13/13 verde (hook/codigo intactos); consistencia de
+  sellos = 6/6 skills en v1.10.1, 0 stragglers (grep). PASS.
+- Iteraciones: 1
+- TEST_COVERAGE: hook enforcer (crisol/tests/test-enforcer.sh, 13/13) + grep de consistencia de sellos (6/6)
+- RETRO: v1.10.0 nacio incompleto porque la convencion "re-sellar TODAS las skills en cada
+  release" es TACITA (no esta escrita en crisol §Versionado) — la deduje del historial recien
+  DESPUES de taggear. Parked: explicitar esa regla en el skill crisol. Leccion: antes de
+  taggear un release, verificar consistencia de sellos en TODAS las skills, no solo en las tocadas.
