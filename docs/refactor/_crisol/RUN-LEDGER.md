@@ -283,3 +283,40 @@
   PowerShell con minisign.exe; clave privada en disco (~/lucky-keys, backupear a USB),
   Infisical diferido. Leccion: probar el RELEASE temprano destapa lo que el unit-test
   no ve (que no haya cargo real).
+
+### main — 2026-06-15 (capa de entorno — TARGET en Crisol + Topologia PaaS en Brujula — v1.10.0)
+- STATUS: CLOSED
+- Tier: completo
+- Fecha: 2026-06-15
+- TARGET: pc-local (Git-Bash del operador). Repo de skills-CLI, sin deploy a un PaaS
+  → el entorno REAL de consumo es Git-Bash (mismo target que la corrida v1.9.0:
+  test-verify.sh verde en Git-Bash). Declarado y faithful, NO degradacion silenciosa.
+  [el campo TARGET es justo lo que esta corrida agrega → se dogfoodea bajo ley v1.9.0]
+- Alcance: 2 SKILL.md (prosa de ley). brujula: nace la 4ta fuente "Topologia (PaaS)"
+  (read-only; duena de la MECANICA de leer la topologia del orquestador + del esquema
+  canonico del TARGET); description 3->4 fuentes; fail-closed extendido. crisol: Paso 0
+  pregunta/confirma el TARGET (1 tecla, prefill de brujula); el RUN-LEDGER gana 4to
+  campo minimo `TARGET:`; REGLA 0 fija el ENTORNO de verificacion = el TARGET (jamas
+  PC local salvo `pc-local` explicito; degradar en silencio = FAIL fail-closed); §5
+  invariante actualizado. Todo AGREGAR (Open/Closed). bump v1.9.0->v1.10.0 en ambos.
+  Cierra el gap real: la verificacion corria en Windows sin declararlo (friccion +
+  infidelidad: chmod 0600, PTY/device-flow no se ejecutan).
+- MIGRATION_STRATEGY: N/A (sin DDL)
+- Planificacion/Diseno: Concejo de 10 Opus + redactor (angulos: frontera-no-duplicar,
+  fail-closed-anti-deriva, ux-anti-friccion, redteam-minimalismo-autogobierno, esquema
+  TARGET, ledger-campo, brujula-mecanica-segura, crisol-paso0/regla0). Los 10 old_string
+  matchearon EXACTO contra la v1.9.0 fresca (cero alucinacion). Decision del operador:
+  nombrar "PaaS" (vendor-neutral) en vez del producto; prefijo de esquema `paas:`.
+- Conformidad-arq: N/A (cambio de PROSA de skill; la skill `arquitectura` rige CODIGO hexagonal)
+- Veredictos (Verificador fresco, independiente, solo-artefactos): REGLA 0 = test-enforcer.sh
+  13/13 verde (exit 0, ambos guardianes en sync); OPEN_CLOSED ok (todo AGREGAR, REGLA 0 se
+  precisa no se reescribe); ZERO_LEAK limpio (solo genericos PaaS/git/docker + placeholders);
+  FRONTERA ok (mecanica solo en brujula, crisol consume; fail-closed consistente); AUTO_GOBIERNO
+  bump v1.10.0 en ambos. PASS.
+- Iteraciones: 1 (el Concejo 10 Opus produjo el diseno; 1 nit cosmetico de wrap corregido pre-commit)
+- TEST_COVERAGE: hook enforcer (crisol/tests/test-enforcer.sh, 13/13)
+- RETRO: el gap nacio porque REGLA 0 (v1.9.0) decia QUIEN verifica pero no DONDE → el agente
+  derrapo a Windows local (me sorprendio que me hablara de Windows cuando no desarrollo ahi).
+  Fix: el TARGET es ahora campo de ledger + lo fija el Paso 0 + lo exige REGLA 0. La frontera
+  limpia (mecanica en brujula, consumo en crisol) evito duplicar. Nit vigilado: el literal del
+  esquema se restata en crisol con atribucion a brujula — aceptable, no dejar que derive en 2da definicion.
