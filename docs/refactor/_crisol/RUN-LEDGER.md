@@ -243,7 +243,7 @@
   unica de verdad y el template ahora la espeja.
 
 ### main — 2026-06-14 (forja loader cargar — v1.9.0)
-- STATUS: ACTIVE
+- STATUS: CLOSED
 - Tier: completo
 - Fecha: 2026-06-14
 - Alcance: nace la skill `cargar` (loader skill-como-datos, cross-IA, fail-closed)
