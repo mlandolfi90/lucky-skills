@@ -241,3 +241,45 @@
   divergente del trio enforcer+fixture+ledger-real → reconfirma la leccion de la
   corrida 1: un invariante = un solo formato canonico; el fixture es la fuente
   unica de verdad y el template ahora la espeja.
+
+### main — 2026-06-14 (forja loader cargar — v1.9.0)
+- STATUS: ACTIVE
+- Tier: completo
+- Fecha: 2026-06-14
+- Alcance: nace la skill `cargar` (loader skill-como-datos, cross-IA, fail-closed)
+  + su cadena de verificacion por CODIGO. 13 archivos: cargar/SKILL.md +
+  hooks/{cargar-fetch-verify.sh, cargar-prefetch-guard.sh, settings.snippet.json}
+  + install/{install-trust.sh,.ps1} + tests/test-verify.sh + references/
+  detectar-runtime.md + scripts/{forjar-release.sh, leak-scan.sh} + registry.json
+  + registry.schema.json + docs/decisions/0001-loader-cargar.md. HAY CODIGO .sh →
+  el gate del Crisol aplica; esta entrada ACTIVE abre la mesa. Forja: Concejo de AI
+  (17 Opus) + 3 emisores; escrutinio de 5 lentes con todos los blocker/major aplicados.
+- MIGRATION_STRATEGY: N/A (sin DDL)
+- DECISION ESTRUCTURAL: WebFetch NO sirve como fetch verificable (convierte a
+  markdown + resume → muta bytes). El fetch+verify del cuerpo lo hace CODIGO en un
+  hook UserPromptSubmit (curl bytes crudos → minisign -V del registry → sha256 -c
+  del cuerpo → emite con nonce SOLO si exit 0). El modelo nunca computa ni
+  transcribe un hash. Pin por COMMIT (el tag git es mutable).
+- Hallazgo de scope: de las 5 skills, SOLO arquitectura es cargable-como-dato;
+  brujula/management necesitan Bash, crisol/idea hooks/escriben → requires_tools /
+  requires_runtime → rechazadas (fast-path de install). El loader cubre cross-IA.
+- Conformidad-arq: N/A
+- Veredictos: test-verify.sh 10/10 verde (Git-Bash + minisign reales del operador);
+  leak-scan LIMPIO (tras excluir el propio scanner, que se auto-marcaba con sus
+  patrones de deteccion); firma del registry VERIFICADA con la clave publica
+  (minisign -V: "Signature and comment signature verified"). Pin por tag + firma.
+- Iteraciones: 2 (forja Concejo 17 Opus + 3 emisores; pivote commit->tag+firma a mano)
+- TEST_COVERAGE: hooks/verify (tests/test-verify.sh, 10/10)
+- RETRO: (1) HALLAZGO de scope: de las 5 skills NINGUNA es cargable-como-dato hoy
+  (todas declaran Bash o hooks) → el loader es INFRA para futuro multi-IA (LiteLLM
+  como gestor de skills), no resuelve nada que /reload-skills + Ley viva no cubran
+  ya en Claude. Publicado igual como infra, declarado honesto al operador. (2)
+  Pin-por-commit quedo inconsistente (el release sella el commit PADRE, no el del
+  release) → v1 pinea por TAG y la firma minisign es el ancla real; pin-por-commit
+  verdadero = deuda v2. (3) WebFetch NO sirve como fetch verificable (convierte a
+  markdown + resume → muta bytes) → el fetch+verify del cuerpo lo hace un hook-codigo.
+  (4) el leak-scan se auto-marcaba (contiene los literales que busca) → se excluye a
+  si mismo. (5) entorno: sin Git-Bash ni infisical-CLI instalados → keygen+firma en
+  PowerShell con minisign.exe; clave privada en disco (~/lucky-keys, backupear a USB),
+  Infisical diferido. Leccion: probar el RELEASE temprano destapa lo que el unit-test
+  no ve (que no haya cargo real).

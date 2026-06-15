@@ -1,0 +1,25 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/skills/cargar/hooks/cargar-fetch-verify.sh"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "WebFetch",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/skills/cargar/hooks/cargar-prefetch-guard.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
