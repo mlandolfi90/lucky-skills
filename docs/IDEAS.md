@@ -18,4 +18,6 @@
 - 2026-06-15 · verificar que las skills lucky funcionen en Claude WEB (no solo
   CLI local) — prioridad principal · Ley viva trae el último tag en sesión nueva;
   chequear que /reload-skills, hooks y registry/cargar se comporten igual que en
-  el CLI · idea de MLL
+  el CLI · idea de MLL · ✅ RESUELTA (2026-06-15): la web carga el plugin desde el
+  `.claude/settings.json` de cada repo; habilitado en los 10 repos del stack Lucky.
+  No era el loader — era config por repo. /reload-skills SÍ existe (CLI y web).
