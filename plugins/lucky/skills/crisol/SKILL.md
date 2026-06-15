@@ -43,8 +43,14 @@ Respondé el checklist. **Cualquier "SÍ" → Tier Completo.** Todos "NO" → Fa
 
 ## 2. Reglas duras (jidoka) — innegociables
 
-- **Anti-romper (REGLA 0):** el Verificador corre los tests ÉL MISMO. Sin verde
-  propio → `FAIL` automático. No se confía en reporte ajeno.
+- **Anti-romper (REGLA 0):** el Verificador corre los tests ÉL MISMO, **EN el
+  `TARGET:` declarado** del RUN-LEDGER (el contenedor/host fiel: dev Linux), no
+  donde corra el proceso del agente. Sin verde propio → `FAIL` automático. No se
+  confía en reporte ajeno. **Jamás en la PC local** salvo `TARGET: pc-local`
+  explícito del humano: degradar a local en silencio (target sin responder o sin
+  declarar) → `FAIL` fail-closed, no `PASS`; target desconocido → preguntar,
+  nunca asumir local. El esquema del target lo define la brújula; acá solo se
+  consume.
   Si NO existe suite de tests: registra `TEST_COVERAGE: NONE` en el RUN-LEDGER y
   puede emitir `PASS`, pero el tag estable `vX.Y.Z` queda **bloqueado para
   crearse** mientras siga en `NONE` (es gate de creación: un tag ya existente sí
@@ -216,6 +222,17 @@ Respondé el checklist. **Cualquier "SÍ" → Tier Completo.** Todos "NO" → Fa
    WIP-commit (si es trabajo recuperable) o `git reset --hard` (si es basura de
    crash); sin árbol limpio NO se abre `ACTIVE`. ¿Brújula reporta huérfana
    `ACTIVE`? → resolverla en el paso 2 antes que nada.
+   Fijar el **`TARGET:`** de la corrida (dónde corre/verifica — lo consume la
+   REGLA 0, §2) ANTES de abrir `ACTIVE`. La brújula ya ancla la topología de
+   deploy (4ta fuente) y **sugiere/prefillea** el target; el Crisol lo **consume**
+   y lo **confirma con el humano** en UNA pregunta de 1 tecla (Enter acepta el
+   sugerido) — no re-deriva ni consulta la API por su cuenta (esa mecánica es de
+   la brújula). Esquema: `paas:<proyecto>/<app>@<env>` (`<env>` ∈ {dev,testing,
+   production}; dev = mesa caliente, default) | `docker-local` (contenedor Linux
+   fiel) | `pc-local` (la PC del dev, Windows). **Fail-closed:** brújula reporta
+   `N/D` o el target es ambiguo → **PREGUNTAR y esperar** (sin humano: ABORTAR),
+   jamás asumir local. `pc-local` NO es el default: solo si el humano lo pide
+   explícito. El target confirmado se registra en el paso 2.
 1. Clasificar **tier** con el checklist §1. Todos NO → fast-path.
 2. `git fetch && git rebase origin/main` (conflicto → resolver antes de seguir;
    prohibido `--force` en `main`). Abrir entrada en
@@ -226,6 +243,7 @@ Respondé el checklist. **Cualquier "SÍ" → Tier Completo.** Todos "NO" → Fa
    - STATUS: ACTIVE
    - Tier: <completo|fast-path>
    - Fecha: <YYYY-MM-DD>
+   - TARGET: <paas:<proyecto>/<app>@<env> | docker-local | pc-local>
    ```
    (plantilla completa: `templates/run-ledger.md`, si existe).
    **Huérfana `ACTIVE` previa:** reportarla al humano (Fecha · Tier ·
@@ -265,8 +283,9 @@ actual, todo cambio de código fuente queda bloqueado (exit 2).** Docs/.md queda
 exentos. Conectarlo con `hooks/settings.snippet.json` en `.claude/settings.json`.
 
 **Invariante: exactamente UNA entrada `ACTIVE` por branch**, con los campos
-mínimos del paso 2 — una línea suelta con `ACTIVE` no habilita nada (el hook lo
-valida). **Fast-path:** basta la entrada mínima con `Tier: fast-path`, sin
+mínimos del paso 2 — incluido `TARGET:` (dónde corre/verifica la corrida; lo fija
+el Paso 0). Una línea suelta con `ACTIVE` no habilita nada (el hook lo valida).
+**Fast-path:** basta la entrada mínima con `Tier: fast-path`, sin
 COLLISION-MAP ni Steward — dev sigue siendo mesa caliente con ceremonia de 30
 segundos. **Excepción DDL:** si el diff contiene `ALTER`/`DROP`/`CREATE TABLE`,
 la entrada (incluso fast-path) debe llevar `MIGRATION_STRATEGY` — sin él →
@@ -277,7 +296,7 @@ la entrada (incluso fast-path) debe llevar `MIGRATION_STRATEGY` — sin él →
 ## 6. La ley se gobierna a sí misma
 
 **Fuente de verdad: `github.com/mlandolfi90/lucky-skills` · esta copia = tag
-`v1.9.0` (cache local, NO la ley).** **Ley viva:** al invocar la skill, si la
+`v1.10.0` (cache local, NO la ley).** **Ley viva:** al invocar la skill, si la
 sesión tiene red: `git ls-remote --tags
 https://github.com/mlandolfi90/lucky-skills.git` — si existe un tag mayor al de
 esta copia, descargar y seguir LA DEL REPO
