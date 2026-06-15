@@ -15,3 +15,7 @@
   a modelos concretos en UN solo lugar (hoy: sonnet/opus/fable), así sobrevive
   a modelos nuevos · candidata a enmienda de §3 del crisol (próxima release) ·
   idea de MLL
+- 2026-06-15 · verificar que las skills lucky funcionen en Claude WEB (no solo
+  CLI local) — prioridad principal · Ley viva trae el último tag en sesión nueva;
+  chequear que /reload-skills, hooks y registry/cargar se comporten igual que en
+  el CLI · idea de MLL
