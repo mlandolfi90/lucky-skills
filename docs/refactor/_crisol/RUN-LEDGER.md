@@ -380,3 +380,41 @@
   que la vuelve explicita y enforceable. Leccion meta: una regla que el Verificador no puede LEER
   no se puede EXIGIR; tacito → escrito → enforceable. (Eso es justo lo que el concejo de 10 IAs no
   pudo cazar antes: no estaba en la ley que juzgaban.)
+
+### main — 2026-06-20 (forja vía forjar-release.sh + mandato del tool en la ley + registry al día — v1.10.3)
+- STATUS: CLOSED
+- Tier: completo
+- Fecha: 2026-06-20
+- TARGET: pc-local (Git-Bash del operador) — repo de skills-CLI, sin deploy a un PaaS.
+- Alcance: (a) crisol §Versionado AGREGA el bullet "Forja, no a mano": el bump de sellos +
+  registry.json + firma los hace `scripts/forjar-release.sh` en UNA pasada (consistencia por
+  construcción); el Verificador solo CONFIRMA; sellar/editar el registry a mano = deuda.
+  (b) README: sección "Release (ritual)" apuntando al script + fix L19 (reload-skills → /reload-plugins).
+  (c) Se USÓ el script (dogfood): re-selló 8 archivos a v1.10.3 — incluidos
+  cargar/references/detectar-runtime.md y docs/decisions/0001-loader-cargar.md, que mis releases
+  MANUALES v1.10.0/1/2 habían dejado REZAGADOS en v1.9.0 (el sed a mano sellaba solo 6 .md; el
+  script sella 8). (d) registry.json REGENERADO (sha256 nuevos + pin commit) — saldó el drift v1.9.0.
+- HALLAZGO CLAVE: el "fix de causa raíz" parqueado (script que da consistencia por construcción)
+  YA EXISTÍA — `scripts/forjar-release.sh`, muy completo (pre-flight transaccional, leak-scan,
+  firma minisign, CRLF-safe). La deuda no era construirlo sino USARLO: mis 3 releases lo bypassearon.
+  Esta corrida lo dogfoodea Y lo MANDA en la ley.
+- FIRMA DIFERIDA (decisión del operador): el registry quedó regenerado pero SIN firmar; el
+  registry.json.minisig viejo (firmaba bytes v1.9.0) se BORRÓ para no dejar firma con mismatch.
+  Razón: el loader `cargar` es infra DORMIDA (nada lo consume) y la Ley-viva NO depende de la firma
+  → firmar ahora es ceremonia para una capacidad no usada. Se firmará en batch al activar el loader
+  (o automatizado vía Infisical, ver PARKED). Estado honesto "sin firma, diferida".
+- MIGRATION_STRATEGY: N/A (sin DDL)
+- Conformidad-arq: N/A (prosa + artefacto de release)
+- Veredictos (Verificador fresco, independiente): REGLA 0 = test-enforcer.sh 13/13 verde; CONSISTENCIA_SELLOS
+  8/8 en v1.10.3 (0 stragglers); LEAK_SCAN limpio; OPEN_CLOSED ok (bullet aditivo); ZERO_LEAK limpio;
+  COHERENCIA ok (spot-check: sha256 LF de idea/SKILL.md == campo en registry.json); FIRMA_DIFERIDA ok
+  (.minisig stale removido, sin firma falsa). PASS.
+- Iteraciones: 1
+- TEST_COVERAGE: hook enforcer (test-enforcer.sh, 13/13) + consistencia de sellos (8/8) + leak-scan + spot-check sha256 registry↔archivo
+- PARKED: automatizar la firma vía Infisical (clave+passphrase en bóveda → `infisical run -- forjar-release.sh`
+  firma sola, cero passphrase a mano); hoy infisical CLI no está instalado y la clave vive en ~/lucky-keys
+  protegida por passphrase. Sello único repo-level sigue descartado (el sello por-skill sirve a la web standalone).
+- RETRO: la fricción de "firmar cada release" destapó que la firma protege SOLO al loader dormido → se
+  desacopló del camino crítico (la Ley-viva no la necesita) y se difirió sin bloquear el release. Y anclar
+  al repo REAL reveló que el forjador YA existía: lección = inspeccionar/brújula ANTES de asumir que algo
+  "falta construir" (casi rehago un script que ya estaba).
