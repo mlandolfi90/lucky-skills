@@ -420,7 +420,7 @@
   "falta construir" (casi rehago un script que ya estaba).
 
 ### main — 2026-06-20 (compuerta TARGET: exigir TARGET + piso global en repos no adoptados — v1.11.0)
-- STATUS: ACTIVE
+- STATUS: CLOSED
 - Tier: completo
 - Fecha: 2026-06-20
 - TARGET: pc-local (Git-Bash del operador) — EXCEPCIÓN EXPLÍCITA autorizada por el operador. El artefacto de esta corrida (`crisol_gate.py`) es un hook PreToolUse que el harness ejecuta EN la PC Windows local por arquitectura; no tiene existencia en el VPS. La regla dura "nunca correr en Windows, todo al dev del VPS" rige el CÓDIGO DE PROYECTOS (apps con dev en Coolify), no el toolchain local de skills-CLI (mismo target fiel que v1.9.0→v1.10.3: test-enforcer.sh/forjar-release.sh en Git-Bash). Alcance autorizado: SOLO tests del gate + tooling de release de ESTE repo; NO habilita correr apps de proyecto en Windows.
@@ -431,7 +431,8 @@
 - Planificación/Diseño: concejo de 5 lentes + síntesis (invariantes fail-open FO-1..FO-16, marcador per repo+session_id, suite de 24+ casos, resolución de discrepancias: piso B NO cubre `git commit` en no-adoptados; TARGET se valida por PRESENCIA no por esquema; retro-compat de `## RUN` legado).
 - DECISIÓN ESTRUCTURAL: el campo `TARGET` se exige por PRESENCIA de valor real (no vacío / no `<placeholder>` / no `pendiente|tbd|n/d|na|?` case-insensitive), NO por pertenencia al esquema canónico — validar el esquema duplicaría la ley de la brújula; un valor presente = el humano YA respondió "dónde", que es lo único que la regla persigue.
 - Veredictos: Verificador INDEPENDIENTE fresco (2 olas, solo-artefactos). Ola 1 (5 lentes): REGLA0 PASS (suite 35/35) · FAILOPEN PASS (3 callsites a exit 2, 22 _allow + red exterior; red-team sin brick injusto ni loop; invariante "marcador ANTES de bloquear" OK) · LEAK PASS (0 leaks; leak-scan LIMPIO) · SELLOS PASS (8/8 v1.11.0) · **OPENCLOSED FAIL** → divergencia de paridad entre los 2 guardianes en placeholders MAYÚSCULA (`TBD`/`Pendiente`): `crisol_gate.py` usa `.lower()` (bloquea), `crisol-enforcer.sh` era case-sensitive (permitía); el fixture no probaba mayúsculas (oráculo ciego) → 35/35 ocultaba la deriva. FIX (iter 2): `tolower()` en el awk del enforcer + 4 casos de paridad (TBD/Pendiente, ambos guardianes, exit 2). Ola 2 (re-verificación independiente, rutas Windows): **PARIDAD OK** — 6 valores {TBD,Pendiente,NA,N/D,tbd,pendiente} → exit 2 en AMBOS; control positivo (docker-local → 0/0) y anti-falso-negativo (cwd POSIX da falso "no diverge" por fail-open). Suite final 39/39.
-- VEREDICTO: PASS (iter 2). [STATUS pasa a CLOSED junto con el commit de cierre — pendiente OK del operador para commit/tag/push, paso outward]
+- VEREDICTO: PASS (iter 2).
+- Cierre: 2026-06-20 · commit `2019753` (código+docs, juzgado ACTIVE) + flip a CLOSED (docs-only) · tag anotado `v1.11.0` · push a `origin/main`. Dance ACTIVE→CLOSED para no auto-bloquear el commit de código con el propio gate.
 - Iteraciones: 2/3 (iter 1: FAIL paridad de guardianes; iter 2: fix quirúrgico + PASS independiente)
 - TEST_COVERAGE: hooks/gate (tests/test-enforcer.sh, 39/39 — ambos guardianes, A + B + fail-open + paridad de placeholders) + leak-scan + consistencia de sellos 8/8
 - Forja: `forjar-release.sh v1.11.0 --no-sign` → 8 sellos a v1.11.0, registry.json regenerado (pin commit 18c557b, firma DIFERIDA, sin `.minisig` stale), leak-scan LIMPIO. (Los archivos del fix de iter 2 — crisol-enforcer.sh, test-enforcer.sh — NO están sellados ni en el registry → la forja sigue válida sin re-forjar.)
