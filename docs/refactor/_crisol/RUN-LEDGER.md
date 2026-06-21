@@ -440,7 +440,7 @@
 - RETRO: el Verificador independiente cazó lo que 35 tests verdes ocultaban — la regla NUEVA (TARGET) tenía un oráculo ciego justo donde los 2 guardianes derivaban (variante de mayúscula). Lección reconfirmada (c1/c5): un invariante con DOS guardianes exige que el fixture pruebe el BORDE donde pueden derivar, no solo el camino feliz; y anclar la reproducción al entorno fiel (rutas Windows) — la 1ra corrida del red-team dio falso "no diverge" con rutas POSIX que el gate Windows-native no resolvía (fail-open). Meta: la verificación independiente con poder de CORRER tests (REGLA 0) pagó — un Verificador que solo lee no habría cazado la deriva.
 
 ### main — 2026-06-21 (Crisol endurecido: reglas verificadas-por-agente + gate de cobertura fail-closed)
-- STATUS: ACTIVE
+- STATUS: CLOSED
 - Tier: completo
 - Fecha: 2026-06-21
 - TARGET: docker-local (contenedor Linux efímero de la web; el Verificador corre tests/test-enforcer.sh ACÁ — Linux fiel, más fiel aún que las corridas previas en Git-Bash/Windows; commit+push tras cada PASS para no perder trabajo en el entorno efímero. Declarado por el operador, fail-closed, sin degradación silenciosa)
@@ -474,3 +474,5 @@
 - [V] CIERRE_TRAS_PASS · PASS · integracion-verifier · veredicto combinado PASS; commit de cierre habilitado
 - [V] CONFORMIDAD · N/A · integracion-verifier · prosa de ley + hooks, no código hexagonal de app
 <!-- VEREDICTOS:END -->
+- RETRO: REGLA 0 volvió a pagar — el engineer corriendo sus propios tests cazó un gate que nacía INERTE (KeyError de `.format()` tragado por el fail-open: test-que-miente-verde, reincidencia c5/v1.11.0). Como los 2 guardianes NO están instalados en el contenedor efímero, la dureza se demostró EN VIVO por el Verificador de Integración (poder de CORRER), no por el harness — reconfirma que un verificador que solo lee no alcanza. Fricción de PROCESO (blameless): la COLOCACIÓN de los chequeos (shift-left: punto más temprano decidible) no estaba en la ley y la trajo el operador a mitad de corrida por miedo a iteraciones desperdiciadas → candidato kaizen a explicitarla como criterio de §3/§4.
+- Cierre: 2026-06-21 · commit `911132b` (código+docs, juzgado ACTIVE) + flip a CLOSED (docs-only) · SIN tag (release v1.12.0 = decisión deliberada aparte; sello sigue v1.11.0) · push a origin/main
