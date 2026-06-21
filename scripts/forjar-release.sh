@@ -154,8 +154,9 @@ for d in "$SKILLS_DIR"/*/; do
     rt="${rt:+$rt }Bash"
   fi
 
-  # hooks/*.sh -> enforcer/fetcher de runtime (crisol: enforcer; cargar: fetcher).
-  if ls "$d"hooks/*.sh >/dev/null 2>&1; then
+  # hooks/*.sh|*.py -> enforcer/fetcher/gate de runtime (crisol: enforcer.sh +
+  # gate.py global; cargar: fetcher.sh).
+  if ls "$d"hooks/*.sh >/dev/null 2>&1 || ls "$d"hooks/*.py >/dev/null 2>&1; then
     rr="${rr:+$rr }hooks"
   fi
 

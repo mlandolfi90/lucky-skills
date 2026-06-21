@@ -7,14 +7,15 @@
 > en un repo que adoptó el Crisol queda **bloqueado** (exit 2). Docs/.md quedan exentos.
 >
 > Formato machine-checkable — el `awk` del enforcer exige LITERALMENTE: encabezado
-> `### `, y los campos `- STATUS:`, `- Tier:`, `- Fecha:` (con el guion inicial).
-> El branch se matchea contra el encabezado (NO hay campo `Branch:` separado).
+> `### `, y los campos `- STATUS:`, `- Tier:`, `- Fecha:`, `- TARGET:` (con el guion
+> inicial). El branch se matchea contra el encabezado (NO hay campo `Branch:` separado).
 
 ```
 ### <branch> — <YYYY-MM-DD> (<descripción corta, opcional>)
 - STATUS: ACTIVE | CLOSED | ESCALATED | BOOTSTRAP
 - Tier: completo | fast-path
 - Fecha: <YYYY-MM-DD>
+- TARGET: paas:<proyecto>/<app>@<env> | docker-local | pc-local   (dónde corre/verifica)
 - Alcance: <qué se tocó y por qué>
 - MIGRATION_STRATEGY: <estrategia | N/A>     (obligatorio si el diff trae DDL)
 - Conformidad-arq: PASS | FAIL (capa:archivo) | N/A
@@ -31,7 +32,9 @@
   guion (`STATUS:` en vez de `- STATUS:`) NO matchea y la corrida queda invisible
   para el hook → el código queda bloqueado aunque hayas abierto la corrida.
 - **Campos MÍNIMOS que habilitan código:** `- STATUS: ACTIVE` + `- Tier:` +
-  `- Fecha:`. Una línea suelta con `ACTIVE` no habilita nada (anti ticket-propio).
+  `- Fecha:` + `- TARGET:` (con valor real, no vacío ni `<placeholder>`). Una línea
+  suelta con `ACTIVE`, o un bloque sin `TARGET`, no habilita nada (anti ticket-propio /
+  anti verificar-a-ciegas): codear sin declarar DÓNDE corre se bloquea (exit 2).
 - `STATUS: ACTIVE` → corrida abierta; el código fuente del branch puede mutarse.
 - `STATUS: CLOSED` → corrida cerrada con commit; nuevas mutaciones requieren
   abrir una nueva corrida.

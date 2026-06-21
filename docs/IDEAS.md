@@ -21,3 +21,8 @@
   el CLI · idea de MLL · ✅ RESUELTA (2026-06-15): la web carga el plugin desde el
   `.claude/settings.json` de cada repo; habilitado en los 10 repos del stack Lucky.
   No era el loader — era config por repo. /reload-skills SÍ existe (CLI y web).
+- 2026-06-20 · gate global: reconfigurar `sys.stdin` a utf-8 (errors=replace) al
+  inicio de crisol_gate.py · hoy en Windows un stdin con bytes UTF-8 crudos
+  no-ASCII (rutas con tildes) puede dejar el gate inerte por fallo de decode
+  (fail-open, SEGURO, pero el piso no muerde ahí) · hallado por el Verificador
+  en la corrida v1.11.0 · mejora de robustez, NO bloqueante · idea parqueada

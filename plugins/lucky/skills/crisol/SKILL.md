@@ -298,10 +298,23 @@ Respondé el checklist. **Cualquier "SÍ" → Tier Completo.** Todos "NO" → Fa
 
 El ledger es obligatorio **con o sin hook instalado** — el hook automatiza el
 enforcement, no lo origina. Cada corrida se registra en
-`docs/refactor/_crisol/RUN-LEDGER.md`. El hook `hooks/crisol-enforcer.sh`
-(PreToolUse Edit|Write) lo lee: **sin entrada `STATUS: ACTIVE` para el branch
-actual, todo cambio de código fuente queda bloqueado (exit 2).** Docs/.md quedan
-exentos. Conectarlo con `hooks/settings.snippet.json` en `.claude/settings.json`.
+`docs/refactor/_crisol/RUN-LEDGER.md`. **Dos guardianes** leen la misma regla
+(fixture compartido `tests/test-enforcer.sh`, para que jamás deriven): el hook
+per-repo `hooks/crisol-enforcer.sh` (PreToolUse Edit|Write|MultiEdit, montado por
+`adoptar-crisol.sh` en repos adoptados) y el gate global `hooks/crisol_gate.py`
+(en `~/.claude/hooks/`, lo instala `scripts/instalar-gate.sh`, aplica en TODOS los
+repos). **Sin entrada `STATUS: ACTIVE` con `Tier` + `Fecha` + `TARGET` (valor real)
+para el branch actual, todo cambio de código fuente queda bloqueado (exit 2)** —
+codear sin declarar DÓNDE corre = verificar a ciegas. Docs/.md quedan exentos.
+
+**Piso TARGET global (repos NO adoptados):** el gate global da una red de
+seguridad incluso fuera del Crisol. En cualquier repo git que NO adoptó el Crisol,
+la PRIMERA edición de código de la sesión bloquea UNA sola vez para forzar la
+pregunta *«¿dónde corre este código?»*; tras declarar el TARGET (el mensaje
+interpola el comando `crisol_gate.py --register-target ... --session ... --repo ...`)
+todas las ediciones de la sesión pasan. Es per `(repo, session_id)`, marcador
+central en `~/.claude/.target-cache`, y **FAIL-OPEN total**: cualquier duda, error
+o `session_id` ausente → permite (jamás trabar al humano por un bug del gate).
 
 **Invariante: exactamente UNA entrada `ACTIVE` por branch**, con los campos
 mínimos del paso 2 — incluido `TARGET:` (dónde corre/verifica la corrida; lo fija
@@ -317,7 +330,7 @@ la entrada (incluso fast-path) debe llevar `MIGRATION_STRATEGY` — sin él →
 ## 6. La ley se gobierna a sí misma
 
 **Fuente de verdad: `github.com/mlandolfi90/lucky-skills` · esta copia = tag
-`v1.10.3` (cache local, NO la ley).** **Ley viva:** al invocar la skill, si la
+`v1.11.0` (cache local, NO la ley).** **Ley viva:** al invocar la skill, si la
 sesión tiene red: `git ls-remote --tags
 https://github.com/mlandolfi90/lucky-skills.git` — si existe un tag mayor al de
 esta copia, descargar y seguir LA DEL REPO
