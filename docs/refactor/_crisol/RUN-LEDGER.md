@@ -476,3 +476,14 @@
 <!-- VEREDICTOS:END -->
 - RETRO: REGLA 0 volvió a pagar — el engineer corriendo sus propios tests cazó un gate que nacía INERTE (KeyError de `.format()` tragado por el fail-open: test-que-miente-verde, reincidencia c5/v1.11.0). Como los 2 guardianes NO están instalados en el contenedor efímero, la dureza se demostró EN VIVO por el Verificador de Integración (poder de CORRER), no por el harness — reconfirma que un verificador que solo lee no alcanza. Fricción de PROCESO (blameless): la COLOCACIÓN de los chequeos (shift-left: punto más temprano decidible) no estaba en la ley y la trajo el operador a mitad de corrida por miedo a iteraciones desperdiciadas → candidato kaizen a explicitarla como criterio de §3/§4.
 - Cierre: 2026-06-21 · commit `911132b` (código+docs, juzgado ACTIVE) + flip a CLOSED (docs-only) · SIN tag (release v1.12.0 = decisión deliberada aparte; sello sigue v1.11.0) · push a origin/main
+
+### main — 2026-06-21 (release v1.12.0 — forja del Crisol endurecido)
+- STATUS: CLOSED
+- Tier: fast-path
+- Fecha: 2026-06-21
+- TARGET: docker-local
+- Alcance: release v1.12.0 — `forjar-release.sh v1.12.0 --no-sign` re-selló las 9 archivos de la familia (6 SKILL.md + cargar/references/detectar-runtime.md + docs/decisions/0001 + 0002) de v1.11.0→v1.12.0, y regeneró registry.json (6 skills, pin commit fe90c05 = el commit que pasó el Crisol; "se promueve lo que se probó"). Promueve la corrida CLOSED+PASS del Crisol endurecido (reglas verificadas-por-agente + gate de cobertura fail-closed).
+- FIRMA: minisign DIFERIDA (--no-sign, continúa la política de v1.10.3/v1.11.0): el loader `cargar` es infra dormida y la Ley-viva no depende de la firma; registry SIN firmar, sin `.minisig` stale.
+- Veredictos: Sellos consistentes 9/9 == v1.12.0, 0 stragglers (grep confirmado por el líder) · leak-scan LIMPIO (forja, fail-closed) · registry pin commit fe90c05. Gate Crisol habilitado (corrida CLOSED+PASS, TEST_COVERAGE no-NONE).
+- TEST_COVERAGE: hooks/gate (tests/test-enforcer.sh 50/50, heredado de la corrida que se promueve)
+- Cierre: 2026-06-21 · tag anotado v1.12.0 · push a origin/main + tags

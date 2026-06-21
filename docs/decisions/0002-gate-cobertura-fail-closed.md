@@ -108,3 +108,9 @@ como deuda de endurecimiento futuro:
   prueba los bordes (parcial D3, ilegible/vacía D2, mayúsculas D5, N/A D8, WIP-no-rompe
   D7, FO-15 D10, A-muerde-antes D11). Un cambio de formato de la matriz exige tocar el
   parser Y el fixture en el mismo commit (paridad parser↔fixture).
+
+---
+
+**Fuente de verdad: `github.com/mlandolfi90/lucky-skills` · esta copia = tag
+`v1.12.0` (cache local, NO la ley).** Ley viva: con red, si el repo tiene un tag
+mayor (`git ls-remote --tags`), seguir la del repo e informar al humano.
