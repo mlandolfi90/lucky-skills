@@ -26,6 +26,14 @@
 - [ ] SoC: cada módulo/clase/función con UNA responsabilidad.
 - [ ] Factorizado: sin copy-paste, sin funciones gigantes, sin archivo mezcla-todo.
 - [ ] Sin código muerto / sin duplicación.
+- [ ] **`[OPEN_CLOSED]`** (mapea a §Diseño · lo dictamina `design-verifier`):
+      comportamiento nuevo se AGREGA, no se EDITA lo estable que ya pasó un Crisol
+      (salvo justificación del plan). Emite veredicto por-regla a la matriz (§5).
+- [ ] **`[ATOMICIDAD]`** (mapea a §Diseño · `design-verifier`): cada unidad = 1
+      responsabilidad, deps por parámetro/interfaz (sin estado global nuevo),
+      compone lo chico. Emite a la matriz (§5).
+- [ ] **`[COSTURA]`** (mapea a §Diseño · `design-verifier`): el punto de extensión
+      cae donde el sistema varía; sin generalidad especulativa. Emite a la matriz (§5).
 - [ ] Sin `# TODO` huérfanos (si queda algo → issue separado, no en código).
 - [ ] Dependencias pineadas exactas (ADR 0002).
 - [ ] Type hints / typing completos.
@@ -38,6 +46,11 @@
       estructura cambió.
 - [ ] Annotation (ADR 0010) depositada donde corresponda.
 - [ ] **Si había oportunidad de depositar crédito y no se depositó → `FAIL`.**
+- [ ] **`[CREDITO]`** (lo dictamina `scope-verifier`): cambio de arquitectura sin
+      ADR/annotation/IMPACT-MATRIX → FAIL. Emite veredicto por-regla a la matriz (§5).
+- [ ] **`[SCOPE_CREEP]`** (lo dictamina `scope-verifier`): el diff hace SOLO lo
+      aprobado por el Steward — nada de más (input: plan `APPROVE` + `docs/decisions/`
+      + `docs/IDEAS.md`). Emite a la matriz (§5).
 
 ## D. Integridad estructural (consulta al archaeologist)
 - [ ] El grafo final es íntegro: sin acoplamientos rotos.

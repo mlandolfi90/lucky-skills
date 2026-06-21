@@ -134,6 +134,32 @@ Respondé el checklist. **Cualquier "SÍ" → Tier Completo.** Todos "NO" → Fa
   justificación en el plan → `FAIL`. Si el `Glob` no encuentra la skill →
   N/A → verde.
 
+### Roster de verificadores de juicio (tier completo)
+
+En tier completo, las reglas de **juicio/híbridas** las dictamina un roster de
+`<concern>-verifier` **frescos** (subagente nuevo, contexto limpio: no verifican
+su propio trabajo, INDEPENDENCIA §2). **Input = SOLO el diff** (+ los meta-docs
+que cada uno declare); **output = veredicto binario** (`PASS`/`FAIL`/`N/A`) +
+`archivo:línea` **a la matriz de veredictos** (§5). Cada verificador cubre UNA
+preocupación (atomicidad del rol). **REFERENCIAN** las reglas por nombre+sección
+— la fuente única del enunciado es §2 (Diseño) / §5 (catálogo de IDs), NO se
+copia acá.
+
+| `<concern>-verifier` | Reglas (IDs §5) que dictamina | TRIGGER (cuándo se spawnea) | Input extra al diff |
+|---|---|---|---|
+| `design-verifier` | `OPEN_CLOSED` + `ATOMICIDAD` + `COSTURA` (§2 Diseño) | tier completo · fast-path **si toca código** | — |
+| `scope-verifier` | `SCOPE_CREEP` + `CREDITO` (§2) | tier completo | plan `APPROVE` del Steward + `docs/decisions/` + `docs/IDEAS.md` |
+| `leak-verifier` | `ZERO_LEAK` (§2 «Sin secretos») | **SIEMPRE** (incl. fast-path) | meta-docs: ledger · ADR · COLLISION-MAP · `IDEAS.md` · mensaje de commit. Puede invocar `scripts/leak-scan.sh` |
+| `conformidad-verifier` | `CONFORMIDAD` (§2 «Conformidad estructural») | **solo si** `Glob` halla la skill `arquitectura` | reusa `conformidad-checklist.md` de esa skill TAL CUAL (fuente única, NO duplicar) |
+| `responsive-verifier` | `RESPONSIVE` (§2 «Responsive obligatorio») | **solo si** la corrida toca UI | reusa `auditor-checklist.md` §A2 |
+
+Triggers condicionales OBLIGATORIOS para acotar spawns: `leak-verifier` SIEMPRE;
+`design-verifier` solo si hay código; `conformidad-verifier`/`responsive-verifier`
+solo si el `Glob`/UI lo amerita. Cada uno escribe su línea `[V]` en la matriz
+(formato: `templates/run-ledger.md`); las celdas que no dictamina quedan para los
+demás guardianes (el `gate` para las reglas mecánicas, el Steward para las de
+plan — ver §3-6 y §4).
+
 ### Versionado y promoción por tags (CD)
 
 - **Trunk-based:** una sola rama `main`. **El entorno lo decide el tag, no la rama.**
@@ -228,6 +254,19 @@ Respondé el checklist. **Cualquier "SÍ" → Tier Completo.** Todos "NO" → Fa
    inesperado, lee el estado real (no asume).
 5. **Verificador de Integración:** tras el doble-gate `PASS` de CADA carril,
    verifica el resultado **combinado**. Recién ahí → commit.
+6. **Roster de verificadores de juicio:** en tier completo, además del
+   `quality-auditor` genérico (REGLA 0 + `auditor-checklist.md`), el líder
+   spawnea el **roster aplicable** de §2 «Roster de verificadores de juicio»
+   según el TRIGGER de cada uno (`leak-verifier` siempre; `design-verifier` si
+   toca código; `scope-verifier` en tier completo; `conformidad-verifier`/
+   `responsive-verifier` solo-si-`Glob`/UI), cada uno **fresco** (contexto nuevo,
+   input = solo el diff). Como son rol-LLM de **juicio**, su model = **tier-alto**
+   (mapeo único al pie). Los **tiers elegidos se declaran al humano ANTES de
+   spawnear** (engancha con el punto 1). Cada verificador emite su veredicto
+   por-regla **a la matriz** (§5). Veredictos del Steward sobre el PLAN: ver §4
+   paso 4 — el Steward **escribe en la matriz**, al aprobar, los veredictos de
+   las reglas de plan que ya juzgó (`OPEN_CLOSED`, `ATOMICIDAD`, `COSTURA`,
+   `CASOS_LEGALES`, `CREDITO`→¿ADR?), poblándola TEMPRANO.
 
 ---
 
@@ -275,18 +314,38 @@ Respondé el checklist. **Cualquier "SÍ" → Tier Completo.** Todos "NO" → Fa
 3. Spawnear **archaeologists** (paralelo, sonnet) → plan(es) accionable(s).
 4. Pasar TODOS los planes al **Architecture Steward** → COLLISION-MAP
    (`templates/collision-map.md`) + `APPROVE/REJECT`. REJECT → volver a 3 (cuenta iteración).
+   **Shift-left:** el Steward ya juzga las reglas de PLAN sobre el plan
+   (`OPEN_CLOSED`, `ATOMICIDAD`, `COSTURA`, `CASOS_LEGALES`, `CREDITO`→¿ADR?); al
+   `APPROVE` **escribe esos veredictos en la matriz** (§5) TEMPRANO —
+   `<ID> · PASS|FAIL · steward · <evidencia-del-plan>`. Verificarlas en el plan
+   (el punto más temprano donde son decidibles) evita que recién al cierre se
+   descubra un FAIL ya gastando una iteración.
 5. Spawnear **engineers** en el orden del COLLISION-MAP: engineer-A → esperar su
    `PASS` de auditor → recién entonces engineer-B. Carriles sin archivos
    compartidos corren en paralelo.
-6. Cada carril → **quality-auditor + archaeologist** sobre estado real
-   (`templates/auditor-checklist.md`) → `PASS/FAIL`. FAIL → volver a 3 (cuenta iteración).
+6. Cada carril → el **quality-auditor genérico** (REGLA 0 + `archaeologist` +
+   `templates/auditor-checklist.md`) **+ el roster aplicable de §2 «Roster de
+   verificadores de juicio»** (según TRIGGER: `leak-verifier` siempre;
+   `design-verifier` si toca código; `scope-verifier`; `conformidad-verifier`/
+   `responsive-verifier` solo-si-`Glob`/UI), cada uno fresco, sobre el estado
+   real. **Cada ítem emite su veredicto por-regla a la MATRIZ** (§5). **Shift-left:**
+   para las reglas que el Steward YA juzgó en el plan (paso 4), este paso hace el
+   chequeo **barato** «¿el diff coincide con el plan aprobado?» — no re-deriva el
+   juicio desde cero (la verificación cae en el punto más temprano y con el
+   mecanismo más barato). FAIL de cualquier ítem → volver a 3 (cuenta iteración).
 7. Si hubo paralelo → **Verificador de Integración** sobre el combinado; por
    cada archivo caliente del COLLISION-MAP, verificar que los cambios de todos
    los carriles convivan (sin sobreescrituras entre sí).
-8. Todo verde → commit. Cerrar entrada: `STATUS: CLOSED` + veredictos +
-   iteraciones + `RETRO:` una línea sobre la fricción del PROCESO (blameless:
-   se registra la falla, no el culpable). En el resumen de cierre, listar las
-   ideas capturadas en `docs/IDEAS.md` durante la corrida.
+8. Todo verde **Y la MATRIZ DE VEREDICTOS completa** (§5; gate de cobertura de
+   Lane B con `runState: closing`, **fail-closed**: ninguna celda `PENDIENTE`,
+   ningún `FAIL` — toda regla con TRIGGER activo tiene su veredicto) → commit.
+   Cerrar entrada: `STATUS: CLOSED` + veredictos + iteraciones + `RETRO:` una
+   línea sobre la fricción del PROCESO (blameless: se registra la falla, no el
+   culpable). En el resumen de cierre, listar las ideas capturadas en
+   `docs/IDEAS.md` durante la corrida. El gate de cobertura es la **RED final**,
+   no el primer detector: cada regla se verifica TEMPRANO (paso 4 las de plan,
+   paso 6 las del diff); si algo cae recién en esta red ya se desperdició una
+   iteración.
    - Si la corrida habilita un release → el tag estable `vX.Y.Z` se crea recién
      con `STATUS: CLOSED` + `PASS` (§Versionado). Rollback = tag anterior; los
      tags son inmutables.
@@ -324,6 +383,50 @@ COLLISION-MAP ni Steward — dev sigue siendo mesa caliente con ceremonia de 30
 segundos. **Excepción DDL:** si el diff contiene `ALTER`/`DROP`/`CREATE TABLE`,
 la entrada (incluso fast-path) debe llevar `MIGRATION_STRATEGY` — sin él →
 `FAIL` del Verificador.
+
+### Matriz de veredictos (catálogo canónico de reglas)
+
+Cada corrida registra una **matriz de veredictos** machine-checkable en su
+entrada del RUN-LEDGER (formato de línea: lo posee `templates/run-ledger.md`;
+delimitadores `<!-- VEREDICTOS:BEGIN/END -->`, campo `runState`, línea
+`- [V] <ID> · <PASS|FAIL|N/A> · <quién> · <evidencia>`). Abajo el **catálogo
+canónico de IDs** — referencia documental, NO estructura ejecutable: la
+cobertura es **dinámica**, la matriz solo lista las reglas cuyo TRIGGER se cumple
+para el diff de la corrida. **Ausencia de una regla con trigger activo = FAIL**
+(Lane B lo enforza); `N/A` SOLO si el trigger NO aplica.
+
+IDs en MAYÚSCULA_GUION_BAJO, sin abreviar (`OPEN_CLOSED`, no `OCP`):
+
+| ID | Enunciado (1 línea) | TRIGGER (cuándo aplica) | Clase |
+|---|---|---|---|
+| `REGLA0` | Verificador corre los tests él mismo EN el TARGET; sin verde propio → FAIL | siempre que haya suite | M |
+| `TARGET` | Entrada ACTIVE declara TARGET real (dónde corre/verifica) | siempre | M |
+| `TEST_COVERAGE` | Cobertura registrada; `NONE` bloquea tag estable | siempre | M |
+| `INDEPENDENCIA` | Steward/Verificador reciben solo artefactos reales, no prosa previa | tier completo / fast-path | H |
+| `SCOPE_CREEP` | El Ingeniero hace SOLO lo aprobado por el Steward | siempre | J |
+| `PARKING` | Ideas fuera de scope → `docs/IDEAS.md` al instante | si surge idea fuera de scope | J |
+| `CIERRE_TRAS_PASS` | Commit de cierre solo tras PASS (+ Integración si hubo paralelo) | en el cierre | M |
+| `CREDITO` | Cambio de arquitectura sin ADR/annotation/IMPACT-MATRIX → FAIL | si el diff toca arquitectura | H |
+| `MIGRATION` | DDL destructivo exige `MIGRATION_STRATEGY` en el ledger | si el diff trae DDL | M |
+| `FUENTE_VERDAD` | testing/prod no se tocan a mano; fix-forward = corrida nueva | si toca testing/prod | J |
+| `RESPONSIVE` | UI consumible desde web móvil (~390px), sin overflow | si la corrida toca UI | H |
+| `ZERO_LEAK` | Ningún artefacto lleva secretos reales (solo nombres/ficticios/REDACTED) | siempre | M |
+| `TECHO_ITER` | Techo = 3 iteraciones; superado → ESCALATED y detenerse | si Plan↔FAIL no converge | M |
+| `OPEN_CLOSED` | Comportamiento nuevo se AGREGA, no se EDITA lo estable | si el diff toca código estable | J |
+| `ATOMICIDAD` | Cada unidad = 1 responsabilidad, deps por parámetro, compone lo chico | si el diff crea/edita unidades | J |
+| `COSTURA` | El punto de extensión va donde el sistema varía (sin generalidad especulativa) | si el plan agrega extensión | J |
+| `CASOS_LEGALES` | Tocar lo estable solo por bug / costura faltante (2 corridas) / cambio de contrato | si se edita lo estable | H |
+| `CONFORMIDAD` | Conformidad estructural vs skill `arquitectura` (Glob + lectura del checklist) | si existe skill arquitectura y hay código hexagonal | H |
+| `SELLOS` | Release re-sella TODAS las skills al tag nuevo; 1 sello por skill, todas == tag | si la corrida habilita release | M |
+| `FORJA` | Sellos+registry+firma los hace `forjar-release.sh` en una pasada | si la corrida habilita release | M |
+| `TAG_GATE` | Tag estable `vX.Y.Z` nace SOLO tras corrida PASS cerrada | si se crea tag estable | M |
+| `PIN_TOTAL` | Toda dependencia externa pineada a versión/digest exacto (sin floating) | si el diff toca dependencias | H |
+| `BUMP_REASON` | Bump de pin registra `BUMP_REASON: <vieja> → <nueva>` en el ledger | si el diff bumpea un pin | M |
+
+(Clase: **M** mecánica = gate determinista · **J** juicio = rol-LLM ·
+**H** híbrida = gate + rol-LLM.) El FORMATO de cada línea `[V]` lo define
+`templates/run-ledger.md` — esta tabla es solo el catálogo de IDs y sus
+triggers, para que ningún carril derive el vocabulario.
 
 ---
 

@@ -27,6 +27,55 @@
 - Cierre: <YYYY-MM-DD HH:MM> <commit-sha>
 ```
 
+### Matriz de veredictos (machine-checkable — la consume `crisol_gate.py`)
+
+DENTRO del bloque de corrida, COEXISTIENDO con `- Veredictos:` (la prosa de
+veredictos NO se borra: la matriz la complementa, no la reemplaza). El gate de
+cobertura parsea SOLO lo que está entre los delimitadores HTML; el `awk` del
+enforcer per-repo los ignora (son comentarios HTML).
+
+```
+<!-- VEREDICTOS:BEGIN -->
+- runState: wip | closing
+- [V] <ID> · <PASS|FAIL|N/A> · <quién> · <evidencia>
+- [V] <ID> · <PASS|FAIL|N/A> · <quién> · <evidencia>
+<!-- VEREDICTOS:END -->
+```
+
+Donde:
+- `runState`: `wip` durante las iteraciones; `closing` SOLO en el commit de
+  cierre. Lo define Lane A, lo consume el gate de Lane B.
+- `<ID>`: uno EXACTO del catálogo canónico (SKILL.md §5 — MAYÚSCULA_GUION_BAJO,
+  sin abreviar). La matriz solo lista las reglas cuyo TRIGGER se cumple para el
+  diff de la corrida (cobertura dinámica).
+- `<PASS|FAIL|N/A>`: veredicto binario por regla. `N/A` SOLO si el trigger de la
+  regla NO aplica a este diff.
+- `<quién>`: `gate` (verificación determinista) o `<concern>-verifier` (rol-LLM).
+- `<evidencia>`: `archivo:línea` o un conteo (ej. `tests/test-enforcer.sh:39/39`).
+  SIN secretos (igual que el resto de los artefactos del Crisol).
+
+- **Load-bearing:** estas líneas las parsea el gate de cobertura
+  (`crisol_gate.py`) — el formato es tan rígido como `- STATUS:`. El delimitador
+  `<!-- VEREDICTOS:BEGIN -->`/`<!-- VEREDICTOS:END -->`, el prefijo `- [V] `, los
+  separadores ` · ` y el orden de los 4 campos NO son cosméticos. Con
+  `runState: closing`, una matriz incompleta o con cualquier `FAIL` → exit 2 (no
+  cierra). **Ausencia de veredicto para una regla con TRIGGER activo = FAIL** (no
+  N/A): no listar una regla aplicable NO la exime. `N/A` vale SOLO cuando el
+  trigger de la regla NO aplica al diff. Con `runState: wip` el gate no exige
+  matriz completa (iteración en curso).
+
+- **Ejemplo (lleno, corto):**
+```
+<!-- VEREDICTOS:BEGIN -->
+- runState: closing
+- [V] REGLA0 · PASS · gate · tests/test-enforcer.sh:39/39
+- [V] OPEN_CLOSED · PASS · open_closed-verifier · SKILL.md:104 (todo AGREGAR)
+- [V] TEST_COVERAGE · PASS · gate · tests/test-enforcer.sh:39/39
+- [V] ZERO_LEAK · PASS · zero_leak-verifier · leak-scan:0/0/0
+- [V] MIGRATION · N/A · gate · sin DDL en el diff
+<!-- VEREDICTOS:END -->
+```
+
 - **Load-bearing:** el `###` del encabezado y el guion `- ` de cada campo NO son
   cosméticos — el `awk` los exige tal cual. Un encabezado `## ` o un campo sin
   guion (`STATUS:` en vez de `- STATUS:`) NO matchea y la corrida queda invisible

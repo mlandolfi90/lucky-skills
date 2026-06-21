@@ -36,6 +36,21 @@ have_gate(){ [ -f "$GATE" ] && command -v "${PYBIN%% *}" >/dev/null 2>&1; }
 
 ledger(){ printf '%b' "$1" > "$ADOPTED/docs/refactor/_crisol/RUN-LEDGER.md"; }
 
+# matriz: escribe en el RUN-LEDGER de juguete una entrada ACTIVE válida (TARGET real)
+# + un bloque VEREDICTOS parametrizable. $1 = runState (wip|closing|""=sin bloque),
+# $2 = cuerpo de las líneas [V] (con \n entre líneas; ""=sin líneas [V]).
+# El cuerpo se inserta tal cual; cada caso D arma sus líneas `- [V] <ID> · <V> · <q> · <e>`.
+matriz(){
+  local rs="$1" body="$2" header lines=""
+  header='### main — 2026-06-21\n- STATUS: ACTIVE\n- Tier: completo\n- Fecha: 2026-06-21\n- TARGET: docker-local\n'
+  if [ -n "$rs" ]; then
+    lines='<!-- VEREDICTOS:BEGIN -->\n- runState: '"$rs"'\n'
+    [ -n "$body" ] && lines="$lines$body"'\n'
+    lines="$lines"'<!-- VEREDICTOS:END -->\n'
+  fi
+  printf '%b' "$header$lines" > "$ADOPTED/docs/refactor/_crisol/RUN-LEDGER.md"
+}
+
 # bash enforcer (corre con PWD = repo)
 run_hook(){ ( cd "$1" && printf '{"tool_input":{"file_path":"%s"}}' "$2" | bash "$HOOK" >/dev/null 2>&1; echo $? ); }
 hook_check(){ if have_gate || true; then check "enforcer.sh: $1" "$3" "$(run_hook "$2" "$4")"; fi; }
@@ -121,6 +136,57 @@ ledger '### main — 2026-06-20\n- STATUS: ACTIVE\n- Tier: completo\n- Fecha: 20
 gate_check "$(run_gate_commit "$WADOPTED" "")" "commit staged .py + ACTIVE sin TARGET bloquea" 2
 ( cd "$ADOPTED" && git reset -q a.py && echo '# doc' > b.md && git add b.md )
 gate_check "$(run_gate_commit "$WADOPTED" "")" "commit staged solo .md permite" 0
+
+echo "== Grupo D: gate de cobertura (matriz de veredictos en el commit de cierre) =="
+# Código staged en el repo adoptado para TODOS los casos D (commit con .py).
+( cd "$ADOPTED" && git reset -q . >/dev/null 2>&1; echo 'x=1' > a.py && git add a.py )
+
+# D1: closing + todas PASS -> cierra (exit 0)
+matriz closing '- [V] REGLA0 · PASS · gate · tests/test-enforcer.sh:N/N\n- [V] OPEN_CLOSED · PASS · open_closed-verifier · gate.py:1 (AGREGAR)'
+gate_check "$(run_gate_commit "$WADOPTED" "")" "D1 closing + todas PASS cierra" 0
+
+# D2: closing + bloque VEREDICTOS ausente/vacío -> bloquea (agujero central + cond 4iii)
+matriz closing ''
+gate_check "$(run_gate_commit "$WADOPTED" "")" "D2 closing + matriz vacía bloquea" 2
+
+# D3: closing + una línea PENDIENTE -> bloquea
+matriz closing '- [V] REGLA0 · PASS · gate · ok\n- [V] TARGET · PENDIENTE · gate · -'
+gate_check "$(run_gate_commit "$WADOPTED" "")" "D3 closing + PENDIENTE bloquea" 2
+
+# D4: closing + una FAIL -> bloquea
+matriz closing '- [V] REGLA0 · PASS · gate · ok\n- [V] OPEN_CLOSED · FAIL · open_closed-verifier · viola OCP'
+gate_check "$(run_gate_commit "$WADOPTED" "")" "D4 closing + FAIL bloquea" 2
+
+# D5: closing + fail/Fail (variante de mayúsculas) -> bloquea (borde de paridad, v1.11.0)
+matriz closing '- [V] REGLA0 · fail · gate · x\n- [V] TARGET · Fail · gate · y'
+gate_check "$(run_gate_commit "$WADOPTED" "")" "D5 closing + fail/Fail (mayúsc) bloquea" 2
+
+# D6: closing + PASS/pass/N/A mezclados, todas green -> cierra (case-insensitive)
+matriz closing '- [V] REGLA0 · PASS · gate · a\n- [V] TARGET · pass · gate · b\n- [V] CONFORMIDAD · N/A · conformidad-verifier · no aplica'
+gate_check "$(run_gate_commit "$WADOPTED" "")" "D6 closing + PASS/pass/N/A todas green cierra" 0
+
+# D7: wip + matriz incompleta (PENDIENTE) + código staged -> pasa (WIP-commit no se rompe)
+matriz wip '- [V] REGLA0 · PASS · gate · a\n- [V] TARGET · PENDIENTE · gate · -'
+gate_check "$(run_gate_commit "$WADOPTED" "")" "D7 wip + matriz incompleta permite" 0
+
+# D8: closing + mezcla con un N/A (no aplicable) y resto PASS -> cierra
+matriz closing '- [V] REGLA0 · PASS · gate · a\n- [V] MIGRATION · N/A · gate · sin DDL\n- [V] ZERO_LEAK · PASS · zero_leak-verifier · 0/0/0'
+gate_check "$(run_gate_commit "$WADOPTED" "")" "D8 closing + N/A + PASS cierra" 0
+
+# D9: commit solo-docs (.md) con matriz incompleta -> pasa (no hay código staged; FO existente)
+matriz closing '- [V] REGLA0 · PENDIENTE · gate · -'
+( cd "$ADOPTED" && git reset -q . >/dev/null 2>&1; echo '# d' > c.md && git add c.md )
+gate_check "$(run_gate_commit "$WADOPTED" "")" "D9 solo-docs + matriz incompleta permite (sin código staged)" 0
+( cd "$ADOPTED" && git reset -q . >/dev/null 2>&1; echo 'x=1' > a.py && git add a.py )
+
+# D10: repo NO adoptado, código staged -> pasa (FO-15, regresión del piso B)
+( cd "$PLAIN" && echo 'y=1' > z.py && git add z.py )
+gate_check "$(run_gate_commit "$WPLAIN" "sess-D10")" "D10 no-adoptado + código staged permite (FO-15)" 0
+( cd "$PLAIN" && git reset -q . >/dev/null 2>&1 )
+
+# D11: closing + matriz completa+verde PERO ledger sin TARGET -> bloquea (cambio A muerde ANTES)
+printf '%b' '### main — 2026-06-21\n- STATUS: ACTIVE\n- Tier: completo\n- Fecha: 2026-06-21\n<!-- VEREDICTOS:BEGIN -->\n- runState: closing\n- [V] REGLA0 · PASS · gate · ok\n<!-- VEREDICTOS:END -->\n' > "$ADOPTED/docs/refactor/_crisol/RUN-LEDGER.md"
+gate_check "$(run_gate_commit "$WADOPTED" "")" "D11 closing+verde pero SIN TARGET bloquea (A muerde antes)" 2
 
 echo "== Grupo B: piso TARGET (repo NO adoptado) =="
 SIDA="sess-AAAA"; SIDB="sess-BBBB"

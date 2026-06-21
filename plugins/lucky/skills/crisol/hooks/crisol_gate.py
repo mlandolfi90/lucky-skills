@@ -196,6 +196,112 @@ def _ledger_state(repo: Path, branch: str) -> str:
     return "ACTIVE_NO_TARGET" if seen_active_no_target else "NONE"
 
 
+# ── CAMBIO COBERTURA: gate de la matriz de veredictos en el commit de cierre ─────
+def _coverage_state(repo: Path, branch: str) -> str:
+    """'WIP' | 'CLOSING_OK' | 'CLOSING_INCOMPLETE' para la entrada ACTIVE del branch.
+
+    Espejo de _ledger_state: parsea la entrada ACTIVE del branch en RUN-LEDGER.md,
+    ubica SU bloque <!-- VEREDICTOS:BEGIN -->..<!-- VEREDICTOS:END -->, lee
+    `runState` y las lineas `- [V] <ID> · <VEREDICTO> · ...`.
+
+    Devuelve:
+      WIP                 -> runState != closing (o ausente) -> PERMITE (iteracion
+                             en curso; los WIP-commits no se rompen).
+      CLOSING_OK          -> runState: closing ∧ >=1 linea [V] ∧ TODA linea [V] con
+                             veredicto ∈ {PASS, N/A} (case-insensitive) -> PERMITE.
+      CLOSING_INCOMPLETE  -> runState: closing ∧ (bloque vacio/ausente OR alguna
+                             linea [V] con veredicto ∉ {PASS, N/A}) -> BLOQUEA.
+
+    Gramatica TRIVIAL (condicion 4): green ⟺ veredicto ∈ {PASS, N/A}; cualquier otra
+    cosa (FAIL, PENDIENTE, vacio, lo que sea) NO es green. Una matriz `closing`
+    vacia-pero-presente -> CLOSING_INCOMPLETE (NO fail-open: ausente=skip se bloquea).
+
+    Fail-open ESTRICTO al borde acotado: ledger ausente/ilegible o cualquier
+    excepcion de parseo -> 'WIP' (PERMITE). Solo `runState: closing` con matriz
+    realmente incompleta/roja bloquea (condicion 4: ilegible=bug NO brickea).
+    """
+    ledger = repo / "docs" / "refactor" / "_crisol" / "RUN-LEDGER.md"
+    if not ledger.is_file():
+        return "WIP"  # fail-open: sin ledger no hay cierre que gatear
+    try:
+        text = ledger.read_text(encoding="utf-8-sig", errors="replace")
+    except Exception:
+        return "WIP"  # fail-open: ilegible=bug, no brickear
+
+    in_active = False        # estamos dentro de la entrada ACTIVE de ESTE branch
+    block_status = None
+    block_branch = None
+    in_veredictos = False    # estamos entre BEGIN..END del bloque de la entrada ACTIVE
+    run_state = None
+    seen_v = False
+    all_green = True
+
+    GREEN = {"pass", "n/a"}
+
+    try:
+        for raw in text.splitlines():
+            stripped = raw.strip()
+
+            # Limites de entrada: un nuevo encabezado cierra la entrada previa.
+            if stripped.startswith("## RUN "):
+                if in_active:
+                    break  # ya recorrimos toda la entrada ACTIVE
+                in_active = False
+                block_status, block_branch = None, None
+                continue
+            if stripped.startswith("### "):
+                if in_active:
+                    break  # nueva entrada -> la ACTIVE ya termino
+                block_status = None
+                head = stripped[4:].strip()
+                for sep in (" — ", " - "):
+                    if sep in head:
+                        head = head.split(sep, 1)[0].strip()
+                        break
+                block_branch = head or None
+                continue
+
+            field = stripped[2:].strip() if stripped.startswith("- ") else stripped
+            if field.upper().startswith("STATUS:"):
+                block_status = field.split(":", 1)[1].strip().upper()
+                if block_status == "ACTIVE" and block_branch == branch:
+                    in_active = True
+                continue
+
+            # Solo nos interesan las lineas DENTRO de la entrada ACTIVE del branch.
+            if not in_active:
+                continue
+
+            if stripped == "<!-- VEREDICTOS:BEGIN -->":
+                in_veredictos = True
+                continue
+            if stripped == "<!-- VEREDICTOS:END -->":
+                in_veredictos = False
+                continue
+            if not in_veredictos:
+                continue
+
+            # Dentro del bloque VEREDICTOS de la entrada ACTIVE.
+            if field.lower().startswith("runstate:"):
+                run_state = field.split(":", 1)[1].strip().lower()
+                continue
+            if field.startswith("[V]"):
+                seen_v = True
+                parts = field.split("·")  # separador ` · `
+                verdict = parts[1].strip().lower() if len(parts) >= 2 else ""
+                if verdict not in GREEN:
+                    all_green = False
+    except Exception:
+        return "WIP"  # fail-open: cualquier sorpresa de parseo no brickea
+
+    if run_state != "closing":
+        return "WIP"  # wip (o sin runState) -> permite
+    # runState: closing -> exigir matriz completa+verde.
+    if seen_v and all_green:
+        return "CLOSING_OK"
+    return "CLOSING_INCOMPLETE"  # bloque vacio/ausente OR alguna linea no-green
+
+
 def _staged_has_code(repo: Path) -> bool:
     """Para `git commit`: True si ALGUN archivo staged es codigo fuente."""
     names = _git(repo, "diff", "--cached", "--name-only")
@@ -361,6 +467,26 @@ MENSAJE_B = (
     "   en esta sesion. Editar docs/.md o planificar nunca se bloquea.)\n"
 )
 
+MENSAJE_COBERTURA = (
+    "\n[CRISOL - COBERTURA] BLOQUEADO: el commit de cierre exige la matriz de veredictos COMPLETA y VERDE.\n"
+    "  Repo: {repo}\n  Branch: {branch}\n"
+    "  La entrada ACTIVE declara `runState: closing` (commit de cierre), pero su\n"
+    "  bloque <!-- VEREDICTOS:BEGIN -->..<!-- VEREDICTOS:END --> esta vacio/ausente\n"
+    "  o tiene alguna regla SIN veredicto verde (PENDIENTE, FAIL, o vacio).\n\n"
+    "  Esto NO es el primer detector: es la RED FINAL. El gate de FORMA (TARGET,\n"
+    "  Tier, Fecha) ya paso; lo que falta es la COBERTURA del JUICIO — cada regla\n"
+    "  con TRIGGER activo necesita su veredicto binario por el rol que la audita.\n\n"
+    "  Green ⟺ veredicto ∈ {{PASS, N/A}}. Cualquier otra cosa NO cierra.\n\n"
+    "  Que hacer:\n"
+    "   - Si falta un veredicto: completa el roster del Steward — corre el verificador\n"
+    "     de esa regla y registra su PASS/N/A (con evidencia archivo:linea o conteo).\n"
+    "   - Si hay un FAIL: NO se cierra. Corregi el defecto y volve al Paso\n"
+    "     correspondiente (re-itera bajo el techo); el veredicto pasa a PASS recien\n"
+    "     cuando el verificador lo confirma sobre el artefacto en disco.\n"
+    "   - Si todavia estas iterando: deja `runState: wip` (los WIP-commits pasan); pone\n"
+    "     `closing` SOLO en el commit que cierra, con la matriz ya completa+verde.\n"
+)
+
 
 def main() -> None:
     # CLI de registro (no lee stdin, no es una tool-call gateada).
@@ -444,6 +570,13 @@ def main() -> None:
 
     state = _ledger_state(repo, branch)
     if state == "ACTIVE_OK":
+        # CAMBIO COBERTURA: el commit de cierre (runState: closing) exige la matriz
+        # completa+verde. WIP-commits y ediciones pasan (cov solo muerde en commit).
+        if is_commit:
+            cov = _coverage_state(repo, branch)
+            if cov == "CLOSING_INCOMPLETE":
+                _block(MENSAJE_COBERTURA.format(repo=repo, branch=branch))
+                return
         _allow()
         return
     if state == "ACTIVE_NO_TARGET":

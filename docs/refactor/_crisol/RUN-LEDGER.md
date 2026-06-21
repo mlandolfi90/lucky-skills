@@ -438,3 +438,39 @@
 - Forja: `forjar-release.sh v1.11.0 --no-sign` → 8 sellos a v1.11.0, registry.json regenerado (pin commit 18c557b, firma DIFERIDA, sin `.minisig` stale), leak-scan LIMPIO. (Los archivos del fix de iter 2 — crisol-enforcer.sh, test-enforcer.sh — NO están sellados ni en el registry → la forja sigue válida sin re-forjar.)
 - PARKED: (1) `sys.stdin.reconfigure(utf-8)` en el gate (hoy Windows+stdin no-ASCII → gate inerte fail-open seguro pero el piso no muerde) — robustez no bloqueante (→ docs/IDEAS.md). (2) el enforcer bash per-repo NO implementa el piso B (B es global, solo el gate Python) — por diseño: repos con enforcer.sh están adoptados → caen bajo A. (3) pin-por-commit real del registry (hoy pinea el commit PADRE) sigue siendo deuda v2, irrelevante con firma diferida.
 - RETRO: el Verificador independiente cazó lo que 35 tests verdes ocultaban — la regla NUEVA (TARGET) tenía un oráculo ciego justo donde los 2 guardianes derivaban (variante de mayúscula). Lección reconfirmada (c1/c5): un invariante con DOS guardianes exige que el fixture pruebe el BORDE donde pueden derivar, no solo el camino feliz; y anclar la reproducción al entorno fiel (rutas Windows) — la 1ra corrida del red-team dio falso "no diverge" con rutas POSIX que el gate Windows-native no resolvía (fail-open). Meta: la verificación independiente con poder de CORRER tests (REGLA 0) pagó — un Verificador que solo lee no habría cazado la deriva.
+
+### main — 2026-06-21 (Crisol endurecido: reglas verificadas-por-agente + gate de cobertura fail-closed)
+- STATUS: ACTIVE
+- Tier: completo
+- Fecha: 2026-06-21
+- TARGET: docker-local (contenedor Linux efímero de la web; el Verificador corre tests/test-enforcer.sh ACÁ — Linux fiel, más fiel aún que las corridas previas en Git-Bash/Windows; commit+push tras cada PASS para no perder trabajo en el entorno efímero. Declarado por el operador, fail-closed, sin degradación silenciosa)
+- LEY: v1.11.0 (verificado online — último tag remoto == copia local; §6 Ley viva)
+- Alcance (apertura): cerrar el gap "las reglas de JUICIO no tienen guardián automático". Origen: 3 fallas reales reportadas por el operador — (1) codear en pc-local sin preguntar el TARGET, (2) construir violando Open/Closed, (3) violar diseño atómico. Hoy los 2 guardianes deterministas (crisol-enforcer.sh + crisol_gate.py) solo validan la FORMA del ledger ACTIVE (Tier+Fecha+TARGET) y son fail-open; los criterios de Diseño (OCP/atomicidad/costura/conformidad) y varias §2 dependen de que el líder spawnee verificadores que PUEDE saltear. Objetivo: convertir TODAS las reglas §2 + Diseño en verificaciones-por-agente (+ gate determinista donde sea mecánico) con veredicto binario POR REGLA y un GATE DE COBERTURA fail-closed — ningún commit de cierre sin la matriz de veredictos completa. Meta-cambio a la ley bajo §6 (v1.11.0 juzga el diff que crea ~v1.12.0). Ejército Opus (override de tier declarado por el operador).
+- MIGRATION_STRATEGY: N/A (sin DDL; artefactos = SKILL.md/templates/hooks/tests)
+- Conformidad-arq: N/A (prosa de ley + hooks; la skill arquitectura rige código hexagonal de apps)
+- Iteraciones: 1/3 (Steward APPROVE 7 condiciones + Verificador de Integración PASS, sin re-trabajo)
+- Planificación/Diseño: 3 archaeologists Opus (A=matriz, B=gate cobertura, C=roster+procedimiento) → Architecture Steward Opus (COLLISION-MAP + APPROVE con 7 condiciones: runState dueño-A, catálogo único MAYÚSCULA_GUION_BAJO sin abreviar, matriz coexiste con `- Veredictos:`, fail-closed exige ADR, fixture espeja formato-A y prueba bordes, C toca solo §4 pasos 6/8, serialización A→C→B).
+- DECISIÓN ESTRUCTURAL: el gate de cobertura se ata a `runState: closing` (NO a STATUS) — resuelve el "dance ACTIVE→CLOSED" y la meta-recursión §6; `ausente=skip→fail-CLOSED` vs `ilegible=bug→fail-OPEN` (gramática trivial). Colocación shift-left (de la preocupación del operador por iteraciones desperdiciadas): cada regla se chequea en su punto más temprano decidible (Steward Paso 4 puebla la matriz para las reglas de plan; Paso 6 confirma el diff; el gate de cobertura es la RED al cierre, no el detector).
+- Veredictos: Steward APPROVE (7/7 condiciones cumplidas) · Engineers A→C→B serializados sobre SKILL.md (staged, sin commit) · auditor-A PASS (contrato congelado: 23 IDs canónicos, todo AGREGAR) · Verificador de Integración PASS (fresco, combinado): fixture 50/50 propio en docker-local + contrato A↔B probado EN VIVO sobre el dogfood (closing+verde→permite, closing+PENDIENTE→bloquea, wip→permite) + convivencia A+C+B sin solape + OPEN_CLOSED/ATOMICIDAD/COSTURA + ZERO_LEAK limpio.
+- TEST_COVERAGE: hooks/gate (tests/test-enforcer.sh, 50/50 — 39 previos + Grupo D 11 casos del gate de cobertura, corrido con CRISOL_GATE_OVERRIDE en docker-local)
+- ADR: docs/decisions/0002-gate-cobertura-fail-closed.md (excepción acotada al fail-open global; CREDITO técnico depositado)
+- HALLAZGO (REGLA 0 vuelve a pagar): el fixture corrido por Engineer-B cazó un KeyError de `.format()` (llaves `{PASS, N/A}` sin escapar en MENSAJE_COBERTURA) que tragaba el fail-open y dejaba el gate de cobertura INERTE — el clásico "test que miente verde", reincidencia de la lección c5/v1.11.0. Sin el engineer corriendo sus propios tests, el candado habría nacido muerto.
+- NOTA §6 (entorno): los 2 guardianes (crisol-enforcer.sh + crisol_gate.py) NO están instalados en este contenedor efímero → el dance ACTIVE→CLOSED es documental (ningún hook auto-bloquea acá); la dureza del gate se demostró EN VIVO por el Verificador de Integración, no por el harness. Release (tag v1.12.0) = decisión deliberada aparte del operador (push a main = respaldo, no promoción; el sello sigue en v1.11.0 hasta forjar-release.sh).
+- PARKED (→ docs/IDEAS.md): (1) unificar el vocabulario de nombres de rol (`quién`) entre el dogfood y el roster §2 — no es cisma (el gate solo lee el veredicto, no el quién), pero conviene; (2) endurecer la detección de cierre más allá de `runState` (un agente que nunca pone `closing` deja una corrida ACTIVE colgada, hoy cazada solo por la próxima brújula); (3) mecanizar progresivamente más reglas clase-H al gate determinista.
+<!-- VEREDICTOS:BEGIN -->
+- runState: closing
+- [V] REGLA0 · PASS · integracion-verifier · test-enforcer.sh en docker-local → PASS=50 FAIL=0, exit 0
+- [V] TARGET · PASS · integracion-verifier · RUN-LEDGER.md:446 TARGET=docker-local; _ledger_state(main)=ACTIVE_OK
+- [V] TEST_COVERAGE · PASS · integracion-verifier · suite 50/50 (Grupo D 11 casos cubre el gate de cobertura)
+- [V] INDEPENDENCIA · PASS · integracion-verifier · verificador fresco; juicio sobre diff staged + corridas propias, no prosa previa
+- [V] SCOPE_CREEP · PASS · integracion-verifier · diff = 7 archivos del alcance declarado; sin archivos fuera de scope
+- [V] CREDITO · PASS · integracion-verifier · ADR docs/decisions/0002-gate-cobertura-fail-closed.md deposita el crédito
+- [V] ZERO_LEAK · PASS · integracion-verifier · leak-scan.sh --staged → LIMPIO; 0 secretos / 0 IPs en diff+ADR+dogfood
+- [V] TECHO_ITER · PASS · integracion-verifier · 1 iteración, bajo techo 3
+- [V] OPEN_CLOSED · PASS · integracion-verifier · crisol_gate.py 133 ins/0 del; _allow() ACTIVE_OK preservado; SKILL.md §4 pasos 6/8 únicas ediciones de prosa estable, justificadas
+- [V] ATOMICIDAD · PASS · integracion-verifier · _coverage_state separada de _ledger_state; 1 responsabilidad
+- [V] COSTURA · PASS · integracion-verifier · punto de extensión = rama is_commit en ACTIVE_OK, donde el sistema varía
+- [V] CASOS_LEGALES · PASS · integracion-verifier · edición de lo estable solo en SKILL.md §4 pasos 6/8, justificada
+- [V] CIERRE_TRAS_PASS · PASS · integracion-verifier · veredicto combinado PASS; commit de cierre habilitado
+- [V] CONFORMIDAD · N/A · integracion-verifier · prosa de ley + hooks, no código hexagonal de app
+<!-- VEREDICTOS:END -->

@@ -26,3 +26,15 @@
   no-ASCII (rutas con tildes) puede dejar el gate inerte por fallo de decode
   (fail-open, SEGURO, pero el piso no muerde ahí) · hallado por el Verificador
   en la corrida v1.11.0 · mejora de robustez, NO bloqueante · idea parqueada
+- 2026-06-21 · unificar el vocabulario de nombres de rol (`quién` de la matriz de
+  veredictos): el dogfood usó `open_closed-verifier`/`scope_creep-verifier` mientras
+  el roster §2 los nombra `design-verifier`/`scope-verifier`/`leak-verifier` · NO es
+  cisma (el gate solo lee el veredicto `parts[1]`, nunca el quién) · hallado por el
+  Verificador de Integración en la corrida del Crisol-endurecido · cosmético, no bloqueante
+- 2026-06-21 · endurecer la detección de cierre más allá de `runState`: hoy un agente
+  que nunca pone `runState: closing` deja una corrida ACTIVE colgada que solo caza la
+  próxima brújula (enforcement de proceso, no del gate) · frontera declarada en ADR 0002 ·
+  candidato kaizen
+- 2026-06-21 · mecanizar progresivamente más reglas clase-H (híbridas) al gate
+  determinista a medida que se vuelvan decidibles por código — baja el costo de
+  verificación (token-free) y adelanta el FAIL · de la taxonomía M/J/H de la matriz
