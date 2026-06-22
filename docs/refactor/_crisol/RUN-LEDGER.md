@@ -487,3 +487,39 @@
 - Veredictos: Sellos consistentes 9/9 == v1.12.0, 0 stragglers (grep confirmado por el líder) · leak-scan LIMPIO (forja, fail-closed) · registry pin commit fe90c05. Gate Crisol habilitado (corrida CLOSED+PASS, TEST_COVERAGE no-NONE).
 - TEST_COVERAGE: hooks/gate (tests/test-enforcer.sh 50/50, heredado de la corrida que se promueve)
 - Cierre: 2026-06-21 · tag anotado v1.12.0 · push a origin/main + tags
+
+### main — 2026-06-21 (compuerta de modelo: Paso 0 fail-closed elige el modelo de los agentes)
+- STATUS: CLOSED
+- Tier: completo
+- Fecha: 2026-06-21
+- TARGET: docker-local (mismo contenedor Linux efímero; declarado por el operador, consistente con las corridas previas de la sesión)
+- MODEL: opus (el operador eligió "fable sino opus"; al spawnear, fable devolvió "currently unavailable" → la compuerta resolvió a opus. Demostración VIVA del patrón runtime-list: lo que el entorno realmente expone manda sobre la preferencia) [dogfood: el campo MODEL es justo lo que esta corrida agrega]
+- LEY: v1.12.0 (verificado — último tag remoto == copia local; §6: v1.12.0 juzga el diff que crea v1.13.0)
+- Alcance (apertura): agregar la COMPUERTA DE MODELO en el Paso 0, fail-closed (como TARGET): antes de spawnear, el líder enumera EN RUNTIME los modelos que el entorno ofrece (alias opus/sonnet/haiku/fable, SIN hardcodear — patrón Ley viva) + la opción "default", y espera. Elegís un alias → uniforme para todos los agentes; "default" → cada rol por complejidad (mapeo §3 existente); sin respuesta → FRENA (no spawnea). Se registra `MODEL:` en el ledger. Enforcement: procedural (Paso 0) + backstop estructural reusando el gate de cobertura de v1.12.0 (regla nueva `MODEL` en el catálogo de la matriz → no se cierra sin MODEL declarado). SCOPE: solo prosa de ley (.md) + template + catálogo + ADR; SIN tocar hooks (.py/.sh) — el gate de cobertura ya enforza por construcción. Meta-cambio §6.
+- MIGRATION_STRATEGY: N/A (sin DDL; solo .md de la ley)
+- Conformidad-arq: N/A (prosa de ley)
+- Planificación/Diseño: plan desarrollado con el operador → Architecture Steward (opus) APPROVE con 5 condiciones (reconciliar §3 pto1+pto6; MODEL clase mecánica sin model-verifier; ADR con frontera honesta; anti-alucinación "enumerar del entorno, no de memoria"; no tocar hooks). El Steward confirmó que `_coverage_state` es rule-agnóstico → MODEL enforza por construcción sin tocar el .py.
+- Veredictos: Steward APPROVE (5/5 condiciones cumplidas) · Engineer (opus): 3 .md staged, §3 pto1+pto6 reconciliados, hooks/tests intactos · Verificador fresco (opus) PASS: fixture 50/50 propio en docker-local + enforcement probado EN VIVO (MODEL·PENDIENTE+closing→exit2 / MODEL·PASS→exit0) + OPEN_CLOSED + ZERO_LEAK.
+- ADR: docs/decisions/0003-compuerta-modelo.md (CREDITO depositado; frontera spawn-time parqueada)
+- TEST_COVERAGE: hooks/gate (tests/test-enforcer.sh 50/50, sin regresión — no se tocó código)
+- Iteraciones: 1/3 (Steward APPROVE + Verificador PASS, sin re-trabajo)
+<!-- VEREDICTOS:BEGIN -->
+- runState: closing
+- [V] REGLA0 · PASS · gate · tests/test-enforcer.sh 50/50 exit 0 (docker-local)
+- [V] TARGET · PASS · gate · RUN-LEDGER:495 TARGET docker-local
+- [V] MODEL · PASS · gate · RUN-LEDGER:496 MODEL declarado; prueba viva PENDIENTE→exit2 / PASS→exit0
+- [V] TEST_COVERAGE · PASS · gate · suite enforcer 50/50 sin regresión
+- [V] INDEPENDENCIA · PASS · verificador-fresco · input = solo diff staged + corridas propias
+- [V] SCOPE_CREEP · PASS · scope-verifier · 3 .md staged; 0 .py/.sh/hooks/tests
+- [V] CREDITO · PASS · scope-verifier · ADR 0003 deposita el crédito del meta-cambio de ley
+- [V] ZERO_LEAK · PASS · leak-verifier · 0 secretos en diff staged + ADR 0003
+- [V] TECHO_ITER · PASS · gate · 1/3 iteraciones, bajo techo
+- [V] OPEN_CLOSED · PASS · design-verifier · estable editado = §3 pto1+pto6 (caso legal c); resto AGREGA
+- [V] ATOMICIDAD · PASS · design-verifier · 1 responsabilidad; lista de modelos runtime, no hardcode
+- [V] COSTURA · PASS · design-verifier · reusa _coverage_state existente, sin generalidad especulativa
+- [V] CASOS_LEGALES · PASS · scope-verifier · edición de estable justificada por cambio de contrato (c)
+- [V] CIERRE_TRAS_PASS · PASS · gate · veredicto combinado PASS
+- [V] CONFORMIDAD · N/A · design-verifier · prosa de ley, no código hexagonal
+<!-- VEREDICTOS:END -->
+- RETRO: la feature se dogfoodeó DOS veces — el operador la usó (declaró el modelo "fable sino opus") ANTES de que existiera, y el fallback se ejecutó solo cuando fable dio "unavailable", validando en vivo que la runtime-list debe mandar sobre la preferencia. Proceso (blameless): cero fricción; el Crisol lean (3 agentes para 1 dominio prose) confirmó la lección shift-left/minimalismo de v1.12.0 sin re-trabajo.
+- Cierre: 2026-06-21 · commit de cierre único (.md-only: SKILL.md + template + ADR 0003 + ledger; sin código → el gate de cobertura no engancha en este commit) · SIN tag (release v1.13.0 = decisión deliberada aparte) · push a origin/main

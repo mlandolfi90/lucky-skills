@@ -230,11 +230,14 @@ plan — ver §3-6 y §4).
 ## 3. Paralelo (poka-yoke: prevenir, no detectar)
 
 1. **N carriles por dominio.** Naming `<dominio>-<rol>`, equipos descartables.
-   Model por TIER según COMPLEJIDAD (mapeo único al pie de esta skill):
-   tarea mecánica → tier-económico · juicio/decisión (Steward, Verificador de
-   Integración) → tier-alto · síntesis súper-compleja → tier-frontera.
-   El tier barato en tarea compleja sale CARO (rework). **Declarar los tiers
-   elegidos al humano ANTES de spawnear.**
+   El modelo de los sub-agentes lo fija la **Compuerta de Modelo** del Paso 0
+   (§4), fail-closed. Si `MODEL` es un **alias pin** (`opus`/`sonnet`/`haiku`/
+   `fable`) → **uniforme**: ese modelo para TODOS los agentes, sin declaración
+   por-rol que hacer. Si `MODEL: default` → **por-rol por COMPLEJIDAD** (mapeo
+   único al pie de esta skill): tarea mecánica → tier-económico · juicio/decisión
+   (Steward, Verificador de Integración) → tier-alto · síntesis súper-compleja →
+   tier-frontera; el tier barato en tarea compleja sale CARO (rework), y **los
+   tiers elegidos se declaran al humano ANTES de spawnear**.
 2. **Archaeologists paralelizan libre** (read-only, carpetas propias).
 3. **Compuerta serializada = Architecture Steward.** Ve TODOS los planes ANTES de
    que cualquier Ingeniero toque código. Emite COLLISION-MAP, marca calientes,
@@ -260,9 +263,12 @@ plan — ver §3-6 y §4).
    según el TRIGGER de cada uno (`leak-verifier` siempre; `design-verifier` si
    toca código; `scope-verifier` en tier completo; `conformidad-verifier`/
    `responsive-verifier` solo-si-`Glob`/UI), cada uno **fresco** (contexto nuevo,
-   input = solo el diff). Como son rol-LLM de **juicio**, su model = **tier-alto**
-   (mapeo único al pie). Los **tiers elegidos se declaran al humano ANTES de
-   spawnear** (engancha con el punto 1). Cada verificador emite su veredicto
+   input = solo el diff). Su modelo lo gobierna la **Compuerta de Modelo** del
+   Paso 0 (igual que el punto 1): con un **alias pin** → **uniforme** (no hay
+   declaración por-rol que hacer); con `MODEL: default`, como son rol-LLM de
+   **juicio**, su model = **tier-alto** (mapeo único al pie) y **los tiers
+   elegidos se declaran al humano ANTES de spawnear** (engancha con el punto 1).
+   Cada verificador emite su veredicto
    por-regla **a la matriz** (§5). Veredictos del Steward sobre el PLAN: ver §4
    paso 4 — el Steward **escribe en la matriz**, al aprobar, los veredictos de
    las reglas de plan que ya juzgó (`OPEN_CLOSED`, `ATOMICIDAD`, `COSTURA`,
@@ -293,6 +299,22 @@ plan — ver §3-6 y §4).
    `N/D` o el target es ambiguo → **PREGUNTAR y esperar** (sin humano: ABORTAR),
    jamás asumir local. `pc-local` NO es el default: solo si el humano lo pide
    explícito. El target confirmado se registra en el paso 2.
+   Fijar también el **MODELO** de la corrida — la **Compuerta de Modelo** —
+   ANTES de spawnear cualquier agente, fail-closed (mismo rigor que el TARGET).
+   El líder **enumera EN RUNTIME los modelos que el ENTORNO ofrece** (los alias
+   que la tool de spawn realmente acepta — hoy `opus`/`sonnet`/`haiku`/`fable`)
+   más la opción `default`, y se los presenta al humano. **NO se hardcodea la
+   lista** (patrón Ley viva: sale un modelo nuevo, aparece solo) — se enumera
+   **del entorno, NO de memoria**; si el líder no puede enumerar, fail-closed:
+   pregunta con lo que tenga y **jamás inventa un alias**. **Constraint a
+   documentar:** la tool acepta **alias de familia, no versiones puntuales**
+   (`opus` resuelve a la versión vigente; no se puede pinear "4.8 vs 4.7").
+   Outcomes: el humano elige un **alias → uniforme** (ese modelo para TODOS los
+   agentes de la corrida); elige **`default` → por-rol por complejidad** (el
+   mapeo de tiers de §3); **sin respuesta → FRENA** (no spawnea; sin humano →
+   ABORTAR). La compuerta **gobierna los SUB-agentes**, no al líder (que ya corre
+   en el modelo de la sesión). El modelo confirmado se registra como **`MODEL:`**
+   en la entrada del ledger (igual que `TARGET:`).
 1. Clasificar **tier** con el checklist §1. Todos NO → fast-path.
 2. `git fetch && git rebase origin/main` (conflicto → resolver antes de seguir;
    prohibido `--force` en `main`). Abrir entrada en
@@ -401,6 +423,7 @@ IDs en MAYÚSCULA_GUION_BAJO, sin abreviar (`OPEN_CLOSED`, no `OCP`):
 |---|---|---|---|
 | `REGLA0` | Verificador corre los tests él mismo EN el TARGET; sin verde propio → FAIL | siempre que haya suite | M |
 | `TARGET` | Entrada ACTIVE declara TARGET real (dónde corre/verifica) | siempre | M |
+| `MODEL` | El ledger declara MODEL (alias uniforme o `default`); lo fija la Compuerta del Paso 0 | siempre | M |
 | `TEST_COVERAGE` | Cobertura registrada; `NONE` bloquea tag estable | siempre | M |
 | `INDEPENDENCIA` | Steward/Verificador reciben solo artefactos reales, no prosa previa | tier completo / fast-path | H |
 | `SCOPE_CREEP` | El Ingeniero hace SOLO lo aprobado por el Steward | siempre | J |

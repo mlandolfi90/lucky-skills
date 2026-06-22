@@ -16,6 +16,7 @@
 - Tier: completo | fast-path
 - Fecha: <YYYY-MM-DD>
 - TARGET: paas:<proyecto>/<app>@<env> | docker-local | pc-local   (dónde corre/verifica)
+- MODEL: <alias> (uniforme) | default (por-rol)   (modelo de los sub-agentes; lo fija la Compuerta del Paso 0, fail-closed; la regla `MODEL` de la matriz exige su presencia al cierre)
 - Alcance: <qué se tocó y por qué>
 - MIGRATION_STRATEGY: <estrategia | N/A>     (obligatorio si el diff trae DDL)
 - Conformidad-arq: PASS | FAIL (capa:archivo) | N/A
