@@ -523,3 +523,15 @@
 <!-- VEREDICTOS:END -->
 - RETRO: la feature se dogfoodeó DOS veces — el operador la usó (declaró el modelo "fable sino opus") ANTES de que existiera, y el fallback se ejecutó solo cuando fable dio "unavailable", validando en vivo que la runtime-list debe mandar sobre la preferencia. Proceso (blameless): cero fricción; el Crisol lean (3 agentes para 1 dominio prose) confirmó la lección shift-left/minimalismo de v1.12.0 sin re-trabajo.
 - Cierre: 2026-06-21 · commit de cierre único (.md-only: SKILL.md + template + ADR 0003 + ledger; sin código → el gate de cobertura no engancha en este commit) · SIN tag (release v1.13.0 = decisión deliberada aparte) · push a origin/main
+
+### main — 2026-06-21 (release v1.13.0 — compuerta de modelo)
+- STATUS: CLOSED
+- Tier: fast-path
+- Fecha: 2026-06-21
+- TARGET: docker-local
+- MODEL: opus (sello/forja mecánica; el operador autorizó el release "vamos por 1.13")
+- Alcance: release v1.13.0 — `forjar-release.sh v1.13.0 --no-sign` re-selló los 10 archivos de la familia (6 SKILL.md + cargar/references/detectar-runtime.md + docs/decisions/0001/0002/0003) de v1.12.0→v1.13.0, y regeneró registry.json (6 skills, pin commit 7d4380f = el commit que pasó el Crisol de la compuerta de modelo; "se promueve lo que se probó"). Promueve la corrida CLOSED+PASS de la Compuerta de Modelo (Paso 0 fail-closed).
+- FIRMA: minisign DIFERIDA (--no-sign, continúa la política de v1.10.3→v1.12.0): registry SIN firmar, sin `.minisig` stale.
+- Veredictos: Sellos consistentes 10/10 == v1.13.0, 0 stragglers (grep confirmado por el líder) · leak-scan LIMPIO (forja, fail-closed) · registry pin commit 7d4380f. Gate Crisol habilitado (corrida CLOSED+PASS, TEST_COVERAGE no-NONE).
+- TEST_COVERAGE: hooks/gate (tests/test-enforcer.sh 50/50, heredado de la corrida que se promueve)
+- Cierre: 2026-06-21 · tag anotado v1.13.0 (lo crea el operador desde el navegador — el sandbox bloquea push de tags) · push del re-sello a origin/main
