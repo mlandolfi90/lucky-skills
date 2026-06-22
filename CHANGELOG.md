@@ -4,6 +4,25 @@ Notas de release de la familia de skills Lucky. El historial completo del **proc
 (corridas del Crisol, RETROs) vive en `docs/refactor/_crisol/RUN-LEDGER.md`; los tags
 inmutables, en `git tag`. Formato: más nuevo arriba.
 
+## v1.13.0 — 2026-06-21 — Compuerta de modelo
+
+El Crisol ahora **pregunta qué modelo usar** para los agentes ANTES de spawnear
+(Paso 0, fail-closed).
+
+- El líder **enumera en runtime** los modelos que el entorno ofrece
+  (`opus`/`sonnet`/`haiku`/`fable`) + `default` — lista viva, no hardcodeada (patrón Ley viva).
+- Elegís un alias → ese modelo para **todos** los agentes (uniforme).
+- Elegís `default` → cada rol por complejidad (mecánico→`sonnet` · juicio→`opus` · síntesis→`fable`).
+- Sin respuesta → **frena** (como el `TARGET`).
+
+Se registra `MODEL:` en el ledger. **Enforcement por construcción**: la regla `MODEL`
+en la matriz de veredictos hace que el gate de cobertura de v1.12.0 bloquee el cierre
+sin `MODEL` — **cero código nuevo** (`crisol_gate.py` intacto). Decisión en **ADR 0003**.
+
+Verificación: Steward APPROVE (5 condiciones) + Verificador fresco PASS (fixture
+`tests/test-enforcer.sh` **50/50**, enforcement probado en vivo). Re-sello de familia
+**10/10 == v1.13.0**. Firma minisign **diferida** (`--no-sign`).
+
 ## v1.12.0 — 2026-06-21 — Crisol endurecido
 
 Las reglas del Crisol ahora se **verifican por agente** y el cierre es **fail-closed**:
