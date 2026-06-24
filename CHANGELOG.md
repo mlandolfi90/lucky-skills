@@ -4,6 +4,22 @@ Notas de release de la familia de skills Lucky. El historial completo del **proc
 (corridas del Crisol, RETROs) vive en `docs/refactor/_crisol/RUN-LEDGER.md`; los tags
 inmutables, en `git tag`. Formato: más nuevo arriba.
 
+## v1.14.0 — 2026-06-24 — Apéndice deploy build-once-promote
+
+Nueva **referencia consultable** (en `arquitectura/references/`): el patrón de deploy
+**build-once-promote**.
+
+- Buildeás **una vez** en CI (con el test horneado en el build) y promovés la **misma imagen**
+  `sha-<commit>`: el `<paas>` solo **pullea**, no buildea. Deploy de ~17 min a ~100 s.
+- El deploy lo dispara el **job CI** (no el webhook), atado a `sha-<commit>` → atribución 1:1 commit↔imagen.
+- Promoción `dev→testing→prod` = re-deploy de la **misma imagen** (no se rebuildea).
+- **Agnóstico**: escrito en roles (`<paas>`/`<registry>`/`<secrets-vault>`/`CI`), reusable en
+  cualquier stack. Incluye runbook, esqueletos y catálogo de footguns. Descriptivo, no normativo.
+
+Generado bajo el Crisol (Steward APPROVE 8 cond + Verificador PASS, **zero-leak doble red**:
+`leak-scan.sh` LIMPIO + 0/21 identificadores del piloto). `MODEL: opus` vía la Compuerta de
+Modelo. Re-sello de familia **10/10 == v1.14.0**; firma minisign **diferida**.
+
 ## v1.13.0 — 2026-06-21 — Compuerta de modelo
 
 El Crisol ahora **pregunta qué modelo usar** para los agentes ANTES de spawnear
