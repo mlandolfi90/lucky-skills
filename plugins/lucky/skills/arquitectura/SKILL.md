@@ -73,6 +73,7 @@ método. Cuando sí corresponde escanear:
 | Entra una request HTTP/CLI/cola — ¿controlador, modelo, vista? | `references/mvc-adaptador.md` | MVC es el adaptador de ENTRADA, no la arquitectura global; el "Model" se parte en dos |
 | ¿Dónde va un componente de UI? | `references/atomic-design.md` | atoms→…→pages; dónde corta cada nivel; solo la página cruza al backend |
 | Config, logs, build, deploy, secretos, estado | `references/doce-factor.md` | las reglas transversales, agnósticas; nombres en repo, valores en runtime |
+| El cambio toca CI/CD o infra de deploy — ¿cómo se buildea/promueve una imagen sin rebuildear en prod? | `references/deploy-build-once-promote.md` | patrón build-once-promote: CI buildea una vez, el `<paas>` solo pullea y promueve la misma imagen `sha-<commit>`; roles vendor-neutral, footguns |
 | Esto ya existe en MVC plano — ¿cómo migro sin big-bang? ¿hexagonal es overkill? | `references/migracion.md` | mínimo viable hexagonal, regla de tier, estrangulamiento paso a paso |
 | Quiero ver UNA feature ubicada de punta a punta en las 4 capas | `references/end-to-end.md` | walkthrough de una feature cruzando front → MVC → puerto → núcleo → puerto → adaptador |
 | ¿Cuáles son los anti-patrones que rechaza? | `references/anti-patrones.md` | catálogo transversal: síntoma → por qué rompe → veredicto |

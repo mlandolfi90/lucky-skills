@@ -535,3 +535,35 @@
 - Veredictos: Sellos consistentes 10/10 == v1.13.0, 0 stragglers (grep confirmado por el líder) · leak-scan LIMPIO (forja, fail-closed) · registry pin commit 7d4380f. Gate Crisol habilitado (corrida CLOSED+PASS, TEST_COVERAGE no-NONE).
 - TEST_COVERAGE: hooks/gate (tests/test-enforcer.sh 50/50, heredado de la corrida que se promueve)
 - Cierre: 2026-06-21 · tag anotado v1.13.0 (lo crea el operador desde el navegador — el sandbox bloquea push de tags) · push del re-sello a origin/main
+
+### main — 2026-06-24 (apéndice consultable: patrón de deploy build-once-promote, agnóstico + zero-leak)
+- STATUS: CLOSED
+- Tier: completo
+- Fecha: 2026-06-24
+- TARGET: docker-local (contenedor Linux efímero; el oráculo de esta corrida de prosa es scripts/leak-scan.sh + coherencia, corrido ACÁ)
+- MODEL: opus (uniforme — el operador eligió "opus" pasando por la Compuerta de Modelo del Paso 0, fail-closed; PRIMER uso real de la feature v1.13.0)
+- LEY: v1.13.0 (verificado — último tag remoto == copia local; §6)
+- Alcance (apertura): agregar el patrón de deploy **build-once-promote** (CI buildea+pushea a un registry con REGLA 0 horneada → el PaaS solo pullea la imagen `sha-<commit>` → deploy disparado por el job CI, no por webhook) como **referencia consultable, descriptiva (NO normativa)** en `plugins/lucky/skills/arquitectura/references/deploy-build-once-promote.md` (el Steward la movió de crisol/references a **arquitectura/references** — es patrón de deploy/CD, primo de doce-factor.md; + 1 fila en el Router de arquitectura/SKILL.md; confirmado por el operador). Origen: doc local del operador validado en un proyecto piloto. CRÍTICO: el doc original trae identificadores específicos del proyecto (nombres de app/VPS/usuario, rutas de secretos, identities, productos vendor) → debe quedar **AGNÓSTICO + ZERO-LEAK** para el repo PÚBLICO: project-specifics → placeholders (`<app>`, `<owner>`, `<env>`, `<secrets-path>`); vendor-neutral (`PaaS`/`registry`/`secrets-vault`/`CI`, como el precedente "PaaS" de v1.10.0). El patrón queda intacto, lo específico se borra. Las references NO llevan sello ni registry (la forja no las enumera). Meta-cambio §6.
+- MIGRATION_STRATEGY: N/A (sin DDL; solo .md de referencia)
+- Conformidad-arq: N/A (referencia descriptiva, no código hexagonal)
+- Iteraciones: 1/3 (Steward APPROVE 8 condiciones + Verificador PASS, sin re-trabajo)
+- Planificación/Diseño: plan con el operador → Architecture Steward (opus) APPROVE con 8 condiciones. Decisión clave: ubicación arquitectura/references/ (NO crisol/) por razón-de-cambio (patrón deploy/CD, primo de doce-factor.md), confirmada por el operador. El Steward cazó huecos críticos en la lista de scrub: FQDNs/dominios (el leak-scan NO los caza — clase del leak v1.7), Lucky-* como prefijo, UUIDs/SHAs/slugs ajenos.
+- Veredictos: Steward APPROVE (8/8) · Engineer (opus): 2 .md staged, scrub exhaustivo (~25 identificadores → placeholders/roles), fila en Router SKILL.md:76 · Verificador fresco (opus) PASS: DOBLE RED zero-leak (leak-scan.sh LIMPIO + grep de 21 identificadores del piloto = 0 ocurrencias; Coolify=0, ghcr/GHA=1 "p.ej." c/u, dominios=solo slug propio, IPs/UUIDs=0) + C4 descriptivo + OPEN_CLOSED + REGLA0 test-enforcer 50/50.
+- TEST_COVERAGE: N/A (solo-docs, 2 .md; suite enforcer verde sin regresión)
+<!-- VEREDICTOS:BEGIN -->
+- runState: closing
+- [V] REGLA0 · PASS · verificador · test-enforcer 50/50 exit 0 (docker-local)
+- [V] TARGET · PASS · gate · docker-local; reference agnóstico, sin acción sobre infra real
+- [V] MODEL · PASS · gate · opus (Compuerta de Modelo, primer uso real)
+- [V] TEST_COVERAGE · N/A · verificador · solo-docs sin código testeable; suite enforcer verde
+- [V] INDEPENDENCIA · PASS · verificador · fresco; evidencia propia (leak-scan + greps + test corridos por él)
+- [V] SCOPE_CREEP · PASS · verificador · diff = 2 .md; núcleo SKILL.md intacto salvo 1 fila Router
+- [V] ZERO_LEAK · PASS · verificador · leak-scan LIMPIO + 0/21 identificadores piloto + dominios/IP/UUID limpios
+- [V] TECHO_ITER · PASS · gate · 1/3 iteraciones, bajo techo
+- [V] OPEN_CLOSED · PASS · verificador · AGREGAR puro (reference nuevo) + 1 fila Router, formato consistente
+- [V] ATOMICIDAD · PASS · verificador · 1 reference = 1 tema (build-once-promote), §0–§11
+- [V] CIERRE_TRAS_PASS · PASS · gate · veredicto combinado PASS
+- [V] CONFORMIDAD · N/A · verificador · referencia descriptiva, no código hexagonal
+<!-- VEREDICTOS:END -->
+- RETRO: el Steward cazó lo que el leak-scan NO ve — FQDNs/dominios del piloto (clase del leak v1.7 pero por dominio en vez de IP). Lección reconfirmada: para zero-leak en repo público, el scan mecánico es red de VALORES; los NOMBRES (proyecto/app/dominio) los caza el verificador-LLM. La doble red (scan + grep semántico) es lo que hace el cierre confiable. Proceso (blameless): cero fricción; Crisol lean (Steward→engineer→verificador) en 1 iteración.
+- Cierre: 2026-06-24 · commit único (.md-only: 2 archivos de skill + ledger; sin código → el gate de cobertura no engancha) · referencia consultable, sin sello/registry/tag · push a origin/main
