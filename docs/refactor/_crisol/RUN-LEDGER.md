@@ -567,3 +567,15 @@
 <!-- VEREDICTOS:END -->
 - RETRO: el Steward cazó lo que el leak-scan NO ve — FQDNs/dominios del piloto (clase del leak v1.7 pero por dominio en vez de IP). Lección reconfirmada: para zero-leak en repo público, el scan mecánico es red de VALORES; los NOMBRES (proyecto/app/dominio) los caza el verificador-LLM. La doble red (scan + grep semántico) es lo que hace el cierre confiable. Proceso (blameless): cero fricción; Crisol lean (Steward→engineer→verificador) en 1 iteración.
 - Cierre: 2026-06-24 · commit único (.md-only: 2 archivos de skill + ledger; sin código → el gate de cobertura no engancha) · referencia consultable, sin sello/registry/tag · push a origin/main
+
+### main — 2026-06-24 (release v1.14.0 — apéndice de deploy build-once-promote)
+- STATUS: CLOSED
+- Tier: fast-path
+- Fecha: 2026-06-24
+- TARGET: docker-local
+- MODEL: opus (sello/forja mecánica; el operador autorizó el release "se puede terminar de forjar")
+- Alcance: release v1.14.0 — `forjar-release.sh v1.14.0 --no-sign` re-selló los 10 archivos de la familia de v1.13.0→v1.14.0, y regeneró registry.json (6 skills, pin commit 1d40c9e). Promueve la corrida CLOSED+PASS del apéndice consultable build-once-promote en `arquitectura/references/`: la referencia (que no lleva sello) viaja con el bundle de `arquitectura`, cuyo SKILL.md sí se re-selló a v1.14.0 → ahora la Ley-viva la ve en el tag.
+- FIRMA: minisign DIFERIDA (--no-sign, continúa la política): registry SIN firmar, sin `.minisig` stale.
+- Veredictos: Sellos consistentes 10/10 == v1.14.0, 0 stragglers (grep confirmado por el líder) · leak-scan LIMPIO (forja, fail-closed) · registry pin commit 1d40c9e. Gate Crisol habilitado (corrida CLOSED+PASS).
+- TEST_COVERAGE: hooks/gate (tests/test-enforcer.sh 50/50, heredado)
+- Cierre: 2026-06-24 · tag anotado v1.14.0 (lo crea el operador desde el navegador — el sandbox bloquea push de tags) · push del re-sello a origin/main
