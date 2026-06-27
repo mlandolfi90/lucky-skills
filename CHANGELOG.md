@@ -4,6 +4,28 @@ Notas de release de la familia de skills Lucky. El historial completo del **proc
 (corridas del Crisol, RETROs) vive en `docs/refactor/_crisol/RUN-LEDGER.md`; los tags
 inmutables, en `git tag`. Formato: más nuevo arriba.
 
+## v1.15.0 — 2026-06-27 — Invariante TARGET @env
+
+El Crisol ahora **caza cuando un deploy aterriza en un entorno distinto al declarado**.
+Origen: un deploy declarado `@dev` terminó en el entorno default del orquestador
+(`production`) sin que el Crisol lo detectara — el `@env` del TARGET nunca se verificaba
+contra el entorno REAL.
+
+- **Regla `TARGET_ENV`** (matriz de veredictos): el `deploy-verifier` afirma
+  `recurso.env == @env declarado`. **Dinámica** — una promoción a `@testing`/`@production`
+  pasa; solo se caza la contradicción declarado↔real. `paas:` → chequeo por API;
+  `local@<env>` → disciplina; sin `@env` / no-paas → N/A.
+- **Esquema TARGET**: `@env` opcional en local (`docker-local@<env>`) para separar
+  hot-dev de testing-estable.
+- **Brújula**: bandera roja temprana (shift-left) si el recurso vive en otro entorno
+  que el `@env`; el humano define el `@env`.
+- **Apéndice de deploy**: invariante `entorno==@env`, auto-crear los 3 entornos al
+  inicializar, trampa del "default = production", y **runbook de remediación agnóstico**.
+- **ADR 0004**.
+
+Crisol §6, Tier completo. Steward APPROVE (10 cond) + Verificador PASS. Re-sello de
+familia **11/11 == v1.15.0**; firma minisign **diferida**.
+
 ## v1.14.0 — 2026-06-24 — Apéndice deploy build-once-promote
 
 Nueva **referencia consultable** (en `arquitectura/references/`): el patrón de deploy
