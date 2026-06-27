@@ -67,8 +67,15 @@
 ## D2. Infra / contenedores (si la corrida tocó servicios desplegados)
 - [ ] Ningún cambio quedó SOLO dentro de un contenedor (terminal = solo
       diagnóstico; un cambio in-container se pierde en el próximo redeploy).
-- [ ] Todo cambio real está en la fuente de verdad (Coolify panel/API o repo
+- [ ] Todo cambio real está en la fuente de verdad (panel/API del `<paas>` o repo
       de la app). Parche de emergencia por terminal → replicado ANTES del PASS.
+- [ ] **`[TARGET_ENV]`** (mapea a §5 — enunciado allá, fuente única; en
+      `paas:…@<env>` lo dictamina el `deploy-verifier`, acá la **disciplina**
+      local): el env REAL del recurso == el `@env` declarado en el TARGET
+      (consistencia declarado↔real, NUNCA impone dev). Para `docker-local@<env>`/
+      `pc-local@<env>` se afirma por compose-project / puerto / directorio
+      (mismatch observable → FAIL; sin evidencia → N/A); local-sin-`@env` → N/A.
+      Emite veredicto por-regla a la matriz (§5).
 
 ## E. Integración (solo si hubo carriles paralelos)
 - [ ] El resultado **combinado** de todos los carriles compila/pasa junto.

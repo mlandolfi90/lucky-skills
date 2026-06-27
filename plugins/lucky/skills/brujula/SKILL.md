@@ -41,9 +41,12 @@ bash scripts/brujula.sh
 4. **Topología (PaaS)** — con token disponible, consulta la API del control
    plane (read-only) y reporta SOLO el triplete relevante a esta sesión:
    `<proyecto>/<app>@<env>` (el que matchea el repo en curso), con esta gramática
-   canónica del **TARGET**: `paas:<proyecto>/<app>@<env>` | `docker-local` |
-   `pc-local` (`<env>` ∈ {`dev`, `testing`, `production`}; **dev** = mesa caliente,
-   default de desarrollo). Es *sugerencia*: prefillea el `TARGET:` que el Crisol
+   canónica del **TARGET**: `paas:<proyecto>/<app>@<env>` | `docker-local[@<env>]`
+   | `pc-local[@<env>]` (`<env>` ∈ {`dev`, `testing`, `production`}; **dev** = mesa
+   caliente, default de desarrollo). El **`@env` es OPCIONAL en local**
+   (`docker-local@<env>` / `pc-local@<env>` separa la mesa caliente `@dev` de un
+   testing-estable local); **sin `@env` = instancia única** (`docker-local` a
+   secas, retro-compatible). Es *sugerencia*: prefillea el `TARGET:` que el Crisol
    confirma con el humano en su Paso 0. **Nunca lista el inventario completo,
    nunca imprime el token ni dominios/IPs reales: el token se usa, no se vuelca.**
    Sin token, o si la API no responde / no parsea → `N/D` (REGLA DE ORO, igual que
@@ -54,6 +57,14 @@ bash scripts/brujula.sh
 - **Branch ≠ esperado / detached HEAD → bandera roja ARRIBA DE TODO.**
   En trunk-based `main` es lo NORMAL — la anomalía es estar FUERA de `main`
   sin entrada ACTIVE que lo justifique.
+- **Entorno ≠ `@env` declarado / `@env` ausente → bandera roja temprana
+  (shift-left), read-only.** Si la 4ta fuente observa que el recurso vive en otro
+  entorno que el `@env` del TARGET, o que el proyecto no declara `@env`, la
+  brújula lo FLAGEA arriba como sugerencia. **NO auto-bloquea:** hay casos
+  legítimos (deploy directo en `production`, proyectos puramente locales) y **el
+  `@env` lo DEFINE el humano** en el Paso 0 del Crisol. La brújula contrasta y
+  sugiere; el humano resuelve. El bloqueo fail-closed ante un mismatch real lo
+  provee el Crisol vía la regla `TARGET_ENV`, no esta skill.
 - **Fail-closed:** fuente ilegible (sin git, sin docker, sin ADRs, o API del
   PaaS sin token / sin respuesta) → `N/D`.
   Nunca rellena, nunca infiere. Esa es la diferencia entre ubicarse y alucinar.

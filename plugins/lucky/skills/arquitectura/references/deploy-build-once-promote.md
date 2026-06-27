@@ -82,6 +82,27 @@ re-deployar la misma imagen `sha-<X>` (no rebuild). Feature: `<branch>/<tarea>` 
 merge a `dev`. Para cambios fundacionales de la tubería conviene trabajar directo
 en `dev` bajo el proceso.
 
+### Invariante `entorno == @env` (1:1)
+
+El `<env>` de la arquitectura (`dev` / `testing` / `production`) mapea **1:1** al
+entorno REAL del recurso en el `<paas>`. El `@env` que el TARGET declara NO es una
+etiqueta decorativa: es la afirmación verificable de DÓNDE vive el recurso. El
+Crisol contrasta ese `@env` declarado contra el entorno real (regla `TARGET_ENV`)
+— declarado y real coinciden, o es mismatch.
+
+- **Auto-crear los 3 entornos al inicializar un proyecto.** Al dar de alta un
+  proyecto en el `<paas>`, se crean de entrada los **tres** entornos
+  (`dev` / `testing` / `production`), cada uno con su recurso. Así cada `@env`
+  declarable tiene un destino real 1:1 desde el día cero y la promoción
+  (`dev` → `testing` → `production`) siempre tiene a dónde aterrizar.
+- **Trampa del entorno default (documentada).** El `<paas>` típicamente llama
+  `production` a su **entorno default** y deja caer ahí cualquier recurso que no
+  elija entorno explícito. **ESE default NO es el `<env>` de la arquitectura:** un
+  recurso que cayó en el default del `<paas>` puede estar etiquetado `production`
+  por el `<paas>` mientras el TARGET lo declara `@dev` → mismatch silencioso.
+  **Manda el `@env` declarado:** la verificación contrasta el entorno real contra
+  el `@env`, nunca contra el nombre que el `<paas>` le puso a su default.
+
 ## §5 — Decisiones clave y por qué
 
 1. **El pull privado se autentica con el docker login del HOST**, no con env-vars
@@ -215,6 +236,28 @@ proceso (tier completo), en la rama `dev` del repo de la app:
    deploy HTTP 2xx → contenedores `sha-<commit>` healthy. Un auditor fresco
    confirma. Cerrar el registro.
 
+## §8.1 — Runbook: remediar un mismatch `entorno ≠ @env`
+
+Reusable en cualquier repo (estandarizado o no). Todo en roles `<paas>`/`<env>`,
+sin nombres propios. Aplica cuando la brújula flagea, o `TARGET_ENV` falla, o se
+detecta que un recurso vive en un entorno distinto al `@env` declarado (caso
+típico: cayó en el entorno default del `<paas>`).
+
+1. **Detectar el mismatch.** Confirmar por la API read-only del `<paas>` (o por
+   compose-project / puerto / directorio en local) cuál es el entorno REAL del
+   recurso y compararlo con el `@env` declarado en el TARGET. Si difieren →
+   mismatch confirmado.
+2. **Crear los entornos faltantes.** Si el proyecto no tiene los tres entornos
+   (`dev` / `testing` / `production`), crearlos (ver §4 "Auto-crear los 3
+   entornos"). Sin entorno destino no hay a dónde mover el recurso.
+3. **Mover el recurso al entorno correcto.** Reubicar el recurso desde el entorno
+   donde cayó (p. ej. el default del `<paas>`) al `<env>` que el `@env` declara.
+   Por API / panel del `<paas>`, **nunca** por terminal del contenedor (§9: lo
+   in-container se pierde en el redeploy).
+4. **Re-verificar.** Volver a contrastar entorno real vs `@env` declarado
+   (`TARGET_ENV`): deben coincidir. Recién con la coincidencia confirmada el
+   recurso está remediado; registrar el resultado en la corrida.
+
 ## §9 — Catálogo de footguns
 
 - Tag de rama con `/` usado como tag de docker → "invalid reference format". Usar
@@ -236,6 +279,10 @@ proceso (tier completo), en la rama `dev` del repo de la app:
   `@sha256:` cuando se quiera inmutabilidad fuerte.
 - Cambiar algo por la terminal del contenedor → se pierde en el redeploy. Todo
   por API / repo.
+- Recurso en el entorno default del `<paas>` sin coincidir con el `@env`
+  declarado → mismatch silencioso (el `<paas>` lo etiqueta `production`, el TARGET
+  dice `@dev`). Verificar con `TARGET_ENV`; remediar con §8.1 (crear entornos →
+  mover el recurso al `<env>` correcto → re-verificar).
 
 ## §10 — Endpoints y rutas (roles, no valores)
 

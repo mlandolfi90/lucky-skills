@@ -579,3 +579,37 @@
 - Veredictos: Sellos consistentes 10/10 == v1.14.0, 0 stragglers (grep confirmado por el líder) · leak-scan LIMPIO (forja, fail-closed) · registry pin commit 1d40c9e. Gate Crisol habilitado (corrida CLOSED+PASS).
 - TEST_COVERAGE: hooks/gate (tests/test-enforcer.sh 50/50, heredado)
 - Cierre: 2026-06-24 · tag anotado v1.14.0 (lo crea el operador desde el navegador — el sandbox bloquea push de tags) · push del re-sello a origin/main
+
+### main — 2026-06-27 (invariante TARGET @env: el entorno real debe coincidir con el @env declarado — gap de un incidente real de deploy)
+- STATUS: CLOSED
+- Tier: completo
+- Fecha: 2026-06-27
+- TARGET: docker-local (contenedor Linux efímero; oráculo = leak-scan.sh + coherencia + test-enforcer sin regresión; cambio de prosa de ley multi-skill)
+- MODEL: opus (uniforme — Compuerta de Modelo Paso 0, fail-closed)
+- LEY: v1.14.0 (verificado — último tag remoto == copia local; §6)
+- Alcance (apertura): cerrar el gap de un incidente real: un deploy declarado `@dev` terminó en el entorno `production` (default del `<paas>`) sin que el Crisol lo cazara — el `@env` del TARGET nunca se verifica contra el entorno REAL del orquestador. Fix multi-skill **AGNÓSTICO + zero-leak (sin específicos de proyecto)**: (a) **brujula** — el esquema TARGET gana `@env` OPCIONAL en local (`docker-local@<env>`/`pc-local@<env>`, para separar hot-dev de testing-estable) + la 4ta fuente marca **bandera roja temprana (shift-left)** si falta el `@env` del proyecto o el recurso vive en otro entorno; el humano DEFINE el `@env` (incluye direct-prod y local). (b) **crisol** — regla nueva `TARGET_ENV` en el catálogo de la matriz: el deploy-verifier consulta la API del PaaS y afirma `recurso.env == @env declarado` (DINÁMICA, no impone dev); trigger `paas:` → duro, `local@<env>` → disciplina, local-sin-env/no-paas → N/A; fail-closed por el gate de cobertura; + ítem en auditor-checklist. (c) **apéndice** arquitectura/references/deploy-build-once-promote.md — invariante entorno==@env 1:1 + **auto-crear los 3 entornos** al inicializar + **trampa documentada** ("el PaaS llama `production` a su default; manda el `@env`") + **runbook de remediación AGNÓSTICO**. Meta-cambio §6. Todo prosa (.md); brujula.sh NO se toca (la 4ta fuente es prosa).
+- MIGRATION_STRATEGY: N/A (sin DDL; prosa de ley multi-skill)
+- Conformidad-arq: N/A (prosa de ley)
+- Iteraciones: 1/3 (iter 1: FAIL ZERO_LEAK por leak del líder en el ledger → scrub → PASS)
+- Planificación/Diseño: cuestionario al operador (runbook agnóstico, regla DINÁMICA, auto-crear 3 envs, detección shift-left en brújula, @env opcional en local) → Architecture Steward (opus) APPROVE con 10 condiciones (regla TARGET_ENV clase H; ADR 0004; `docker-local@<env>` NO rompe el gate — presencia-no-esquema, probado en el fixture; chequeo local por disciplina; flag de brújula no-bloqueante; un engineer, secuencia ADR→brujula→crisol→apéndice).
+- Veredictos: Steward APPROVE (10/10) · Engineer (opus): 5 .md (ADR 0004 + brujula + crisol §5/§2 + auditor-checklist §D2 + apéndice), agnósticos · Verificador fresco (opus): 9 PASS + 1 FAIL ZERO_LEAK — el leak fue del LÍDER en el ledger (nombre del incidente/PaaS), NO del engineer (sus 5 archivos limpios); el líder scrubeó → re-check limpio.
+- ADR: docs/decisions/0004-target-env-invariante-entorno.md (CREDITO; contrato canónico del @env + TARGET_ENV)
+- TEST_COVERAGE: N/A (solo-docs; test-enforcer 50/50 sin regresión)
+<!-- VEREDICTOS:BEGIN -->
+- runState: closing
+- [V] REGLA0 · PASS · gate · test-enforcer 50/50 exit 0 (docker-local, override gate del repo)
+- [V] TARGET · PASS · gate · ledger declara docker-local
+- [V] MODEL · PASS · gate · opus (Compuerta de Modelo, Paso 0)
+- [V] INDEPENDENCIA · PASS · verificador · juicio sobre diff real + corridas propias (leak-scan/grep/test)
+- [V] SCOPE_CREEP · PASS · scope-verifier · 5 .md + ledger; 0 .py/.sh/hooks/tests/brujula.sh
+- [V] CREDITO · PASS · scope-verifier · ADR 0004 presente (caso legal c)
+- [V] ZERO_LEAK · PASS · leak-verifier · iter 1 FAIL (leak del líder en el ledger) → scrub → 0 nombres propios (incidente/PaaS) en la entrada + leak-scan LIMPIO + 5 artefactos limpios; historia purgada (force-push)
+- [V] TECHO_ITER · PASS · gate · 1/3 iteraciones, bajo techo
+- [V] OPEN_CLOSED · PASS · design-verifier · @env opcional retro-compat (ADR caso c); TARGET_ENV/deploy-verifier = AGREGAR; brújula flagea-no-bloquea
+- [V] ATOMICIDAD · PASS · design-verifier · TARGET_ENV 1 regla; deploy-verifier 1 preocupación
+- [V] CIERRE_TRAS_PASS · PASS · gate · veredicto combinado PASS (tras scrub)
+- [V] TARGET_ENV · N/A · — · la regla nace en esta corrida; sin deploy real que contrastar → no se autoverifica acá
+- [V] CONFORMIDAD · N/A · design-verifier · prosa de ley, no código hexagonal
+<!-- VEREDICTOS:END -->
+- RETRO: REINCIDENCIA de la lección v1.8 — el LÍDER filtró el nombre del incidente/PaaS en la entrada del ledger; el leak-scan (red de VALORES) no caza nombres de proyecto, la red 2 (grep LLM del verificador) sí. Lección reconfirmada: el leak-verifier DEBE cubrir el ledger/meta-docs, no solo los artefactos del engineer. Decisión del operador: purgar la historia (force-push, 2 WIP → 1 commit limpio) — es agnosticismo, no credencial, pero se eligió cero-rastro. PARKED: reforzar scripts/leak-scan.sh con patrón de nombres de proyecto/PaaS para que la red 1 cace esta clase (disparador kaizen: el ledger ya filtró antes).
+- Cierre: 2026-06-27 · historia reescrita (2 WIP → 1 commit limpio, force-push; ningún tag afectado) · push a origin/main

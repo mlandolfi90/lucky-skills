@@ -152,10 +152,13 @@ copia acá.
 | `leak-verifier` | `ZERO_LEAK` (§2 «Sin secretos») | **SIEMPRE** (incl. fast-path) | meta-docs: ledger · ADR · COLLISION-MAP · `IDEAS.md` · mensaje de commit. Puede invocar `scripts/leak-scan.sh` |
 | `conformidad-verifier` | `CONFORMIDAD` (§2 «Conformidad estructural») | **solo si** `Glob` halla la skill `arquitectura` | reusa `conformidad-checklist.md` de esa skill TAL CUAL (fuente única, NO duplicar) |
 | `responsive-verifier` | `RESPONSIVE` (§2 «Responsive obligatorio») | **solo si** la corrida toca UI | reusa `auditor-checklist.md` §A2 |
+| `deploy-verifier` | `TARGET_ENV` (catálogo §5 — enunciado allá, fuente única) | **solo si** el TARGET es `paas:…@<env>` (acota spawns, como conformidad/responsive) | `@env` del ledger + lectura API read-only del `<paas>` (afirma `recurso.env == @env`). Para `local@<env>` la disciplina la absorbe el `quality-auditor` genérico vía `auditor-checklist.md` §D2 — sin subagente propio |
 
 Triggers condicionales OBLIGATORIOS para acotar spawns: `leak-verifier` SIEMPRE;
 `design-verifier` solo si hay código; `conformidad-verifier`/`responsive-verifier`
-solo si el `Glob`/UI lo amerita. Cada uno escribe su línea `[V]` en la matriz
+solo si el `Glob`/UI lo amerita; `deploy-verifier` solo si el TARGET es
+`paas:…@<env>` (en `local@<env>` la disciplina de `TARGET_ENV` la absorbe el
+`quality-auditor` vía §D2). Cada uno escribe su línea `[V]` en la matriz
 (formato: `templates/run-ledger.md`); las celdas que no dictamina quedan para los
 demás guardianes (el `gate` para las reglas mecánicas, el Steward para las de
 plan — ver §3-6 y §4).
@@ -262,7 +265,8 @@ plan — ver §3-6 y §4).
    spawnea el **roster aplicable** de §2 «Roster de verificadores de juicio»
    según el TRIGGER de cada uno (`leak-verifier` siempre; `design-verifier` si
    toca código; `scope-verifier` en tier completo; `conformidad-verifier`/
-   `responsive-verifier` solo-si-`Glob`/UI), cada uno **fresco** (contexto nuevo,
+   `responsive-verifier` solo-si-`Glob`/UI; `deploy-verifier` solo-si-TARGET
+   `paas:…@<env>`, dictamina `TARGET_ENV`), cada uno **fresco** (contexto nuevo,
    input = solo el diff). Su modelo lo gobierna la **Compuerta de Modelo** del
    Paso 0 (igual que el punto 1): con un **alias pin** → **uniforme** (no hay
    declaración por-rol que hacer); con `MODEL: default`, como son rol-LLM de
@@ -424,6 +428,7 @@ IDs en MAYÚSCULA_GUION_BAJO, sin abreviar (`OPEN_CLOSED`, no `OCP`):
 | `REGLA0` | Verificador corre los tests él mismo EN el TARGET; sin verde propio → FAIL | siempre que haya suite | M |
 | `TARGET` | Entrada ACTIVE declara TARGET real (dónde corre/verifica) | siempre | M |
 | `MODEL` | El ledger declara MODEL (alias uniforme o `default`); lo fija la Compuerta del Paso 0 | siempre | M |
+| `TARGET_ENV` | El env del recurso desplegado == el `@env` declarado en el TARGET (consistencia declarado↔real, NUNCA impone dev) | `paas:…@<env>` → DURO (deploy-verifier, API read-only); `docker-local@<env>`/`pc-local@<env>` → DISCIPLINA (compose-project/puerto/dir; mismatch → FAIL; sin evidencia → N/A); local-sin-env / no-`paas:` → N/A | H |
 | `TEST_COVERAGE` | Cobertura registrada; `NONE` bloquea tag estable | siempre | M |
 | `INDEPENDENCIA` | Steward/Verificador reciben solo artefactos reales, no prosa previa | tier completo / fast-path | H |
 | `SCOPE_CREEP` | El Ingeniero hace SOLO lo aprobado por el Steward | siempre | J |
