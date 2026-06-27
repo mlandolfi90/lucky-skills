@@ -613,3 +613,15 @@
 <!-- VEREDICTOS:END -->
 - RETRO: REINCIDENCIA de la lección v1.8 — el LÍDER filtró el nombre del incidente/PaaS en la entrada del ledger; el leak-scan (red de VALORES) no caza nombres de proyecto, la red 2 (grep LLM del verificador) sí. Lección reconfirmada: el leak-verifier DEBE cubrir el ledger/meta-docs, no solo los artefactos del engineer. Decisión del operador: purgar la historia (force-push, 2 WIP → 1 commit limpio) — es agnosticismo, no credencial, pero se eligió cero-rastro. PARKED: reforzar scripts/leak-scan.sh con patrón de nombres de proyecto/PaaS para que la red 1 cace esta clase (disparador kaizen: el ledger ya filtró antes).
 - Cierre: 2026-06-27 · historia reescrita (2 WIP → 1 commit limpio, force-push; ningún tag afectado) · push a origin/main
+
+### main — 2026-06-27 (release v1.15.0 — invariante TARGET @env)
+- STATUS: CLOSED
+- Tier: fast-path
+- Fecha: 2026-06-27
+- TARGET: docker-local
+- MODEL: opus (sello/forja mecánica; el operador autorizó el release)
+- Alcance: release v1.15.0 — `forjar-release.sh v1.15.0 --no-sign` re-selló los 11 archivos de la familia de v1.14.0→v1.15.0 (incluye el ADR 0004 nuevo), regeneró registry.json (6 skills, pin commit 59adb51 = el commit que pasó el Crisol). Promueve la corrida CLOSED+PASS del invariante TARGET @env (el entorno real del recurso debe coincidir con el `@env` declarado): regla `TARGET_ENV` en la matriz + esquema TARGET con `@env` opcional en local + apéndice de deploy con el invariante, la trampa del default-production y el runbook de remediación agnóstico.
+- FIRMA: minisign DIFERIDA (--no-sign, continúa la política): registry SIN firmar, sin `.minisig` stale.
+- Veredictos: Sellos consistentes 11/11 == v1.15.0, 0 stragglers (grep) · leak-scan LIMPIO · registry pin 59adb51. Gate Crisol habilitado (corrida CLOSED+PASS). La historia de la corrida fue purgada (force-push) por decisión del operador (un nombre propio se había filtrado en el ledger; ningún tag afectado).
+- TEST_COVERAGE: hooks/gate (tests/test-enforcer.sh 50/50, heredado)
+- Cierre: 2026-06-27 · tag anotado v1.15.0 (lo crea el operador desde el navegador — el sandbox bloquea push de tags) · push del re-sello a origin/main
