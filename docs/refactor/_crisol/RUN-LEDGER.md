@@ -704,3 +704,30 @@
   lección v1.10.3: inspeccionar el repo real ANTES de asumir dónde va algo o que "falta construir".
 - Cierre: 2026-06-28 · commit de cierre (Tier Completo, 1 iteración, sin paralelo) · push a
   origin/claude/arduous-task-j7zc8p · release (tag + forjar-release.sh) DIFERIDO al operador
+
+### claude/arduous-task-j7zc8p — 2026-06-28 (release v1.16.0 — skill `bitacora` Capa 4)
+- STATUS: CLOSED
+- Tier: fast-path
+- Fecha: 2026-06-28
+- TARGET: docker-local
+- MODEL: opus (sello/forja mecánica; el operador autorizó el release)
+- LEY: v1.15.0 (verificado online — último tag remoto == sello local previo; §6 Ley viva)
+- Alcance: release v1.16.0 — `forjar-release.sh v1.16.0 --no-sign` re-selló los 13 archivos de la
+  familia de v1.15.0→v1.16.0 (7 SKILL.md incl. `bitacora` nueva + cargar/references/detectar-runtime.md
+  + ADRs 0001-0005), regeneró registry.json (8 entradas = 7 skills + 1 reference; pin commit afd41b54 =
+  el commit que pasó el Crisol de la Capa 4). Promueve la corrida CLOSED+PASS de la skill `bitacora`
+  (catálogo experiencial indexado por síntoma + validador STALE + 5ta fuente de brújula + Destilación).
+- FIRMA: minisign DIFERIDA (--no-sign, continúa la política v1.10.3+): registry SIN firmar, sin `.minisig` stale.
+- Veredictos: Sellos consistentes 13/13 == v1.16.0, 0 stragglers (grep ancla de sello) · leak-scan LIMPIO ·
+  registry pin afd41b54, `bitacora` presente. Gate Crisol habilitado (corrida `bitacora` CLOSED+PASS).
+- TEST_COVERAGE: heredado (el re-sello NO toca los guardianes — crisol_gate.py/crisol-enforcer.sh/
+  test-enforcer.sh ausentes del diff, comportamiento idéntico a la base). NOTA honesta §6 (entorno): el
+  fixture test-enforcer.sh en ESTE contenedor efímero da 3 FAIL de fail-open (FO-4 stdin) — artefacto del
+  contenedor (gate global no instalado), PRE-EXISTENTE y ajeno al diff de re-sello; las verificaciones
+  load-bearing del release (SELLOS 13/13 + leak-scan) son verdes.
+- BITACORA: N/A (corrida de release, sin destilación)
+- RETRO: el forjador enumeró y selló `bitacora` automáticamente (skill nueva entró al registry sin tocar
+  el script) — la convención "forjar, no a mano" (v1.10.3) pagó: un solo comando dio consistencia por
+  construcción (13 sellos + registry + leak-scan) sin straggler. Tag: lo corta el operador desde el navegador.
+- Cierre: 2026-06-28 · commit de re-sello + push a origin/claude/arduous-task-j7zc8p · tag anotado v1.16.0
+  DIFERIDO al operador (el sandbox bloquea push de tags; se crea desde GitHub)
