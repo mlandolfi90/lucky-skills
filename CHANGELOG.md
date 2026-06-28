@@ -4,6 +4,28 @@ Notas de release de la familia de skills Lucky. El historial completo del **proc
 (corridas del Crisol, RETROs) vive en `docs/refactor/_crisol/RUN-LEDGER.md`; los tags
 inmutables, en `git tag`. Formato: más nuevo arriba.
 
+## v1.16.1 — 2026-06-28 — Fixes de la skill `bitacora` (review adversarial)
+
+Review adversarial (12 reviewers + 7 verificadores) sobre la skill `bitacora` recién nacida:
+23 hallazgos crudos → 15 confirmados → **12 arreglados**, 1 parqueado (pre-existente).
+
+- **Validador de fechas (`bitacora-stale.sh`)** — los bugs más serios del reloj de validez:
+  - Anclaje a **UTC** (`date -u -d`): cruzando un cambio de DST, el cálculo daba un veredicto STALE
+    distinto según el huso horario del runner (no-determinismo del corazón de la skill).
+  - Parser **anclado al bullet** y fecha tomada **después del primer `·`**: un branch fechado
+    (`release-2026-01-01`) o una mención en prosa ya no engañan la extracción.
+  - `--umbral` valida numérico (un typo ya no se traga el directorio); `gdate` en BSD/macOS;
+    `RETIRED/SUPERSEDED` case-insensitive.
+- **Tests** (8/8 → **20/20**): +DST cross-TZ, +branch-fechado, +umbral no-numérico, +fecha-ilegible,
+  +directorio-inexistente.
+- **Entradas semilla**: `estado: LIVE` → `CANDIDATE` (la skill dogfoodea su propia regla: el agente
+  destila CANDIDATE, el humano promueve LIVE).
+- **Prosa**: brújula §Uso (script = 3 fuentes; 4-5 agent-driven + Glob para localizar el INDEX
+  cross-repo); ADR 0005 ("read-only" → consumo read-only / escritura por Crisol); ref `§8` → `§4 paso 8`.
+
+Crisol Tier completo: 2 verificadores frescos (opus), **0 FAIL**, iteración 1. Re-sello 13/13 ==
+v1.16.1; firma minisign **diferida**.
+
 ## v1.16.0 — 2026-06-28 — Skill `bitacora`: Capa 4 experiencial
 
 Nace **`bitacora`**, un catálogo de patrones *"cuando ves SÍNTOMA X → hacé ACCIÓN Y"*

@@ -161,7 +161,7 @@ edita para sumar un estilo. Es Open/Closed aplicado a la skill misma.
 ---
 
 **Fuente de verdad: `github.com/mlandolfi90/lucky-skills` · esta copia = tag
-`v1.16.0` (cache local, NO la ley).** Ley viva: con red, si el repo tiene un tag
+`v1.16.1` (cache local, NO la ley).** Ley viva: con red, si el repo tiene un tag
 mayor (`git ls-remote --tags`), seguir la del repo
 (`raw.githubusercontent.com/mlandolfi90/lucky-skills/<tag>/plugins/lucky/skills/arquitectura/SKILL.md`)
 e informar al humano. **Caso de skill nueva:** si el tag remoto mayor existe

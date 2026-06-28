@@ -793,3 +793,20 @@
   FALSO-VERDE que la propia Bitácora cataloga. Lección: un validador de fechas exige tests cross-TZ +
   fixtures adversariales de formato, no solo el camino feliz. (Reconfirma c1/c5: probar el BORDE.)
 - Cierre: 2026-06-28 · commit de cierre (Tier Completo, 1 iteración) · push a origin/claude/arduous-task-j7zc8p
+
+### claude/arduous-task-j7zc8p — 2026-06-28 (release v1.16.1 — fixes del review de bitacora)
+- STATUS: CLOSED
+- Tier: fast-path
+- Fecha: 2026-06-28
+- TARGET: docker-local
+- MODEL: opus (forja mecánica; el operador autorizó tagear)
+- Alcance: release v1.16.1 — `forjar-release.sh v1.16.1 --no-sign` re-selló 13 archivos de la familia
+  v1.16.0→v1.16.1, regeneró registry.json (8 entradas; pin commit e13d32a = la corrida de fixes).
+  Promueve la corrida fix-forward CLOSED+PASS (12 fixes del review adversarial 12+7 sobre `bitacora`).
+  v1.16.0 ya estaba tagged en el remoto (inmutable) → esto es el PATCH v1.16.1.
+- FIRMA: minisign DIFERIDA (--no-sign, continúa la política): registry SIN firmar, sin `.minisig` stale.
+- Veredictos: Sellos consistentes 13/13 == v1.16.1, 0 stragglers (grep ancla) · leak-scan LIMPIO ·
+  registry pin e13d32a, `bitacora` presente. Gate Crisol habilitado (fix-forward CLOSED+PASS).
+- TEST_COVERAGE: heredado (el re-sello NO toca los guardianes); la corrida de fixes dejó test-stale 20/20.
+- Cierre: 2026-06-28 · commit de re-sello + push a origin/claude/arduous-task-j7zc8p · tag anotado v1.16.1
+  DIFERIDO al operador (el sandbox bloquea push de tags; se crea desde GitHub apuntando al commit de re-sello)

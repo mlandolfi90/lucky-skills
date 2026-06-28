@@ -112,5 +112,5 @@ como deuda de endurecimiento futuro:
 ---
 
 **Fuente de verdad: `github.com/mlandolfi90/lucky-skills` · esta copia = tag
-`v1.16.0` (cache local, NO la ley).** Ley viva: con red, si el repo tiene un tag
+`v1.16.1` (cache local, NO la ley).** Ley viva: con red, si el repo tiene un tag
 mayor (`git ls-remote --tags`), seguir la del repo e informar al humano.
