@@ -4,6 +4,25 @@ Notas de release de la familia de skills Lucky. El historial completo del **proc
 (corridas del Crisol, RETROs) vive en `docs/refactor/_crisol/RUN-LEDGER.md`; los tags
 inmutables, en `git tag`. Formato: más nuevo arriba.
 
+## v1.17.1 — 2026-06-28 — Bitácora: consulta pull/on-demand (no push)
+
+Ajuste pedido por MLL por **economía de ventana de contexto**, rebasado sobre v1.17.0. La consulta
+de la bitácora pasa de **push** (la brújula surfaceaba 1-3 entradas al anclar — token-caro, mal
+matcheado) a **pull / on-demand**:
+
+- **Brújula**: la 5ta fuente es ahora un **puntero liviano** — solo SEÑALA que la bitácora existe,
+  no carga contenido.
+- **Crisol**: el Planificador (Paso 3 + fast-path) **grepea por el SÍNTOMA de la tarea** justo antes
+  de planear → recall garantizado (paso del flujo), pull barato y bien-matcheado. Sin filtros duros:
+  el síntoma es el filtro, no hay "dominios".
+- **ADR 0005**: refinado (push→pull + nota de Revisión), alineado con la divulgación progresiva de
+  las Agent Skills.
+
+Planificado por concejo de 5 Opus. Crisol Tier completo: verificador fresco, 2 iteraciones (iter 1
+cazó 2 residuos del modelo push en el ADR), 0 FAIL. Re-sello 13/13 == v1.17.1; firma diferida.
+(Reemplaza el v1.16.2 abortado: main había avanzado a v1.17.0 independientemente; este cambio se
+rebasó encima.)
+
 ## v1.17.0 — 2026-06-28 — REGLA 0: el gate-test va horneado en el CI, no en el VPS
 
 Clarificación dura de **REGLA 0** (jidoka) para builds de imagen: la suite de tests se hornea

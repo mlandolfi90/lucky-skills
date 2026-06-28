@@ -861,3 +861,24 @@
   dominio) en zonas del ADR FUERA del diff (§Consecuencias, frontera cross-repo) — lo cazó el verificador
   fresco. Lección: al cambiar una decisión, grepear el ADR ENTERO por el vocabulario viejo, no solo el punto editado.
 - Cierre: 2026-06-28 · commit de cierre (Tier Completo, 2 iteraciones) · push a origin/claude/arduous-task-j7zc8p
+
+### main — 2026-06-28 (release v1.17.1 — bitacora pull/on-demand, rebasado sobre v1.17.0)
+- STATUS: CLOSED
+- Tier: fast-path
+- Fecha: 2026-06-28
+- TARGET: docker-local
+- MODEL: opus (forja mecánica)
+- Alcance: release v1.17.1 — el operador pusheó v1.17.0 (REGLA 0 gate-test en CI) a main de forma
+  INDEPENDIENTE mientras se preparaba el ajuste pull/on-demand (forjado como v1.16.2 sobre v1.16.1).
+  v1.16.2 quedó ABORTADO (por debajo de v1.17.0). Se cherry-pickeó el commit de CONTENIDO del ajuste
+  (cd141ca, sin el reseal v1.16.2) SOBRE v1.17.0 — auto-merge limpio (el ajuste toca crisol §4/§8 +
+  brújula/bitácora/ADR; v1.17.0 tocó crisol §2 REGLA 0: sin solape de contenido). `forjar-release.sh
+  v1.17.1 --no-sign` re-selló 13 archivos v1.17.0→v1.17.1, registry pin cd141ca. Sale a main por FF.
+- FIRMA: minisign DIFERIDA (--no-sign).
+- Veredictos: cherry-pick sin conflictos · Sellos 13/13 == v1.17.1, 0 stragglers · leak-scan LIMPIO ·
+  registry pin cd141ca. Hereda el PASS de la corrida del ajuste (verificador fresco, 0 FAIL, 2 iter).
+- TEST_COVERAGE: heredado (no toca scripts; test-stale 20/20 sin cambios).
+- RETRO: dos releases concurrentes (operador v1.17.0 directo a main + agente v1.16.2 en la rama)
+  colisionaron en la numeración → v1.16.2 murió. Lección: antes de forjar, fetchear main y forjar
+  sobre el ÚLTIMO tag remoto, no sobre el local — un release ajeno puede haber avanzado el trunk.
+- Cierre: 2026-06-28 · commit de re-sello + push FF a main · tag anotado v1.17.1 DIFERIDO al operador
