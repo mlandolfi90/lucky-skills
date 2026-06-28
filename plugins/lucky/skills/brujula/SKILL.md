@@ -29,8 +29,9 @@ su salida tal cual:
 bash scripts/brujula.sh
 ```
 
-Las fuentes **4 (PaaS)** y **5 (Bitácora)** NO las emite el script: las ejecuta el AGENTE como
-pasos adicionales (Read/Grep/Glob) DESPUÉS de correrlo. "Salida tal cual" aplica a las 3 deterministas.
+La fuente **4 (PaaS)** la ejecuta el AGENTE tras el script (Read/Grep/Glob). La fuente **5 (Bitácora)**
+es solo un RECORDATORIO de consultarla on-demand al planear — **no se carga al arranque**. "Salida
+tal cual" aplica a las 3 deterministas.
 
 ## Las 5 fuentes (todas read-only)
 
@@ -56,17 +57,13 @@ pasos adicionales (Read/Grep/Glob) DESPUÉS de correrlo. "Salida tal cual" aplic
    nunca imprime el token ni dominios/IPs reales: el token se usa, no se vuelca.**
    Sin token, o si la API no responde / no parsea → `N/D` (REGLA DE ORO, igual que
    cualquier fuente).
-5. **Bitácora (experiencia)** — patrones "cuando ves SÍNTOMA X → hacé ACCIÓN Y"
-   (la skill `bitacora`, Capa 4 — ADR 0005). **La brújula LEE, el Crisol ESCRIBE.**
-   Localizá el `INDEX.md` de la skill `bitacora` **con Glob** (patrón
-   `**/skills/bitacora/INDEX.md` sobre las rutas de plugins instalados; NO asumas el cwd, que es el
-   repo de trabajo, no el del plugin) y greppealo **filtrando por el
-   branch/dominio activo**; surfacéa **1-3 entradas relevantes** con SOLO su línea
-   de acción (*push*: el agente recibe la experiencia ANTES de grepar, sin
-   pedirla). **Filtrado, no volcado** — cargar el índice entero reintroduce el
-   context rot. Entrada `STALE` (ver `bitacora-stale.sh`) → surfacearla con bandera
-   **"⚠ verificar antes de confiar"**, no como verdad vigente. Sin skill `bitacora`
-   instalada o sin match → `N/D` (REGLA DE ORO). Read-only, igual que las demás.
+5. **Bitácora (experiencia)** — la brújula SOLO SEÑALA que existe; **no carga contenido**.
+   Recordá en UNA línea: *"hay bitácora de patrones (skill `bitacora`, Capa 4 — ADR 0005);
+   consultala **por SÍNTOMA al planear/solucionar**, no antes"*. La brújula NO grepea entradas ni
+   vuelca líneas de acción al contexto — eso lo hace el agente **on-demand (pull)** en el Paso del
+   Planificador del Crisol, matcheando contra el síntoma REAL del momento (al arranque ni se sabe
+   el síntoma, y pre-cargar quema ventana de contexto). Sin skill `bitacora` instalada → omitir.
+   Read-only, igual que las demás.
 
 ## Reglas duras
 

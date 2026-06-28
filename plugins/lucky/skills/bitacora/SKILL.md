@@ -23,10 +23,12 @@ reemplaza. **Principio rector: la brújula LEE, el Crisol ESCRIBE.**
 viva (se pudre si no se valida → reloj `validated_on`) · *compass, not
 encyclopedia* (devolvé la acción, jamás volqués el archivo entero).
 
-## Consultar (al arrancar o al atascarte)
+## Consultar (AL PLANEAR / solucionar — pull, on-demand)
 
-1. **Grep del INDEX por síntoma:** `grep -i "<lo que observás>" INDEX.md` (relativo
-   a esta skill). El INDEX está ordenado por `usos` — lo que más duele, arriba.
+1. **Cuándo:** justo ANTES de planear o resolver algo (no al arranque de la sesión). **Grep del
+   INDEX por el SÍNTOMA de la tarea** — las palabras de lo que vas a tocar:
+   `grep -i "<lo que vas a tocar>" INDEX.md` (relativo a esta skill). **El síntoma ES el filtro;
+   no hay "dominios".** El INDEX está ordenado por `usos` — lo que más duele, arriba.
 2. **Match → abrí la entrada lazy:** leé SOLO `entries/<ID>.md` que matcheó. No
    leas todas; no vuelques el INDEX completo al contexto (eso reintroduce el
    context rot que la Bitácora cura).

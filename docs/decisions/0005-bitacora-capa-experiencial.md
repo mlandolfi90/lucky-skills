@@ -35,15 +35,24 @@ en el momento del dolor.
 
 ## Decisión
 
+> **Revisión 2026-06-28 (MLL):** el punto 1 original especificaba *push* (la brújula surfaceaba
+> 1-3 entradas al anclar). Se corrige a **pull on-demand**: la brújula SEÑALA que la Capa 4 existe
+> (puntero barato), y el Planificador del Crisol la consulta **por SÍNTOMA al planear**. Razón:
+> alinear con la divulgación progresiva de las skills y no quemar ventana de contexto pre-cargando
+> al arranque (cuando aún no se conoce el síntoma y el match es peor).
+
 Nace la **Capa 4 — Bitácora**: una skill `bitacora` cuyo **consumo (vía brújula) es read-only** y
 cuya **escritura (la destilación) la dispara el Crisol** al cerrar, que cataloga patrones
 experienciales atómicos, indexados por síntoma, y los hace consultables por humano **y por agente**. NO es un manual
 nuevo escrito a mano: es un **ciclo colgado del Crisol que ya corre**.
 
 1. **Principio rector (separación de poderes, calcado de la brújula): la brújula LEE, el Crisol
-   ESCRIBE.** La brújula gana una 5ta fuente que, al anclar, surface 1-3 entradas relevantes al
-   branch/dominio (*push*, no *pull*: el agente recibe la experiencia ANTES de grepar). El
-   Verificador del Crisol, al cerrar, destila UNA entrada si la corrida tuvo dolor real.
+   ESCRIBE.** La consulta es **pull / on-demand**: el agente, en el **Paso del Planificador** (antes
+   de planear/solucionar), grepea la bitácora por el **síntoma de la tarea** y trae SOLO el match
+   (línea de acción). La brújula solo **SEÑALA** que la bitácora existe (puntero liviano), **no carga
+   contenido al arranque** — alineado con la divulgación progresiva de las skills y con la economía
+   de la ventana de contexto (pre-cargar al inicio quema tokens y matchea mal, cuando aún no se sabe
+   el síntoma). El Verificador del Crisol, al cerrar, destila UNA entrada si la corrida tuvo dolor real.
 
 2. **Unidad atómica = entrada por SÍNTOMA.** El título ES el síntoma observable, con tag para
    Ctrl-F (`[GAP-001]`, `[DRIFT-003]`). Campos: tipo, síntoma, causa-raíz (1 línea), acción
@@ -58,7 +67,7 @@ nuevo escrito a mano: es un **ciclo colgado del Crisol que ya corre**.
    *pasa el Verificador*. Cada tipo mapea a una postura Cynefin (GAP→complejo/spike; GREP→
    complicado/mapa; DRIFT→caótico/estabilizar).
 
-4. **Índice grep-able por síntoma (`INDEX.md`), ≤1 pantalla.** Es lo único que la 5ta fuente carga.
+4. **Índice grep-able por síntoma (`INDEX.md`), ≤1 pantalla.** Se grepea **on-demand al planear** (la 5ta fuente de la brújula solo lo SEÑALA / cuenta sus filas, no lo carga).
    Ordenado por `usos` (lo que más duele, arriba). El agente matchea lo que OBSERVA contra la
    columna "síntoma" — no re-deriva una taxonomía abstracta. Indexar por síntoma, NO por tema, es
    el diferencial: sin eso el catálogo existe pero no se consulta en el momento del dolor.
@@ -66,7 +75,7 @@ nuevo escrito a mano: es un **ciclo colgado del Crisol que ya corre**.
 5. **Anti-pudrición mecánico (la disciplina humana siempre falla en dev-solo):**
    `scripts/bitacora-stale.sh` marca STALE toda entrada con `validated_on` más vieja que el umbral
    (default 90 días) o sin `validated_on` (nace STALE). STALE **no se borra: se degrada
-   visiblemente** (la brújula la surface con bandera "⚠ verificar antes de confiar"). Un runbook que
+   visiblemente** (al consultarla on-demand, el agente la muestra con bandera "⚠ verificar antes de confiar"). Un runbook que
    miente causa el incidente que pretendía evitar — por eso el reloj de validez es innegociable.
 
 6. **Regla de ASCENSO (válvula anti-pantano).** Una entrada asciende y se reemplaza por un puntero
@@ -94,8 +103,9 @@ nuevo escrito a mano: es un **ciclo colgado del Crisol que ya corre**.
   Ante la duda bitácora-vs-ADR: *¿es una decisión o una receta?* Receta → bitácora.
 
 - **Cross-repo por tag, no por copy-paste.** La Bitácora viaja con la familia `lucky-skills` (la
-  Ley viva, §6) a los ~21 repos. Es un catálogo experiencial compartido; la 5ta fuente filtra por
-  branch/dominio para no volcar todo (eso reintroduciría el context rot que cura).
+  Ley viva, §6) a los ~21 repos. Es un catálogo experiencial compartido; el agente lo consulta
+  **por síntoma, on-demand al planear** (la 5ta fuente de la brújula solo lo señala) — nunca se
+  vuelca entero, eso reintroduciría el context rot que cura.
 
 - **Cero secretos (invariante #1).** Nombres de variable, nunca valores; rutas relativas, nunca
   absolutas; sin IPs/dominios/tokens. El `leak-scan.sh` cubre las entradas como cualquier `.md`. Un
@@ -110,7 +120,8 @@ nuevo escrito a mano: es un **ciclo colgado del Crisol que ya corre**.
 
 - **Positivas:** reusa ~90% de la infra existente (skills, brújula, RUN-LEDGER, parking) — cero
   artefacto huérfano; el conocimiento experiencial deja de perderse entre RETROs efímeros e IDEAS
-  volátil; el agente llega pre-cargado con el patrón relevante ANTES de grepar; el reloj
+  volátil; el agente consulta el patrón **al planear** (pull, grepeando por síntoma), sin pre-cargar
+  contexto al arranque; el reloj
   `validated_on` + la propiedad humana sobre la promoción evitan el wiki podrido; indexar por
   síntoma hace el lookup de segundos.
 - **A vigilar:** el catálogo `.md` vive bajo `docs/`-equivalente exento del gate (sin piso

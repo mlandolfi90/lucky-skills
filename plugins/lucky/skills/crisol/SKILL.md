@@ -291,8 +291,8 @@ plan — ver §3-6 y §4).
 
 ## 4. Procedimiento (líder)
 
-**Fast-path:** 0 → 1 → 2 → Planificador (mini) → Verificador (subagente fresco)
-→ 8. Se saltan los pasos 3–7.
+**Fast-path:** 0 → 1 → 2 → consultar bitácora por síntoma (pull) → Planificador (mini) →
+Verificador (subagente fresco) → 8. Se saltan los pasos 3–7.
 
 0. Sesión nueva o retomada → correr la skill **brujula** (namespace según
    instalación: `/brujula` o `/lucky:brujula`) para anclar el estado real.
@@ -346,7 +346,11 @@ plan — ver §3-6 y §4).
    COLLISION-MAP `APPROVE` → saltar al paso 5; techo restante = 3−N) o
    **reiniciar** (cerrarla `ESCALATED · Motivo: crash-de-sesión · Iter: N ·
    WIP: <hashes>` → paso 3). Si N ≥ 3 → solo `ESCALATED`, no se reanuda.
-3. Spawnear **archaeologists** (paralelo, sonnet) → plan(es) accionable(s).
+3. **Consultá la bitácora ANTES de planear (pull, on-demand):** grepeá el `INDEX.md` de la skill
+   `bitacora` por el **SÍNTOMA** de la tarea (las palabras de lo que vas a tocar); si hay match,
+   traé SOLO esa entrada (línea de acción + anti-acción) y pasala como input a los archaeologists.
+   Sin match → seguí. NO se vuelca el índice entero (pull, no pre-carga; el síntoma es el filtro,
+   no hay "dominios"). Luego spawnear **archaeologists** (paralelo, sonnet) → plan(es) accionable(s).
 4. Pasar TODOS los planes al **Architecture Steward** → COLLISION-MAP
    (`templates/collision-map.md`) + `APPROVE/REJECT`. REJECT → volver a 3 (cuenta iteración).
    **Shift-left:** el Steward ya juzga las reglas de PLAN sobre el plan
@@ -384,7 +388,7 @@ plan — ver §3-6 y §4).
    `bitacora` (`estado: CANDIDATE`; el humano la promueve a `LIVE`) y registrala en
    el campo `BITACORA:` del ledger. Es `.md` → exento del gate; el Crisol **AVISA,
    no exige** (meter el playbook como obligatorio pelearía con el jidoka). La
-   brújula la consumirá como 5ta fuente en sesiones futuras.
+   brújula la SEÑALARÁ (puntero); el Planificador la consultará por síntoma (Paso 3) en sesiones futuras.
    El gate de cobertura es la **RED final**,
    no el primer detector: cada regla se verifica TEMPRANO (paso 4 las de plan,
    paso 6 las del diff); si algo cae recién en esta red ya se desperdició una

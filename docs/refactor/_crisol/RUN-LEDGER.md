@@ -810,3 +810,54 @@
 - TEST_COVERAGE: heredado (el re-sello NO toca los guardianes); la corrida de fixes dejó test-stale 20/20.
 - Cierre: 2026-06-28 · commit de re-sello + push a origin/claude/arduous-task-j7zc8p · tag anotado v1.16.1
   DIFERIDO al operador (el sandbox bloquea push de tags; se crea desde GitHub apuntando al commit de re-sello)
+
+### claude/arduous-task-j7zc8p — 2026-06-28 (ajuste bitacora: consulta pull/on-demand al planear)
+- STATUS: CLOSED
+- Tier: completo
+- Fecha: 2026-06-28
+- TARGET: docker-local
+- MODEL: opus (concejo de 5 planificadores + verificador fresco)
+- LEY: v1.16.1 (sello local; tag v1.16.1 ya en el remoto)
+- Alcance: cambio de DECISIÓN que refina ADR 0005 — la consulta de la bitácora pasa de PUSH (la
+  brújula surfaceaba 1-3 entradas al anclar) a PULL / ON-DEMAND: la brújula solo SEÑALA (puntero
+  liviano), y el Planificador del Crisol grepea por el SÍNTOMA de la tarea al planear/solucionar.
+  Razón (MLL): economía de ventana de contexto + alinear con la divulgación progresiva de las
+  Agent Skills; SIN filtros duros (el síntoma es el filtro, no hay "dominios"). Solo PROSA .md:
+  brujula/SKILL.md (5ta fuente → puntero + §Uso), crisol/SKILL.md (Paso 3 + fast-path: consulta por
+  síntoma antes de planear; §8 matiz), bitacora/SKILL.md (§Consultar → on-demand al planear), ADR
+  0005 (punto 1/4 + §Consecuencias + nota de Revisión). NO toca scripts ni guardianes. Planificado
+  por concejo de 5 Opus (lentes: brújula, planificador-Crisol, skill, economía-de-tokens, coherencia).
+- MIGRATION_STRATEGY: N/A (sin DDL; prosa de ley/skill)
+- Conformidad-arq: N/A (prosa)
+- Iteraciones: 2/3 (iter 1: FAIL COHERENCIA_PULL por 2 residuos del modelo push en el ADR; iter 2: corregidos + PASS)
+- Planificación/Diseño: concejo de 5 Opus (lentes: brújula, planificador-Crisol, skill, economía-de-tokens,
+  coherencia/adversario) → plan sintetizado y aplicado por el líder; alineado con lo acordado con MLL (pull
+  on-demand, brújula como puntero, sin filtros duros).
+- Veredictos: verificador fresco (opus, input=diff, corridas propias): ZERO_LEAK/OPEN_CLOSED/RECALL_SANO PASS;
+  COHERENCIA_PULL FAIL en iter 1 (2 rastros "push"/"surface"/"filtra por dominio" en ADR :78/:107, fuera del
+  diff) → corregidos → PASS en iter 2.
+- ADR: docs/decisions/0005-bitacora-capa-experiencial.md (refinado: push→pull on-demand + nota de Revisión 2026-06-28)
+<!-- VEREDICTOS:BEGIN -->
+- runState: closing
+- [V] TARGET · PASS · gate · docker-local
+- [V] MODEL · PASS · gate · opus (uniforme)
+- [V] INDEPENDENCIA · PASS · verificador · concejo 5 Opus (plan) + verificador fresco (diff), corridas propias
+- [V] ZERO_LEAK · PASS · verificador · leak-scan exit 0 (LIMPIO)
+- [V] SCOPE_CREEP · PASS · verificador · 5 .md (4 prosa + ledger); 0 scripts/guardianes tocados
+- [V] CREDITO · PASS · verificador · ADR 0005 refinado (cambio de decisión documentado)
+- [V] CASOS_LEGALES · PASS · verificador · caso legal (c): cambia el contrato de consulta → tier completo + ADR
+- [V] OPEN_CLOSED · PASS · verificador · correctivo de prosa; captura (§4 paso 8) y propagación intactas
+- [V] COHERENCIA_PULL · PASS · verificador · iter 1 FAIL (2 residuos push ADR :78/:107) → corregidos → 0 residuos
+- [V] RECALL_SANO · PASS · verificador · Crisol Paso 3 + fast-path consultan por síntoma; description auto-invoca (no-Crisol)
+- [V] CIERRE_TRAS_PASS · PASS · gate · cierre tras todos PASS
+- [V] TECHO_ITER · PASS · gate · 2/3 iteraciones
+- [V] REGLA0 · N/A · — · prosa, sin código nuevo (test-stale 20/20 heredado sin cambios)
+- [V] CONFORMIDAD · N/A · — · prosa, sin código hexagonal
+- [V] MIGRATION · N/A · gate · sin DDL
+- [V] RESPONSIVE · N/A · gate · no toca UI
+<!-- VEREDICTOS:END -->
+- BITACORA: N/A (corrida de ajuste de la propia skill)
+- RETRO: el concejo de 5 acertó el diseño, pero el cambio de DECISIÓN dejó vocabulario viejo (push/surface/
+  dominio) en zonas del ADR FUERA del diff (§Consecuencias, frontera cross-repo) — lo cazó el verificador
+  fresco. Lección: al cambiar una decisión, grepear el ADR ENTERO por el vocabulario viejo, no solo el punto editado.
+- Cierre: 2026-06-28 · commit de cierre (Tier Completo, 2 iteraciones) · push a origin/claude/arduous-task-j7zc8p
