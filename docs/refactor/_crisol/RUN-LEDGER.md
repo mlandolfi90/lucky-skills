@@ -625,3 +625,82 @@
 - Veredictos: Sellos consistentes 11/11 == v1.15.0, 0 stragglers (grep) · leak-scan LIMPIO · registry pin 59adb51. Gate Crisol habilitado (corrida CLOSED+PASS). La historia de la corrida fue purgada (force-push) por decisión del operador (un nombre propio se había filtrado en el ledger; ningún tag afectado).
 - TEST_COVERAGE: hooks/gate (tests/test-enforcer.sh 50/50, heredado)
 - Cierre: 2026-06-27 · tag anotado v1.15.0 (lo crea el operador desde el navegador — el sandbox bloquea push de tags) · push del re-sello a origin/main
+
+### claude/arduous-task-j7zc8p — 2026-06-28 (forja skill `bitacora` — Capa 4 experiencial + ADR 0005)
+- STATUS: CLOSED
+- Tier: completo
+- Fecha: 2026-06-28
+- TARGET: docker-local
+- MODEL: opus (uniforme — Compuerta de Modelo Paso 0, fail-closed)
+- LEY: v1.15.0 (verificado online — último tag remoto == sello local; §6 Ley viva)
+- Alcance (apertura): nace la skill `bitacora` (Capa 4 experiencial) — un catálogo de patrones
+  "cuando ves SÍNTOMA X → hacé ACCIÓN Y" indexado por SÍNTOMA OBSERVABLE, que COMPLEMENTA al
+  Crisol para sortear gaps/greps/drifts sin re-derivar. Producto de investigación (15 Sonnet) +
+  concejo (10 Opus) sintetizado en blueprint. Principio rector calcado de la brújula: **la brújula
+  LEE, el Crisol ESCRIBE**. Artefactos (todo AGREGAR, Open/Closed): (a) ADR 0005 — la Capa 4 y su
+  frontera con ADR/RUN-LEDGER/IDEAS (4 capas, 4 vidas útiles); (b) `skills/bitacora/SKILL.md`
+  read-only auto-invocable (dispatcher liviano: grep del INDEX por síntoma → leé la entrada lazy →
+  devolvé SOLO la línea de acción, jamás volcar el archivo); (c) `INDEX.md` grep-able + plantilla
+  de entrada + 3 entradas semilla reales (GAP-001 spike, GREP-001 navegación, DRIFT-001
+  falso-verde) destiladas de RETROs reales; (d) `scripts/bitacora-stale.sh` — validador
+  read-only que marca STALE toda entrada con `validated_on` > umbral (default 90d) o sin
+  `validated_on` (nace STALE), con `--today` inyectable (determinismo REGLA 0); (e)
+  `tests/test-stale.sh` — fixture del validador; (f) brújula §5ta fuente "Bitácora" (PROSA,
+  brujula.sh NO se toca — precedente: la 4ta fuente PaaS también es prosa); (g) crisol §8 sub-paso
+  "Destilación" (captura al cierre, disparador objetivo >30min/grep/drift) + nota suave
+  (NO gate duro: meter el playbook como obligatorio pelea con el jidoka) + campo `BITACORA:`
+  opcional en el template del ledger. HAY CÓDIGO .sh (validador+test) → el gate aplica; esta
+  entrada ACTIVE abre la mesa. NO toca crisol_gate.py/crisol-enforcer.sh/test-enforcer.sh (cero
+  scope creep en los guardianes). Release (tag + forjar-release.sh + registry + sellos) DIFERIDO
+  al operador (decisión deliberada, §Versionado).
+- MIGRATION_STRATEGY: N/A (sin DDL)
+- Conformidad-arq: N/A (skill prosa + script reporter POSIX; la skill `arquitectura` rige código
+  hexagonal de apps, no toolchain de skills-CLI)
+- SELLO_PIN: bitacora @ v1.15.0 · skill nueva sellada al tag vigente de la familia; el bump a la
+  versión del próximo release lo hará `forjar-release.sh` (NO a mano) cuando el operador forje.
+- Iteraciones: 1/3 (converge en iter 1; 0 FAIL en el roster)
+- Planificación/Diseño: líder como Planificador/Arquitecto — investigación (15 Sonnet) + concejo
+  (10 Opus) → blueprint, luego recon profundo (brújula + lectura de crisol/brujula/gate/leak-scan/
+  registry) que aterrizó el diseño a la estructura REAL (aditivo, single-lane, COLLISION-MAP
+  trivial). Las reglas de Diseño las dictaminó el `design-verifier` FRESCO sobre el diff real
+  (shift-left al punto decidible). Release (tag+forja+registry+sellos) DIFERIDO al operador.
+- Veredictos: roster de 5 verificadores FRESCOS (opus, input=diff, corridas propias en docker-local):
+  leak-verifier ZERO_LEAK PASS · design-verifier OPEN_CLOSED/ATOMICIDAD/COSTURA PASS · quality-auditor
+  REGLA0 PASS (test-stale 8/8 exit 0, corrido 2x) + TEST_COVERAGE PASS · scope-verifier SCOPE_CREEP/
+  CREDITO PASS · conformidad-verifier CONFORMIDAD N/A. 0 FAIL → converge iter 1.
+- ADR: docs/decisions/0005-bitacora-capa-experiencial.md (CREDITO; la Capa 4 y su frontera con ADR/
+  RUN-LEDGER/IDEAS)
+- TEST_COVERAGE: bitacora (plugins/lucky/skills/bitacora/tests/test-stale.sh, 8/8); guardianes NO
+  tocados (test-enforcer sin regresión: crisol_gate.py/crisol-enforcer.sh/test-enforcer.sh ausentes del diff)
+<!-- VEREDICTOS:BEGIN -->
+- runState: closing
+- [V] REGLA0 · PASS · quality-auditor · test-stale.sh 8/8 exit 0 (docker-local, corrido 2x, idempotente)
+- [V] TARGET · PASS · gate · ledger declara docker-local (este contenedor Linux)
+- [V] MODEL · PASS · gate · opus (uniforme — Compuerta de Modelo, Paso 0)
+- [V] TEST_COVERAGE · PASS · quality-auditor · tests/test-stale.sh (8/8); suite del validador nuevo
+- [V] INDEPENDENCIA · PASS · verificador · 5 verificadores frescos, input=diff, corridas propias
+- [V] ZERO_LEAK · PASS · leak-verifier · leak-scan --staged rc=0, 0 hallazgos; semillas agnósticas (0 nombres propios del operador)
+- [V] SCOPE_CREEP · PASS · scope-verifier · 13 archivos en alcance; 0 guardianes/registry tocados; 0 tags
+- [V] CREDITO · PASS · scope-verifier · ADR 0005 presente (cambio arquitectónico = nueva capa)
+- [V] OPEN_CLOSED · PASS · design-verifier · aditivo (5ta fuente, sub-paso Destilación, campo BITACORA); guardianes intactos
+- [V] ATOMICIDAD · PASS · design-verifier · bitacora-stale.sh 1 responsabilidad, read-only, fail-soft, deps por --today/--umbral/<dir>
+- [V] COSTURA · PASS · design-verifier · 5ta fuente en la lista de fuentes; Destilación en §8 cierre — costuras naturales
+- [V] CIERRE_TRAS_PASS · PASS · gate · cierre tras todos PASS (single-lane, sin Integración)
+- [V] TECHO_ITER · PASS · gate · 1/3 iteraciones, bajo techo
+- [V] CONFORMIDAD · N/A · conformidad-verifier · prosa .md + reporter bash POSIX; sin código hexagonal de app
+- [V] CASOS_LEGALES · N/A · design-verifier · ediciones aditivas; no se edita comportamiento estable
+- [V] TARGET_ENV · N/A · gate · docker-local sin @env (trigger no aplica)
+- [V] MIGRATION · N/A · gate · sin DDL en el diff
+- [V] RESPONSIVE · N/A · gate · la corrida no toca UI
+- [V] SELLOS · N/A · gate · release diferido al operador (SELLO_PIN bitacora @ v1.15.0 declarado)
+- [V] TAG_GATE · N/A · gate · no se crea tag en esta corrida
+<!-- VEREDICTOS:END -->
+- BITACORA: N/A — esta corrida CONSTRUYE la Capa 4; las 3 entradas semilla son bootstrap, no
+  destilación de la corrida sobre sí misma (build limpio, sin gap/grep/drift doloroso que capturar)
+- RETRO: el blueprint (producto del concejo) asumió rutas (`plugins/lucky/bitacora/`) y un fix
+  tocando `crisol_gate.py` que NO matcheaban el repo real (las skills viven en
+  `plugins/lucky/skills/<n>/`; el gate es load-bearing y frágil) — la brújula + recon profundo
+  ANTES de codear corrigió ambos hacia un diseño 100% ADITIVO y un validador AISLADO. Reconfirma la
+  lección v1.10.3: inspeccionar el repo real ANTES de asumir dónde va algo o que "falta construir".
+- Cierre: 2026-06-28 · commit de cierre (Tier Completo, 1 iteración, sin paralelo) · push a
+  origin/claude/arduous-task-j7zc8p · release (tag + forjar-release.sh) DIFERIDO al operador

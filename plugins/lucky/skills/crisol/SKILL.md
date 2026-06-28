@@ -368,7 +368,15 @@ plan — ver §3-6 y §4).
    Cerrar entrada: `STATUS: CLOSED` + veredictos + iteraciones + `RETRO:` una
    línea sobre la fricción del PROCESO (blameless: se registra la falla, no el
    culpable). En el resumen de cierre, listar las ideas capturadas en
-   `docs/IDEAS.md` durante la corrida. El gate de cobertura es la **RED final**,
+   `docs/IDEAS.md` durante la corrida.
+   **Destilación (Bitácora, Capa 4 — ADR 0005; opcional, NO bloqueante):** si la
+   corrida tuvo un **gap que costó >30min**, un **grep que re-derivó algo ya
+   sabido**, o un **drift hallado**, destilá UNA entrada experiencial con la skill
+   `bitacora` (`estado: CANDIDATE`; el humano la promueve a `LIVE`) y registrala en
+   el campo `BITACORA:` del ledger. Es `.md` → exento del gate; el Crisol **AVISA,
+   no exige** (meter el playbook como obligatorio pelearía con el jidoka). La
+   brújula la consumirá como 5ta fuente en sesiones futuras.
+   El gate de cobertura es la **RED final**,
    no el primer detector: cada regla se verifica TEMPRANO (paso 4 las de plan,
    paso 6 las del diff); si algo cae recién en esta red ya se desperdició una
    iteración.

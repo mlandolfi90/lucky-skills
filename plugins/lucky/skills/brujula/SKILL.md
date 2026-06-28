@@ -4,9 +4,10 @@ description: >-
   Brújula — ancla la sesión al estado REAL del repo y el deploy para
   evitar alucinar contexto ya superado. Usar AL EMPEZAR a trabajar en un repo,
   al retomar una sesión, o cuando dudes en qué branch/estado estás
-  ("¿dónde estoy?", "ubicame", "/brujula"). Lee 4 fuentes reales (git,
-  docker, ADR/RUN-LEDGER y, si hay token, la topología del PaaS read-only) y
-  devuelve un snapshot objetivo. REGLA DE ORO: si una
+  ("¿dónde estoy?", "ubicame", "/brujula"). Lee 5 fuentes reales (git,
+  docker, ADR/RUN-LEDGER, la topología del PaaS read-only si hay token, y la
+  Bitácora de patrones experienciales) y devuelve un snapshot objetivo.
+  REGLA DE ORO: si una
   fuente no se puede leer, dice "N/D" — JAMÁS infiere. Solo lectura, no modifica.
 allowed-tools: Bash, Read, Glob, Grep
 ---
@@ -27,7 +28,7 @@ Ejecutá el script y mostrale al usuario su salida tal cual:
 bash scripts/brujula.sh
 ```
 
-## Las 4 fuentes (todas read-only)
+## Las 5 fuentes (todas read-only)
 
 1. **Repo** — branch actual, archivos sin commitear, adelanto/atraso vs remote,
    y **último tag** (en promoción-por-tags, el tag ES el estado de release).
@@ -51,6 +52,15 @@ bash scripts/brujula.sh
    nunca imprime el token ni dominios/IPs reales: el token se usa, no se vuelca.**
    Sin token, o si la API no responde / no parsea → `N/D` (REGLA DE ORO, igual que
    cualquier fuente).
+5. **Bitácora (experiencia)** — patrones "cuando ves SÍNTOMA X → hacé ACCIÓN Y"
+   (la skill `bitacora`, Capa 4 — ADR 0005). **La brújula LEE, el Crisol ESCRIBE.**
+   Localizá el `INDEX.md` de la skill `bitacora` y greppealo **filtrando por el
+   branch/dominio activo**; surfacéa **1-3 entradas relevantes** con SOLO su línea
+   de acción (*push*: el agente recibe la experiencia ANTES de grepar, sin
+   pedirla). **Filtrado, no volcado** — cargar el índice entero reintroduce el
+   context rot. Entrada `STALE` (ver `bitacora-stale.sh`) → surfacearla con bandera
+   **"⚠ verificar antes de confiar"**, no como verdad vigente. Sin skill `bitacora`
+   instalada o sin match → `N/D` (REGLA DE ORO). Read-only, igual que las demás.
 
 ## Reglas duras
 
