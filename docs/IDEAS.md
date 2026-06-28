@@ -38,3 +38,8 @@
 - 2026-06-21 · mecanizar progresivamente más reglas clase-H (híbridas) al gate
   determinista a medida que se vuelvan decidibles por código — baja el costo de
   verificación (token-free) y adelanta el FAIL · de la taxonomía M/J/H de la matriz
+- 2026-06-28 · firma minisign del registry: diferida INDEFINIDA mientras sea solo-dev +
+  loader `cargar` dormido — tratarla como DEFAULT (`--no-sign`), no como deuda. La firma
+  protege integridad de cadena de suministro para TERCEROS que carguen el registry, no
+  confidencialidad (por eso "repo público" no la exige). Reactivar solo si se abre a
+  multi-IA / terceros que consuman el registry · decisión de MLL
