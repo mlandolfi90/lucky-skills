@@ -731,3 +731,65 @@
   construcción (13 sellos + registry + leak-scan) sin straggler. Tag: lo corta el operador desde el navegador.
 - Cierre: 2026-06-28 · commit de re-sello + push a origin/claude/arduous-task-j7zc8p · tag anotado v1.16.0
   DIFERIDO al operador (el sandbox bloquea push de tags; se crea desde GitHub)
+
+### claude/arduous-task-j7zc8p — 2026-06-28 (fix-forward: hallazgos del review adversarial de bitacora)
+- STATUS: CLOSED
+- Tier: completo
+- Fecha: 2026-06-28
+- TARGET: docker-local
+- MODEL: opus (uniforme — review 12+7 agentes + verificadores de fix)
+- LEY: v1.16.0 (sello local; tag v1.16.0 aún sin cortar — release diferido al operador)
+- Alcance: fix-forward de 12 hallazgos CONFIRMADOS por un review adversarial (12 reviewers + 7
+  verificadores que reprodujeron cada uno). Solo bug-fixes de la skill `bitacora`, sin scope nuevo.
+  bitacora-stale.sh: (F1) anclar fechas a UTC (`date -u -d`) — el cálculo /86400 cruzando DST daba
+  veredicto STALE distinto según el TZ del runner (no-determinismo del reloj de validez); (F2+F17)
+  extraer la fecha DESPUÉS del primer `·` y anclar el grep al bullet `**validated_on**` — un branch
+  con fecha (`release-2026-01-01`) o una mención en prosa engañaban al parser; (F0) validar
+  `--umbral` numérico (un typo `--umbral <dir>` tragaba el dir y daba veredictos falsos);
+  (F3) preferir `gdate` en BSD/macOS; (F13) RETIRED/SUPERSEDED case-insensitive. test-stale.sh:
+  (F5) caso dir-inexistente, (F6) fecha ilegible, + regresiones de DST/branch-fechado/umbral.
+  Entradas semilla (F15): `estado: LIVE`→`CANDIDATE` (dogfood: el agente destila CANDIDATE, el
+  humano promueve LIVE — su propio invariante anti-documentation-theater) + INDEX. brujula/SKILL.md
+  (F11/F19/F18): §Uso aclara que el script da 3 fuentes y las 4-5 son agent-driven + mecanismo Glob
+  para localizar el INDEX cross-repo. ADR 0005 (F12): "read-only" → consumo read-only / escritura por
+  Crisol. run-ledger template (F20): ref rota `§8`→`§4 paso 8`. NO toca los guardianes. F21 (registry
+  no valida contra su schema, PRE-EXISTENTE y sistémico) → parqueado en IDEAS.md (fuera de scope).
+- MIGRATION_STRATEGY: N/A (sin DDL)
+- Conformidad-arq: N/A (skill prosa + script reporter POSIX)
+- Iteraciones: 1/3 (converge iter 1; 0 FAIL)
+- Planificación/Diseño: review adversarial (workflow 12 reviewers + 7 verificadores que reprodujeron
+  cada hallazgo) → 23 crudos → 15 confirmados, 8 refutados. El líder decidió arreglar 12 (todos los
+  major + minor/nit con fix limpio) y parquear 1 (F21, pre-existente/sistémico, fuera de scope).
+- Veredictos: 2 verificadores FRESCOS (opus, input=diff, corridas propias en docker-local): leak-verifier
+  ZERO_LEAK PASS (leak-scan exit 0; único hit `sk-` = substring de "task" en el branch, falso positivo) ·
+  quality-verifier REGLA0 PASS (test-stale 20/20 exit 0) + FIXES_REALES PASS (F1 DST, F2 branch-fechado,
+  F0 umbral reproducidos resueltos) + NO_REGRESION PASS (guardianes intactos, 3 entradas reales 0-stale,
+  prosa coherente). 0 FAIL.
+- TEST_COVERAGE: bitacora (tests/test-stale.sh 8/8 → 20/20; +DST cross-TZ, +branch-fechado, +umbral
+  no-numérico, +fecha-ilegible, +dir-inexistente); guardianes NO tocados (sin regresión)
+- BITACORA: N/A (corrida de mantenimiento de la propia skill; sin destilación)
+<!-- VEREDICTOS:BEGIN -->
+- runState: closing
+- [V] REGLA0 · PASS · quality-verifier · test-stale.sh 20/20 exit 0 (docker-local)
+- [V] TARGET · PASS · gate · docker-local
+- [V] MODEL · PASS · gate · opus (uniforme)
+- [V] TEST_COVERAGE · PASS · quality-verifier · tests/test-stale.sh 20/20 (ampliado: DST/branch/umbral/ilegible/dir)
+- [V] INDEPENDENCIA · PASS · verificador · review 12+7 + 2 verificadores frescos de fix, corridas propias
+- [V] ZERO_LEAK · PASS · leak-verifier · leak-scan exit 0; 0 hallazgos (sk- = falso positivo de "task")
+- [V] SCOPE_CREEP · PASS · líder · solo los 12 fixes confirmados; 0 guardianes; F21 parqueado en IDEAS.md
+- [V] OPEN_CLOSED · PASS · quality-verifier · correctivo/aditivo; guardianes intactos
+- [V] ATOMICIDAD · PASS · quality-verifier · bitacora-stale.sh sigue 1 responsabilidad, read-only, fail-soft
+- [V] CASOS_LEGALES · PASS · quality-verifier · caso legal (a): bug fixes sobre código que ya pasó un Crisol
+- [V] CIERRE_TRAS_PASS · PASS · gate · cierre tras todos PASS (single-lane)
+- [V] TECHO_ITER · PASS · gate · 1/3 iteraciones
+- [V] CREDITO · N/A · — · sin cambio arquitectónico (ADR 0005 ya existe; son bug fixes)
+- [V] COSTURA · N/A · — · no agrega punto de extensión nuevo (corrige los existentes)
+- [V] CONFORMIDAD · N/A · — · prosa + reporter bash, sin código hexagonal
+- [V] MIGRATION · N/A · gate · sin DDL
+- [V] RESPONSIVE · N/A · gate · no toca UI
+<!-- VEREDICTOS:END -->
+- RETRO: el review adversarial (12+7) cazó lo que el primer Verificador de la skill NO vio: el reloj de
+  validez (corazón de la skill) era NO-determinista por DST y por branches fechados — justo la clase
+  FALSO-VERDE que la propia Bitácora cataloga. Lección: un validador de fechas exige tests cross-TZ +
+  fixtures adversariales de formato, no solo el camino feliz. (Reconfirma c1/c5: probar el BORDE.)
+- Cierre: 2026-06-28 · commit de cierre (Tier Completo, 1 iteración) · push a origin/claude/arduous-task-j7zc8p

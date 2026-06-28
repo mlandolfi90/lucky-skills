@@ -24,7 +24,7 @@
 - Iteraciones: <n>/3
 - TEST_COVERAGE: <cobertura | NONE>
 - Escalación: <none | detalle a MLL>
-- BITACORA: <id(s) de entrada(s) destilada(s) a la Capa 4 | N/A>   (opcional, NO bloqueante; crisol §8 Destilación)
+- BITACORA: <id(s) de entrada(s) destilada(s) a la Capa 4 | N/A>   (opcional, NO bloqueante; crisol §4 paso 8, Destilación)
 - RETRO: <una línea sobre la fricción del PROCESO, al cerrar (blameless)>
 - Cierre: <YYYY-MM-DD HH:MM> <commit-sha>
 ```

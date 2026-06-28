@@ -43,3 +43,11 @@
   protege integridad de cadena de suministro para TERCEROS que carguen el registry, no
   confidencialidad (por eso "repo público" no la exige). Reactivar solo si se abre a
   multi-IA / terceros que consuman el registry · decisión de MLL
+- 2026-06-28 · registry.json NO valida contra registry.schema.json (pre-existente, sistémico):
+  el schema marca `triggers` como required y `additionalProperties:false` sin declarar `url`,
+  pero `forjar-release.sh` genera SIEMPRE `url` y NUNCA `triggers` → las 8 entradas fallan la
+  validación. El schema description dice que la forja lo corre antes de firmar (defensa en
+  profundidad), así que el schema desactualizado rompería ese gate. Decidir dirección: sincronizar
+  el schema con el formato real (admitir `url`, `triggers` opcional) o que la forja emita `triggers`.
+  Hallado por el review adversarial de bitacora (F21); afecta a toda la familia, NO solo bitacora ·
+  candidato a corrida Crisol sobre forjar-release.sh + registry.schema.json

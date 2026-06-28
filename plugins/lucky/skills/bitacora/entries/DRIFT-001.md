@@ -21,4 +21,4 @@
 - **stale_si:** >90 días, o si el check pasa a ser fail-closed por contrato
 - **origen:** RUN-LEDGER (lección recurrente "el test miente verde", c5/v1.11.0/v1.12.0)   ·   **usos:** 2
 - **REFS:** ADR 0002 (gate de cobertura fail-closed)   ·   **NEXT:** si reaparece en otro repo → ascenso a regla-gate
-- **estado:** LIVE
+- **estado:** CANDIDATE   <!-- semilla destilada por el agente; el humano la promueve a LIVE -->

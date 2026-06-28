@@ -22,11 +22,15 @@ inesperado = bandera roja) · sencilla (invocás y leés) · confiable (fail-clo
 
 ## Uso
 
-Ejecutá el script y mostrale al usuario su salida tal cual:
+Corré el script — cubre las **3 fuentes deterministas** (Repo, Deploy, Decisiones) — y mostrá
+su salida tal cual:
 
 ```bash
 bash scripts/brujula.sh
 ```
+
+Las fuentes **4 (PaaS)** y **5 (Bitácora)** NO las emite el script: las ejecuta el AGENTE como
+pasos adicionales (Read/Grep/Glob) DESPUÉS de correrlo. "Salida tal cual" aplica a las 3 deterministas.
 
 ## Las 5 fuentes (todas read-only)
 
@@ -54,7 +58,9 @@ bash scripts/brujula.sh
    cualquier fuente).
 5. **Bitácora (experiencia)** — patrones "cuando ves SÍNTOMA X → hacé ACCIÓN Y"
    (la skill `bitacora`, Capa 4 — ADR 0005). **La brújula LEE, el Crisol ESCRIBE.**
-   Localizá el `INDEX.md` de la skill `bitacora` y greppealo **filtrando por el
+   Localizá el `INDEX.md` de la skill `bitacora` **con Glob** (patrón
+   `**/skills/bitacora/INDEX.md` sobre las rutas de plugins instalados; NO asumas el cwd, que es el
+   repo de trabajo, no el del plugin) y greppealo **filtrando por el
    branch/dominio activo**; surfacéa **1-3 entradas relevantes** con SOLO su línea
    de acción (*push*: el agente recibe la experiencia ANTES de grepar, sin
    pedirla). **Filtrado, no volcado** — cargar el índice entero reintroduce el

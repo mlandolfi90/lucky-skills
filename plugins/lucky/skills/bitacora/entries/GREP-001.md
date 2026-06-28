@@ -21,4 +21,4 @@
 - **stale_si:** >90 días, o si el flujo se refactoriza
 - **origen:** blueprint Vademécum (concejo) + lección "anclarse al código real, no al resumen"   ·   **usos:** 1
 - **REFS:** `brujula/SKILL.md` (fuentes)   ·   **NEXT:** si el cambio toca un contrato → invocar `crisol`
-- **estado:** LIVE
+- **estado:** CANDIDATE   <!-- semilla destilada por el agente; el humano la promueve a LIVE -->

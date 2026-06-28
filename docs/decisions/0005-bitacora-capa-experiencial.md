@@ -35,8 +35,9 @@ en el momento del dolor.
 
 ## Decisión
 
-Nace la **Capa 4 — Bitácora**: una skill `bitacora` read-only que cataloga patrones experienciales
-atómicos, indexados por síntoma, y los hace consultables por humano **y por agente**. NO es un manual
+Nace la **Capa 4 — Bitácora**: una skill `bitacora` cuyo **consumo (vía brújula) es read-only** y
+cuya **escritura (la destilación) la dispara el Crisol** al cerrar, que cataloga patrones
+experienciales atómicos, indexados por síntoma, y los hace consultables por humano **y por agente**. NO es un manual
 nuevo escrito a mano: es un **ciclo colgado del Crisol que ya corre**.
 
 1. **Principio rector (separación de poderes, calcado de la brújula): la brújula LEE, el Crisol
