@@ -4,6 +4,30 @@ Notas de release de la familia de skills Lucky. El historial completo del **proc
 (corridas del Crisol, RETROs) vive en `docs/refactor/_crisol/RUN-LEDGER.md`; los tags
 inmutables, en `git tag`. Formato: más nuevo arriba.
 
+## v1.16.0 — 2026-06-28 — Skill `bitacora`: Capa 4 experiencial
+
+Nace **`bitacora`**, un catálogo de patrones *"cuando ves SÍNTOMA X → hacé ACCIÓN Y"*
+**indexado por síntoma observable**, para sortear **gaps/greps/drifts** sin re-derivar.
+Complementa al Crisol; no lo reemplaza. **Principio rector: la brújula LEE, el Crisol
+ESCRIBE.** Producto de una investigación (15 investigadores) + concejo (10 Opus)
+sintetizado en blueprint, y aterrizado a la infra real de la familia.
+
+- **Skill `bitacora`** read-only auto-invocable (dispatcher liviano): grep del `INDEX.md`
+  por síntoma → entrada lazy → devuelve SOLO la línea de acción (*compass, not encyclopedia*).
+- **Taxonomía** centrada en el dolor: `GAP` · `GREP` · `DRIFT` · `FALSO-VERDE` (el verde
+  que miente — failure-mode dominante de la familia). 3 entradas semilla agnósticas.
+- **Anti-pudrición mecánico**: `bitacora-stale.sh` marca STALE toda entrada con
+  `validated_on` > 90 días o ausente (read-only, fail-soft, `--today` inyectable; test 8/8).
+- **Brújula**: nace la **5ta fuente "Bitácora"** (prosa) — empuja 1-3 entradas relevantes
+  al anclar, ANTES de grepar. `brujula.sh` intacto.
+- **Crisol**: sub-paso **"Destilación"** al cierre (captura por dolor objetivo: gap >30min /
+  grep re-derivado / drift) — el Crisol **AVISA, no exige** (fiel al jidoka) + campo `BITACORA:`
+  en el ledger.
+- **ADR 0005**. NO toca los guardianes (`crisol_gate.py`/`crisol-enforcer.sh`/`test-enforcer.sh`).
+
+Crisol Tier completo: 5 verificadores frescos (opus), **0 FAIL**, iteración 1. Re-sello de
+familia **13/13 == v1.16.0**; registry con `bitacora`; firma minisign **diferida**.
+
 ## v1.15.0 — 2026-06-27 — Invariante TARGET @env
 
 El Crisol ahora **caza cuando un deploy aterriza en un entorno distinto al declarado**.
