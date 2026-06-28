@@ -55,6 +55,15 @@ Respondé el checklist. **Cualquier "SÍ" → Tier Completo.** Todos "NO" → Fa
   puede emitir `PASS`, pero el tag estable `vX.Y.Z` queda **bloqueado para
   crearse** mientras siga en `NONE` (es gate de creación: un tag ya existente sí
   puede re-deployarse en rollback).
+  - **Builds de imagen — el gate-test va HORNEADO en el `CI`, no en el `<vps>`.**
+    Cuando el artefacto es una imagen (Dockerfile multi-stage), la suite de REGLA 0 se
+    hornea en el stage `test` que corre DURANTE el build del `CI` (runner Linux = entorno
+    fiel del TARGET). El build vive en el `CI` (build-once-promote, §deploy); **NO se corre
+    en el `<vps>` de deploy ni se duplica con un pre-build local** (`scp` + `docker build`):
+    es redundante y carga el server. El Verificador satisface REGLA 0 observando el stage
+    `test` verde en el `CI` (gate determinista, no reporte ajeno) + la provenance (imagen
+    desplegada == `sha-<commit>` del `CI`) + su verificación **funcional/e2e propia** contra
+    el artefacto desplegado. Único build fuera del `CI`: minutos de `CI` agotados (fallback).
 - **Independencia operacional:** Arquitecto y Verificador reciben SOLO artefactos
   reales (diff, salida de tests propia) — **nunca** la prosa del paso previo.
   En fast-path el Verificador corre en un **contexto nuevo** (subagente fresco):

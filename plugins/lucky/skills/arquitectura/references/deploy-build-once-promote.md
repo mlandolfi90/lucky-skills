@@ -275,6 +275,11 @@ típico: cayó en el entorno default del `<paas>`).
 - Leak del token en logs → sin `set -x`; enmascarar ANTES de usar; `curl` sin
   `-v`/`--trace`; el token nunca en argv ni en outputs del job.
 - Push docs-only → rebuild redundante. `paths-ignore: [docs/**, **/*.md]`.
+- **Pre-build de REGLA-0 en el `<vps>`** (`scp` del repo + `docker build` local antes del
+  push) → redundante con el stage `test` horneado en el build del `CI`, y carga el `<vps>`
+  (el build NO vive en el server). El gate-test se hornea en el `CI` (runner Linux); el
+  Verificador lo confirma por el stage `test` verde + provenance + e2e propia. Solo caer a
+  build fuera del `CI` si se agotan los minutos del `CI` (fallback). Cruza con REGLA 0.
 - Pin por tag (no por digest) → un re-push movería el contenido. Pinear por
   `@sha256:` cuando se quiera inmutabilidad fuerte.
 - Cambiar algo por la terminal del contenedor → se pierde en el redeploy. Todo

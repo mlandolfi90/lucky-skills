@@ -4,6 +4,24 @@ Notas de release de la familia de skills Lucky. El historial completo del **proc
 (corridas del Crisol, RETROs) vive en `docs/refactor/_crisol/RUN-LEDGER.md`; los tags
 inmutables, en `git tag`. Formato: más nuevo arriba.
 
+## v1.17.0 — 2026-06-28 — REGLA 0: el gate-test va horneado en el CI, no en el VPS
+
+Clarificación dura de **REGLA 0** (jidoka) para builds de imagen: la suite de tests se hornea
+en el stage `test` del Dockerfile multi-stage y corre DURANTE el build del `CI` (runner Linux =
+entorno fiel del TARGET). El build vive en el `CI` (build-once-promote); **NO se pre-buildea en
+el `<vps>`** (`scp` + `docker build` local) — era redundante con el stage `test` del `CI` y
+cargaba el server. El Verificador satisface REGLA 0 observando el stage `test` verde en el `CI`
+(gate determinista, no reporte ajeno) + la provenance (imagen desplegada == `sha-<commit>` del
+`CI`) + su verificación **funcional/e2e propia** contra el artefacto. Único build fuera del
+`CI`: minutos del `CI` agotados (fallback).
+
+- `crisol/SKILL.md` §2: sub-cláusula de REGLA 0 (builds de imagen → gate horneado en el `CI`).
+- `arquitectura/references/deploy-build-once-promote.md` §9: footgun (pre-build en el `<vps>` = redundante).
+
+Origen: corrida real (operador) donde el pre-build en el `<vps>` metía relay de desarrollo sin
+valor — el stage `test` del `CI` ya es el gate. Feedback: "no se buildea nunca en el VPS salvo
+que se acaben los minutos de CI". Firma minisign **diferida** (consistente con v1.16.1).
+
 ## v1.16.1 — 2026-06-28 — Fixes de la skill `bitacora` (review adversarial)
 
 Review adversarial (12 reviewers + 7 verificadores) sobre la skill `bitacora` recién nacida:
