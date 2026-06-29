@@ -4,6 +4,18 @@ Notas de release de la familia de skills Lucky. El historial completo del **proc
 (corridas del Crisol, RETROs) vive en `docs/refactor/_crisol/RUN-LEDGER.md`; los tags
 inmutables, en `git tag`. Formato: más nuevo arriba.
 
+## v1.17.2 — 2026-06-28 — Bitácora: +DRIFT-002 (CSRF login vencido tras redeploy → PRG)
+
+Captura **cross-repo** a la bitácora de un aprendizaje real de **Lucky-Auth-Plane** (que vivía en su
+rama `dev`, sin llegar a la bitácora ni a otros repos):
+
+- **DRIFT-002:** tras un redeploy, loguear al portal da `{"detail":"csrf token invalid"}` (el token
+  CSRF del form vive ~15 min) y el hard-reload no recupera. **Fix:** Post/Redirect/Get — ante CSRF
+  inválido en un FORM → **303** a `GET /login?expired=1` (cookie+token frescos); 403 JSON solo para API.
+
+Entrada LIVE (promovida por MLL). La Ley viva la propaga a los 21 repos: el próximo portal con CSRF
++ redeploys la recibe al planear. Re-sello 13/13 == v1.17.2; firma minisign diferida.
+
 ## v1.17.1 — 2026-06-28 — Bitácora: consulta pull/on-demand (no push)
 
 Ajuste pedido por MLL por **economía de ventana de contexto**, rebasado sobre v1.17.0. La consulta
