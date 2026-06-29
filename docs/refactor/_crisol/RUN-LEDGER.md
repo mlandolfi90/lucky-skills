@@ -906,7 +906,7 @@
 - Cierre: 2026-06-28 · commit + push a main · tag v1.17.2 DIFERIDO al operador
 
 ### main — 2026-06-29 (autoUpdate: los consumidores auto-siguen main, gateado por el Crisol)
-- STATUS: ACTIVE
+- STATUS: CLOSED
 - Tier: completo
 - Fecha: 2026-06-29
 - TARGET: docker-local
@@ -925,7 +925,7 @@
 - Conformidad-arq: N/A (bash/config, sin código hexagonal)
 - ADR: docs/decisions/0006-autoupdate-consumidores-siguen-main.md
 <!-- VEREDICTOS:BEGIN -->
-- runState: wip
+- runState: closing
 - [V] TARGET · PASS · gate · docker-local
 - [V] MODEL · PASS · gate · opus (uniforme)
 - [V] CREDITO · PASS · steward · ADR 0006 (necesario+suficiente; 0006 = siguiente nº libre)
@@ -934,13 +934,13 @@
 - [V] CASOS_LEGALES · N/A · steward · inserción aditiva contigua al setdefault; no reescribe lógica estable
 - [V] PIN_TOTAL · PASS · steward · artefacto PROPIO Crisol-gateado ≠ floating de tercero (§2 Pin total :226-232)
 - [V] SCOPE_CREEP · PASS · steward · 4 archivos; footer-bug PARQUEADO (no implementado, 13 ubicaciones intactas)
-- [V] PARKING · PENDIENTE · verificador · footer-bug + idea-borde (source≠propio) → IDEAS.md
-- [V] INDEPENDENCIA · PENDIENTE · verificador · Steward/verificador frescos, input=diff
-- [V] ZERO_LEAK · PENDIENTE · leak-verifier · sin secretos en artefactos
-- [V] REGLA0 · PENDIENTE · gate · test-enforcer.sh en docker-local (regresión)
-- [V] TEST_COVERAGE · PENDIENTE · gate · test-enforcer.sh
-- [V] CIERRE_TRAS_PASS · PENDIENTE · gate · cierre tras PASS
-- [V] TECHO_ITER · PENDIENTE · gate · iteraciones
+- [V] PARKING · PASS · verificador · 2 ideas en IDEAS.md (footer-bug + borde source≠propio)
+- [V] INDEPENDENCIA · PASS · verificador · cadena fresca: Steward(plan) / engineer(código) / verificador(diff+tests propios)
+- [V] ZERO_LEAK · PASS · verificador · leak-scan exit 0 LIMPIO + barrido semántico: 0 nombres propios (salvo el repo)
+- [V] REGLA0 · PASS · verificador · funcional NUEVO+BACK-FILL ok (JSON parseado) + enforcer 50/50; baseline-padre idéntico → 3 rojos pelados = ambiental, no regresión
+- [V] TEST_COVERAGE · PASS · verificador · test-enforcer.sh 50/50 (CRISOL_GATE_OVERRIDE=gate versionado, exit 0)
+- [V] CIERRE_TRAS_PASS · PASS · gate · cierre tras todos los veredictos PASS/N/A
+- [V] TECHO_ITER · PASS · gate · 1/3 (converge en iter 1)
 - [V] CONFORMIDAD · N/A · — · bash/config, sin código hexagonal
 - [V] RESPONSIVE · N/A · — · no toca UI
 - [V] MIGRATION · N/A · gate · sin DDL
@@ -953,3 +953,7 @@
 - BITACORA: N/A (cambio de infra de adopción, no aprendizaje de dominio)
 - Iteraciones: 1/3
 - Escalación: none
+- TEST_COVERAGE: test-enforcer.sh 50/50 (gate versionado; el cambio no toca guardianes → regresión verde)
+- Veredictos: Steward APPROVE (7 reglas de plan; PIN_TOTAL resuelta con el texto en mano) · Verificador fresco PASS (funcional NUEVO+BACK-FILL empírico en docker-local + enforcer 50/50 + zero-leak doble red)
+- RETRO: corrida bajo sesión concurrente sobre el mismo trunk — main saltó v1.15→v1.17.2 a mitad de ancla; el fetch+rebase del Paso 2 lo absorbió, pero hubo que re-derivar el nº de ADR (0005 ocupado → 0006) y DIFERIR el tag para no chocar el contador de versión (la RETRO de v1.17.1 ya lo avisaba). Lección: con otra sesión viva en main, re-chequear nº de ADR y último tag remoto ANTES de planificar, no solo al abrir ACTIVE. Bonus de entorno: test-enforcer "pelado" da 3 FAILs ambientales (crisol_gate.py no desplegado en el contenedor) → correr con CRISOL_GATE_OVERRIDE=gate versionado y comparar baseline-padre para separar regresión de entorno.
+- Cierre: 2026-06-29 · commit de cierre (Tier Completo, 1 iteración) · push a main. Tag/forja DIFERIDOS: con autoUpdate, aterrizar en main YA es el deploy → la propagación no necesita tag, y se evita chocar el contador con la otra sesión.
