@@ -51,3 +51,14 @@
   el schema con el formato real (admitir `url`, `triggers` opcional) o que la forja emita `triggers`.
   Hallado por el review adversarial de bitacora (F21); afecta a toda la familia, NO solo bitacora ·
   candidato a corrida Crisol sobre forjar-release.sh + registry.schema.json
+- 2026-06-29 · footer-bug "Ley viva": los footers de ~13 archivos (.md de skills + ADRs) usan
+  `git ls-remote --tags` SIN remoto explícito → dentro de un repo consumidor resuelve contra SU
+  origin, no contra lucky-skills, así que la red secundaria de detección de drift queda ciega.
+  Fix = remoto explícito `https://github.com/mlandolfi90/lucky-skills.git` (como ya hace
+  crisol/SKILL.md §6). Corrida SEPARADA: toca los mismos archivos que el re-sello concurrente ·
+  hallado en la corrida autoUpdate
+- 2026-06-29 · borde del Steward en `adoptar-crisol.sh`: inyecta `autoUpdate: true` sin validar
+  que el `source` preexistente apunte a `mlandolfi90/lucky-skills`; si un repo tuviera una entrada
+  `lucky-skills` apuntando a OTRO repo/fork, auto-seguir su main SÍ sería floating-de-tercero
+  (viola PIN_TOTAL). Endurecimiento futuro: validar `source.repo == mlandolfi90/lucky-skills`
+  antes de inyectar el flag · hallado en la corrida autoUpdate

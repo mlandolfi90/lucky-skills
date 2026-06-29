@@ -4,7 +4,8 @@
       "source": {
         "source": "github",
         "repo": "mlandolfi90/lucky-skills"
-      }
+      },
+      "autoUpdate": true
     }
   },
   "enabledPlugins": {

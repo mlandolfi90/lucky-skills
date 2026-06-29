@@ -20,12 +20,17 @@ if os.path.exists(p):
         data = json.load(f)
 mk = data.setdefault("extraKnownMarketplaces", {})
 mk.setdefault("lucky-skills", {"source": {"source": "github", "repo": "mlandolfi90/lucky-skills"}})
+# marketplace github de TERCEROS: auto-update OFF por defecto → sin esto el CLI cachea el
+# plugin al instalar y los consumidores quedan pinneados ("quedan atrás" tras cada release);
+# con el flag auto-siguen main HEAD (gateado por el Crisol). Incondicional: back-fillea
+# adopciones viejas que ya tenían la entrada sin autoUpdate.
+mk["lucky-skills"]["autoUpdate"] = True
 ep = data.setdefault("enabledPlugins", {})
 ep["lucky@lucky-skills"] = True
 with open(p, "w", encoding="utf-8") as f:
     json.dump(data, f, indent=2, ensure_ascii=False)
     f.write("\n")
-print("  ✅ .claude/settings.json — marketplace lucky-skills + plugin lucky habilitado")
+print("  ✅ .claude/settings.json — marketplace lucky-skills + autoUpdate + plugin lucky habilitado")
 PY
 
 # 2. Opt-in del enforcement: el ledger (su existencia activa ambos guardianes)
