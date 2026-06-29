@@ -957,3 +957,31 @@
 - Veredictos: Steward APPROVE (7 reglas de plan; PIN_TOTAL resuelta con el texto en mano) · Verificador fresco PASS (funcional NUEVO+BACK-FILL empírico en docker-local + enforcer 50/50 + zero-leak doble red)
 - RETRO: corrida bajo sesión concurrente sobre el mismo trunk — main saltó v1.15→v1.17.2 a mitad de ancla; el fetch+rebase del Paso 2 lo absorbió, pero hubo que re-derivar el nº de ADR (0005 ocupado → 0006) y DIFERIR el tag para no chocar el contador de versión (la RETRO de v1.17.1 ya lo avisaba). Lección: con otra sesión viva en main, re-chequear nº de ADR y último tag remoto ANTES de planificar, no solo al abrir ACTIVE. Bonus de entorno: test-enforcer "pelado" da 3 FAILs ambientales (crisol_gate.py no desplegado en el contenedor) → correr con CRISOL_GATE_OVERRIDE=gate versionado y comparar baseline-padre para separar regresión de entorno.
 - Cierre: 2026-06-29 · commit de cierre (Tier Completo, 1 iteración) · push a main. Tag/forja DIFERIDOS: con autoUpdate, aterrizar en main YA es el deploy → la propagación no necesita tag, y se evita chocar el contador con la otra sesión.
+
+### main — 2026-06-29 (release v1.18.0 — forja autoUpdate, sobre v1.17.2)
+- STATUS: CLOSED
+- Tier: fast-path
+- Fecha: 2026-06-29
+- TARGET: docker-local
+- MODEL: opus (forja mecánica)
+- LEY: v1.18.0 (sello local recién forjado; el operador crea el tag anotado v1.18.0 sobre el commit de re-sello)
+- Alcance: release v1.18.0 — re-sello de familia v1.17.2→v1.18.0 (14 sellos: 8 SKILL.md + detectar-runtime + 6 ADRs) + registry.json regenerado (7 skills, pin commit f848740) sobre la corrida CLOSED de autoUpdate. `forjar-release.sh v1.18.0 --no-sign`. Decisión MLL: forjar para tener el checkpoint nombrado (aunque con autoUpdate la propagación ya vive en main). El tag anotado lo crea el operador desde el navegador (el sandbox bloquea el push de tags).
+- FIRMA: minisign DIFERIDA (--no-sign).
+- TEST_COVERAGE: heredado (la corrida autoUpdate ya verificó test-enforcer 50/50; la forja no toca scripts).
+<!-- VEREDICTOS:BEGIN -->
+- runState: closing
+- [V] TARGET · PASS · gate · docker-local
+- [V] MODEL · PASS · gate · opus (forja mecánica)
+- [V] SELLOS · PASS · forja+lead · 14/14 == v1.18.0, 0 stragglers (grep confirmado)
+- [V] FORJA · PASS · forja · forjar-release.sh en una pasada (sellos + registry + leak-scan)
+- [V] TAG_GATE · PASS · gate · tag v1.18.0 nace tras corrida CLOSED+PASS (autoUpdate)
+- [V] ZERO_LEAK · PASS · forja · leak-scan exit 0 LIMPIO
+- [V] TEST_COVERAGE · PASS · lead · heredado de la corrida autoUpdate (50/50); forja no toca código
+- [V] CIERRE_TRAS_PASS · PASS · gate · cierre tras PASS
+- [V] TECHO_ITER · PASS · gate · 1/1 (forja mecánica)
+- [V] REGLA0 · N/A · — · forja de sellos/prosa, sin código nuevo
+- [V] PIN_TOTAL · N/A · — · re-sello, sin cambio de dependencias
+<!-- VEREDICTOS:END -->
+- BITACORA: N/A (release mecánico)
+- RETRO: forja limpia sobre el ÚLTIMO tag remoto (v1.17.2), con main quieto → sin colisión de contador (la lección de v1.17.1 aplicada de entrada). Tag anotado diferido al operador (sandbox bloquea push de tags).
+- Cierre: 2026-06-29 · commit de re-sello + push a main · tag v1.18.0 DIFERIDO al operador
