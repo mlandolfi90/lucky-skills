@@ -882,3 +882,25 @@
   colisionaron en la numeración → v1.16.2 murió. Lección: antes de forjar, fetchear main y forjar
   sobre el ÚLTIMO tag remoto, no sobre el local — un release ajeno puede haber avanzado el trunk.
 - Cierre: 2026-06-28 · commit de re-sello + push FF a main · tag anotado v1.17.1 DIFERIDO al operador
+
+### main — 2026-06-28 (bitacora: captura DRIFT-002 CSRF login vencido → PRG)
+- STATUS: CLOSED
+- Tier: fast-path
+- Fecha: 2026-06-28
+- TARGET: docker-local
+- MODEL: opus (líder)
+- Alcance: Destilación manual a la bitácora — entrada **DRIFT-002** "tras un redeploy, login da
+  `csrf token invalid` → PRG 303" (estado LIVE, promovida por MLL que endosó el aprendizaje en
+  sesión) + fila en INDEX.md. Origen: corrida de Lucky-Auth-Plane (portal CSRF login vencido,
+  rama `dev` — NO estaba en la bitácora ni aplicado a otros repos). Se forja v1.17.2 para que la
+  Ley viva la propague a los 21 repos. Solo .md (entrada + INDEX) + re-sello/registry.
+- FIRMA: minisign DIFERIDA.
+- Veredictos: leak-scan LIMPIO (sin secretos: status codes/paths relativos/strings genéricos) ·
+  Sellos 13/13 == v1.17.2.
+- TEST_COVERAGE: N/A (captura .md; sin código).
+- BITACORA: DRIFT-002 (capturada en esta corrida).
+- RETRO: el operador cazó que un aprendizaje real (CSRF 15 min → PRG) vivía en `auth-plane/dev` y
+  NO había llegado a la bitácora — confirma el valor del ciclo: sin captura cross-repo, cada repo
+  re-tropieza. Nota operativa: mi clon de auth-plane no tenía la rama `dev` fetcheada → fetchear
+  antes de juzgar "está al día".
+- Cierre: 2026-06-28 · commit + push a main · tag v1.17.2 DIFERIDO al operador
