@@ -928,13 +928,13 @@
 - runState: wip
 - [V] TARGET · PASS · gate · docker-local
 - [V] MODEL · PASS · gate · opus (uniforme)
-- [V] CREDITO · PENDIENTE · steward · ADR 0006
-- [V] OPEN_CLOSED · PENDIENTE · design-verifier · adoptar-crisol.sh (¿AGREGAR data emitida vs EDITAR lógica?)
-- [V] ATOMICIDAD · PENDIENTE · design-verifier · responsabilidad única del script de adopción
-- [V] CASOS_LEGALES · PENDIENTE · steward · si toca lógica estable del adoptar
-- [V] PIN_TOTAL · PENDIENTE · scope-verifier · tensión autoUpdate=floating, resuelta self-owned + Crisol-gated
-- [V] SCOPE_CREEP · PENDIENTE · scope-verifier · solo adoptar+settings+ADR+IDEAS
-- [V] PARKING · PENDIENTE · scope-verifier · footer-bug → IDEAS.md
+- [V] CREDITO · PASS · steward · ADR 0006 (necesario+suficiente; 0006 = siguiente nº libre)
+- [V] OPEN_CLOSED · PASS · steward · adoptar-crisol.sh:22 AGREGA clave a la data emitida, no edita la lógica de merge
+- [V] ATOMICIDAD · PASS · steward · responsabilidad única ("escribir la adopción") preservada
+- [V] CASOS_LEGALES · N/A · steward · inserción aditiva contigua al setdefault; no reescribe lógica estable
+- [V] PIN_TOTAL · PASS · steward · artefacto PROPIO Crisol-gateado ≠ floating de tercero (§2 Pin total :226-232)
+- [V] SCOPE_CREEP · PASS · steward · 4 archivos; footer-bug PARQUEADO (no implementado, 13 ubicaciones intactas)
+- [V] PARKING · PENDIENTE · verificador · footer-bug + idea-borde (source≠propio) → IDEAS.md
 - [V] INDEPENDENCIA · PENDIENTE · verificador · Steward/verificador frescos, input=diff
 - [V] ZERO_LEAK · PENDIENTE · leak-verifier · sin secretos en artefactos
 - [V] REGLA0 · PENDIENTE · gate · test-enforcer.sh en docker-local (regresión)
