@@ -904,3 +904,52 @@
   re-tropieza. Nota operativa: mi clon de auth-plane no tenía la rama `dev` fetcheada → fetchear
   antes de juzgar "está al día".
 - Cierre: 2026-06-28 · commit + push a main · tag v1.17.2 DIFERIDO al operador
+
+### main — 2026-06-29 (autoUpdate: los consumidores auto-siguen main, gateado por el Crisol)
+- STATUS: ACTIVE
+- Tier: completo
+- Fecha: 2026-06-29
+- TARGET: docker-local
+- MODEL: opus (uniforme)
+- LEY: v1.17.2 (sello local; tag v1.17.2 en el remoto — esta corrida NO crea tag: forja diferida para no chocar el contador con la otra sesión activa, RETRO v1.17.1)
+- Alcance: `adoptar-crisol.sh` no activaba `autoUpdate`, así que los hosts CLI (auto-update OFF por
+  defecto en marketplaces de terceros) quedaban pinneados al plugin cacheado al instalar → los repos
+  "quedan atrás" tras un release. Fix: `"autoUpdate": true` en el merge del marketplace de
+  `adoptar-crisol.sh` (con asignación explícita post-`setdefault` para PROPAGAR a adopciones viejas) +
+  dogfood en `.claude/settings.json` del propio repo. Consecuencia: los consumidores AUTO-SIGUEN main
+  (como ya hace la web por clon-fresco) y main está gateado por el Crisol → "siempre-último" =
+  "siempre-aprobado"; el tag deja de ser el pin de distribución y pasa a checkpoint nombrado. NO toca
+  guardianes (crisol_gate.py / crisol-enforcer.sh). Footer-bug `git ls-remote` (family-wide, ~14
+  archivos) PARQUEADO en IDEAS.md (concern separado + conflicto con el re-sello de la otra sesión).
+- MIGRATION_STRATEGY: N/A (sin DDL)
+- Conformidad-arq: N/A (bash/config, sin código hexagonal)
+- ADR: docs/decisions/0006-autoupdate-consumidores-siguen-main.md
+<!-- VEREDICTOS:BEGIN -->
+- runState: wip
+- [V] TARGET · PASS · gate · docker-local
+- [V] MODEL · PASS · gate · opus (uniforme)
+- [V] CREDITO · PENDIENTE · steward · ADR 0006
+- [V] OPEN_CLOSED · PENDIENTE · design-verifier · adoptar-crisol.sh (¿AGREGAR data emitida vs EDITAR lógica?)
+- [V] ATOMICIDAD · PENDIENTE · design-verifier · responsabilidad única del script de adopción
+- [V] CASOS_LEGALES · PENDIENTE · steward · si toca lógica estable del adoptar
+- [V] PIN_TOTAL · PENDIENTE · scope-verifier · tensión autoUpdate=floating, resuelta self-owned + Crisol-gated
+- [V] SCOPE_CREEP · PENDIENTE · scope-verifier · solo adoptar+settings+ADR+IDEAS
+- [V] PARKING · PENDIENTE · scope-verifier · footer-bug → IDEAS.md
+- [V] INDEPENDENCIA · PENDIENTE · verificador · Steward/verificador frescos, input=diff
+- [V] ZERO_LEAK · PENDIENTE · leak-verifier · sin secretos en artefactos
+- [V] REGLA0 · PENDIENTE · gate · test-enforcer.sh en docker-local (regresión)
+- [V] TEST_COVERAGE · PENDIENTE · gate · test-enforcer.sh
+- [V] CIERRE_TRAS_PASS · PENDIENTE · gate · cierre tras PASS
+- [V] TECHO_ITER · PENDIENTE · gate · iteraciones
+- [V] CONFORMIDAD · N/A · — · bash/config, sin código hexagonal
+- [V] RESPONSIVE · N/A · — · no toca UI
+- [V] MIGRATION · N/A · gate · sin DDL
+- [V] COSTURA · N/A · — · sin nuevo punto de extensión
+- [V] FUENTE_VERDAD · N/A · — · no toca testing/prod
+- [V] SELLOS · N/A · — · corrida no crea tag (forja diferida)
+- [V] FORJA · N/A · — · sin release esta corrida
+- [V] TAG_GATE · N/A · — · sin tag esta corrida
+<!-- VEREDICTOS:END -->
+- BITACORA: N/A (cambio de infra de adopción, no aprendizaje de dominio)
+- Iteraciones: 1/3
+- Escalación: none
