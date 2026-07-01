@@ -4,6 +4,24 @@ Notas de release de la familia de skills Lucky. El historial completo del **proc
 (corridas del Crisol, RETROs) vive en `docs/refactor/_crisol/RUN-LEDGER.md`; los tags
 inmutables, en `git tag`. Formato: más nuevo arriba.
 
+## v1.18.2 — 2026-07-01 — Bitácora: +GAP-002 (cron de Actions inerte fuera de la rama default) + cierre DRIFT-003
+
+Segunda captura del mismo incidente de **Lucky-Auth-Plane** (cierre del postmortem, verificado en vivo)
++ refresh de DRIFT-003 con lo aprendido al cerrar:
+
+- **GAP-002 (nueva, CANDIDATE):** agregás un workflow con `schedule:` (cron) y jamás corre — 0 runs,
+  sin error visible. Causa: los cron de GitHub Actions corren SOLO desde la rama default; en un repo
+  dev-only el canary queda INERTE (teatro de cobertura). Acción: el periódico va a un scheduler
+  independiente de la rama (watchdog / monitor externo), NO a Actions. Origen: el repo origen agregó
+  su canary y lo RETIRÓ al descubrir esto — ingeniería honesta que ahora es patrón de la familia.
+- **DRIFT-003 (refresh, usos 2, sigue LIVE):** fix verificado EN VIVO (GET público → 200, antes 000)
+  → `validated_on` con sha real (`6660073`). Prevención actualizada: (b) guarda de CI portable
+  (`compose-guard.yml`: FALLA si `traefik.docker.network` usa `${...}`) aplicada en el repo origen;
+  (d) HECHA — auditoría read-only de los ~21 repos: el label vive SOLO en 3 (el origen ya literal en
+  su rama de deploy; los otros 2 aún `${...}` en `main`).
+
+Re-sello de la familia == v1.18.2; firma minisign diferida.
+
 ## v1.18.1 — 2026-07-01 — Bitácora: +DRIFT-003 (portal healthy pero caído → label traefik literal)
 
 Captura **cross-repo** (sobre v1.18.0) a la bitácora de un postmortem real de **Lucky-Auth-Plane**

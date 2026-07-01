@@ -19,11 +19,15 @@
   re-elige al azar una IP alcanzable y **deja la bomba armada** para el próximo reload. NO confíes en el
   `healthy` del PaaS (no testea end-to-end a través del proxy). NO asumas que `${VAR:-}` se interpola en labels.
 - **PREVENCIÓN:** (a) **check sintético EXTERNO end-to-end** (GET público esperando 200/303) — cierra el
-  punto ciego del healthcheck; (b) prohibí `${VAR:-}` sin default útil en labels de red críticos → literal;
+  punto ciego del healthcheck; OJO: NO como cron de Actions si el repo no lo tiene en la rama default →
+  [GAP-002](GAP-002.md); (b) **guarda de CI** que FALLA si `traefik.docker.network` usa `${...}` —
+  aplicada en el repo origen (`compose-guard.yml`), patrón portable a cualquier repo del mismo esquema;
   (c) invariante: el contenedor que el proxy expone debe estar SIEMPRE en una red a la que el proxy esté
-  conectado; (d) **auditá los otros repos** con el mismo esquema PaaS+compose (mismo `${VAR:-}` en labels de red).
-- **validated_on:** `dev` · 2026-07-01 · `<sha>`
+  conectado; (d) **[HECHO 2026-07-01]** auditados los ~21 repos (read-only): el label vive SOLO en 3 —
+  el repo origen ya literal en `dev` (su rama de deploy); los otros 2 aún `${...}` en `main` → promover
+  el literal donde el PaaS trackee esa rama.
+- **validated_on:** `dev` · 2026-07-01 · `6660073` (fix verificado EN VIVO: GET público → 200, antes 000)
 - **stale_si:** >90 días, o si se cambia el reverse-proxy / esquema de red del PaaS
-- **origen:** Lucky-Auth-Plane — postmortem `docs/incidents/2026-07-01-portal-traefik-docker-network.md`   ·   **usos:** 1
-- **REFS:** deploy-build-once-promote (esquema PaaS+compose)   ·   **NEXT:** el punto (d) es cross-repo → candidato a checklist/regla de deploy
+- **origen:** Lucky-Auth-Plane — postmortem `docs/incidents/2026-07-01-portal-traefik-docker-network.md`   ·   **usos:** 2
+- **REFS:** deploy-build-once-promote (esquema PaaS+compose) · [GAP-002](GAP-002.md)   ·   **NEXT:** promover el literal a los 2 repos restantes + canary en scheduler externo
 - **estado:** LIVE   <!-- promovida por MLL (endosó el postmortem en sesión) -->

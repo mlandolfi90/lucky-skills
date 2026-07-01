@@ -1011,3 +1011,30 @@
   mismo esquema PaaS+compose re-tropieza. Delicadeza: solo se capturó el patrón, NO se aplicó el fix ni
   se tocó prod (respetando "nada de tocar").
 - Cierre: 2026-07-01 · commit + push a main · tag v1.18.1 DIFERIDO al operador
+
+### main — 2026-07-01 (bitacora: captura GAP-002 cron-inerte + cierre DRIFT-003 — revisión del postmortem cerrado)
+- STATUS: CLOSED
+- Tier: fast-path
+- Fecha: 2026-07-01
+- TARGET: docker-local
+- MODEL: fable (líder) — captura .md-only
+- Alcance: Revisión del cierre del incidente en Lucky-Auth-Plane (postmortem RESUELTO, fix verificado
+  en vivo, guarda `compose-guard.yml` + gate `.github/**` no-desplegable, canary retirado por dev-only)
+  → destilación de DOS aprendizajes: (1) **GAP-002** nueva, CANDIDATE: "workflow con `schedule:` jamás
+  corre — 0 runs sin error" (los cron de Actions corren SOLO desde la rama default; repo dev-only →
+  canary INERTE = teatro; el periódico va a scheduler externo). (2) **DRIFT-003** refresh (sigue LIVE):
+  `validated_on` con sha real `6660073` (fix verificado EN VIVO: GET público 200, antes 000), usos 2,
+  prevención (b) guarda de CI portable aplicada en el origen, (d) HECHA — auditoría read-only ~21
+  repos: label solo en 3 (origen ya literal en su rama de deploy; 2 restantes aún `${...}` en `main`).
+  **Leak-scrubbed**: sin IPs/dominios/UUIDs — solo el patrón y nombres de repo. + fila GAP-002 en INDEX
+  (reordenado por usos) + CHANGELOG. Forja v1.18.2 (Ley viva → 21 repos). Solo .md; auth-plane NO tocado.
+- FIRMA: minisign DIFERIDA.
+- Veredictos: leak-scan LIMPIO · sellos == v1.18.2 (forja) · SCOPE: solo bitácora (GAP-002.md,
+  DRIFT-003.md, INDEX.md) + CHANGELOG + este ledger.
+- TEST_COVERAGE: N/A (captura .md; sin código).
+- BITACORA: GAP-002 (nueva) · DRIFT-003 (usos++/refresh).
+- RETRO: el cierre del incidente en el repo origen enseñó DOS veces: el fix confirmó la causa raíz de
+  DRIFT-003 (predicción → certeza), y el intento de canary destapó el footgun del `schedule` dev-only
+  (GAP-002). Capturar el POR QUÉ se retiró un guard vale tanto como el guard: evita que el próximo lo
+  "restaure". Fetch antes de forjar, de entrada (lección v1.17.1 ya rutina).
+- Cierre: 2026-07-01 · commit + push a main · tag v1.18.2 DIFERIDO al operador
