@@ -4,6 +4,21 @@ Notas de release de la familia de skills Lucky. El historial completo del **proc
 (corridas del Crisol, RETROs) vive en `docs/refactor/_crisol/RUN-LEDGER.md`; los tags
 inmutables, en `git tag`. Formato: más nuevo arriba.
 
+## v1.18.1 — 2026-07-01 — Bitácora: +DRIFT-003 (portal healthy pero caído → label traefik literal)
+
+Captura **cross-repo** (sobre v1.18.0) a la bitácora de un postmortem real de **Lucky-Auth-Plane**
+(diagnóstico read-only, sin tocar prod):
+
+- **DRIFT-003:** el PaaS reporta `running:healthy` pero la app no responde de afuera (`curl` →
+  000/timeout — cuelgue, **no 503**) tras un reload del proxy. Causa: el label
+  `traefik.docker.network: ${VAR:-}` no se interpola → el proxy elige una red inalcanzable. **Fix:**
+  label a valor **LITERAL** + redeploy ("Restart Proxy" solo maquilla, deja la bomba armada).
+  Prevención: check sintético externo end-to-end + prohibir `${VAR:-}` en labels de red críticos +
+  auditar los otros repos con el mismo esquema PaaS+compose.
+
+Entrada **LIVE** (endosada por MLL). Verificador fresco: leak/calidad/scope PASS. Re-sello 14/14 ==
+v1.18.1; firma minisign diferida.
+
 ## v1.17.2 — 2026-06-28 — Bitácora: +DRIFT-002 (CSRF login vencido tras redeploy → PRG)
 
 Captura **cross-repo** a la bitácora de un aprendizaje real de **Lucky-Auth-Plane** (que vivía en su

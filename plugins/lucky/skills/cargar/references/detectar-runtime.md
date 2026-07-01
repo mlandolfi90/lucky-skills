@@ -281,6 +281,6 @@ contexto". Por eso la verificacion de presencia es:
 ---
 
 **Fuente de verdad: `github.com/mlandolfi90/lucky-skills` · esta copia = tag
-`v1.18.0` (cache local, NO la ley).** Ley viva: con red, si el repo tiene un tag
+`v1.18.1` (cache local, NO la ley).** Ley viva: con red, si el repo tiene un tag
 mayor (`git ls-remote --tags`), avisar al humano que reinstale; el loader NO
 adopta su propio cuerpo desde la red.
