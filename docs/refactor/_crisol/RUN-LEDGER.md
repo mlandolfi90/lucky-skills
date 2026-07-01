@@ -985,3 +985,29 @@
 - BITACORA: N/A (release mecánico)
 - RETRO: forja limpia sobre el ÚLTIMO tag remoto (v1.17.2), con main quieto → sin colisión de contador (la lección de v1.17.1 aplicada de entrada). Tag anotado diferido al operador (sandbox bloquea push de tags).
 - Cierre: 2026-06-29 · commit de re-sello + push a main · tag v1.18.0 DIFERIDO al operador
+
+### main — 2026-07-01 (bitacora: captura DRIFT-003 — portal caído por label traefik sin interpolar)
+- STATUS: CLOSED
+- Tier: fast-path
+- Fecha: 2026-07-01
+- TARGET: docker-local
+- MODEL: opus (líder + verificador fresco)
+- Alcance: Destilación a la bitácora — entrada **DRIFT-003** "el PaaS dice `healthy` pero la app no
+  responde de afuera (`curl` → 000/timeout) tras un reload del proxy → fijar `traefik.docker.network`
+  a LITERAL (no `${VAR:-}`) + redeploy; 'Restart Proxy' solo maquilla" (estado LIVE, endosada por MLL).
+  Origen: postmortem real de Lucky-Auth-Plane (2026-07-01, rama `dev`, diagnóstico read-only, sin tocar
+  prod). **Leak-scrubbed**: sin IPs (172.x)/dominios(nip.io)/UUIDs del postmortem — solo el patrón. +
+  fila en INDEX. Forja v1.18.1 para propagar por Ley viva a los 21 repos. Solo .md.
+- FIRMA: minisign DIFERIDA.
+- Veredictos: leak-scan `--staged` LIMPIO + grep de fugas del postmortem = 0 (IPs 172.x / nip.io / UUID
+  `xb4l9…` / `COOLIFY_RESOURCE_UUID`) · verificador FRESCO independiente (opus): ZERO_LEAK PASS
+  (árbol+staged exit0, 0 hits) · CALIDAD_ENTRADA PASS (síntoma observable, acción correcta, 29 líneas) ·
+  SCOPE PASS (solo INDEX.md + DRIFT-003.md) · Sellos 13/13 == v1.18.1.
+- TEST_COVERAGE: N/A (captura .md; sin código).
+- BITACORA: DRIFT-003.
+- RETRO: mi clon de lucky-skills estaba viejo (main ya en v1.18.0); **fetch ANTES de forjar** cazó el
+  último tag y evitó colisión de contador (lección DRIFT-002/v1.17.1 aplicada de entrada). El
+  aprendizaje del incidente vivía solo en `auth-plane/dev`; sin captura cross-repo, cada repo con el
+  mismo esquema PaaS+compose re-tropieza. Delicadeza: solo se capturó el patrón, NO se aplicó el fix ni
+  se tocó prod (respetando "nada de tocar").
+- Cierre: 2026-07-01 · commit + push a main · tag v1.18.1 DIFERIDO al operador
