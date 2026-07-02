@@ -4,6 +4,29 @@ Notas de release de la familia de skills Lucky. El historial completo del **proc
 (corridas del Crisol, RETROs) vive en `docs/refactor/_crisol/RUN-LEDGER.md`; los tags
 inmutables, en `git tag`. Formato: más nuevo arriba.
 
+## v1.19.1 — 2026-07-02 — Bitácora: promociones por panel (delegación explícita del operador)
+
+El operador delegó la decisión sobre las 4 CANDIDATE ("decide tú"). Panel de 12 jueces
+independientes (3 lentes por entrada: evidencia real en los ledgers, calidad adversarial de
+catálogo, predicción de la decisión del operador):
+
+- **DRIFT-001 → LIVE (3/3)** — evidencia viva doble en el ledger (oráculo ciego v1.11.0;
+  KeyError que dejaba el gate INERTE v1.12.0) + 3er uso HOY ("el INDEX que miente" → parió
+  `bitacora-lint`). `usos: 3`, `validated_on` con sha real `54a9176`. La válvula de ascenso quedó
+  anotada en NEXT: la mitad mecanizable YA ascendió (gate ADR 0002 + lint).
+- **GAP-002 → LIVE (3/3)** — la acción se ejecutó y verificó en la realidad (cadena de commits del
+  retiro del canary en el repo origen). + prevención enriquecida: GitHub auto-desactiva `schedule`
+  tras ~60 días sin actividad (el mismo teatro por otra puerta).
+- **GREP-001 queda CANDIDATE (3/3)** — bootstrap del concejo, 0 usos reales, y la acción prescribe
+  un mapa (Key Files/MAPA.md) que ningún repo tiene todavía. NEXT con condición de promoción explícita.
+- **GAP-001 queda CANDIDATE (2/1)** — el patrón tiene espejo real (la corrida S2d de auth-plane
+  desriesgó su cutover con un spike) pero cero usos post-nacimiento. Fixes de calidad aplicados:
+  umbral unificado, "spike-log" desinventado, dónde vive el código del spike, `validated_on`
+  anclado al evento real (2026-06-21) y REFS al ledger de origen.
+
+Anti-teatro respetado: promover solo lo probado; lo teórico madura con condición de salida escrita.
+Lint 6/6 coherente · stale 0 · leak-scan LIMPIO. Re-sello == v1.19.1; firma minisign diferida.
+
 ## v1.19.0 — 2026-07-02 — Forja: gate de coherencia de la Bitácora (`bitacora-lint.sh`, fail-closed)
 
 La bitácora duplicaba `estado`/`usos`/`validated_on` en dos lugares (la entrada y su fila del INDEX)

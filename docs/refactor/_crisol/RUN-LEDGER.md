@@ -1071,3 +1071,36 @@
   del operador ("predecí mis decisiones"): la mejora elegida salió de SU filosofía escrita
   (anti-pudrición mecánico, jidoka fail-closed en el ritual de release, frontera del gate intacta).
 - Cierre: 2026-07-02 · commit + push a main · tag DIFERIDO al operador
+
+### main — 2026-07-02 (bitacora: promociones CANDIDATE→LIVE por panel — delegación explícita del operador)
+- STATUS: CLOSED
+- Tier: fast-path (solo .md: entradas + INDEX + CHANGELOG; exento del gate)
+- Fecha: 2026-07-02
+- TARGET: docker-local
+- MODEL: fable (líder) + panel de 12 jueces independientes (workflow: 4 entradas × 3 lentes)
+- Alcance: El operador delegó EXPLÍCITAMENTE la promoción de las 4 CANDIDATE ("decide los candidatos
+  dónde encajan, decide tú"). La delegación es su acto deliberado de propiedad (ADR 0005 §Captura 4
+  intacto en espíritu: humano decide — acá decidió delegar). Panel con lentes: (1) EVIDENCIA real en
+  los RUN-LEDGERs/postmortems de los ~21 repos; (2) CALIDAD adversarial vs la vara de las LIVE;
+  (3) PREDICCIÓN de la decisión del operador desde su historial (promovió DRIFT-002/003 con evidencia
+  viva; retiró el canary-teatro). Decisiones: **DRIFT-001 → LIVE (3/3)** — evidencia doble en este
+  ledger (:433 oráculo ciego v1.11.0; :457 KeyError gate INERTE v1.12.0) + 3er uso hoy (lint);
+  usos 3, validated_on sha real 54a9176; NEXT anota válvula de ascenso (mitad mecanizable ya
+  ascendió: gate ADR 0002 + bitacora-lint). **GAP-002 → LIVE (3/3)** — acción ejecutada y verificada
+  en la realidad (cadena alta→retiro→postmortem en el repo origen); + prevención: GitHub auto-desactiva
+  schedule tras ~60d sin actividad. **GREP-001 CANDIDATE (3/3)** — bootstrap, 0 usos, la acción
+  prescribe un mapa que no existe; NEXT con condición de promoción. **GAP-001 CANDIDATE (2/1)** —
+  espejo real (spike S2d de auth-plane) pero 0 usos post-nacimiento; fixes de calidad aplicados
+  (umbral unificado, spike-log desinventado, scratch/enforcer, validated_on al evento real 2026-06-21,
+  REFS al ledger origen).
+- FIRMA: minisign DIFERIDA.
+- Veredictos: bitacora-lint 6/6 coherente exit 0 (primera promoción real verificada por el gate
+  forjado hoy) · bitacora-stale 6 vigentes/0 STALE · leak-scan LIMPIO · panel unánime en 3 de 4
+  (GAP-001 mayoría 2/1 hacia el lado conservador — anti-teatro).
+- TEST_COVERAGE: N/A (solo .md; los gates mecánicos corrieron).
+- BITACORA: DRIFT-001 (usos++ → 3, LIVE) · GAP-002 (LIVE) · GREP-001/GAP-001 (metadatos honestos).
+- RETRO: el panel superó al juicio individual: encontró el espejo real de GAP-001 (S2d) que el líder
+  no tenía presente, y frenó la tentación de promover las 4 por complacencia — promover solo lo
+  probado ES la predicción correcta del operador (su anti-teatro), no la promoción masiva. El lint
+  forjado en v1.19.0 pagó en su primer día: verificó mecánicamente el espejo de 8 celdas editadas.
+- Cierre: 2026-07-02 · commit + push a main · tag DIFERIDO al operador

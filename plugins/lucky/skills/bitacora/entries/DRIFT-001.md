@@ -15,10 +15,9 @@
   pasó"; el verde NO garantiza que el invariante se aplicó. No leas solo el resumen
   del verificador previo: anclate al código real.
 - **PREVENCIÓN:** verificación adversarial NO es opcional en código de seguridad; el
-  Verificador corre el test ÉL MISMO en el TARGET (REGLA 0). Candidato a ascender a
-  regla del gate.
-- **validated_on:** `main` · 2026-06-13 · `<sha>`
+  Verificador corre el test ÉL MISMO en el TARGET (REGLA 0).
+- **validated_on:** `main` · 2026-07-02 · `54a9176` (aplicada al propio catálogo: "el INDEX que miente" → nació `bitacora-lint`)
 - **stale_si:** >90 días, o si el check pasa a ser fail-closed por contrato
-- **origen:** RUN-LEDGER (lección recurrente "el test miente verde", c5/v1.11.0/v1.12.0)   ·   **usos:** 2
-- **REFS:** ADR 0002 (gate de cobertura fail-closed)   ·   **NEXT:** si reaparece en otro repo → ascenso a regla-gate
-- **estado:** CANDIDATE   <!-- semilla destilada por el agente; el humano la promueve a LIVE -->
+- **origen:** RUN-LEDGER (lección recurrente "el test miente verde", c5/v1.11.0/v1.12.0; reaparecida cross-repo)   ·   **usos:** 3
+- **REFS:** ADR 0002 (gate de cobertura fail-closed) · `bitacora-lint.sh` (ascenso parcial v1.19.0)   ·   **NEXT:** usos≥3 disparó la válvula: la mitad mecanizable YA ascendió (gate ADR 0002 + lint); queda decidir si "auditá el código, no el comentario" va a regla del Verificador
+- **estado:** LIVE   <!-- promovida por delegación explícita de MLL ("decide tú", 2026-07-02) · panel 3/3 LIVE -->

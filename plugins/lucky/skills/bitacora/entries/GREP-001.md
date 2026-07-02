@@ -20,5 +20,5 @@
 - **validated_on:** `claude/arduous-task-j7zc8p` · 2026-06-28 · `<sha>`
 - **stale_si:** >90 días, o si el flujo se refactoriza
 - **origen:** blueprint Vademécum (concejo) + lección "anclarse al código real, no al resumen"   ·   **usos:** 1
-- **REFS:** `brujula/SKILL.md` (fuentes)   ·   **NEXT:** si el cambio toca un contrato → invocar `crisol`
-- **estado:** CANDIDATE   <!-- semilla destilada por el agente; el humano la promueve a LIVE -->
+- **REFS:** `brujula/SKILL.md` (fuentes)   ·   **NEXT:** → LIVE recién con el 1er uso real documentado (`BITACORA: GREP-001` en algún ledger); prerequisito honesto: el mapa Key Files/MAPA.md aún NO existe en ningún repo — crearlo es parte del patrón
+- **estado:** CANDIDATE   <!-- panel 2026-07-02 (delegación MLL): 3/3 CANDIDATE — bootstrap del concejo, 0 usos reales, la acción prescribe un mapa inexistente -->
