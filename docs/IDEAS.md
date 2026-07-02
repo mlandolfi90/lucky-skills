@@ -68,3 +68,13 @@
   escapado `\|` de markdown en celdas del INDEX da "FILA malformada" (de facto prohíbe pipes en
   celdas — documentarlo o soportarlo). Ninguno produce falso verde · hallado en la corrida
   bitacora-lint
+- 2026-07-02 · [ex GREP-001] patrón "grep ciego → pará y abrí el mapa (Key Files ≤5)": RETIRADO del
+  catálogo por decisión del operador — sin evidencia real (0 usos en ningún ledger) y la acción
+  prescribe un mapa que ningún repo tiene. Para revivirlo: crear el MAPA/Key Files en ≥1 repo y
+  capturar el 1er uso real con sha. Texto completo en git history (v1.19.1 @ `02820ee`) · regla nueva:
+  sin evidencia real no entra al catálogo
+- 2026-07-02 · [ex GAP-001] patrón "incógnita con >2 ramas → spike timebox ANTES del Crisol": RETIRADO
+  del catálogo — el patrón tiene espejo real (corrida S2d de auth-plane, 2026-06-21, spike PASS que
+  cambió la decisión) pero la ENTRADA tuvo 0 usos. Para revivirlo: el próximo spike real que corra el
+  patrón la destila de vuelta citando su evidencia. Texto completo en git history (v1.19.1 @
+  `02820ee`) · regla nueva: sin evidencia real no entra al catálogo

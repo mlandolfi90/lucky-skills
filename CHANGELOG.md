@@ -4,6 +4,22 @@ Notas de release de la familia de skills Lucky. El historial completo del **proc
 (corridas del Crisol, RETROs) vive en `docs/refactor/_crisol/RUN-LEDGER.md`; los tags
 inmutables, en `git tag`. Formato: más nuevo arriba.
 
+## v1.19.2 — 2026-07-02 — Bitácora: regla "sin evidencia real, NO entra" — el catálogo guarda solo lo confirmado
+
+Decisión del operador al ver el resultado del panel v1.19.1: *"¿de qué sirve guardar algo que no
+está confirmado que funcione?"* — CANDIDATE venía funcionando como depósito de teoría (las semillas
+bootstrap del concejo). Se corrige la doctrina y el contenido:
+
+- **Regla dura nueva (SKILL.md):** el catálogo guarda SOLO lo confirmado por el uso (evidencia
+  verificable: sha/ledger/postmortem). La previsión/teoría va a `/idea` (parking). `CANDIDATE` pasa a
+  ser una transición corta — evidencia real esperando endoso humano — no un almacén.
+- **GREP-001 y GAP-001 RETIRADAS del catálogo** → parkeadas en `docs/IDEAS.md` con su condición de
+  regreso escrita (GREP: crear el mapa Key Files + 1er uso real; GAP: el próximo spike que corra el
+  patrón la destila de vuelta). Texto completo preservado en git history (`02820ee`).
+
+El catálogo queda **4/4 LIVE** (DRIFT-001/002/003, GAP-002): todo lo que un agente consulte está
+confirmado por la realidad. Lint 4/4 coherente · leak-scan LIMPIO. Re-sello == v1.19.2.
+
 ## v1.19.1 — 2026-07-02 — Bitácora: promociones por panel (delegación explícita del operador)
 
 El operador delegó la decisión sobre las 4 CANDIDATE ("decide tú"). Panel de 12 jueces

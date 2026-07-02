@@ -80,6 +80,12 @@ hallado**. Entonces:
 
 ## Reglas duras
 
+- **Sin evidencia real, NO entra.** El catálogo guarda solo lo CONFIRMADO por el
+  uso: una entrada nace de una corrida con dolor real y evidencia verificable
+  (sha/ledger/postmortem). La previsión/teoría va a `/idea` (parking) hasta que la
+  realidad la valide. `CANDIDATE` es una **transición corta** (evidencia real
+  esperando el endoso humano), no un depósito de teoría — regla del operador,
+  2026-07-02: "¿de qué sirve guardar algo que no está confirmado que funcione?".
 - **Indexá por SÍNTOMA observable, no por tema.** Si no podés escribir el síntoma
   como algo que un agente OBSERVA literalmente, no es un patrón → va a `/idea`.
 - **Cero secretos (invariante #1):** nombres de variable, nunca valores; rutas
@@ -91,5 +97,5 @@ hallado**. Entonces:
 ---
 
 **Fuente de verdad: `github.com/mlandolfi90/lucky-skills` · esta copia = tag
-`v1.19.1` (cache local, NO la ley).** Ley viva: con red, si el repo tiene un tag
+`v1.19.2` (cache local, NO la ley).** Ley viva: con red, si el repo tiene un tag
 mayor (`git ls-remote --tags`), seguir la del repo e informar al humano.

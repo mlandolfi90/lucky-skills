@@ -1104,3 +1104,28 @@
   probado ES la predicción correcta del operador (su anti-teatro), no la promoción masiva. El lint
   forjado en v1.19.0 pagó en su primer día: verificó mecánicamente el espejo de 8 celdas editadas.
 - Cierre: 2026-07-02 · commit + push a main · tag DIFERIDO al operador
+
+### main — 2026-07-02 (bitacora: regla "sin evidencia real NO entra" — retiro de GREP-001/GAP-001 al parking)
+- STATUS: CLOSED
+- Tier: fast-path (solo .md; exento del gate)
+- Fecha: 2026-07-02
+- TARGET: docker-local
+- MODEL: fable (líder) — decisión doctrinal del OPERADOR en sesión
+- Alcance: Tras el panel v1.19.1 el operador fijó la regla: el catálogo no guarda lo no-confirmado
+  ("¿de qué sirve guardar algo que no está confirmado que funcione?"). Se detectó que CANDIDATE
+  operaba como depósito de teoría (semillas bootstrap). Cambios: (1) regla dura nueva en
+  bitacora/SKILL.md — "Sin evidencia real, NO entra": entrada nace SOLO de dolor real con evidencia
+  verificable; teoría → /idea; CANDIDATE = transición corta esperando endoso, no almacén.
+  (2) GREP-001 y GAP-001 retiradas del catálogo (git rm + filas del INDEX) → parkeadas en
+  docs/IDEAS.md con condición de regreso escrita y puntero a git history (02820ee) — "el
+  por-qué-se-jubiló también es conocimiento". Catálogo resultante: 4/4 LIVE.
+- FIRMA: minisign DIFERIDA.
+- Veredictos: bitacora-lint 4/4 coherente exit 0 · test-lint VERDE (dogfood F5 sobre el catálogo
+  real post-retiro) · leak-scan LIMPIO.
+- TEST_COVERAGE: N/A (.md; gates mecánicos corridos).
+- BITACORA: GREP-001/GAP-001 retiradas (parking); doctrina endurecida.
+- RETRO: el estado CANDIDATE ocultaba una ambigüedad que el operador cazó al preguntar "¿por qué
+  quedaron 2?": servía a la vez de "espera de endoso" (sano) y de "almacén de teoría" (teatro). La
+  regla nueva parte esa ambigüedad: la bitácora es un catálogo de VERDAD CONFIRMADA; el parking ya
+  existía para lo demás. Éxito medido en entradas RETIRADAS: 2 hoy — la métrica del propio diseño.
+- Cierre: 2026-07-02 · commit + push a main · tag DIFERIDO al operador
