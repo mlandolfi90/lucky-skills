@@ -1038,3 +1038,36 @@
   (GAP-002). Capturar el POR QUÉ se retiró un guard vale tanto como el guard: evita que el próximo lo
   "restaure". Fetch antes de forjar, de entrada (lección v1.17.1 ya rutina).
 - Cierre: 2026-07-01 · commit + push a main · tag v1.18.2 DIFERIDO al operador
+
+### main — 2026-07-02 (bitacora-lint: coherencia INDEX↔entradas fail-closed en la forja — corrida autónoma /goal)
+- STATUS: CLOSED
+- Tier: fast-path (script nuevo autocontenido + wiring de 1 paso en la forja; sin contrato externo)
+- Fecha: 2026-07-02
+- TARGET: docker-local
+- MODEL: fable (líder) + verificador FRESCO independiente (adversarial, 11 fixtures de ataque)
+- Alcance: Verificación completa de la bitácora (6 entradas conformes a plantilla, 0 STALE,
+  leak-clean) detectó su FALSO-VERDE latente: `estado`/`usos`/`validated_on` viven DUPLICADOS
+  (entrada + fila del INDEX), mantenidos a mano — nada detectaba cuándo el INDEX miente (DRIFT-001
+  aplicado al propio catálogo; en v1.18.2 se editó `usos` a mano en 2 archivos). Mejora:
+  **`scripts/bitacora-lint.sh`** — verificador mecánico read-only: (1) bijección INDEX↔entries
+  (huérfanas/fantasmas/duplicadas); (2) título==ID; (3) campos obligatorios de plantilla; (4) estado
+  legal y espejado; (5) usos espejado; (6) fecha espejada; (7) ≤35 líneas; (8) orden por usos desc.
+  **Fail-closed en la FORJA** (paso 4b de `forjar-release.sh`, tras el leak-scan): no se propaga por
+  Ley viva un INDEX que miente a los ~21 repos. FRONTERA ADR 0005 intacta: el gate de COMMITS sigue
+  sin bloquear por la Bitácora (solo frena la forja, igual que el leak-scan). + `tests/test-lint.sh`
+  (24 asserts, incl. dogfood sobre la bitácora real) + bullet §Mantener en bitacora/SKILL.md.
+- FIRMA: minisign DIFERIDA.
+- Veredictos (verificador fresco, corrió TODO él mismo — REGLA 0): test-lint 24/24 PASS · regresión
+  test-stale 20/20 PASS · lint bitácora real 6 entradas/0 incoherencias · leak-scan LIMPIO ·
+  SCOPE exacto (4 archivos) · ZERO_LEAK en lo nuevo (0 hits) · adversarial: 11 ataques, ningún falso
+  verde (todo FP aborta fail-closed) → APTO PARA FORJA.
+- TEST_COVERAGE: 24/24 lint + 20/20 stale (regresión) + dogfood real.
+- BITACORA: N/A como entrada nueva (la mejora ES infraestructura del catálogo, no un patrón nuevo).
+- PARKING: 2 hallazgos menores del verificador → docs/IDEAS.md (IDs con metacaracteres ERE; pipe
+  escapado en celdas). Ambos fail-closed hoy; no frenan release.
+- RETRO: la verificación adversarial paga incluso sobre un linter: el verificador halló la clase de
+  FP por metacaracteres que el autor no vio — y confirmó que TODOS los fallos van hacia el lado
+  seguro (nunca falso verde), que es lo único innegociable en un gate. Corrida autónoma bajo /goal
+  del operador ("predecí mis decisiones"): la mejora elegida salió de SU filosofía escrita
+  (anti-pudrición mecánico, jidoka fail-closed en el ritual de release, frontera del gate intacta).
+- Cierre: 2026-07-02 · commit + push a main · tag DIFERIDO al operador

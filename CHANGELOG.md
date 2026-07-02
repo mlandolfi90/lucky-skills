@@ -4,6 +4,26 @@ Notas de release de la familia de skills Lucky. El historial completo del **proc
 (corridas del Crisol, RETROs) vive en `docs/refactor/_crisol/RUN-LEDGER.md`; los tags
 inmutables, en `git tag`. Formato: más nuevo arriba.
 
+## v1.19.0 — 2026-07-02 — Forja: gate de coherencia de la Bitácora (`bitacora-lint.sh`, fail-closed)
+
+La bitácora duplicaba `estado`/`usos`/`validated_on` en dos lugares (la entrada y su fila del INDEX)
+mantenidos a mano — nada detectaba cuándo el INDEX miente sobre las entradas (DRIFT-001 aplicado al
+propio catálogo). Corrida autónoma (/goal del operador):
+
+- **`bitacora/scripts/bitacora-lint.sh` (nuevo):** verificador mecánico read-only de coherencia:
+  bijección INDEX↔`entries/` (huérfanas/fantasmas/duplicadas), título==ID, campos obligatorios de la
+  plantilla, estado legal + espejado, `usos` y fecha espejados, ≤35 líneas por entrada, INDEX
+  ordenado por `usos` desc. Exit 0/1; N/D fail-soft solo ante ausencia total de bitácora.
+- **`forjar-release.sh` paso 4b (nuevo):** corre el lint tras el leak-scan, **fail-closed** — no se
+  propaga por Ley viva un INDEX que miente a los ~21 repos. Frontera ADR 0005 intacta: el gate de
+  COMMITS sigue sin bloquear por la Bitácora (esto solo frena la FORJA, igual que el leak-scan).
+- **`tests/test-lint.sh` (nuevo):** 24 asserts (batería de mentiras + orden + catálogo-a-medias +
+  dogfood sobre la bitácora real). Regresión test-stale 20/20 intacta.
+
+Verificador fresco adversarial (11 ataques): ningún falso verde — todo fallo del lint aborta hacia
+el lado seguro. 2 hallazgos menores parkeados en IDEAS.md. Re-sello == v1.19.0; firma minisign
+diferida.
+
 ## v1.18.2 — 2026-07-01 — Bitácora: +GAP-002 (cron de Actions inerte fuera de la rama default) + cierre DRIFT-003
 
 Segunda captura del mismo incidente de **Lucky-Auth-Plane** (cierre del postmortem, verificado en vivo)

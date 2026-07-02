@@ -63,6 +63,12 @@ hallado**. Entonces:
 - **STALE:** `bash scripts/bitacora-stale.sh` marca toda entrada con
   `validated_on` > 90 días o sin `validated_on`. Read-only: reporta, no borra.
   Candidato a correr desde el heartbeat (`crisol-pulso`) o el CI.
+- **Coherencia (lint):** `bash scripts/bitacora-lint.sh` verifica que el INDEX
+  no MIENTA sobre las entradas: bijección INDEX↔`entries/`, `estado`/`usos`/
+  `validated_on` espejados, campos obligatorios, ≤35 líneas, orden por `usos`.
+  **Fail-closed en la FORJA** (corre tras el leak-scan y aborta el release si el
+  catálogo está incoherente); el gate de commits sigue SIN bloquear por la
+  Bitácora. Tests: `tests/test-lint.sh`.
 - **Poda por tope (~40 entradas vivas):** superado el tope, la de menor `usos` +
   más vieja se archiva con su razón (*el por-qué-se-jubiló también es
   conocimiento*: evita re-proponer lo descartado).
@@ -85,5 +91,5 @@ hallado**. Entonces:
 ---
 
 **Fuente de verdad: `github.com/mlandolfi90/lucky-skills` · esta copia = tag
-`v1.18.2` (cache local, NO la ley).** Ley viva: con red, si el repo tiene un tag
+`v1.19.0` (cache local, NO la ley).** Ley viva: con red, si el repo tiene un tag
 mayor (`git ls-remote --tags`), seguir la del repo e informar al humano.

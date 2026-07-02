@@ -62,3 +62,9 @@
   `lucky-skills` apuntando a OTRO repo/fork, auto-seguir su main SÍ sería floating-de-tercero
   (viola PIN_TOTAL). Endurecimiento futuro: validar `source.repo == mlandolfi90/lucky-skills`
   antes de inyectar el flag · hallado en la corrida autoUpdate
+- 2026-07-02 · endurecer `bitacora-lint.sh` (2 hallazgos menores del verificador fresco, ambos
+  fail-closed hoy): (1) IDs con metacaracteres ERE fuera de la convención `[A-Z]+-[0-9]+` dan
+  falso positivo en TÍTULO / huérfana falsa (escapar `$id` al interpolar en grep); (2) el pipe
+  escapado `\|` de markdown en celdas del INDEX da "FILA malformada" (de facto prohíbe pipes en
+  celdas — documentarlo o soportarlo). Ninguno produce falso verde · hallado en la corrida
+  bitacora-lint

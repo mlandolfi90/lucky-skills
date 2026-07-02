@@ -15,7 +15,8 @@
 #      raw_base parametrizado, y por skill kind/loadable_as_data/requires_runtime/
 #      requires_tools/path/url/sha256. La url es raw@COMMIT (inmutable de verdad;
 #      un tag git es MUTABLE con `git -f`). El cliente verifica raw@commit;
-#   4. corre scripts/leak-scan.sh sobre el arbol (gate zero-leak, fail-closed);
+#   4. corre scripts/leak-scan.sh sobre el arbol (gate zero-leak, fail-closed) y
+#      bitacora-lint.sh (coherencia INDEX<->entradas de la bitacora, fail-closed);
 #   5. firma registry.json con minisign (clave PRIVADA via Infisical/offline,
 #      JAMAS hardcodeada ni en el repo) -> registry.json.minisig, y AUTO-VERIFICA
 #      la firma si MINISIGN_PUBKEY esta seteada (no taggear algo que el loader
@@ -347,6 +348,24 @@ if [ -f "$LEAK_SCAN" ]; then
   fi
 else
   warn "no encontre $LEAK_SCAN — SALTEO el gate zero-leak (recomendado tenerlo)."
+fi
+line
+
+# ── 4b. bitacora-lint (coherencia INDEX↔entradas, fail-closed) ───────────────
+# La bitacora viaja con el tag a los ~21 repos (Ley viva): no se forja un INDEX
+# que MIENTE sobre sus entradas (estado/usos/fecha desespejados, huerfanas,
+# fantasmas). Mismo rango que el leak-scan: aborta la FORJA; el gate de commits
+# sigue sin bloquear por la Bitacora (frontera ADR 0005 intacta).
+BITACORA_LINT="$SKILLS_DIR/bitacora/scripts/bitacora-lint.sh"
+if [ -f "$BITACORA_LINT" ]; then
+  info "corriendo bitacora-lint (coherencia INDEX<->entradas)..."
+  if bash "$BITACORA_LINT"; then
+    ok "bitacora coherente (el INDEX dice la verdad)"
+  else
+    die "bitacora INCOHERENTE. Release ABORTADO — un catalogo que miente causa el incidente que pretendia evitar."
+  fi
+else
+  info "sin skill bitacora en este arbol — salteo el lint (no aplica)."
 fi
 line
 
