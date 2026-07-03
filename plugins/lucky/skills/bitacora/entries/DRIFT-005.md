@@ -23,4 +23,4 @@
 - **stale_si:** >90 días, o si el Dockerfile pasa a COPY de directorio completo
 - **origen:** Lucky-Auth-Plane RUN-LEDGER (handlers-provider-limits, run CI 28638932678 failure)   ·   **usos:** 1
 - **REFS:** keyring/Dockerfile:93   ·   **NEXT:** si se repite, migrar a `COPY *.py ./` con .dockerignore
-- **estado:** CANDIDATE
+- **estado:** LIVE

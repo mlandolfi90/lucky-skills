@@ -22,4 +22,4 @@
 - **stale_si:** >90 días, o si Coolify pasa a actualizar `git_commit_sha` en pull-based
 - **origen:** Lucky-Auth-Plane RUN-LEDGER (corridas catálogo; app uuid en VPS-B con PORTAL_TAG congelado)   ·   **usos:** 2
 - **REFS:** DRIFT-004 (el endpoint de versión sirve para ambos)   ·   **NEXT:** —
-- **estado:** CANDIDATE
+- **estado:** LIVE

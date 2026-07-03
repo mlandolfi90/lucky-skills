@@ -22,4 +22,4 @@
 - **stale_si:** >90 días, o upgrade de litellm que cambie la ruta
 - **origen:** Lucky-Auth-Plane (corrida catalogo-ctx-auto: `/get/...` → 404, `/public/...` → 200)   ·   **usos:** 1
 - **REFS:** keyring/litellm_admin.py `fetch_model_cost_map`   ·   **NEXT:** —
-- **estado:** CANDIDATE
+- **estado:** LIVE

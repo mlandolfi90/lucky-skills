@@ -27,4 +27,4 @@
 - **stale_si:** >90 días, o si el portal deja de ser SPA-de-pestaña-larga / cambia el mecanismo de deploy
 - **origen:** Lucky-Auth-Plane RUN-LEDGER (models-disable-route, INCIDENTE anexo 17-modelos)   ·   **usos:** 1
 - **REFS:** ADR 0010 (contrato apply v2)   ·   **NEXT:** si reaparece en otro front del stack → patrón cross-repo, candidato a checklist de UI
-- **estado:** CANDIDATE
+- **estado:** LIVE
