@@ -243,13 +243,16 @@ plan — ver §3-6 y §4).
 
 1. **N carriles por dominio.** Naming `<dominio>-<rol>`, equipos descartables.
    El modelo de los sub-agentes lo fija la **Compuerta de Modelo** del Paso 0
-   (§4), fail-closed. Si `MODEL` es un **alias pin** (`opus`/`sonnet`/`haiku`/
-   `fable`) → **uniforme**: ese modelo para TODOS los agentes, sin declaración
-   por-rol que hacer. Si `MODEL: default` → **por-rol por COMPLEJIDAD** (mapeo
-   único al pie de esta skill): tarea mecánica → tier-económico · juicio/decisión
-   (Steward, Verificador de Integración) → tier-alto · síntesis súper-compleja →
-   tier-frontera; el tier barato en tarea compleja sale CARO (rework), y **los
-   tiers elegidos se declaran al humano ANTES de spawnear**.
+   (§4), fail-closed. Si `MODEL` es un **alias pin** (uno de los que el entorno
+   ofrezca ese día) → **uniforme**: ese modelo para TODOS los agentes, sin
+   declaración por-rol que hacer. Si `MODEL: default` → **por-rol por
+   COMPLEJIDAD** (resolución del mapeo al pie de esta skill): tarea mecánica →
+   tier-económico · verificación de calidad/diseño → tier-alto ·
+   juicio/decisión crítica (Steward, Verificador de Integración) y síntesis
+   súper-compleja → tier-frontera (default; el humano puede bajarlo a tier-alto
+   si prioriza velocidad — directiva operador 2026-07-02); el tier barato en
+   tarea compleja sale CARO (rework), y **los tiers elegidos se declaran al
+   humano ANTES de spawnear**.
 2. **Archaeologists paralelizan libre** (read-only, carpetas propias).
 3. **Compuerta serializada = Architecture Steward.** Ve TODOS los planes ANTES de
    que cualquier Ingeniero toque código. Emite COLLISION-MAP, marca calientes,
@@ -482,7 +485,7 @@ triggers, para que ningún carril derive el vocabulario.
 ## 6. La ley se gobierna a sí misma
 
 **Fuente de verdad: `github.com/mlandolfi90/lucky-skills` · esta copia = tag
-`v1.19.2` (cache local, NO la ley).** **Ley viva:** al invocar la skill, si la
+`v1.20.0` (cache local, NO la ley).** **Ley viva:** al invocar la skill, si la
 sesión tiene red: `git ls-remote --tags
 https://github.com/mlandolfi90/lucky-skills.git` — si existe un tag mayor al de
 esta copia, descargar y seguir LA DEL REPO
@@ -499,8 +502,22 @@ abre la corrida sobre el propio skill.
 
 ---
 
-**Mapeo de tiers (actualizar SOLO acá cuando cambien los modelos):**
-económico=`sonnet` · alto=`opus` · frontera=`fable`
+**Mapeo de tiers (RESUELTO EN RUNTIME — sin nombres horneados):**
+Los tiers NO se mapean a alias acá. En el Paso 0 (Compuerta de Modelo, §4) el
+líder **EXPLORA los modelos que el entorno ofrece HOY** (los alias que la tool
+de spawn realmente acepta) y los **ordena por capacidad según lo que el propio
+entorno declara** (system-prompt/documentación de la sesión: cuál es el más
+capaz vigente, cuál el económico) — jamás por memoria de entrenamiento.
+Asignación ORDINAL sobre lo disponible:
+- **frontera** = el más capaz que el entorno ofrezca
+- **alto** = el siguiente tier de capacidad
+- **económico** = el más barato competente para tarea mecánica
+Sale un modelo nuevo mañana → entra solo en la próxima corrida (patrón Ley
+viva: se descubre, no se edita esta skill). El mapeo RESUELTO (tier→alias) se
+**declara al humano antes de spawnear** y se registra en la entrada del ledger
+del RUN (ej.: `MODEL: default (frontera=X · alto=Y · económico=Z)`). Si el
+líder no puede ordenar por capacidad con evidencia del entorno → pregunta al
+humano, fail-closed (jamás adivina el ranking).
 
 **Templates:** `templates/collision-map.md` · `templates/run-ledger.md` · `templates/auditor-checklist.md`
 **Hook:** `hooks/crisol-enforcer.sh` (+ `hooks/settings.snippet.json`)

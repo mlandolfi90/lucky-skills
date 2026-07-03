@@ -1129,3 +1129,28 @@
   regla nueva parte esa ambigüedad: la bitácora es un catálogo de VERDAD CONFIRMADA; el parking ya
   existía para lo demás. Éxito medido en entradas RETIRADAS: 2 hoy — la métrica del propio diseño.
 - Cierre: 2026-07-02 · commit + push a main · tag DIFERIDO al operador
+
+---
+
+### main — RUN LEY-M20: Compuerta de Modelo — mapeo de tiers resuelto en runtime (fast-path)
+
+- STATUS: CLOSED
+- Tier: fast-path (docs/ley; sin código ejecutable tocado)
+- Fecha: 2026-07-02
+- TARGET: n/a (edición de la ley; autorización EXPLÍCITA del operador en sesión)
+- CONTEXTO: el pie de crisol/SKILL.md horneaba nombres de modelos
+  ("económico=sonnet · alto=opus · frontera=fable") — mañana sale un modelo nuevo
+  y la ley queda vieja. Directiva operador: "se tiene que hacer que explore los
+  modelos disponibles; el día de mañana se entrega otro modelo, habrá más disponibles".
+- CAMBIO: (1) pie — mapeo de tiers pasa de nombres a RESOLUCIÓN ORDINAL EN RUNTIME
+  (explorar los alias que la tool de spawn acepta HOY + ordenar por capacidad según
+  lo que el ENTORNO declara, jamás memoria de entrenamiento; frontera = el más capaz
+  disponible; mapeo resuelto se declara al humano y va al ledger; sin evidencia para
+  rankear → fail-closed, pregunta); (2) §3 — juicio/decisión crítica (Steward,
+  Integración) y síntesis → tier-frontera default (bajable a alto por velocidad,
+  directiva operador 2026-07-02); calidad/diseño → tier-alto; alias de ejemplo
+  des-horneados; (3) footer → v1.20.0.
+- VEREDICTOS: TARGET n/a · ZERO_LEAK PASS (texto normativo, sin secretos) ·
+  REGLA0 n/a (markdown) · CIERRE_TRAS_PASS = commit+tag+release en este RUN.
+- NOTA: los releases v1.19.0/1/2 están commiteados SIN tag en el remoto (último tag
+  remoto = v1.18.2) — backfill pendiente de la sesión que los emitió.
