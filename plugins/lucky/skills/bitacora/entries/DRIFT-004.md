@@ -23,8 +23,7 @@
   detección de versión desde el día 1; al diseñar contratos v2 retro-compat, preguntate qué hace
   un CLIENTE v1 vivo contra el server v2 (la retro-compat del server es exactamente lo que
   ejecuta la semántica vieja).
-- **validated_on:** `dev` · 2026-07-03 · `f8feddc` (incidente) — fix del aviso: corrida
-  portal-version-notice (en curso al destilar)
+- **validated_on:** `dev` · 2026-07-03 · `6e22ec3` (fix verificado e2e: banner + bloqueo de Guardar, corrida portal-version-notice PASS; incidente original en `f8feddc`)
 - **stale_si:** >90 días, o si el portal deja de ser SPA-de-pestaña-larga / cambia el mecanismo de deploy
 - **origen:** Lucky-Auth-Plane RUN-LEDGER (models-disable-route, INCIDENTE anexo 17-modelos)   ·   **usos:** 1
 - **REFS:** ADR 0010 (contrato apply v2)   ·   **NEXT:** si reaparece en otro front del stack → patrón cross-repo, candidato a checklist de UI
