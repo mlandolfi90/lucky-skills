@@ -1129,3 +1129,15 @@
   regla nueva parte esa ambigüedad: la bitácora es un catálogo de VERDAD CONFIRMADA; el parking ya
   existía para lo demás. Éxito medido en entradas RETIRADAS: 2 hoy — la métrica del propio diseño.
 - Cierre: 2026-07-02 · commit + push a main · tag DIFERIDO al operador
+
+### claude/lucky-tool-debug-feedback-hf6fty — 2026-07-03 (bitacora: formalizar SEÑALES — near-miss log con contador)
+- STATUS: CLOSED
+- Tier: fast-path (regla nueva en la doctrina de bitacora + archivo SENALES.md ya creado de facto; sin código ejecutable nuevo)
+- Fecha: 2026-07-03
+- LEY: v1.20.0 (objetivo: v1.21.0)
+- Alcance: (1) SKILL.md de bitacora — regla nueva "Señales débiles (near-miss log)": la sospecha SIN evidencia no entra al INDEX ni se pierde — va a `SENALES.md` con contador `visto: N`; `visto ≥ 2` → investigación activa en la próxima corrida que la roce (valida → CANDIDATE, o refuta → se borra con el porqué). SENALES jamás se consulta para decidir una acción. Linaje: hiyari-hatto (Toyota) + weak signals + ley de Heinrich. (2) bullet de mantenimiento (poda: señal refutada o >90 días sin nuevo avistamiento se borra). Origen: regla del operador 2026-07-03 ("quizás sirve para ver si pasa más seguido de lo que se imagina").
+- MIGRATION_STRATEGY: N/A (.md)
+- FIRMA: minisign DIFERIDA (--no-sign; la clave la provee el operador).
+- Veredictos: test-lint 24 PASS · bitacora-lint coherente (10/10 LIVE) · leak-scan LIMPIO (forja fail-closed completó) · sellos: 7/7 SKILL.md en v1.21.0, 0 rezagados · registry.json tag v1.21.0 (8 skills, ancla commit de la forja).
+- BITACORA: promoción del día (6 → LIVE) + SENALES.md formalizado en la ley (regla dura + poda).
+- Cierre: 2026-07-03 · commit + push a la rama de trabajo (claude/lucky-tool-debug-feedback-hf6fty) · **tag v1.21.0 ANOTADO + merge a main + firma: DIFERIDOS al operador** (paso 4-6 del ritual de forja).
