@@ -78,14 +78,16 @@
   cambió la decisión) pero la ENTRADA tuvo 0 usos. Para revivirlo: el próximo spike real que corra el
   patrón la destila de vuelta citando su evidencia. Texto completo en git history (v1.19.1 @
   `02820ee`) · regla nueva: sin evidencia real no entra al catálogo
-- 2026-07-04 · SELECTOR DE IDIOMA + traducción integrada como capacidad POR DEFECTO en TODOS nuestros
-  desarrollos (no solo las skills): como el "Responsive obligatorio" del Crisol pero para idioma — toda
-  app/UI/panel que creemos trae selector de idioma + capa de traducción, SIEMPRE, con el español como
-  base. Encaje natural en la ley: REGLA nueva del Crisol paralela a `RESPONSIVE` ("i18n obligatorio":
-  UI sin selector de idioma → FAIL) + invariante de la skill `arquitectura` + fila en
-  `conformidad-checklist`; el verificador la chequea igual que responsive. Sub-caso: la propia familia
-  de skills (prosa markdown) en varios idiomas — el LLM ya opera en cualquier idioma, el tema es
-  legibilidad humana del archivo → language-pack PRE-traducido por locale, cargado on-demand por
-  `cargar`, cada uno firmado aparte en el registry (una traducción cambia el `sha256`; el español
-  canónico sigue siendo la fuente firmada). Ejes de diseño: build-time firmable vs runtime LLM al vuelo;
-  servicio tipo Crowdin vs el propio LLM. Corrida grande con ADR · idea de MLL (refinada 2026-07-04)
+- 2026-07-04 · SELECTOR DE IDIOMA + traducción como capacidad reutilizable POR DEFECTO en TODOS
+  nuestros desarrollos, con el español de base. ENCUADRE (MLL): dejar la idea ABIERTA — NO convertirla
+  en regla dura de FAIL. La meta es que el "producto" (el componente/capa de i18n) sea PLUG-AND-PLAY:
+  fácil de integrar cuando el desarrollo esté listo. Distinción clave con `RESPONSIVE`: una UI rota en
+  móvil es un DEFECTO que existe hoy → se gatea duro; una UI sin selector de idioma NO es defecto, es
+  una capacidad-todavía-no-necesaria → NO se gatea (forzar i18n antes de tiempo = generalidad
+  especulativa = deuda, contra el propio Crisol). Forma correcta: (a) construir una capacidad i18n
+  reutilizable/drop-in (componente + patrón) para que integrarla sea trivial; (b) que cada dev deje la
+  COSTURA de idioma (punto de extensión barato, "i18n-ready") sin cablear idiomas hasta que haga falta;
+  (c) enforcement SUAVE a lo sumo (pregunta de checklist "¿dejaste la costura de idioma?", no un gate
+  fail-closed). Sub-caso skills: language-pack pre-traducido por locale, cargado on-demand por `cargar`,
+  firmado aparte (el español canónico sigue firmado; traducir cambia el sha256). Corrida con ADR cuando
+  el producto esté maduro · idea de MLL (refinada 2x: 2026-07-04)
