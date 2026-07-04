@@ -78,3 +78,11 @@
   cambió la decisión) pero la ENTRADA tuvo 0 usos. Para revivirlo: el próximo spike real que corra el
   patrón la destila de vuelta citando su evidencia. Texto completo en git history (v1.19.1 @
   `02820ee`) · regla nueva: sin evidencia real no entra al catálogo
+- 2026-07-04 · adaptar TODA la familia de skills para TRADUCCIÓN INTEGRADA multi-idioma: hoy la prosa
+  está en español (rioplatense); diseñar cómo servir/mantener cada skill en varios idiomas SIN duplicar
+  la fuente de verdad ni romper la cadena sello/Ley-viva/registry. Preguntas de diseño: ¿capa i18n con
+  clave por idioma? ¿el idioma como parámetro del loader `cargar`? ¿traducción on-demand (LLM) vs.
+  copias por idioma firmadas? CONSECUENCIA DURA: una traducción cambia el `sha256` del SKILL.md → rompe
+  el pin/firma del `registry.json` — repensar qué se hashea/firma (¿el original canónico + traducciones
+  como assets? ¿registry por idioma?). Cross-cutting mayor: ~9 skills + forja/sellos + registry + firma
+  minisign. Candidata a corrida grande con ADR · idea de MLL
