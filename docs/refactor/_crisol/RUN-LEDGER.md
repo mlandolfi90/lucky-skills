@@ -1165,3 +1165,17 @@
 - Veredictos: test-lint 24 PASS · bitacora-lint coherente (10/10 LIVE) · leak-scan LIMPIO (forja fail-closed completó) · sellos: 7/7 SKILL.md en v1.21.0, 0 rezagados · registry.json tag v1.21.0 (8 skills, ancla commit de la forja).
 - BITACORA: promoción del día (6 → LIVE) + SENALES.md formalizado en la ley (regla dura + poda).
 - Cierre: 2026-07-03 · commit + push a la rama de trabajo (claude/lucky-tool-debug-feedback-hf6fty) · **tag v1.21.0 ANOTADO + merge a main + firma: DIFERIDOS al operador** (paso 4-6 del ritual de forja).
+
+### main — 2026-07-04 (skill `ley` — auto-update de la ley viva)
+- STATUS: ACTIVE
+- Tier: fast-path
+- Fecha: 2026-07-04
+- TARGET: pc-local
+- MODEL: opus (uniforme, directiva del operador)
+- LEY: v1.22.0
+- TEST_COVERAGE: verificación de rol-LLM (simulación de flujo en clon temporal); skill es .md puro
+- Alcance: skill nueva `plugins/lucky/skills/ley/SKILL.md` (auto-update: detecta último tag por
+  version-sort, ff/merge al clon local, re-instala gate, output binario; caso "tag diferido") +
+  puntero no-normativo en brujula/SKILL.md (SEÑALA, no ejecuta). Release v1.23.0 por forja.
+  Justificación pc-local: la skill opera sobre ~/.claude/plugins y ~/.claude/hooks del operador
+  (no hay entorno más fiel; declarado explícito por el humano).

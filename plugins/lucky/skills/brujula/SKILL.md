@@ -39,6 +39,11 @@ tal cual" aplica a las 3 deterministas.
    y **último tag** (en promoción-por-tags, el tag ES el estado de release).
    **Trunk-based: lo esperado es `main`**, salvo que el RUN-LEDGER tenga una
    entrada `STATUS: ACTIVE` para otro branch — esa entrada **manda**.
+   **Ley atrasada (no-normativo, solo SEÑAL):** si el sello local de la familia
+   `lucky-skills` (`esta copia = tag vX.Y.Z`) es menor que el último tag remoto
+   (`git ls-remote --tags`, **`sort -V`**) → imprimí `ley atrasada: <local> <
+   <remoto> → corré /ley`. La brújula NO actualiza: la corrida de `/ley` la
+   decide el humano. Sin red → omitir la señal (no bloquea).
 2. **Deploy** — `docker ps` y, si hay compose en el repo, `docker compose ps`.
 3. **Decisiones** — último ADR en `docs/decisions/` + estado del Crisol. Si hay
    entrada `ACTIVE` y commits `wip: crisol iter N` recientes → reporta
@@ -90,5 +95,5 @@ pedí el dato o decláralo desconocido.
 ---
 
 **Fuente de verdad: `github.com/mlandolfi90/lucky-skills` · esta copia = tag
-`v1.22.0` (cache local, NO la ley).** Ley viva: con red, si el repo tiene un tag
+`v1.23.0` (cache local, NO la ley).** Ley viva: con red, si el repo tiene un tag
 mayor (`git ls-remote --tags`), seguir la del repo e informar al humano.
