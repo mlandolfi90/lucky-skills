@@ -1,7 +1,7 @@
 {
   "schema": "lucky-skills/registry@1",
-  "tag": "v1.19.2",
-  "commit": "02820eefee5690bb5e8ce3d48b2ed3a9f5bc3520",
+  "tag": "v1.21.0",
+  "commit": "640033e2ed36cf27adfc9a3a7da779ed1d8fa326",
   "raw_base": "${SKILLS_REGISTRY_URL}",
   "note": "Verificacion cripto la hace codigo externo (minisign -V del .minisig + sha256 -c por archivo, sobre bytes LF). El cliente NUNCA computa NI transcribe el hash. El ancla de seguridad es la FIRMA del registry (un tag movido con registry falso no valida sin la clave privada); v1 pinea por tag, el campo commit es informativo (pin-por-commit real = v2). Solo se cargan como dato las skills loadable_as_data=true; requires_runtime/requires_tools -> fast-path de install.",
   "skills": [
@@ -14,8 +14,8 @@
         "Bash"
       ],
       "path": "plugins/lucky/skills/arquitectura/SKILL.md",
-      "url": "${SKILLS_REGISTRY_URL}/v1.19.2/plugins/lucky/skills/arquitectura/SKILL.md",
-      "sha256": "7e591a6ae3446c769d727ced00d6c51534fe550a3f3f500292afd7698828c6d3"
+      "url": "${SKILLS_REGISTRY_URL}/v1.21.0/plugins/lucky/skills/arquitectura/SKILL.md",
+      "sha256": "8d16c88c67440d126e77a1f7ec5d122581533e378fb258a2d1632c261c1e309b"
     },
     {
       "name": "bitacora",
@@ -28,8 +28,8 @@
         "Bash"
       ],
       "path": "plugins/lucky/skills/bitacora/SKILL.md",
-      "url": "${SKILLS_REGISTRY_URL}/v1.19.2/plugins/lucky/skills/bitacora/SKILL.md",
-      "sha256": "8a864c2349f530e674c0fda68990ddd128c7eacddf286b3372ca3b01f8a9e7bf"
+      "url": "${SKILLS_REGISTRY_URL}/v1.21.0/plugins/lucky/skills/bitacora/SKILL.md",
+      "sha256": "3259fb09ee49e4ac97dfd391af1fa9d2573cfaa9f77502f3c2bad7abe73ebfb0"
     },
     {
       "name": "brujula",
@@ -40,8 +40,8 @@
         "Bash"
       ],
       "path": "plugins/lucky/skills/brujula/SKILL.md",
-      "url": "${SKILLS_REGISTRY_URL}/v1.19.2/plugins/lucky/skills/brujula/SKILL.md",
-      "sha256": "01338c9aa395032896d4237d28c8172571a5a0fe69dc3e22d220fc3802f7bcb6"
+      "url": "${SKILLS_REGISTRY_URL}/v1.21.0/plugins/lucky/skills/brujula/SKILL.md",
+      "sha256": "814afbce787dcef67a16264e32fd641698b92454eb52a549d50a079ad2fd4f93"
     },
     {
       "name": "cargar",
@@ -52,8 +52,8 @@
       ],
       "requires_tools": [],
       "path": "plugins/lucky/skills/cargar/SKILL.md",
-      "url": "${SKILLS_REGISTRY_URL}/v1.19.2/plugins/lucky/skills/cargar/SKILL.md",
-      "sha256": "eddead106df2cd49b0c2fe51aa4b8b8b959df69ec3a5ea79f3002c41bc4ae6a7"
+      "url": "${SKILLS_REGISTRY_URL}/v1.21.0/plugins/lucky/skills/cargar/SKILL.md",
+      "sha256": "1a0e53188c754395f5651400b8b26a59ed13fc215d77f4ddcba69b67e71d1567"
     },
     {
       "name": "cargar/detectar-runtime.ref",
@@ -62,8 +62,8 @@
       "requires_runtime": [],
       "requires_tools": [],
       "path": "plugins/lucky/skills/cargar/references/detectar-runtime.md",
-      "url": "${SKILLS_REGISTRY_URL}/v1.19.2/plugins/lucky/skills/cargar/references/detectar-runtime.md",
-      "sha256": "e494b152243096a68c32e7fe230055e1492f8789ee75833aae9795edd546adf4"
+      "url": "${SKILLS_REGISTRY_URL}/v1.21.0/plugins/lucky/skills/cargar/references/detectar-runtime.md",
+      "sha256": "1a0e6e9e0536302ef808cac69ce53542a27b7ecae2c713db6d05e52cb75d4227"
     },
     {
       "name": "crisol",
@@ -78,8 +78,8 @@
         "Bash"
       ],
       "path": "plugins/lucky/skills/crisol/SKILL.md",
-      "url": "${SKILLS_REGISTRY_URL}/v1.19.2/plugins/lucky/skills/crisol/SKILL.md",
-      "sha256": "87dfa94c42a5e4a2c5eae1e70d59a5144f46d090649b869f4ee642e37c34a943"
+      "url": "${SKILLS_REGISTRY_URL}/v1.21.0/plugins/lucky/skills/crisol/SKILL.md",
+      "sha256": "1af1e4850d6f69384d521f14de91cf7037d4a3be7b38a07085a4bdb07a06f2d5"
     },
     {
       "name": "idea",
@@ -92,8 +92,8 @@
         "Bash"
       ],
       "path": "plugins/lucky/skills/idea/SKILL.md",
-      "url": "${SKILLS_REGISTRY_URL}/v1.19.2/plugins/lucky/skills/idea/SKILL.md",
-      "sha256": "8e27bd2a9643cfabc43477e2e42264a7f5e43fb49d8c9923a5da26788f36fc4b"
+      "url": "${SKILLS_REGISTRY_URL}/v1.21.0/plugins/lucky/skills/idea/SKILL.md",
+      "sha256": "cded72295a4ff467796bf8ff5927f1ea5ee9786f89b87945af041ea8b2d7b325"
     },
     {
       "name": "management",
@@ -104,8 +104,8 @@
         "Bash"
       ],
       "path": "plugins/lucky/skills/management/SKILL.md",
-      "url": "${SKILLS_REGISTRY_URL}/v1.19.2/plugins/lucky/skills/management/SKILL.md",
-      "sha256": "fb099a0d73e65d03f75b44012e3090b0d0fcddeaf13493f81dfb4bb9909bb935"
+      "url": "${SKILLS_REGISTRY_URL}/v1.21.0/plugins/lucky/skills/management/SKILL.md",
+      "sha256": "49385b5748993a1f868149d74488295c94f6ec035fc4e2003e8c8532364aed94"
     }
   ]
 }

@@ -72,6 +72,9 @@ hallado**. Entonces:
 - **Poda por tope (~40 entradas vivas):** superado el tope, la de menor `usos` +
   más vieja se archiva con su razón (*el por-qué-se-jubiló también es
   conocimiento*: evita re-proponer lo descartado).
+- **Poda de SEÑALES:** señal refutada, o >90 días sin avistamiento nuevo, se
+  borra de `SENALES.md` con una línea de por qué (mismo principio que el
+  archivo de podas: lo descartado también es conocimiento).
 - **Ascenso (válvula anti-pantano):** patrón con `usos ≥ 3` o explicado en >2
   RETROs → asciende y se reemplaza por un puntero: → **ADR** (decisión), →
   **skill** (proceso que el agente ejecuta), → **regla del gate** (invariante
@@ -88,6 +91,15 @@ hallado**. Entonces:
   2026-07-02: "¿de qué sirve guardar algo que no está confirmado que funcione?".
 - **Indexá por SÍNTOMA observable, no por tema.** Si no podés escribir el síntoma
   como algo que un agente OBSERVA literalmente, no es un patrón → va a `/idea`.
+- **Señales débiles (near-miss log, `SENALES.md`):** la SOSPECHA de patrón sin
+  evidencia no entra al INDEX ni se tira — se acumula en `SENALES.md` con
+  contador (`visto: N` + fecha + contexto de 1 línea). La frecuencia del
+  casi-incidente predice el incidente (hiyari-hatto / weak signals / ley de
+  Heinrich). `visto ≥ 2` → investigación ACTIVA en la próxima corrida que la
+  roce: valida (→ CANDIDATE con `validated_on`) o refuta (→ se borra con el
+  porqué). SENALES **jamás se consulta para decidir una acción** — eso es
+  exclusivo del INDEX; cero secretos, igual que el catálogo. Regla del
+  operador, 2026-07-03.
 - **Cero secretos (invariante #1):** nombres de variable, nunca valores; rutas
   relativas, nunca absolutas; sin IPs/dominios/tokens. Lo cubre `leak-scan.sh`.
 - **Máx ~20-35 líneas por entrada.** Más que eso = es un ADR o un skill, movelo.
@@ -97,5 +109,5 @@ hallado**. Entonces:
 ---
 
 **Fuente de verdad: `github.com/mlandolfi90/lucky-skills` · esta copia = tag
-`v1.19.2` (cache local, NO la ley).** Ley viva: con red, si el repo tiene un tag
+`v1.21.0` (cache local, NO la ley).** Ley viva: con red, si el repo tiene un tag
 mayor (`git ls-remote --tags`), seguir la del repo e informar al humano.
