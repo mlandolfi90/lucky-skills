@@ -1167,7 +1167,7 @@
 - Cierre: 2026-07-03 · commit + push a la rama de trabajo (claude/lucky-tool-debug-feedback-hf6fty) · **tag v1.21.0 ANOTADO + merge a main + firma: DIFERIDOS al operador** (paso 4-6 del ritual de forja).
 
 ### main — 2026-07-04 (skill `ley` — auto-update de la ley viva)
-- STATUS: ACTIVE
+- STATUS: CLOSED
 - Tier: fast-path
 - Fecha: 2026-07-04
 - TARGET: pc-local
@@ -1179,3 +1179,13 @@
   puntero no-normativo en brujula/SKILL.md (SEÑALA, no ejecuta). Release v1.23.0 por forja.
   Justificación pc-local: la skill opera sobre ~/.claude/plugins y ~/.claude/hooks del operador
   (no hay entorno más fiel; declarado explícito por el humano).
+- Veredictos (verificador fresco opus, input=solo diff): VERSION_SORT PASS (sort -V empírico
+  v1.22 vs lexicográfico v1.9) · TAG_DIFERIDO PASS (merge-base --is-ancestor + freno) · FAIL_CLOSED
+  PASS (5 salidas binarias, sin --force/auto-merge) · RESOLUCION_CLON+ZERO_LEAK PASS · FRONTMATTER+
+  NO_COLISION PASS · BRUJULA_COHERENTE PASS (read-only intacto) · SELLO PASS · LEAK_SCAN PASS.
+- Iteraciones: 1/3 (fix de robustez del lector de sello: git describe + grep -A1 tolerante al wrap,
+  señalado por el verificador fuera-de-veredicto y aplicado antes de forjar).
+- Release: v1.23.0 forjado (15 sellos, registry 8 skills @ c3c5568), commit 1c0e965, tag anotado
+  577f1ed pusheado a origin. Sin firma minisign (precedente --no-sign).
+- RETRO: el verificador cazó un bug funcional de la propia skill (grep single-line sobre sello
+  envuelto) que ningún test de contenido habría visto — valor del rol-LLM fresco sobre método .md.
