@@ -83,6 +83,31 @@ git -C "$CLON" pull --ff-only origin main
 bash "$CLON/scripts/instalar-gate.sh"
 ```
 
+**6b. Refrescá el CACHE instalado del plugin.** El harness NO carga el clon:
+carga el snapshot registrado en `~/.claude/plugins/installed_plugins.json`
+(clave `lucky@lucky-skills` → `installPath`). Actualizar solo el clon deja a la
+sesión cargando la ley vieja (incidente 2026-07-04). Si la clave no existe
+(plugin no instalado por esa vía) → omití el paso y reportalo en una línea.
+```bash
+PLUGS="$HOME/.claude/plugins/installed_plugins.json"
+DEST=$(python -c "import json,sys;e=json.load(open(sys.argv[1],encoding='utf-8'))['plugins'].get('lucky@lucky-skills');print(e[0]['installPath'] if e else '')" "$PLUGS" 2>/dev/null)
+if [ -n "$DEST" ]; then
+  rm -rf "$DEST" && cp -r "$CLON/plugins/lucky" "$DEST"
+  SHA=$(git -C "$CLON" rev-parse HEAD)
+  python - "$PLUGS" "$SHA" <<'PY'
+import json, sys, datetime
+p, sha = sys.argv[1], sys.argv[2]
+d = json.load(open(p, encoding="utf-8"))
+e = d["plugins"]["lucky@lucky-skills"][0]
+e["gitCommitSha"] = sha
+e["lastUpdated"] = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000Z")
+json.dump(d, open(p, "w", encoding="utf-8"), indent=2)
+PY
+fi
+```
+El refresco pisa SOLO el snapshot del plugin (`installPath`), jamás otra cosa
+de `~/.claude/plugins`. Las skills refrescadas cargan al reiniciar la sesión.
+
 **7. Verificación opcional de integridad.** Si hay `plugins/lucky/skills/registry.json`,
 confirmá sha256 de al menos `crisol/SKILL.md` contra el registry (cadena de
 suministro). Mismatch → reportá `LEY: INTEGRIDAD FALLA (sha ≠ registry)` y frená.
@@ -113,5 +138,5 @@ reiniciar la sesión** (el gate ya quedó vivo sin reiniciar).
 ---
 
 **Fuente de verdad: `github.com/mlandolfi90/lucky-skills` · esta copia = tag
-`v1.23.0` (cache local, NO la ley).** Ley viva: con red, si el repo tiene un tag
+`v1.24.0` (cache local, NO la ley).** Ley viva: con red, si el repo tiene un tag
 mayor (`git ls-remote --tags`), seguir la del repo e informar al humano.

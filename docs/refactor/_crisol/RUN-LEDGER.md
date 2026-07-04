@@ -1189,3 +1189,23 @@
   577f1ed pusheado a origin. Sin firma minisign (precedente --no-sign).
 - RETRO: el verificador cazó un bug funcional de la propia skill (grep single-line sobre sello
   envuelto) que ningún test de contenido habría visto — valor del rol-LLM fresco sobre método .md.
+
+### main — 2026-07-04 (forja sincroniza plugin.json + /ley refresca el cache instalado)
+- STATUS: CLOSED
+- Tier: fast-path
+- Fecha: 2026-07-04
+- TARGET: pc-local (opera sobre ~/.claude/plugins del operador; mismo precedente que la corrida `ley`)
+- MODEL: opus (verificador)
+- LEY: v1.23.0 (objetivo: v1.24.0)
+- Alcance: (1) `scripts/forjar-release.sh` — paso nuevo: sincronizar `plugins/lucky/.claude-plugin/plugin.json`
+  `version` con el tag (sin la `v`), transaccional e idempotente, con soporte --dry-run. Causa-raíz del
+  incidente 2026-07-04: version fija en 1.0.0 → el instalador de plugins jamás ve "versión nueva" y el
+  cache instalado queda congelado. (2) `plugins/lucky/skills/ley/SKILL.md` — paso nuevo post-update:
+  refrescar el CACHE instalado (`installed_plugins.json` → installPath) copiando el clon y actualizando
+  gitCommitSha; hoy /ley solo actualiza el clon y la sesión sigue cargando el snapshot viejo.
+- Veredictos (verificador fresco opus, input=diff, evidencia propia incl. dry-run): SYNC_VERSION PASS
+  (idempotente+transaccional+dry-run) · CACHE_REFRESH PASS (solo installPath, fail-soft sin clave) ·
+  NO_REGRESION PASS (66 inserciones, 0 borrados) · ZERO_LEAK PASS · DRY_RUN_EVIDENCE PASS. GLOBAL: PASS.
+- Test propio (sandbox scratchpad): 6b happy-path (viejo eliminado, sha actualizado) + sin-clave omite. PASS.
+- Release: v1.24.0 forjado (15 sellos + plugin.json 1.0.0→1.24.0 — primer release con el paso 2b vivo).
+- Cierre: 2026-07-04 · commit + tag anotado + push por el operador vía agente (directiva "aplica 3").

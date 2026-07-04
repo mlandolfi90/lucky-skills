@@ -242,6 +242,33 @@ done
 [ "$DRY" -eq 1 ] && info "[dry] $bump_count sello(s) se bumpearian a $TAG" || ok "$bump_count sello(s) bumpeado(s); los ${#SEALED[@]} archivos sellados consistentes con $TAG"
 line
 
+# ── 2b. sincronizar plugin.json.version con el tag ───────────────────────────
+# Sin esto la version del plugin queda fija (1.0.0 historico) y el instalador de
+# plugins del harness JAMAS ve "version nueva" -> el cache instalado se congela
+# al commit del dia del install (incidente 2026-07-04). El tag manda: version =
+# TAG sin la 'v'. Transaccional: valida el JSON resultante antes de mover.
+PLUGIN_JSON="plugins/lucky/.claude-plugin/plugin.json"
+[ -f "$PLUGIN_JSON" ] || die "no existe $PLUGIN_JSON — el plugin perdio su manifiesto"
+PLUGIN_VER="${TAG#v}"
+cur_pver="$("$PYBIN" -c "import json,sys;print(json.load(open(sys.argv[1],encoding='utf-8')).get('version',''))" "$PLUGIN_JSON")"
+if [ "$cur_pver" = "$PLUGIN_VER" ]; then
+  info "plugin.json ya en version $PLUGIN_VER (idempotente, sin cambios)"
+elif [ "$DRY" -eq 1 ]; then
+  info "[dry] plugin.json: $cur_pver -> $PLUGIN_VER"
+else
+  tmp="$(mktemp)"
+  "$PYBIN" - "$PLUGIN_JSON" "$PLUGIN_VER" > "$tmp" <<'PY'
+import json, sys
+d = json.load(open(sys.argv[1], encoding="utf-8"))
+d["version"] = sys.argv[2]
+print(json.dumps(d, indent=2, ensure_ascii=False))
+PY
+  "$PYBIN" -c "import json,sys;json.load(open(sys.argv[1],encoding='utf-8'))" "$tmp" || { rm -f "$tmp"; die "plugin.json resultante invalido — abortando sin tocar el archivo"; }
+  mv "$tmp" "$PLUGIN_JSON"
+  ok "plugin.json: $cur_pver -> $PLUGIN_VER"
+fi
+line
+
 # ── 3. computar sha256 + generar registry.json (raw@commit, no raw@tag) ──────
 # RAW_BASE: unico ancla. Si SKILLS_REGISTRY_URL no esta en env, NO se hornea un
 # valor: queda el token literal ${SKILLS_REGISTRY_URL} (zero-leak; el cliente lo
