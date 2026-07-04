@@ -78,11 +78,14 @@
   cambió la decisión) pero la ENTRADA tuvo 0 usos. Para revivirlo: el próximo spike real que corra el
   patrón la destila de vuelta citando su evidencia. Texto completo en git history (v1.19.1 @
   `02820ee`) · regla nueva: sin evidencia real no entra al catálogo
-- 2026-07-04 · adaptar TODA la familia de skills para TRADUCCIÓN INTEGRADA multi-idioma: hoy la prosa
-  está en español (rioplatense); diseñar cómo servir/mantener cada skill en varios idiomas SIN duplicar
-  la fuente de verdad ni romper la cadena sello/Ley-viva/registry. Preguntas de diseño: ¿capa i18n con
-  clave por idioma? ¿el idioma como parámetro del loader `cargar`? ¿traducción on-demand (LLM) vs.
-  copias por idioma firmadas? CONSECUENCIA DURA: una traducción cambia el `sha256` del SKILL.md → rompe
-  el pin/firma del `registry.json` — repensar qué se hashea/firma (¿el original canónico + traducciones
-  como assets? ¿registry por idioma?). Cross-cutting mayor: ~9 skills + forja/sellos + registry + firma
-  minisign. Candidata a corrida grande con ADR · idea de MLL
+- 2026-07-04 · SELECTOR DE IDIOMA + traducción integrada como capacidad POR DEFECTO en TODOS nuestros
+  desarrollos (no solo las skills): como el "Responsive obligatorio" del Crisol pero para idioma — toda
+  app/UI/panel que creemos trae selector de idioma + capa de traducción, SIEMPRE, con el español como
+  base. Encaje natural en la ley: REGLA nueva del Crisol paralela a `RESPONSIVE` ("i18n obligatorio":
+  UI sin selector de idioma → FAIL) + invariante de la skill `arquitectura` + fila en
+  `conformidad-checklist`; el verificador la chequea igual que responsive. Sub-caso: la propia familia
+  de skills (prosa markdown) en varios idiomas — el LLM ya opera en cualquier idioma, el tema es
+  legibilidad humana del archivo → language-pack PRE-traducido por locale, cargado on-demand por
+  `cargar`, cada uno firmado aparte en el registry (una traducción cambia el `sha256`; el español
+  canónico sigue siendo la fuente firmada). Ejes de diseño: build-time firmable vs runtime LLM al vuelo;
+  servicio tipo Crowdin vs el propio LLM. Corrida grande con ADR · idea de MLL (refinada 2026-07-04)
