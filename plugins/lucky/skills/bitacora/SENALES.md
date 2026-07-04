@@ -19,3 +19,4 @@
 
 | SEÑAL (lo que parece pasar) | visto | avistamientos (fecha · contexto 1 línea) |
 |---|---|---|
+| winget se cuelga en "DeliveryOptimization downloading" con instaladores grandes (~600MB); dos instancias winget se bloquean mutuamente sin error visible | 1 | 2026-07-03 · upgrade Docker Desktop; workaround: descarga directa del vendor + Get-AuthenticodeSignature Valid antes de ejecutar |
