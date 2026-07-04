@@ -78,16 +78,26 @@
   cambió la decisión) pero la ENTRADA tuvo 0 usos. Para revivirlo: el próximo spike real que corra el
   patrón la destila de vuelta citando su evidencia. Texto completo en git history (v1.19.1 @
   `02820ee`) · regla nueva: sin evidencia real no entra al catálogo
-- 2026-07-04 · SELECTOR DE IDIOMA + traducción como capacidad reutilizable POR DEFECTO en TODOS
-  nuestros desarrollos, con el español de base. ENCUADRE (MLL): dejar la idea ABIERTA — NO convertirla
-  en regla dura de FAIL. La meta es que el "producto" (el componente/capa de i18n) sea PLUG-AND-PLAY:
-  fácil de integrar cuando el desarrollo esté listo. Distinción clave con `RESPONSIVE`: una UI rota en
-  móvil es un DEFECTO que existe hoy → se gatea duro; una UI sin selector de idioma NO es defecto, es
-  una capacidad-todavía-no-necesaria → NO se gatea (forzar i18n antes de tiempo = generalidad
-  especulativa = deuda, contra el propio Crisol). Forma correcta: (a) construir una capacidad i18n
-  reutilizable/drop-in (componente + patrón) para que integrarla sea trivial; (b) que cada dev deje la
-  COSTURA de idioma (punto de extensión barato, "i18n-ready") sin cablear idiomas hasta que haga falta;
-  (c) enforcement SUAVE a lo sumo (pregunta de checklist "¿dejaste la costura de idioma?", no un gate
-  fail-closed). Sub-caso skills: language-pack pre-traducido por locale, cargado on-demand por `cargar`,
-  firmado aparte (el español canónico sigue firmado; traducir cambia el sha256). Corrida con ADR cuando
-  el producto esté maduro · idea de MLL (refinada 2x: 2026-07-04)
+- 2026-07-04 · [DECIDIDO — Vía A · plan completo: docs/refactor/_crisol/PLAN-i18n-costura.md] i18n /
+  selector de idioma en TODOS los desarrollos, español de base. NO es una skill nueva (los 3 jueces del
+  panel la rankearon última); su hogar es una extensión drop-in de `arquitectura` (reference + Router,
+  como deploy) pero DIFERIDA a evidence-triggered (primer APPS real): crearla hoy con 0 usos =
+  generalidad especulativa (lo que el repo ya castiga — GAP-001/GREP-001 retirados). NORMA VIVA que
+  aterriza (no artefacto, sin ID §5, sin skill, sin tocar el gate):
+  (1) DISCRIMINADOR — `RESPONSIVE` gatea DURO (UI rota en móvil = defecto de HOY) · `i18n` NO gatea (UI
+  sin selector = capacidad-todavía-no-necesaria; gatearla = deuda especulativa contra el Crisol).
+  (2) PATRÓN DE COSTURA — dispatch `(locale,key)→string` en el borde de presentación; español único
+  locale poblado + fallback; i18n-ready pero MONOLINGÜE (seam con evidencia, cero idiomas precableados);
+  agregar idioma después = soltar `locales/<lang>` + registrarlo, sin tocar el núcleo (Open/Closed).
+  (3) "dejá la costura de idioma" = instancia de la regla COSTURA EXISTENTE (clase J), DIRECCIÓN DEL
+  JUICIO fijada: juzga SOLO ubicación-cuando-el-plan-agrega-un-seam; la AUSENCIA de seam i18n es N/A,
+  NUNCA FAIL (ningún plan de UI falla por no dejar costura i18n). Enforcement SUAVE: self-check advisory
+  con guarda anti-promoción, JAMÁS checkbox en el conformidad-checklist binario ni ID en §5 (eso lo
+  volvería fail-closed). DIFERIDO a su momento/ADR: reference+fila-Router en `arquitectura`, componente
+  drop-in (i18next), señal en la brújula, language-pack pre-traducido de prosa (exige separar SEALED de
+  HASHES), skill `idioma`. · MLL (plan Crisol 21-agentes, 2026-07-04)
+- 2026-07-04 · DEUDA DE FIRMA ACTUAL (no de i18n): falta `.gitattributes` — `forjar-release.sh:256`
+  (`sha256_lf`) lo asume presente para servir el raw en LF byte-idéntico; sin él, la paridad LF del raw
+  que consume `cargar` es frágil HOY (UTF-8 multibyte), no solo el futuro language-pack. Saldar como fix
+  de firma INDEPENDIENTE (definir primero qué normaliza el `.gitattributes` antes de crearlo) · hallado
+  en el plan i18n
