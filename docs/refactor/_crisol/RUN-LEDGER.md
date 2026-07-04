@@ -1209,3 +1209,47 @@
 - Test propio (sandbox scratchpad): 6b happy-path (viejo eliminado, sha actualizado) + sin-clave omite. PASS.
 - Release: v1.24.0 forjado (15 sellos + plugin.json 1.0.0→1.24.0 — primer release con el paso 2b vivo).
 - Cierre: 2026-07-04 · commit + tag anotado + push por el operador vía agente (directiva "aplica 3").
+
+### main — 2026-07-04 (.gitattributes: normaliza EOL a LF, salda deuda de firma)
+- STATUS: ACTIVE
+- Tier: completo
+- Fecha: 2026-07-04
+- TARGET: docker-local
+- MODEL: opus (uniforme; verificación adversarial en worktrees aislados)
+- LEY: v1.24.0 (sello local; rebaseado sobre v1.24.0 de la otra sesión)
+- Alcance: saldar la deuda de firma que halló el plan i18n — falta `.gitattributes`. `forjar-release.sh:285`
+  (`sha256_lf`) asume LF para servir el raw byte-idéntico a `cargar`. Crear `.gitattributes` (`* text=auto
+  eol=lf` + scripts LF) preventivo + renormalizar el ÚNICO archivo con CRLF, `bitacora/INDEX.md` (26 CRLF
+  + 1 CR suelto → LF limpio). INVARIANTE DURO: los 9 archivos firmados (SKILL.md + detectar-runtime) están
+  limpios en LF y NO se tocan → sus sha256 del registry quedan byte-idénticos → NO requiere re-forja ni tag.
+  INDEX.md no está en el registry. Diff esperado = SOLO 2 archivos.
+- MIGRATION_STRATEGY: N/A (sin DDL)
+- Conformidad-arq: N/A (config de repo, sin código hexagonal)
+<!-- VEREDICTOS:BEGIN -->
+- runState: wip
+- [V] TARGET · PASS · gate · docker-local
+- [V] MODEL · PASS · gate · opus (uniforme)
+- [V] FIRMA_INTACTA · PENDIENTE · verificador · los 9 sha256_lf firmados byte-idénticos (diff toca solo 2 archivos)
+- [V] OPEN_CLOSED · PENDIENTE · design-verifier · .gitattributes NUEVO (AGREGAR); INDEX.md solo EOL
+- [V] ATOMICIDAD · PENDIENTE · design-verifier · config de EOL, responsabilidad única
+- [V] SCOPE_CREEP · PENDIENTE · scope-verifier · solo .gitattributes + INDEX.md
+- [V] REGLA0 · PENDIENTE · verificador · test-enforcer regresión + prueba de invariancia de firma en worktree
+- [V] TEST_COVERAGE · PENDIENTE · verificador · test-enforcer + dry-run de forja
+- [V] ZERO_LEAK · PENDIENTE · leak-verifier · sin secretos
+- [V] CREDITO · PENDIENTE · steward · ¿annotation basta o exige ADR? (endurece assumption de firma existente)
+- [V] INDEPENDENCIA · PENDIENTE · verificador · verificadores frescos en worktree
+- [V] CIERRE_TRAS_PASS · PENDIENTE · gate · cierre tras PASS
+- [V] TECHO_ITER · PENDIENTE · gate · iteraciones
+- [V] CONFORMIDAD · N/A · — · config de repo, sin código hexagonal
+- [V] RESPONSIVE · N/A · — · no toca UI
+- [V] MIGRATION · N/A · gate · sin DDL
+- [V] PIN_TOTAL · N/A · — · sin cambio de dependencias
+- [V] COSTURA · N/A · — · sin punto de extensión
+- [V] FUENTE_VERDAD · N/A · — · no toca testing/prod
+- [V] SELLOS · N/A · — · registered files sin cambio → sin re-sello
+- [V] FORJA · N/A · — · no requiere forja (invariante de firma)
+- [V] TAG_GATE · N/A · — · sin tag esta corrida
+<!-- VEREDICTOS:END -->
+- BITACORA: N/A (infra de firma)
+- Iteraciones: 1/3
+- Escalación: none

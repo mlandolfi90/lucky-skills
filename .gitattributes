@@ -1,0 +1,27 @@
+# Cadena de firma: forjar-release.sh hashea con sha256_lf (LF) y `cargar` verifica
+# sobre LF. Forzamos LF en TODO el repo para que el raw servido a `cargar` sea
+# byte-idéntico al que se hashea/firma — evita drift CRLF, sobre todo en UTF-8
+# multibyte. Salda la deuda hallada por el plan i18n
+# (docs/refactor/_crisol/PLAN-i18n-costura.md).
+* text=auto eol=lf
+
+# Texto explícito (LF innegociable): scripts ejecutables (corren en Linux/Git-Bash),
+# config y prosa firmada.
+*.sh       text eol=lf
+*.py       text eol=lf
+*.ps1      text eol=lf
+*.md       text eol=lf
+*.json     text eol=lf
+.gitignore text eol=lf
+
+# Binarios (defensivo, para cuando se agreguen): NO normalizar EOL. En especial
+# *.minisig — una firma minisign normalizada a LF quedaría CORROMPIDA.
+*.minisig  binary
+*.png      binary
+*.jpg      binary
+*.jpeg     binary
+*.gif      binary
+*.pdf      binary
+*.ico      binary
+*.woff     binary
+*.woff2    binary
