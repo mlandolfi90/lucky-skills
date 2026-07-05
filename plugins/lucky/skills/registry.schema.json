@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "lucky-skills/registry@1",
   "title": "lucky-skills registry (manifiesto del loader cargar)",
-  "description": "Valida la FORMA del registry.json. La CONFIANZA la dan minisign -V (firma del registry) + sha256 -c por SKILL.md, ejecutados por codigo externo. Este schema solo evita un manifiesto malformado; lo corre scripts/forjar-release.sh ANTES de firmar (defensa en profundidad).",
+  "description": "Valida la FORMA del registry.json (defensa en profundidad): solo evita un manifiesto malformado, NO es la capa de confianza. La confianza fuerte la darian minisign -V (firma del registry) + sha256 -c por SKILL.md via codigo externo; hoy la firma esta DIFERIDA/dormida (el registry se genera sin firmar todavia), por lo que este schema queda como gate de forma del manifiesto que produce scripts/forjar-release.sh (validacion offline; no promociona una firma activa).",
   "type": "object",
   "additionalProperties": false,
   "required": ["schema", "tag", "commit", "raw_base", "skills"],
@@ -43,18 +43,18 @@
     "skill": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["name", "triggers", "kind", "loadable_as_data", "requires_runtime", "requires_tools", "path", "sha256"],
+      "required": ["name", "kind", "loadable_as_data", "requires_runtime", "requires_tools", "path", "sha256"],
       "properties": {
         "name": {
           "type": "string",
-          "pattern": "^[a-z][a-z0-9-]*$",
-          "description": "Nombre canonico; == frontmatter name (minusculas)."
+          "pattern": "^[a-z][a-z0-9-]*(/[a-z][a-z0-9-]*\\.ref)?$",
+          "description": "Nombre canonico (== frontmatter name, minusculas) o id de sub-capa/reference 'cargar/<ref>.ref' (UNA sola barra + sufijo literal '.ref', como genera la forja para references/*.md). Prohibido mayusculas, espacios, '..' y path traversal: el segmento tras la barra es [a-z][a-z0-9-]* y el unico punto permitido es el de '.ref'."
         },
         "triggers": {
           "type": "array",
           "minItems": 1,
           "items": { "type": "string", "minLength": 1 },
-          "description": "Frases/alias de invocacion que el resolver-de-catalogo matchea contra el pedido del humano."
+          "description": "OPCIONAL: frases/alias de invocacion que el resolver-de-catalogo matchea contra el pedido del humano. La forja ACTUAL no la emite; queda declarada para que additionalProperties:false no la rechace si algun dia vuelve. Ausente => el resolver de 'cargar' matchea SOLO por 'name' (aceptable con el loader dormido)."
         },
         "kind": {
           "type": "string",
@@ -87,6 +87,11 @@
           "type": "string",
           "pattern": "^[A-Za-z0-9._/-]+\\.md$",
           "description": "Ruta RELATIVA al raw del repo (zero-leak). El loader compone <raw_base>/<commit>/<path>. Sin esquema ni host: prohibido absolute URL."
+        },
+        "url": {
+          "type": "string",
+          "pattern": "^\\$\\{SKILLS_REGISTRY_URL\\}/v[0-9]+\\.[0-9]+\\.[0-9]+(-rc[0-9]+)?/[A-Za-z0-9._/-]+\\.md$",
+          "description": "URL de fetch que compone la forja: '${SKILLS_REGISTRY_URL}/<tag>/<path>'. ZERO-LEAK (defensa en profundidad): el pattern OBLIGA el prefijo literal '${SKILLS_REGISTRY_URL}' — el host/dominio real lo resuelve el entorno (Infisical) en runtime — y PROHIBE un host/IP concreto horneado: si el prefijo fuese 'https://host-real' o una IP, NO valida. Tras el prefijo va el tag (vX.Y.Z[-rcN]) y termina en el <path> del repo (.md)."
         },
         "sha256": {
           "type": "string",
