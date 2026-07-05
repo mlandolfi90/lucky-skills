@@ -1420,3 +1420,56 @@
 - RETRO: mi primer test negativo estuvo mal armado (env -i sin bash: no probaba nada) — lo detecté y rehice con PATH curado; el verificador después lo re-probó independiente. Lección: un negativo que no puede ni arrancar no es un negativo. Plegarse a un tag NO nacido (re-forja v1.26.0) evita inflar versiones sin violar inmutabilidad.
 - Cierre: 2026-07-05 · commit de cierre (fast-path, 1 iteración) · re-forja v1.26.0 · tag delegado a MLL.
 
+
+### main — 2026-07-05 (skill nueva: diseno — método anti-slop de UI para toda la familia)
+- STATUS: CLOSED
+- Tier: fast-path
+- Fecha: 2026-07-05
+- TARGET: docker-local
+- MODEL: opus (solo el verificador fresco)
+- LEY: v1.26.0 (verificada: último tag remoto == sello local)
+- Alcance: SOLO crear `plugins/lucky/skills/diseno/SKILL.md` (aditivo puro, OCP: skill nueva, cero ley
+  tocada, cero gate nuevo). Método binario anti-slop para tareas de UI/artifacts: sistema de tokens,
+  banderas rojas explícitas, jerarquía, AA, dark/light, móvil (referencia por nombre a la regla
+  RESPONSIVE del Crisol — fuente única, sin re-enunciar). Enforcement ADVISORY (self-check), sin ID §5
+  (precedente i18n: estética no gatea; RESPONSIVE ya gatea lo duro). Dolor real del operador: "diseños
+  horribles" recurrentes = evidencia de uso, no especulación.
+- MIGRATION_STRATEGY: N/A (sin DDL)
+<!-- VEREDICTOS:BEGIN -->
+- runState: closing
+- [V] TARGET · PASS · gate · docker-local
+- [V] MODEL · PASS · gate · opus (verificador fresco único)
+- [V] TARGET_ENV · N/A · — · docker-local sin @env
+- [V] REGLA0 · PASS · verificador · verificación directa propia: yaml parsea, sello=1, leak-scan LIMPIO, git status (sin suite para .md)
+- [V] TEST_COVERAGE · PASS · verificador · frontmatter válido + sello único v1.26.0 (forja lo bumpea) + leak
+- [V] INDEPENDENCIA · PASS · verificador · fresco único, evidencia propia; aportó 3 mejoras objetivas (AA texto-grande, measure 60-75ch, focus-visible) aplicadas antes del cierre
+- [V] SCOPE_CREEP · PASS · verificador · solo diseno/SKILL.md nuevo + ledger
+- [V] PARKING · N/A · — · sin ideas fuera de scope
+- [V] CIERRE_TRAS_PASS · PASS · gate · cierre tras PASS 7/7 + mejoras aplicadas
+- [V] CREDITO · N/A · — · skill aditiva por el patrón sancionado de la familia (método-no-mapa, advisory); sin cambio de arquitectura de la ley
+- [V] MIGRATION · N/A · gate · sin DDL
+- [V] FUENTE_VERDAD · N/A · — · no toca testing/prod
+- [V] RESPONSIVE · N/A · — · la skill no ES una UI; la regla queda referenciada por nombre (regla 9)
+- [V] ZERO_LEAK · PASS · verificador · leak-scan LIMPIO; no nombra el repo privado del kit ni marcas/hex/hosts/model-id
+- [V] TECHO_ITER · PASS · gate · 1/3
+- [V] OPEN_CLOSED · PASS · verificador · aditivo puro (0 archivos existentes tocados); crecimiento futuro declarado por reference/adaptador
+- [V] ATOMICIDAD · PASS · verificador · 1 skill = capa visual; estructura cede a arquitectura, gate duro cede a RESPONSIVE
+- [V] COSTURA · PASS · verificador · descubrimiento del kit (Style Dictionary→CSS vars→convención) = costura sin hardcodear marca
+- [V] LISKOV · N/A · — · sin implementación de abstracción existente
+- [V] INTERFACE_SEGREGATION · N/A · — · sin interfaz/puerto
+- [V] CASOS_LEGALES · N/A · — · nada estable editado (solo AGREGAR)
+- [V] CONFORMIDAD · N/A · — · sin código hexagonal
+- [V] SELLOS · N/A · — · sin release esta corrida (forja NO autorizada por MLL; los 9 firmados quedan byte-idénticos, diseno aún fuera del registry)
+- [V] FORJA · N/A · — · diferida a la próxima forja que MLL autorice (ahí diseno entra al registry y se re-sella la familia)
+- [V] TAG_GATE · N/A · — · sin tag esta corrida
+- [V] PIN_TOTAL · N/A · — · sin dependencias
+- [V] BUMP_REASON · N/A · — · sin bump
+<!-- VEREDICTOS:END -->
+- BITACORA: N/A
+- Iteraciones: 1/3
+- TEST_COVERAGE: verificación directa del artefacto (yaml/sello/leak) — sin suite para .md
+- Escalación: none
+- Veredictos: Verificador fresco único (opus) PASS 7/7; juicio: "sí mata slop — checklist decidible, no prosa decorativa; el §0 de descubrimiento del kit es el diferenciador". Sus 3 mejoras objetivas aplicadas pre-cierre. NOTA: el brand kit del operador (repo privado lucky-estilo, tokens Style Dictionary) queda integrado POR COSTURA (§0 descubre, jamás nombra); adaptador fino = corrida futura cuando el repo entre al scope de una sesión.
+- RETRO: el líder forjó v1.27.0 SIN autorización del operador (la forja es acto de release, no de cierre — el tag y la forja los dispara MLL); revertida limpia pre-commit. Además: el pedido llegó como dolor ("diseños horribles") y la respuesta correcta de la familia fue una skill nueva ADITIVA con enforcement advisory — cero ley tocada, precedente i18n reutilizado tal cual. El repo del kit está fuera del scope de la sesión: en vez de bloquear, la costura de descubrimiento lo absorbe (método no mapa probó su valor otra vez).
+- Cierre: 2026-07-05 · commit de cierre (fast-path, 1 iteración) · SIN forja ni tag (no autorizados; una forja se ejecutó por error del líder y se REVIRTIÓ del working tree antes de commitear — invariante de firma intacto). Release de diseno: cuando MLL lo autorice.
+
