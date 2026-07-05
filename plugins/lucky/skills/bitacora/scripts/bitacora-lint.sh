@@ -81,9 +81,14 @@ if [ -d "$ENTRIES" ]; then
       *) flag "$id · DUPLICADA: $n filas en INDEX para la misma entrada" ;;
     esac
 
-    # 2. título == ID
-    head -1 "$f" | grep -qE "^## \[$id\]" || \
-      flag "$id · TÍTULO: la 1ra línea no es '## [$id] …' (dice: '$(head -1 "$f" | cut -c1-60)')"
+    # 2. título == ID — comparación FIXED-STRING anclada al inicio (NO ERE): un ID
+    #    con metacaracteres ERE fuera de la convención [A-Z]+-[0-9]+ (ej. 'X-1+y')
+    #    interpolado en un grep -E daba falso TÍTULO/huérfana. El prefijo va entre
+    #    comillas dentro de ${var#…} → sin globbing ni regex, comparación literal.
+    first="$(head -1 "$f")"
+    if [ "${first#"## [$id]"}" = "$first" ]; then
+      flag "$id · TÍTULO: la 1ra línea no es '## [$id] …' (dice: '$(printf '%s' "$first" | cut -c1-60)')"
+    fi
 
     # 3. campos obligatorios de la plantilla (anclados al bullet)
     grep -qE '^- \*\*TIPO:'          "$f" || flag "$id · CAMPO faltante: TIPO"
@@ -116,20 +121,30 @@ if [ -d "$ENTRIES" ]; then
     # 4/5/6. espejo entrada↔INDEX (solo si la fila es única)
     if [ "$n" = "1" ]; then
       row="$(printf '%s\n' "$ROWS" | grep -F "(entries/$id.md)")"
-      nf="$(printf '%s\n' "$row" | awk -F'|' '{print NF}')"
-      if [ "$nf" != "9" ]; then
-        flag "$id · FILA malformada en INDEX ($((nf-2)) columnas, esperadas 7)"
-      else
-        i_fecha="$(trim "$(printf '%s\n' "$row" | awk -F'|' '{print $6}')")"
-        i_usos="$(trim "$(printf '%s\n' "$row" | awk -F'|' '{print $7}')")"
-        i_estado="$(estado_token "$(printf '%s\n' "$row" | awk -F'|' '{print $8}')")"
-        [ -n "$e_estado" ] && [ "$i_estado" != "$e_estado" ] && \
-          flag "$id · ESTADO desespejado: entrada='$e_estado' vs INDEX='${i_estado:-?}'"
-        [ -n "$e_usos" ] && [ "$i_usos" != "$e_usos" ] && \
-          flag "$id · USOS desespejado: entrada='$e_usos' vs INDEX='$i_usos'"
-        [ -n "$e_fecha" ] && [ "$i_fecha" != "$e_fecha" ] && \
-          flag "$id · FECHA desespejada: entrada='$e_fecha' vs INDEX='$i_fecha'"
-      fi
+      # Un pipe crudo en una celda (escapado '\|' o no) rompe el conteo de columnas
+      # del awk -F'|' → antes daba el engañoso "FILA malformada". Detectarlo ANTES
+      # del conteo da el mensaje correcto y accionable (usá la entidad HTML).
+      case "$row" in
+      *'\|'*)
+        flag "$id · FILA: pipe crudo en celda — prohibido; usá la entidad HTML &#124;"
+        ;;
+      *)
+        nf="$(printf '%s\n' "$row" | awk -F'|' '{print NF}')"
+        if [ "$nf" != "9" ]; then
+          flag "$id · FILA malformada en INDEX ($((nf-2)) columnas, esperadas 7)"
+        else
+          i_fecha="$(trim "$(printf '%s\n' "$row" | awk -F'|' '{print $6}')")"
+          i_usos="$(trim "$(printf '%s\n' "$row" | awk -F'|' '{print $7}')")"
+          i_estado="$(estado_token "$(printf '%s\n' "$row" | awk -F'|' '{print $8}')")"
+          [ -n "$e_estado" ] && [ "$i_estado" != "$e_estado" ] && \
+            flag "$id · ESTADO desespejado: entrada='$e_estado' vs INDEX='${i_estado:-?}'"
+          [ -n "$e_usos" ] && [ "$i_usos" != "$e_usos" ] && \
+            flag "$id · USOS desespejado: entrada='$e_usos' vs INDEX='$i_usos'"
+          [ -n "$e_fecha" ] && [ "$i_fecha" != "$e_fecha" ] && \
+            flag "$id · FECHA desespejada: entrada='$e_fecha' vs INDEX='$i_fecha'"
+        fi
+        ;;
+      esac
     fi
   done
 fi
@@ -141,6 +156,9 @@ if [ -n "$ROWS" ]; then
     ref="$(printf '%s\n' "$row" | grep -oE '\(entries/[^)]+\.md\)' | head -1 | tr -d '()')"
     rid="$(basename "$ref" .md)"
     [ -f "$ENTRIES/$rid.md" ] || flag "$rid · FANTASMA: fila en INDEX pero no existe entries/$rid.md"
+    # pipe crudo en celda → columnas corridas; usos/orden no son fiables (el loop
+    # por-archivo ya emitió el mensaje específico). Saltar sin re-flag ni contarla.
+    case "$row" in *'\|'*) continue ;; esac
     u="$(trim "$(printf '%s\n' "$row" | awk -F'|' '{print $7}')")"
     case "$u" in
       ''|*[!0-9]*) flag "$rid · USOS no-numérico en INDEX ('$u')" ;;

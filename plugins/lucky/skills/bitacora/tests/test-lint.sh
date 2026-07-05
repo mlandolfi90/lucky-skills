@@ -111,6 +111,45 @@ OUT="$(bash "$SCRIPT" "$D" 2>&1)"; rc=$?
 eq "$rc" "1" "F4b catálogo a medias exit 1"
 has "falta INDEX.md pero entries/ existe"
 
+# ── F6: ROBUSTEZ del parser — ID con METACARACTER ERE fuera de convención ────────
+# Un ID como 'DRIFT-001+x' (el '+' es metacaracter ERE) interpolado en un grep -E
+# daba falso positivo de TÍTULO aunque el título fuese CORRECTO. El check ahora es
+# fixed-string: el metacaracter NO debe romper ni el título ni la bijección.
+E="$TMP/e"; mkhdr "$E"
+mkentry "$E" 'DRIFT-001+x' 2026-07-01 1 LIVE
+mkrow   "$E" 'DRIFT-001+x' 2026-07-01 1 LIVE
+OUT="$(bash "$SCRIPT" "$E" 2>&1)"; rc=$?
+echo "$OUT"; echo "────────"
+eq "$rc" "0" "F6a metachar-id con título correcto es coherente"
+has   "incoherencias: 0"
+hasnt "DRIFT-001+x · TÍTULO"      # el '+' NO debe dar falso TÍTULO
+hasnt "DRIFT-001+x · HUÉRFANA"    # ni falsa huérfana por el metacaracter
+
+# el MISMO ID pero con título que MIENTE → debe fallar por la razón CORRECTA
+E2="$TMP/e2"; mkhdr "$E2"
+mkentry "$E2" 'DRIFT-001+x' 2026-07-01 1 LIVE
+sed -i '1s/.*/## [OTRO-999] título que miente/' "$E2/entries/DRIFT-001+x.md"
+mkrow   "$E2" 'DRIFT-001+x' 2026-07-01 1 LIVE
+OUT="$(bash "$SCRIPT" "$E2" 2>&1)"; rc=$?
+echo "$OUT"; echo "────────"
+eq "$rc" "1" "F6b metachar-id con título falso falla por la razón correcta"
+has  "DRIFT-001+x · TÍTULO"
+
+# ── F7: PIPE crudo/escapado en una celda del INDEX → mensaje ESPECÍFICO ───────────
+# El awk -F'|' parte igual el '\|', así que antes daba el engañoso "FILA malformada"
+# (y de rebote "USOS no-numérico"). Ahora: un mensaje accionable que manda usar la
+# entidad HTML &#124;, detectado ANTES del conteo de columnas.
+G="$TMP/g"; mkhdr "$G"
+mkentry "$G" PIPE-001 2026-07-01 1 LIVE
+printf '| síntoma con \\| pipe | GAP | acción | [PIPE-001](entries/PIPE-001.md) | 2026-07-01 | 1 | LIVE |\n' >> "$G/INDEX.md"
+OUT="$(bash "$SCRIPT" "$G" 2>&1)"; rc=$?
+echo "$OUT"; echo "────────"
+eq "$rc" "1" "F7 exit fail-closed por pipe en celda"
+has   "PIPE-001 · FILA: pipe crudo en celda"
+has   "&#124;"
+hasnt "PIPE-001 · FILA malformada"     # el mensaje engañoso YA NO aparece
+hasnt "PIPE-001 · USOS no-numérico"    # ni el efecto secundario del 2º loop
+
 # ── F5: DOGFOOD — la bitácora REAL del repo debe pasar el lint ───────────────────
 OUT="$(bash "$SCRIPT" "$HERE/.." 2>&1)"; rc=$?
 echo "$OUT"; echo "────────"
