@@ -16,7 +16,7 @@
 | `new` adentro del núcleo | `new RepoSql()` instanciado DENTRO del núcleo | el núcleo elige la impl concreta | `REJECT` (→ inyectar en composition root) |
 | Puerto que filtra tecnología | el puerto devuelve un `Row` del ORM o recibe una `connection` | el detalle se cuela al núcleo | `REJECT` |
 | Puerto que nombra infra | `GuardarEnPostgres` en vez de `RepoPedidos` | la flecha apunta para afuera | `REJECT` |
-| Puerto-Dios | una interfaz con 12 métodos que nadie implementa entera | ISP roto | `REJECT` (→ partir por capacidad) |
+| Puerto-Dios | una interfaz con 12 métodos que nadie implementa entera | ISP roto — instancia hexagonal de `INTERFACE_SEGREGATION` (Crisol §2/§5) | `REJECT` (→ partir por capacidad) |
 | Generalidad especulativa | puerto con 1 implementación y cero variación prevista (que NO es salida del núcleo) | abstracción sin demanda = deuda | `FAIL` salvo justificación |
 | Estado global mutable nuevo | singleton/variable de módulo que muta entre capas | rompe inyección y testeo aislado | `REJECT` |
 

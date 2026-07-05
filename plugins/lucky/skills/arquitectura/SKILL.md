@@ -77,6 +77,7 @@ método. Cuando sí corresponde escanear:
 | Esto ya existe en MVC plano — ¿cómo migro sin big-bang? ¿hexagonal es overkill? | `references/migracion.md` | mínimo viable hexagonal, regla de tier, estrangulamiento paso a paso |
 | Quiero ver UNA feature ubicada de punta a punta en las 4 capas | `references/end-to-end.md` | walkthrough de una feature cruzando front → MVC → puerto → núcleo → puerto → adaptador |
 | ¿Cuáles son los anti-patrones que rechaza? | `references/anti-patrones.md` | catálogo transversal: síntoma → por qué rompe → veredicto |
+| Auditar si el código YA existente cumple SOLID (retroactivo, read-only) — ¿qué violaciones viven y cuáles duelen primero? | `templates/auditoria-solid.md` | procedimiento detectá→clasificá→priorizá→reportá→alimentá con severidad anclada al gate del Crisol |
 | ¿Por qué esta arquitectura? | `references/contexto.md` | fundamento, no procedimiento |
 
 ## Reglas de estructura (innegociables, binarias)
