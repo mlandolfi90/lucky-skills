@@ -1369,3 +1369,19 @@
 - RETRO: pase-solo del líder + verificador fresco único = el mínimo jidoka que la directiva "sin enjambre" permite, y alcanzó: el fresco refutó de verdad (encontró el defecto que el autor no vio en su propio diff — INDEPENDENCIA no es ceremonia). Lección de prosa: al feminizar/corregir un término repetido, grep del término en TODO el archivo antes de dar por cerrado el hunk.
 - Cierre: 2026-07-05 · commit de cierre (fast-path, 1 iteración) · forja v1.26.0 · tag delegado a MLL.
 
+
+### main — 2026-07-05 (fix: ley §6b resolver python3 — refresco de cache portable)
+- STATUS: ACTIVE
+- Tier: fast-path
+- Fecha: 2026-07-05
+- TARGET: docker-local
+- MODEL: opus (solo el verificador fresco; fix del líder, alcance de 1 archivo)
+- LEY: v1.26.0 (sello local; tag remoto pendiente de publicación por MLL — último publicado v1.25.0; esta corrida se pliega al MISMO release v1.26.0, re-forjado sobre tag no nacido)
+- Alcance: SOLO `plugins/lucky/skills/ley/SKILL.md` §6b — los 2 `python` pelados (resolve de installPath +
+  heredoc de actualización del JSON) pasan a resolver `python3||python` una vez (PYBIN); sin intérprete →
+  el paso se omite con aviso (fluye por el guard `[ -n "$DEST" ]` existente). Parqueado en IDEAS.md por el
+  pase de prosa; mismo patrón que F2 dejó en adoptar-crisol.sh.
+- MIGRATION_STRATEGY: N/A (sin DDL)
+<!-- VEREDICTOS:BEGIN -->
+- runState: wip
+<!-- VEREDICTOS:END -->

@@ -88,13 +88,15 @@ carga el snapshot registrado en `~/.claude/plugins/installed_plugins.json`
 (clave `lucky@lucky-skills` → `installPath`). Actualizar solo el clon deja a la
 sesión cargando la ley vieja (incidente 2026-07-04). Si la clave no existe
 (plugin no instalado por esa vía) → omití el paso y reportalo en una línea.
+Ídem sin `python3` ni `python` en PATH (Linux moderno suele traer SOLO `python3`).
 ```bash
 PLUGS="$HOME/.claude/plugins/installed_plugins.json"
-DEST=$(python -c "import json,sys;e=json.load(open(sys.argv[1],encoding='utf-8'))['plugins'].get('lucky@lucky-skills');print(e[0]['installPath'] if e else '')" "$PLUGS" 2>/dev/null)
+PYBIN=$(command -v python3 || command -v python || true)
+DEST=$([ -n "$PYBIN" ] && "$PYBIN" -c "import json,sys;e=json.load(open(sys.argv[1],encoding='utf-8'))['plugins'].get('lucky@lucky-skills');print(e[0]['installPath'] if e else '')" "$PLUGS" 2>/dev/null)
 if [ -n "$DEST" ]; then
   rm -rf "$DEST" && cp -r "$CLON/plugins/lucky" "$DEST"
   SHA=$(git -C "$CLON" rev-parse HEAD)
-  python - "$PLUGS" "$SHA" <<'PY'
+  "$PYBIN" - "$PLUGS" "$SHA" <<'PY'
 import json, sys, datetime
 p, sha = sys.argv[1], sys.argv[2]
 d = json.load(open(p, encoding="utf-8"))
