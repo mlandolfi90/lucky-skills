@@ -1371,7 +1371,7 @@
 
 
 ### main — 2026-07-05 (fix: ley §6b resolver python3 — refresco de cache portable)
-- STATUS: ACTIVE
+- STATUS: CLOSED
 - Tier: fast-path
 - Fecha: 2026-07-05
 - TARGET: docker-local
@@ -1383,5 +1383,40 @@
   pase de prosa; mismo patrón que F2 dejó en adoptar-crisol.sh.
 - MIGRATION_STRATEGY: N/A (sin DDL)
 <!-- VEREDICTOS:BEGIN -->
-- runState: wip
+- runState: closing
+- [V] TARGET · PASS · gate · docker-local
+- [V] MODEL · PASS · gate · opus (verificador fresco único)
+- [V] TARGET_ENV · N/A · — · docker-local sin @env
+- [V] REGLA0 · PASS · verificador · simulación propia con el snippet REAL: (a) python3 → cache+sha actualizados; (b) sin intérprete → exit 0, JSON intacto
+- [V] TEST_COVERAGE · PASS · verificador · 4 caminos: feliz · sin intérprete · borde set-e · clave ausente preexistente
+- [V] INDEPENDENCIA · PASS · verificador · fresco único, sandbox propio, intentó refutar (set-e, viejo-vs-nuevo) y el fix aguantó
+- [V] SCOPE_CREEP · PASS · verificador · 3 sub-hunks todos dentro del §6b + ledger; frontmatter/sello intactos; heredoc PY sin colisión con PYBIN
+- [V] PARKING · N/A · — · sin ideas nuevas (la corrida ES la idea parqueada, que se retira de IDEAS al cierre)
+- [V] CIERRE_TRAS_PASS · PASS · gate · cierre tras PASS del verificador
+- [V] CREDITO · N/A · — · bug-fix de portabilidad, sin cambio de arquitectura
+- [V] MIGRATION · N/A · gate · sin DDL
+- [V] FUENTE_VERDAD · N/A · — · no toca testing/prod
+- [V] RESPONSIVE · N/A · — · no toca UI
+- [V] ZERO_LEAK · PASS · verificador · leak-scan LIMPIO + semántico del diff y ledger
+- [V] TECHO_ITER · PASS · gate · 1/3
+- [V] OPEN_CLOSED · PASS · verificador · bug-fix caso (a) del mecanismo de invocación; cero rama/regla nueva; output idéntico con python presente
+- [V] ATOMICIDAD · N/A · — · sin unidades nuevas (resolver de 1 línea en snippet existente)
+- [V] COSTURA · N/A · — · sin punto de extensión
+- [V] LISKOV · N/A · — · sin abstracción tocada
+- [V] INTERFACE_SEGREGATION · N/A · — · sin interfaz tocada
+- [V] CASOS_LEGALES · PASS · verificador · caso (a) bug directo — OCP protege comportamiento correcto, no defectos
+- [V] CONFORMIDAD · N/A · — · sin código hexagonal
+- [V] SELLOS · PASS · gate · re-forja v1.26.0 sobre tag NO nacido: 1 sello real por archivo, 0 stragglers
+- [V] FORJA · PASS · gate · forjar-release.sh v1.26.0 --no-sign (registry re-generado con el sha nuevo de ley/SKILL.md)
+- [V] TAG_GATE · PASS · gate · v1.26.0 sin publicar aún → se pliega a este cierre; inmutabilidad intacta (solo aplica a tags publicados); lo crea MLL
+- [V] PIN_TOTAL · N/A · — · sin dependencias
+- [V] BUMP_REASON · N/A · — · sin bump
 <!-- VEREDICTOS:END -->
+- BITACORA: N/A
+- Iteraciones: 1/3
+- TEST_COVERAGE: simulación 4 caminos con snippet real (verificador, sandbox propio) · leak-scan LIMPIO
+- Escalación: none
+- Veredictos: Verificador fresco único (opus) PASS en toda la matriz; juzgó la asimetría adoptar-ABORTA vs ley-OMITE como diseño correcto (adopción necesita python; refresco es opcional). Matiz honesto registrado: la omisión sin python es silenciosa, consistente con la omisión por clave-ausente preexistente.
+- RETRO: mi primer test negativo estuvo mal armado (env -i sin bash: no probaba nada) — lo detecté y rehice con PATH curado; el verificador después lo re-probó independiente. Lección: un negativo que no puede ni arrancar no es un negativo. Plegarse a un tag NO nacido (re-forja v1.26.0) evita inflar versiones sin violar inmutabilidad.
+- Cierre: 2026-07-05 · commit de cierre (fast-path, 1 iteración) · re-forja v1.26.0 · tag delegado a MLL.
+

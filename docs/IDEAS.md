@@ -138,7 +138,7 @@
 - 2026-07-05 · [pase de prosa] ley/SKILL.md paso 6b usa `python` pelado (2×: el `python -c` del resolve
   de installPath y el heredoc de actualización del JSON) — MISMO bug que F2 arregló en adoptar-crisol.sh;
   en Linux-solo-python3 el refresco de cache muere. Fix chico (resolver python3||python), corrida aparte:
-  esta corrida es prosa-only por alcance declarado · hallado en el pase quirúrgico de prosa
+  esta corrida es prosa-only por alcance declarado · hallado en el pase quirúrgico de prosa · ✅ RESUELTA 2026-07-05 (corrida fast-path propia, mismo release v1.26.0)
 - 2026-07-04 · auditar si REALMENTE aplicamos SOLID en la construcción de sistemas (skills + apps de los
   repos), no solo en la teoría. Contexto que AHORRA trabajo: el Crisol YA encarna 4 de los 5 como reglas
   de Diseño (§2) — `OPEN_CLOSED` (explícito) · `ATOMICIDAD` ≈ Single-Responsibility · `COSTURA` ≈

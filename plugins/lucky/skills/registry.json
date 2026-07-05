@@ -1,7 +1,7 @@
 {
   "schema": "lucky-skills/registry@1",
   "tag": "v1.26.0",
-  "commit": "4ed22be025a555fd338797acdce442343f4aa64c",
+  "commit": "f27632eabd074877b56a2e76b9e3532499480cbf",
   "raw_base": "${SKILLS_REGISTRY_URL}",
   "note": "Verificacion cripto la hace codigo externo (minisign -V del .minisig + sha256 -c por archivo, sobre bytes LF). El cliente NUNCA computa NI transcribe el hash. El ancla de seguridad es la FIRMA del registry (un tag movido con registry falso no valida sin la clave privada); v1 pinea por tag, el campo commit es informativo (pin-por-commit real = v2). Solo se cargan como dato las skills loadable_as_data=true; requires_runtime/requires_tools -> fast-path de install.",
   "skills": [
@@ -107,7 +107,7 @@
       ],
       "path": "plugins/lucky/skills/ley/SKILL.md",
       "url": "${SKILLS_REGISTRY_URL}/v1.26.0/plugins/lucky/skills/ley/SKILL.md",
-      "sha256": "040a14877c0b1e6ced0a5267b865084e1c1979ab5b6ea9fcc2817992eddd4c25"
+      "sha256": "bd02c77b45155b1d7a80b34b4c7edfd38c5837d569f6923a2f77cc8568117a69"
     },
     {
       "name": "management",
