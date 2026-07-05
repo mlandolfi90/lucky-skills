@@ -5,32 +5,47 @@
 set -euo pipefail
 export PYTHONIOENCODING=utf-8  # Windows: cp1252 no imprime emojis
 
+# Intérprete Python: resolver UNA vez (Linux-solo-python3 no trae `python` pelado).
+# Preferir python3; caer a python. Sin ninguno → fail-closed con mensaje claro.
+PYTHON="$(command -v python3 || command -v python || true)"
+[ -n "$PYTHON" ] || { echo "❌ Falta Python: ni 'python3' ni 'python' están en el PATH. Instalá Python 3 y reintentá."; exit 1; }
+
 [ -d ".git" ] || { echo "❌ Corré esto desde la raíz de un repo git."; exit 1; }
 echo "⚒️  Adoptando el Crisol en: $(pwd)"
 echo
 
 # 1. .claude/settings.json — merge NO destructivo (preserva lo existente)
 mkdir -p ".claude"
-python - << 'PY'
+"$PYTHON" - << 'PY'
 import json, os
 p = os.path.join(".claude", "settings.json")
 data = {}
 if os.path.exists(p):
     with open(p, encoding="utf-8") as f:
         data = json.load(f)
+CANON = "mlandolfi90/lucky-skills"
 mk = data.setdefault("extraKnownMarketplaces", {})
-mk.setdefault("lucky-skills", {"source": {"source": "github", "repo": "mlandolfi90/lucky-skills"}})
+mk.setdefault("lucky-skills", {"source": {"source": "github", "repo": CANON}})
 # marketplace github de TERCEROS: auto-update OFF por defecto → sin esto el CLI cachea el
 # plugin al instalar y los consumidores quedan pinneados ("quedan atrás" tras cada release);
-# con el flag auto-siguen main HEAD (gateado por el Crisol). Incondicional: back-fillea
-# adopciones viejas que ya tenían la entrada sin autoUpdate.
-mk["lucky-skills"]["autoUpdate"] = True
+# con el flag auto-siguen main HEAD (gateado por el Crisol). Back-fillea adopciones viejas
+# que ya tenían la entrada sin autoUpdate — PERO solo si el source apunta al repo canónico.
+# Gate PIN_TOTAL: auto-seguir main es legítimo SOLO para nuestro propio artefacto; si la
+# entrada apunta a otro repo/fork, inyectar autoUpdate sería floating-de-tercero → NO se hace.
+_src = mk["lucky-skills"].get("source")
+_repo = _src.get("repo") if isinstance(_src, dict) else None
+if _repo == CANON:
+    mk["lucky-skills"]["autoUpdate"] = True
+    _au = "autoUpdate ON"
+else:
+    print(f"  ⚠️  extraKnownMarketplaces['lucky-skills'].source apunta a {_repo!r} (no a {CANON}) — autoUpdate NO inyectado (evita floating-de-tercero; PIN_TOTAL)")
+    _au = "autoUpdate OMITIDO (source de tercero)"
 ep = data.setdefault("enabledPlugins", {})
 ep["lucky@lucky-skills"] = True
 with open(p, "w", encoding="utf-8") as f:
     json.dump(data, f, indent=2, ensure_ascii=False)
     f.write("\n")
-print("  ✅ .claude/settings.json — marketplace lucky-skills + autoUpdate + plugin lucky habilitado")
+print(f"  ✅ .claude/settings.json — marketplace lucky-skills + {_au} + plugin lucky habilitado")
 PY
 
 # 2. Opt-in del enforcement: el ledger (su existencia activa ambos guardianes)
@@ -61,7 +76,7 @@ else
 fi
 
 # 3b. Hooks zombis: entradas de settings que apuntan a vendoreados viejos
-python - << 'PYZ'
+"$PYTHON" - << 'PYZ'
 import json, os
 p = os.path.join(".claude", "settings.json")
 if os.path.exists(p):
