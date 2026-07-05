@@ -123,6 +123,23 @@ Respondé el checklist. **Cualquier "SÍ" → Tier Completo.** Todos "NO" → Fa
   sistema y pone ahí el punto de extensión (interfaz, tabla de dispatch,
   registro de handlers). Donde NO hay evidencia de variación → código simple:
   la generalidad especulativa también es deuda.
+- **Sustituibilidad (Liskov):** una implementación nueva de una abstracción YA
+  existente (adapter de un puerto, `struct` que llena una vtable, función
+  asignada a un puntero-a-función, handler bajo una clave de dispatch, clase que
+  `implements`) debe poder ocupar el lugar del supertipo **sin que el llamador
+  se entere**: no fortalece precondiciones, no debilita postcondiciones, no
+  obliga a saber cuál impl es. Rompe el contrato → `REJECT`, salvo **cambio de
+  contrato declarado en el plan** (caso legal (c) → tier completo + ADR). La
+  conformidad de FIRMA la caza el compilador; acá se juzga el contrato
+  **semántico**.
+- **Segregación de interfaces (ISP):** un contrato se parte por **necesidad de
+  cliente**; ningún cliente depende de métodos que no usa. La partición es del
+  CONTRATO, no de la impl (quien lo cumple entero puede ser 1 unidad). Contrato
+  de N clientes + método que sirve a uno → `REJECT`, salvo justificación (todos
+  usan todo, o partir sería especulación). **Distinto de ATOMICIDAD** (SRP = la
+  unidad; ISP = el contrato expuesto a clientes — provider-side vs
+  consumer-side). El anti-patrón `Puerto-Dios` de la skill `arquitectura` es su
+  instancia hexagonal (referencia por nombre).
 - **Cuando tocar lo estable es inevitable (3 casos legales):** (a) bug → se toca
   directo, OCP protege comportamiento correcto, no defectos; (b) falta la
   costura → **dos corridas Crisol separadas** (cada una con su entrada `ACTIVE`
@@ -156,7 +173,7 @@ copia acá.
 
 | `<concern>-verifier` | Reglas (IDs §5) que dictamina | TRIGGER (cuándo se spawnea) | Input extra al diff |
 |---|---|---|---|
-| `design-verifier` | `OPEN_CLOSED` + `ATOMICIDAD` + `COSTURA` (§2 Diseño) | tier completo · fast-path **si toca código** | — |
+| `design-verifier` | `OPEN_CLOSED` + `ATOMICIDAD` + `COSTURA` + `LISKOV` + `INTERFACE_SEGREGATION` (§2 Diseño) | tier completo · fast-path **si toca código** | — |
 | `scope-verifier` | `SCOPE_CREEP` + `CREDITO` (§2) | tier completo | plan `APPROVE` del Steward + `docs/decisions/` + `docs/IDEAS.md` |
 | `leak-verifier` | `ZERO_LEAK` (§2 «Sin secretos») | **SIEMPRE** (incl. fast-path) | meta-docs: ledger · ADR · COLLISION-MAP · `IDEAS.md` · mensaje de commit. Puede invocar `scripts/leak-scan.sh` |
 | `conformidad-verifier` | `CONFORMIDAD` (§2 «Conformidad estructural») | **solo si** `Glob` halla la skill `arquitectura` | reusa `conformidad-checklist.md` de esa skill TAL CUAL (fuente única, NO duplicar) |
@@ -467,6 +484,8 @@ IDs en MAYÚSCULA_GUION_BAJO, sin abreviar (`OPEN_CLOSED`, no `OCP`):
 | `OPEN_CLOSED` | Comportamiento nuevo se AGREGA, no se EDITA lo estable | si el diff toca código estable | J |
 | `ATOMICIDAD` | Cada unidad = 1 responsabilidad, deps por parámetro, compone lo chico | si el diff crea/edita unidades | J |
 | `COSTURA` | El punto de extensión va donde el sistema varía (sin generalidad especulativa) | si el plan agrega extensión | J |
+| `LISKOV` | Implementación nueva de una abstracción existente sustituye al supertipo sin romper su contrato | si el diff crea/modifica una implementación de una interfaz/puerto existente | J |
+| `INTERFACE_SEGREGATION` | Contrato tajado por necesidad de cliente; ningún cliente depende de métodos que no usa | si el diff crea/amplía una interfaz/puerto con ≥2 clientes | J |
 | `CASOS_LEGALES` | Tocar lo estable solo por bug / costura faltante (2 corridas) / cambio de contrato | si se edita lo estable | H |
 | `CONFORMIDAD` | Conformidad estructural vs skill `arquitectura` (Glob + lectura del checklist) | si existe skill arquitectura y hay código hexagonal | H |
 | `SELLOS` | Release re-sella TODAS las skills al tag nuevo; 1 sello por skill, todas == tag | si la corrida habilita release | M |

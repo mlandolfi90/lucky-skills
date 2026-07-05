@@ -34,6 +34,11 @@
       compone lo chico. Emite a la matriz (§5).
 - [ ] **`[COSTURA]`** (mapea a §Diseño · `design-verifier`): el punto de extensión
       cae donde el sistema varía; sin generalidad especulativa. Emite a la matriz (§5).
+- [ ] **`[LISKOV]`** (mapea a §2 Diseño · `design-verifier`): enunciado en
+      SKILL.md §2/§5 (fuente única, NO se re-enuncia acá). Emite a la matriz (§5).
+- [ ] **`[INTERFACE_SEGREGATION]`** (mapea a §2 Diseño · `design-verifier`):
+      enunciado en SKILL.md §2/§5 (fuente única, NO se re-enuncia acá). Emite a
+      la matriz (§5).
 - [ ] Sin `# TODO` huérfanos (si queda algo → issue separado, no en código).
 - [ ] Dependencias pineadas exactas (ADR 0002).
 - [ ] Type hints / typing completos.
