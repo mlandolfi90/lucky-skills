@@ -100,4 +100,14 @@
   (`sha256_lf`) lo asume presente para servir el raw en LF byte-idéntico; sin él, la paridad LF del raw
   que consume `cargar` es frágil HOY (UTF-8 multibyte), no solo el futuro language-pack. Saldar como fix
   de firma INDEPENDIENTE (definir primero qué normaliza el `.gitattributes` antes de crearlo) · hallado
-  en el plan i18n
+  en el plan i18n · ✅ RESUELTA 2026-07-04 (commit 6da5333: `.gitattributes` EOL→LF + INDEX.md limpio,
+  bajo Crisol Tier Completo; verificador probó 9/9 hashes firmados == registry, sin re-forja)
+- 2026-07-04 · auditar si REALMENTE aplicamos SOLID en la construcción de sistemas (skills + apps de los
+  repos), no solo en la teoría. Contexto que AHORRA trabajo: el Crisol YA encarna 4 de los 5 como reglas
+  de Diseño (§2) — `OPEN_CLOSED` (explícito) · `ATOMICIDAD` ≈ Single-Responsibility · `COSTURA` ≈
+  Dependency-Inversion (la costura donde el sistema varía) · `CONFORMIDAD` hexagonal (deps hacia adentro,
+  núcleo sin I/O) ≈ DIP+ISP. GAP a chequear: Liskov (sustituibilidad) e Interface-Segregation no tienen
+  regla propia; y SOBRE TODO si el CÓDIGO real de cada repo cumple, no solo el reglamento (el Crisol
+  verifica el diff de cada corrida, no hace auditoría retroactiva del código ya existente). Candidata a
+  corrida de AUDITORÍA read-only por repo (mapear violaciones SOLID vivas) o a enmienda del
+  `conformidad-checklist`. · idea de MLL
