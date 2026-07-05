@@ -126,6 +126,15 @@
 - 2026-07-05 · [corrida SOLID] lint de pipes intra-celda: hoy solo se caza la forma escapada `\|` (el pipe
   crudo es indistinguible del delimitador); un markdown-lint podría exigir la entidad HTML en toda celda ·
   hallado por el carril F8
+- 2026-07-05 · [corrida SOLID · verificadores] higiene de test-enforcer.sh (pre-existente, NO de esta
+  corrida): las invocaciones FO-1/FO-3/FO-4 y la de cache llaman a $GATE sin la guarda have_gate → en
+  contenedor fresco sin gate desplegado dan 3 FAIL espurios (17/3) en vez de skip; el override
+  CRISOL_GATE_OVERRIDE (documentado en el header) da el 69/0 legítimo — 3 verificadores frescos tropezaron
+  con lo mismo independientemente. Fix: guardar esas 4 llamadas con have_gate · hallado en la verificación
+- 2026-07-05 · [corrida SOLID · verificadores] paridad de rutas/extensiones EXENTAS entre guardianes
+  (.mdx/.markdown/.rst/docs//.claude/) queda asserted-por-comentario: el fixture prueba la paridad de la
+  lista de CÓDIGO (grupo E) pero no extrae/compara las listas de exención — candidato a grupo E2 ·
+  hallado por el design-verifier
 - 2026-07-04 · auditar si REALMENTE aplicamos SOLID en la construcción de sistemas (skills + apps de los
   repos), no solo en la teoría. Contexto que AHORRA trabajo: el Crisol YA encarna 4 de los 5 como reglas
   de Diseño (§2) — `OPEN_CLOSED` (explícito) · `ATOMICIDAD` ≈ Single-Responsibility · `COSTURA` ≈

@@ -1259,7 +1259,7 @@
 - Cierre: 2026-07-04 · commit de cierre (Tier Completo, 1 iteración) · push a main. SIN re-forja (invariante de firma: los 9 firmados byte-idénticos) · SIN tag.
 
 ### main — 2026-07-05 (optimización integral: SOLID al Crisol + cierre de gaps acumulados)
-- STATUS: ACTIVE
+- STATUS: CLOSED
 - Tier: completo
 - Fecha: 2026-07-05
 - TARGET: docker-local
@@ -1279,7 +1279,42 @@
   PLAN-solid.md como backlog): split SRP de forjar-release.sh · prosa §CD→references · taxonomías por env.
 - Bitácora (pull por síntoma): DRIFT-001 (FALSO-VERDE fail-closed) → input del carril F1 y de sus verificadores.
 - MIGRATION_STRATEGY: N/A (sin DDL)
-- Conformidad-arq: pendiente al cierre
+- Conformidad-arq: N/A (scripts/hooks/ley — sin código hexagonal en el diff)
 <!-- VEREDICTOS:BEGIN -->
-- runState: wip
+- runState: closing
+- [V] TARGET · PASS · gate · docker-local
+- [V] MODEL · PASS · gate · opus (uniforme, alias pin de MLL)
+- [V] TARGET_ENV · N/A · — · docker-local sin @env
+- [V] REGLA0 · PASS · quality-auditor · enforcer 69/69 · lint 35/35 · stale 20/20 · verify 1/0 (skip minisign de diseño), corridas propias en el TARGET
+- [V] TEST_COVERAGE · PASS · quality-auditor · guardianes con paridad probada (grupos E/F/G/H) + lint modificado + py_compile/bash -n de los 4 scripts + registry 9/9 vs schema
+- [V] INDEPENDENCIA · PASS · integration-verifier · 5 verificadores frescos, evidencia empírica propia cada uno
+- [V] SCOPE_CREEP · PASS · scope-verifier · 23/23 archivos en mandato de frente; prohibidos con diff vacío (forja/registry/--register-target/fail-open)
+- [V] PARKING · PASS · lead · 9 líneas [corrida SOLID] depositadas en IDEAS.md (7 de carriles + 2 de verificadores)
+- [V] CIERRE_TRAS_PASS · PASS · gate · cierre tras 5/5 verificadores PASS + Integración PASS
+- [V] CREDITO · PASS · scope-verifier · ADR 0007 cubre F3 (2 reglas §2/§5) + F4 (modo auditoría) + política de guardianes F1
+- [V] MIGRATION · N/A · gate · sin DDL
+- [V] FUENTE_VERDAD · N/A · — · no toca testing/prod
+- [V] RESPONSIVE · N/A · — · no toca UI
+- [V] ZERO_LEAK · PASS · leak-verifier · leak-scan exit 0 + barrido semántico limpio + pattern url del schema probado anti-host-horneado
+- [V] TECHO_ITER · PASS · gate · 1/3 (converge en iteración 1)
+- [V] OPEN_CLOSED · PASS · design-verifier · nuevo=AGREGADO (filas §5, bullets §2, template, Router, grupos de test); editado en estable = bug-fix (a) o contrato-con-ADR (c)
+- [V] ATOMICIDAD · PASS · design-verifier · awk 1 responsabilidad; --print-code-policy accesor introspectivo; template difiere criterios a fuentes canónicas
+- [V] COSTURA · PASS · design-verifier · seams preexistentes (catálogo §5, Router, fixture-como-contrato); único seam nuevo con consumidor real (grupo E)
+- [V] CASOS_LEGALES · PASS · steward · F1/F2/F7/F8=(a) bug · F5/F6=doc · F3=(c) con ADR 0007; ninguno (b)
+- [V] LISKOV · PASS · design-verifier · guardianes sustituibles PROBADOS por fixture 69/69 (dictamen voluntario: la regla nace en este diff; la vara vigente era v1.24.0)
+- [V] INTERFACE_SEGREGATION · N/A · — · el diff no crea/amplía interfaz con ≥2 clientes (--print-code-policy tiene 1 consumidor)
+- [V] CONFORMIDAD · N/A · — · sin código hexagonal en el diff
+- [V] SELLOS · PASS · gate · forja re-selló familia completa: 9 skills + 7 ADRs, 1 sello real c/u == v1.25.0, 0 stragglers
+- [V] FORJA · PASS · gate · forjar-release.sh v1.25.0 --no-sign en una pasada (sellos+registry+leak-scan interno); registry regenerado 9/9 válido vs schema nuevo; ancla 8c9142c
+- [V] TAG_GATE · PASS · gate · v1.25.0 habilitado: nace de esta corrida CLOSED; lo crea MLL desde el navegador (sandbox sin push de tags)
+- [V] PIN_TOTAL · N/A · — · sin cambio de dependencias (F2 endurece el guard anti-floating, no toca pins)
+- [V] BUMP_REASON · N/A · — · sin bump de pin
 <!-- VEREDICTOS:END -->
+- BITACORA: N/A (sin gap >30min; los hallazgos ya canalizados a IDEAS.md — 9 líneas)
+- Iteraciones: 1/3
+- TEST_COVERAGE: enforcer 69/69 (grupos nuevos E paridad · F branch exacto · G allow-list · H utf-8) · lint 35/35 · stale 20/20 · verify 1/0 skip-diseño
+- Escalación: none
+- Veredictos: Steward APPROVE 8/8 (con correcciones duras a F7/F1/F5 incorporadas) · design/scope/leak/quality/integración PASS · Integración PASS (F3↔F4 íntegro, sin pisadas en los 3 archivos compartidos)
+- NOTA: con triggers opcional y ausente, el resolver de cargar matchea SOLO por name (aceptable con loader dormido — declarado por F7)
+- RETRO: 8 carriles paralelos con partición disjunta declarada en el COLLISION-MAP + WIP-commit por carril al reportar = cero pisadas y respaldo continuo (el stop-hook del harness pedía commitear trabajo en vuelo — el respaldo-por-carril-cerrado lo resolvió sin capturar estados a medio escribir). Trampa evitada: test-enforcer da 17/3 en contenedor fresco por gate no desplegado (precondición de entorno, pre-existente) — 3 verificadores independientes la diagnosticaron igual; el override documentado del propio fixture da el 69/0 legítimo. La dependencia semántica F3→F4 (IDs que nacen en un carril y se referencian en otro) se salda cerrando ambos en el mismo release — chequeada explícitamente por Integración.
+- Cierre: 2026-07-05 · commit de cierre (Tier Completo, 1 iteración) · forja v1.25.0 · tag delegado a MLL.

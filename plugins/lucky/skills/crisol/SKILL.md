@@ -504,7 +504,7 @@ triggers, para que ningún carril derive el vocabulario.
 ## 6. La ley se gobierna a sí misma
 
 **Fuente de verdad: `github.com/mlandolfi90/lucky-skills` · esta copia = tag
-`v1.24.0` (cache local, NO la ley).** **Ley viva:** al invocar la skill, si la
+`v1.25.0` (cache local, NO la ley).** **Ley viva:** al invocar la skill, si la
 sesión tiene red: `git ls-remote --tags
 https://github.com/mlandolfi90/lucky-skills.git` — si existe un tag mayor al de
 esta copia, descargar y seguir LA DEL REPO
