@@ -102,6 +102,30 @@
   de firma INDEPENDIENTE (definir primero qué normaliza el `.gitattributes` antes de crearlo) · hallado
   en el plan i18n · ✅ RESUELTA 2026-07-04 (commit 6da5333: `.gitattributes` EOL→LF + INDEX.md limpio,
   bajo Crisol Tier Completo; verificador probó 9/9 hashes firmados == registry, sin re-forja)
+- 2026-07-05 · [corrida SOLID] adoptar-crisol.sh: (1) `json.load` del settings.json sin try/except (paso 1
+  y 3b) — un JSON malformado muere con traceback crudo en vez de mensaje amable; (2) el guard canónico de
+  `source.repo` compara exacto (`mlandolfi90/lucky-skills`) — variantes legítimas (capitalización, `.git`)
+  caen al camino fail-closed y omiten autoUpdate; decidir si normalizar · hallado por el carril F2
+- 2026-07-05 · [corrida SOLID] shift-left de `INTERFACE_SEGREGATION` a las reglas de PLAN del Steward
+  (§3.6/§4-paso-4): una interfaz con ≥2 clientes y métodos sin usar ES plan-decidible; `LISKOV` NO (contrato
+  semántico exige la impl real, fase-diff) · propuesto por el carril F3
+- 2026-07-05 · [corrida SOLID] armonizar `auditor-checklist.md` §B: los ítems viejos [OPEN_CLOSED]/
+  [ATOMICIDAD]/[COSTURA] re-enuncian el texto de la regla; los 2 nuevos son referencia-pura a §2/§5 —
+  migrar los 3 viejos a referencia-only cierra el drift de fuente única · hallado por el carril F3
+- 2026-07-05 · [corrida SOLID] el enforcer NO parsea el formato legado `## RUN`/`STATUS:` sin `- ` (el gate
+  sí): con corrida legada activa el gate permite y el enforcer bloquea — divergencia fail-closed (no abre
+  de más) pero drift real entre guardianes; + matiz: exclusión `docs/` por glob (enforcer) vs primer
+  segmento (gate) podría diferir con rutas raras · hallado por el carril F1
+- 2026-07-05 · [corrida SOLID] brujula/SKILL.md:44 (señal "ley atrasada", body no-footer) usa `git
+  ls-remote --tags` pelado — mismo bug del footer-fix F6, quedó fuera del carril (scope=footers); una línea
+  en corrida futura · hallado por el carril F6
+- 2026-07-05 · [corrida SOLID] templates de `arquitectura` inconsistentes en footer: `auditoria-solid.md`
+  nace con footer Ley-viva, `estructura.md`/`conformidad-checklist.md` no tienen — decidir si homogeneizar ·
+  + candidata: helper de ruteo para el paso "Alimentá" de la auditoría (el depósito seguiría siendo humano/
+  corrida, solo baja la fricción de copia) · hallado por el carril F4
+- 2026-07-05 · [corrida SOLID] lint de pipes intra-celda: hoy solo se caza la forma escapada `\|` (el pipe
+  crudo es indistinguible del delimitador); un markdown-lint podría exigir la entidad HTML en toda celda ·
+  hallado por el carril F8
 - 2026-07-04 · auditar si REALMENTE aplicamos SOLID en la construcción de sistemas (skills + apps de los
   repos), no solo en la teoría. Contexto que AHORRA trabajo: el Crisol YA encarna 4 de los 5 como reglas
   de Diseño (§2) — `OPEN_CLOSED` (explícito) · `ATOMICIDAD` ≈ Single-Responsibility · `COSTURA` ≈
