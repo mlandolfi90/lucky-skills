@@ -51,11 +51,11 @@ método. Cuando sí corresponde escanear:
    naming → la skill **cede ante ella** y la registra; no la reescribe.
 2. **MAPEÁ lo encontrado a las lentes APLICABLES** (núcleo · MVC-entrada ·
    atomic · 12-factor) y reportá una línea por lente: qué capa existe, cuál
-   falta, qué está mezclado. Marcá **N/A** la lente que el repo no usa (atomic y
+   falta, qué está mezclado. Marcá como **N/A** la lente que el repo no usa (atomic y
    MVC-entrada no aplican a un CLI, una librería o un worker sin UI/entrada web)
    — N/A NO es un defecto.
-3. **Aplicá la regla de tier antes de ofrecer esqueleto** (`references/
-   migracion.md`). Si el checklist de tier da todos NO → recomendá **MVC plano**
+3. **Aplicá la regla de tier antes de ofrecer esqueleto**
+   (`references/migracion.md`). Si el checklist de tier da todos NO → recomendá **MVC plano**
    (controller→servicio→DB), no el árbol hexagonal completo. Hexagonal no es por
    default; el purismo es deuda.
 4. **Si NO hay estructura reconocible y el tier lo justifica** → ofrecé el
@@ -103,7 +103,7 @@ QUÉ capa es cuál lo definen las capas; acá viven los invariantes universales.
    es otro adaptador de entrada: solo la página cruza al backend.
 5. **Open/Closed real.** Capacidad nueva = adaptador o caso de uso NUEVO;
    tecnología distinta = adaptador que cumple el MISMO puerto. El núcleo y los
-   puertos estables NO se editan para extender — se compone. (Tocar lo estable
+   puertos estables NO se editan para extender — se extiende COMPONIENDO. (Tocar lo estable
    solo en los 3 casos legales del Crisol §2: bug, falta-la-costura con corrida
    propia, o cambio de contrato con ADR.)
 6. **Un puerto por capacidad que VARÍA — con una excepción dura.** La
@@ -162,7 +162,7 @@ edita para sumar un estilo. Es Open/Closed aplicado a la skill misma.
 ---
 
 **Fuente de verdad: `github.com/mlandolfi90/lucky-skills` · esta copia = tag
-`v1.25.0` (cache local, NO la ley).** Ley viva: con red, si el repo tiene un tag
+`v1.26.0` (cache local, NO la ley).** Ley viva: con red, si el repo tiene un tag
 mayor (`git ls-remote --tags
 https://github.com/mlandolfi90/lucky-skills.git`), seguir la del repo
 (`raw.githubusercontent.com/mlandolfi90/lucky-skills/<tag>/plugins/lucky/skills/arquitectura/SKILL.md`)

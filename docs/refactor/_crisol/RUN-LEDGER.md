@@ -1318,3 +1318,54 @@
 - NOTA: con triggers opcional y ausente, el resolver de cargar matchea SOLO por name (aceptable con loader dormido — declarado por F7)
 - RETRO: 8 carriles paralelos con partición disjunta declarada en el COLLISION-MAP + WIP-commit por carril al reportar = cero pisadas y respaldo continuo (el stop-hook del harness pedía commitear trabajo en vuelo — el respaldo-por-carril-cerrado lo resolvió sin capturar estados a medio escribir). Trampa evitada: test-enforcer da 17/3 en contenedor fresco por gate no desplegado (precondición de entorno, pre-existente) — 3 verificadores independientes la diagnosticaron igual; el override documentado del propio fixture da el 69/0 legítimo. La dependencia semántica F3→F4 (IDs que nacen en un carril y se referencian en otro) se salda cerrando ambos en el mismo release — chequeada explícitamente por Integración.
 - Cierre: 2026-07-05 · commit de cierre (Tier Completo, 1 iteración) · forja v1.25.0 · tag delegado a MLL.
+
+### main — 2026-07-05 (pase quirúrgico de prosa: semántica y gramática de las skills, sin cambio de contrato)
+- STATUS: CLOSED
+- Tier: fast-path
+- Fecha: 2026-07-05
+- TARGET: docker-local
+- MODEL: opus (solo el verificador fresco; la ingeniería la hace el líder en el modelo de sesión, por directiva explícita de MLL: "1 solo sin enjambre")
+- LEY: v1.25.0 (verificada: último tag remoto == sello local)
+- Alcance: SOLO prosa de los SKILL.md de la familia — gramática, precisión semántica, ambigüedad. INVARIANTE
+  DURO: cero cambio de contrato o semántica normativa; IDs §5, formatos machine-checkable (encabezados,
+  campos con guion, matriz [V]), frontmatter (triggers de autoactivación), sellos y footers INTACTOS.
+  Cambia el sha de archivos firmados → habilita release: forja v1.26.0 al cierre.
+- MIGRATION_STRATEGY: N/A (sin DDL)
+<!-- VEREDICTOS:BEGIN -->
+- runState: closing
+- [V] TARGET · PASS · gate · docker-local
+- [V] MODEL · PASS · gate · opus (solo el verificador fresco; ingeniería = líder por directiva MLL)
+- [V] TARGET_ENV · N/A · — · docker-local sin @env
+- [V] REGLA0 · PASS · verificador · enforcer 69/0 (override documentado) + lint 35/0, corridas propias
+- [V] TEST_COVERAGE · PASS · verificador · pase prosa-only; suites relevantes verdes propias; sin superficie de runtime nueva
+- [V] INDEPENDENCIA · PASS · verificador · fresco único (fast-path), evidencia empírica propia; refutó y cazó 1 errata del propio pase
+- [V] SCOPE_CREEP · PASS · verificador · solo 6 SKILL.md + IDEAS.md (parking) + ledger; cero código/templates/hooks
+- [V] PARKING · PASS · lead · 1 línea a IDEAS.md (python pelado en ley §6b, mismo bug F2)
+- [V] CIERRE_TRAS_PASS · PASS · gate · cierre tras PASS del verificador + errata señalada corregida
+- [V] CREDITO · N/A · — · sin cambio de arquitectura: erratas + coherencia hacia fuente única YA existente
+- [V] MIGRATION · N/A · gate · sin DDL
+- [V] FUENTE_VERDAD · N/A · — · no toca testing/prod
+- [V] RESPONSIVE · N/A · — · no toca UI
+- [V] ZERO_LEAK · PASS · verificador · leak-scan LIMPIO + barrido semántico del diff/IDEAS/ledger
+- [V] TECHO_ITER · PASS · gate · 1/3
+- [V] OPEN_CLOSED · PASS · verificador · 14 hunks = (a) gramática/errata o (b) coherencia interna; cero regla nueva, cero obligación borrada, cero umbral movido
+- [V] ATOMICIDAD · N/A · — · sin unidades de código creadas/editadas
+- [V] COSTURA · N/A · — · sin punto de extensión nuevo
+- [V] LISKOV · N/A · — · sin implementación de abstracción tocada
+- [V] INTERFACE_SEGREGATION · N/A · — · sin interfaz/puerto tocado
+- [V] CASOS_LEGALES · PASS · verificador · los 3 hunks de coherencia juzgados RESTAURACIÓN legítima hacia la fuente única (§4, Compuerta, roster §2) — no cambio de contrato
+- [V] CONFORMIDAD · N/A · — · sin código hexagonal
+- [V] SELLOS · PASS · gate · forja v1.26.0: 1 sello real por archivo de familia, 0 stragglers (verificado post-forja)
+- [V] FORJA · PASS · gate · forjar-release.sh v1.26.0 --no-sign en una pasada (sellos+registry+leak-scan)
+- [V] TAG_GATE · PASS · gate · v1.26.0 nace de esta corrida CLOSED; lo crea MLL desde el navegador
+- [V] PIN_TOTAL · N/A · — · sin dependencias tocadas
+- [V] BUMP_REASON · N/A · — · sin bump
+<!-- VEREDICTOS:END -->
+- BITACORA: N/A (hallazgo canalizado a IDEAS.md)
+- Iteraciones: 1/3
+- TEST_COVERAGE: enforcer 69/0 + lint 35/0 (verificador, corridas propias) · leak-scan LIMPIO
+- Escalación: none
+- Veredictos: Verificador fresco único (opus) PASS en toda la matriz; juzgó los 3 hunks de coherencia como restauración hacia fuente única (el hardcode sonnet era el más audaz y resistió el escrutinio); cazó 1 inconsistencia de género que el PROPIO pase introdujo en crisol §6 (corregida antes de forjar).
+- RETRO: pase-solo del líder + verificador fresco único = el mínimo jidoka que la directiva "sin enjambre" permite, y alcanzó: el fresco refutó de verdad (encontró el defecto que el autor no vio en su propio diff — INDEPENDENCIA no es ceremonia). Lección de prosa: al feminizar/corregir un término repetido, grep del término en TODO el archivo antes de dar por cerrado el hunk.
+- Cierre: 2026-07-05 · commit de cierre (fast-path, 1 iteración) · forja v1.26.0 · tag delegado a MLL.
+

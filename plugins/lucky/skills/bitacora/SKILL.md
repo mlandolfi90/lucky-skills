@@ -21,7 +21,7 @@ reemplaza. **Principio rector: la brújula LEE, el Crisol ESCRIBE.**
 
 **Ejes:** indexada por SÍNTOMA (no por tema) · compacta (≤1 pantalla el INDEX) ·
 viva (se pudre si no se valida → reloj `validated_on`) · *compass, not
-encyclopedia* (devolvé la acción, jamás volqués el archivo entero).
+encyclopedia* (devolvé la acción, jamás vuelques el archivo entero).
 
 ## Consultar (AL PLANEAR / solucionar — pull, on-demand)
 
@@ -102,14 +102,14 @@ hallado**. Entonces:
   operador, 2026-07-03.
 - **Cero secretos (invariante #1):** nombres de variable, nunca valores; rutas
   relativas, nunca absolutas; sin IPs/dominios/tokens. Lo cubre `leak-scan.sh`.
-- **Máx ~20-35 líneas por entrada.** Más que eso = es un ADR o un skill, movelo.
+- **Máx ~20-35 líneas por entrada.** Más que eso = es un ADR o una skill, movelo.
 - **El gate NO bloquea por la Bitácora** (sería anti-jidoka): el Crisol avisa, no
   exige. Es `.md` → exento del gate; la dureza la dan el origen (Crisol) + STALE.
 
 ---
 
 **Fuente de verdad: `github.com/mlandolfi90/lucky-skills` · esta copia = tag
-`v1.25.0` (cache local, NO la ley).** Ley viva: con red, si el repo tiene un tag
+`v1.26.0` (cache local, NO la ley).** Ley viva: con red, si el repo tiene un tag
 mayor (`git ls-remote --tags
 https://github.com/mlandolfi90/lucky-skills.git`), seguir la del repo e informar
 al humano.

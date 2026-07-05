@@ -113,7 +113,7 @@ detiene ahí** (fail-closed); no se avanza al siguiente.
    del tag `<tag>`"; ofrecé los nombres disponibles y detené. Cero adivinanza de URLs.
 2. **Capability-gate (`requires_runtime` / `requires_tools` / `loadable_as_data`).**
    Si la entrada tiene `loadable_as_data: false`, o `requires_runtime` no vacío
-   (hook, `allowed-tools` de escritura, auto-trigger, `disable-invocation`; p. ej.
+   (hook, `allowed-tools` de escritura, auto-trigger, `disable-model-invocation`; p. ej.
    crisol, idea), o `requires_tools` no vacío (la skill DEPENDE de ejecutar tools
    como `Bash` para cumplir su método; p. ej. brújula, management) → **RECHAZO como
    dato**. Inyectada como texto sería una **versión castrada** (sin su enforcer, o
@@ -193,7 +193,7 @@ en `references/detectar-runtime.md`).
 
 ## Modos de falla (degradación graceful, siempre fail-closed)
 
-- **Sin red / fetcher falla** → no hay catálogo nuevo. Decílo y seguí con lo ya
+- **Sin red / fetcher falla** → no hay catálogo nuevo. Decilo y seguí con lo ya
   cargado; no inventes contenido. No bloquea el resto de la sesión.
 - **fetcher rechaza el registry (firma/tag/commit)** → catálogo no confiable →
   **nada entra**. Detené la carga (el resto de la sesión sigue).
@@ -202,7 +202,7 @@ en `references/detectar-runtime.md`).
 - **`requires_runtime` / `requires_tools`** → fast-path de install (nunca castrada).
 - **Sin `fetch_verify` cableado** → MODO MANUAL (path impreso; verificación humana
   out-of-band; jamás auto-inyección).
-- **Sin `SKILLS_REGISTRY_URL`** → pedíla; sin ella no hay ancla → MODO MANUAL o
+- **Sin `SKILLS_REGISTRY_URL`** → pedila; sin ella no hay ancla → MODO MANUAL o
   detener.
 - **Llegó CRLF / bytes corruptos** → el fetcher rechaza con mensaje accionable
   ("el fetch/checkout corrompió EOL"); no normalices a ojo, no inyectes.
@@ -281,7 +281,7 @@ implementa `fetch_verify`:
 ---
 
 **Fuente de verdad: `github.com/mlandolfi90/lucky-skills` · esta copia = tag
-`v1.25.0` (cache local, NO la ley).** Ley viva: con red, si el repo tiene un tag
+`v1.26.0` (cache local, NO la ley).** Ley viva: con red, si el repo tiene un tag
 mayor (`git ls-remote --tags
 https://github.com/mlandolfi90/lucky-skills.git`), seguir la del repo e informar
 al humano (el loader

@@ -70,7 +70,7 @@ Respondé el checklist. **Cualquier "SÍ" → Tier Completo.** Todos "NO" → Fa
   el líder NO verifica su propio trabajo. Ese Verificador aplica también los
   criterios de **Diseño** (abajo): violación sin justificación → `FAIL`.
 - **Veredicto binario:** `APPROVE/REJECT`, `PASS/FAIL`. Sin "casi".
-- **`FAIL`/`REJECT` → Paso 1.** No hot-patch. Se re-planifica con la corrección.
+- **`FAIL`/`REJECT` → volver al paso 3 (§4).** No hot-patch. Se re-planifica con la corrección.
 - **Cero scope creep:** el Ingeniero hace SOLO lo aprobado por el Steward.
 - **Parking de ideas (anti-olvido):** toda idea, variante o mejora que surja a
   mitad de corrida y esté fuera del scope aprobado se anota AL INSTANTE en
@@ -91,7 +91,7 @@ Respondé el checklist. **Cualquier "SÍ" → Tier Completo.** Todos "NO" → Fa
 - **Fuente de verdad:** **dev es la mesa caliente** — ahí se prueba e itera en
   vivo, sin culpa. Pero **testing y producción NO se tocan a mano**: son
   resultado de una promoción. Si algo falla ahí → se vuelve a dev, se corrige,
-  pasa el Crisol y se re-promueve. Container de testing/prod = solo diagnóstico.
+  pasa el Crisol y se re-promueve. Contenedor de testing/prod = solo diagnóstico.
   **Bug post-release:** el fix-forward es una corrida nueva (entrada `ACTIVE`
   propia); la corrida `CLOSED` no se reabre.
 - **Responsive obligatorio (si la corrida toca UI):** toda app/panel/interfaz
@@ -193,7 +193,7 @@ plan — ver §3-6 y §4).
 
 - **Trunk-based:** una sola rama `main`. **El entorno lo decide el tag, no la rama.**
 - **`push` a `main` = respaldo, NO promoción.** Se pushea para no perder trabajo
-  (las sesiones son efímeras): tras cada corrida `PASS`, y un **WIP-commit al
+  (las sesiones son efímeras): el commit de cierre tras cada corrida `PASS`, y un **WIP-commit al
   cierre de cada iteración que termina en `FAIL`** (fast-path termina en `PASS`
   directo → solo el commit de cierre). El WIP no es release: solo preserva
   trabajo ante un crash. El código cae en **dev**.
@@ -312,7 +312,8 @@ plan — ver §3-6 y §4).
 ## 4. Procedimiento (líder)
 
 **Fast-path:** 0 → 1 → 2 → consultar bitácora por síntoma (pull) → Planificador (mini) →
-Verificador (subagente fresco) → 8. Se saltan los pasos 3–7.
+Verificador (subagente fresco) → 8. Se saltan los pasos 3–7 (la consulta de
+bitácora del paso 3 se conserva).
 
 0. Sesión nueva o retomada → correr la skill **brujula** (namespace según
    instalación: `/brujula` o `/lucky:brujula`) para anclar el estado real.
@@ -370,7 +371,8 @@ Verificador (subagente fresco) → 8. Se saltan los pasos 3–7.
    `bitacora` por el **SÍNTOMA** de la tarea (las palabras de lo que vas a tocar); si hay match,
    traé SOLO esa entrada (línea de acción + anti-acción) y pasala como input a los archaeologists.
    Sin match → seguí. NO se vuelca el índice entero (pull, no pre-carga; el síntoma es el filtro,
-   no hay "dominios"). Luego spawnear **archaeologists** (paralelo, sonnet) → plan(es) accionable(s).
+   no hay "dominios"). Luego spawnear **archaeologists** (paralelo; su modelo lo fija la
+   Compuerta del Paso 0 — con `default`, tarea mecánica → tier-económico) → plan(es) accionable(s).
 4. Pasar TODOS los planes al **Architecture Steward** → COLLISION-MAP
    (`templates/collision-map.md`) + `APPROVE/REJECT`. REJECT → volver a 3 (cuenta iteración).
    **Shift-left:** el Steward ya juzga las reglas de PLAN sobre el plan
@@ -386,7 +388,8 @@ Verificador (subagente fresco) → 8. Se saltan los pasos 3–7.
    `templates/auditor-checklist.md`) **+ el roster aplicable de §2 «Roster de
    verificadores de juicio»** (según TRIGGER: `leak-verifier` siempre;
    `design-verifier` si toca código; `scope-verifier`; `conformidad-verifier`/
-   `responsive-verifier` solo-si-`Glob`/UI), cada uno fresco, sobre el estado
+   `responsive-verifier` solo-si-`Glob`/UI; `deploy-verifier` solo-si-TARGET
+   `paas:…@<env>`), cada uno fresco, sobre el estado
    real. **Cada ítem emite su veredicto por-regla a la MATRIZ** (§5). **Shift-left:**
    para las reglas que el Steward YA juzgó en el plan (paso 4), este paso hace el
    chequeo **barato** «¿el diff coincide con el plan aprobado?» — no re-deriva el
@@ -504,7 +507,7 @@ triggers, para que ningún carril derive el vocabulario.
 ## 6. La ley se gobierna a sí misma
 
 **Fuente de verdad: `github.com/mlandolfi90/lucky-skills` · esta copia = tag
-`v1.25.0` (cache local, NO la ley).** **Ley viva:** al invocar la skill, si la
+`v1.26.0` (cache local, NO la ley).** **Ley viva:** al invocar la skill, si la
 sesión tiene red: `git ls-remote --tags
 https://github.com/mlandolfi90/lucky-skills.git` — si existe un tag mayor al de
 esta copia, descargar y seguir LA DEL REPO
@@ -512,12 +515,12 @@ esta copia, descargar y seguir LA DEL REPO
 e informar al humano. Sin red: seguir esta copia y registrar
 `LEY: <tag> (local, sin verificar)` en la entrada del ledger.
 
-Este skill es ciudadano de su propia ley:
-cambiarlo = corrida Crisol EN ese repo, juzgada por la **versión vigente**
+Esta skill es ciudadana de su propia ley:
+cambiarla = corrida Crisol EN ese repo, juzgada por la **versión vigente**
 (último tag) — vN juzga el diff que crea vN+1; la regresión muere por
-estratificación temporal. Promoción del skill = tag semver + subida a las
+estratificación temporal. Promoción de la skill = tag semver + subida a las
 superficies. Disparador kaizen: ~3 `RETRO:` apuntando a la misma regla → se
-abre la corrida sobre el propio skill.
+abre la corrida sobre la propia skill.
 
 ---
 
