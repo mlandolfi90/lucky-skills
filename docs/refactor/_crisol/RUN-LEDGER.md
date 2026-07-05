@@ -1257,3 +1257,29 @@
 - Veredictos: Verificador fresco adversarial (opus, evidencia empírica propia) PASS — no pudo refutar la invariancia de firma (9/9 sha256_lf == registry) ni la preservación de contenido de INDEX.md; sin correcciones obligatorias.
 - RETRO: el Workflow tool cayó 2× por corte del stream de permisos del harness (mismo bug que AskUserQuestion) → orquesté con el Agent tool (que sí anda): lead implementa + verificador fresco adversarial prueba. Lección: cuando la orquestación multi-agente formal falla por el harness, el patrón lead→verificador-fresco vía Agent preserva independencia + rigor adversarial sin bloquear la corrida. Bonus técnico: `git add --renormalize` NO limpia CR sueltos (solo CRLF) — para LF puro hace falta `tr -d '\r'`.
 - Cierre: 2026-07-04 · commit de cierre (Tier Completo, 1 iteración) · push a main. SIN re-forja (invariante de firma: los 9 firmados byte-idénticos) · SIN tag.
+
+### main — 2026-07-05 (optimización integral: SOLID al Crisol + cierre de gaps acumulados)
+- STATUS: ACTIVE
+- Tier: completo
+- Fecha: 2026-07-05
+- TARGET: docker-local
+- MODEL: opus (uniforme — alias pin declarado por MLL en el pedido; orquestador = modelo de sesión)
+- LEY: v1.24.0 (verificada: ls-remote == sello local; HEAD 2ef26c6 adelante del tag solo por docs)
+- Alcance: cerrar los gaps abiertos del conocimiento acumulado (PLAN-solid.md 2ef26c6 + IDEAS.md), 8 frentes
+  con partición de archivos DISJUNTA: F1 guardianes (fuente única de parseo del ledger + branch match EXACTO
+  + política de detección de código alineada + stdin utf-8 + casos frontera contra AMBOS en test-enforcer) ·
+  F2 adoptar-crisol.sh (fallback python3 + validar source.repo antes de inyectar autoUpdate) · F3 ley SOLID
+  (LISKOV + INTERFACE_SEGREGATION: §2 bullets + §5 filas + roster design-verifier, gate fail-closed ambas) ·
+  F4 arquitectura (templates/auditoria-solid.md read-only + fila Router + Puerto-Dios como instancia hexagonal
+  de ISP) · F5 cargar/SKILL.md (reconciliar prosa↔código: pin-por-commit ya vive) · F6 footers Ley-viva
+  (remoto explícito en git ls-remote; serializado TRAS F3/F4/F5 por archivos compartidos) · F7
+  registry.schema.json (sync con formato real de la forja: url permitido, triggers opcional) · F8
+  bitacora-lint.sh (escapar $id en grep + pipes escapados en celdas). EXCLUIDO por decisión previa de MLL:
+  minisign (diferido indefinido) · i18n Vía B (evidence-triggered). EXCLUIDO por parking (documentado en
+  PLAN-solid.md como backlog): split SRP de forjar-release.sh · prosa §CD→references · taxonomías por env.
+- Bitácora (pull por síntoma): DRIFT-001 (FALSO-VERDE fail-closed) → input del carril F1 y de sus verificadores.
+- MIGRATION_STRATEGY: N/A (sin DDL)
+- Conformidad-arq: pendiente al cierre
+<!-- VEREDICTOS:BEGIN -->
+- runState: wip
+<!-- VEREDICTOS:END -->
