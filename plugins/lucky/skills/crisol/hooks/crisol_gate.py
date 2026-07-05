@@ -42,7 +42,20 @@ if hasattr(sys.stderr, "reconfigure"):
     except Exception:
         pass
 
-# Extensiones que consideramos "codigo fuente" (allow-list conservadora).
+# Windows: un stdin con bytes UTF-8 crudos no-ASCII (p.ej. una ruta con acentos en
+# el JSON) puede fallar el decode y dejar el gate inerte -> reconfigurar utf-8/replace.
+# Fail-open si reconfigure no existe (Python viejo) o falla: no brickear jamas.
+if hasattr(sys.stdin, "reconfigure"):
+    try:
+        sys.stdin.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
+
+# POLITICA DE DETECCION DE CODIGO (allow-list, paridad EXACTA con crisol-enforcer.sh:
+# _CODE_EXTS + _CODE_FILENAMES): solo esas extensiones/nombres se gatean; TODO lo
+# demas (.json, .gitignore, LICENSE, .png, binarios, ...) pasa -- no es codigo->commit.
+# Fail-open por defecto: ante duda, permitir. Las dos listas se prueban identicas
+# por tests/test-enforcer.sh (extrae CODE_EXTS/CODE_FILENAMES de ambos guardianes).
 _CODE_EXTS = {
     ".py", ".js", ".jsx", ".ts", ".tsx", ".go", ".rs", ".java", ".rb",
     ".php", ".c", ".h", ".hpp", ".cpp", ".cc", ".cs", ".sh", ".bash",

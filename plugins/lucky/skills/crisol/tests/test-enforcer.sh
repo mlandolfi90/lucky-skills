@@ -73,6 +73,24 @@ run_gate_commit(){ # cwd_win sid
 }
 gate_check(){ r="$1"; if [ "$r" = "skip" ]; then echo "  ⤼ gate.py ausente — '$2' omitido"; else check "gate.py: $2" "$3" "$r"; fi; }
 
+# check de igualdad de STRINGS (para la paridad de listas, no exit codes)
+check_eq(){ if [ "$2" = "$3" ]; then PASS=$((PASS+1)); echo "  ✅ $1"
+            else FAIL=$((FAIL+1)); echo "  ❌ $1 (gate=[$2] enforcer=[$3])"; fi; }
+
+# Paridad de la política de código: extrae CODE_EXTS/CODE_FILENAMES de AMBOS guardianes
+# y normaliza (sin punto inicial, sin vacíos, ordenado) para comparar como texto.
+norm_list(){ tr ' ' '\n' | sed 's/^\.//' | grep -v '^$' | LC_ALL=C sort | tr '\n' ' '; }
+gate_policy(){  # 2 líneas: exts / filenames. Importa el módulo (NO corre main: __name__!='__main__').
+  "$PYBIN" - "$GATE" <<'PY'
+import importlib.util, sys
+spec = importlib.util.spec_from_file_location("crisol_gate_probe", sys.argv[1])
+m = importlib.util.module_from_spec(spec); spec.loader.exec_module(m)
+print(" ".join(sorted(m._CODE_EXTS)))
+print(" ".join(sorted(m._CODE_FILENAMES)))
+PY
+}
+enf_policy(){ bash "$HOOK" --print-code-policy; }  # 2 líneas: exts / filenames
+
 echo "== Grupo 0: opt-in (repo NO adoptado, sin session_id) =="
 hook_check "no adoptado permite código"        "$PLAIN" 0 src/app.c
 gate_check "$(run_gate src/app.c "$WPLAIN" "")" "no adoptado sin sid permite" 0
@@ -220,6 +238,63 @@ printf '{"tool_name":"Bash","tool_input":{"command":"npm test"},"cwd":"%s","sess
 gate_check "$?" "Bash que no es git commit permite (FO-3)" 0
 printf 'no-json-roto' | "$PYBIN" "$GATE" >/dev/null 2>&1
 gate_check "$?" "stdin roto permite (FO-4)" 0
+
+echo "== Grupo E: paridad de listas de código (gate <-> enforcer, condición Steward c5) =="
+if have_gate; then
+  GP="$(gate_policy)"; EP="$(enf_policy)"
+  G_EXTS="$(printf '%s\n' "$GP" | sed -n 1p | norm_list)"
+  G_FN="$( printf '%s\n' "$GP" | sed -n 2p | norm_list)"
+  E_EXTS="$(printf '%s\n' "$EP" | sed -n 1p | norm_list)"
+  E_FN="$( printf '%s\n' "$EP" | sed -n 2p | norm_list)"
+  check_eq "paridad _CODE_EXTS idénticas gate==enforcer"      "$G_EXTS" "$E_EXTS"
+  check_eq "paridad _CODE_FILENAMES idénticas gate==enforcer" "$G_FN"   "$E_FN"
+else
+  echo "  ⤼ gate.py ausente — paridad de listas omitida"
+fi
+
+echo "== Grupo F: branch match EXACTO (== , no substring) =="
+# F1: branch 'main' + entrada '### main-hotfix' ACTIVE -> BLOQUEA. Era false-PASS del
+# enforcer (awk 'entry ~ b' = substring); el gate ya matcheaba exacto.
+ledger '### main-hotfix — 2026-06-20\n- STATUS: ACTIVE\n- Tier: completo\n- Fecha: 2026-06-20\n- TARGET: docker-local\n'
+hook_check "F1 main + '### main-hotfix' ACTIVE BLOQUEA (mata el false-PASS)" "$ADOPTED" 2 src/app.c
+gate_check "$(run_gate src/app.c "$WADOPTED" "")" "F1 main + '### main-hotfix' ACTIVE bloquea" 2
+
+# F2: branch 'main' + entrada '### main' ACTIVE -> permite.
+ledger '### main — 2026-06-20\n- STATUS: ACTIVE\n- Tier: completo\n- Fecha: 2026-06-20\n- TARGET: docker-local\n'
+hook_check "F2 main + '### main' ACTIVE permite" "$ADOPTED" 0 src/app.c
+gate_check "$(run_gate src/app.c "$WADOPTED" "")" "F2 main + '### main' ACTIVE permite" 0
+
+# F2b: 'INACTIVE' ya no cuenta como 'ACTIVE' (STATUS exacto, no substring /ACTIVE/).
+ledger '### main — 2026-06-20\n- STATUS: INACTIVE\n- Tier: completo\n- Fecha: 2026-06-20\n- TARGET: docker-local\n'
+hook_check "F2b STATUS 'INACTIVE' NO cuenta como ACTIVE (bloquea)" "$ADOPTED" 2 src/app.c
+gate_check "$(run_gate src/app.c "$WADOPTED" "")" "F2b STATUS 'INACTIVE' bloquea (match exacto)" 2
+
+echo "== Grupo G: allow-list de código unificada (no-código pasa; código bloquea) =="
+# Ledger SIN entrada ACTIVE válida para 'main' (CLOSED): sólo el código debe bloquear.
+ledger '### main — 2026-06-20\n- STATUS: CLOSED\n- Tier: completo\n- Fecha: 2026-06-20\n- TARGET: docker-local\n'
+# G3: no-código sin ACTIVE -> AMBOS permiten (config/dotfile/binario exento por allow-list).
+hook_check "G3a .json sin ACTIVE permite (no es código)"      "$ADOPTED" 0 config.json
+gate_check "$(run_gate config.json "$WADOPTED" "")" "G3a .json sin ACTIVE permite" 0
+hook_check "G3b .gitignore sin ACTIVE permite (no es código)" "$ADOPTED" 0 .gitignore
+gate_check "$(run_gate .gitignore "$WADOPTED" "")" "G3b .gitignore sin ACTIVE permite" 0
+hook_check "G3c LICENSE sin ACTIVE permite (no es código)"    "$ADOPTED" 0 LICENSE
+gate_check "$(run_gate LICENSE "$WADOPTED" "")" "G3c LICENSE sin ACTIVE permite" 0
+hook_check "G3d .png sin ACTIVE permite (no es código)"       "$ADOPTED" 0 assets/logo.png
+gate_check "$(run_gate assets/logo.png "$WADOPTED" "")" "G3d .png sin ACTIVE permite" 0
+# G4: código (.py) sin ACTIVE -> AMBOS bloquean.
+hook_check "G4 .py sin ACTIVE BLOQUEA (es código)"            "$ADOPTED" 2 x.py
+gate_check "$(run_gate x.py "$WADOPTED" "")" "G4 .py sin ACTIVE bloquea" 2
+
+echo "== Grupo H: robustez stdin utf-8 del gate (cambio b) =="
+# JSON con ruta no-ASCII (acentos): el gate reconfigura stdin utf-8/replace y no rompe
+# el decode; .md exento -> permite (en Windows un stdin crudo no-ASCII lo dejaba inerte).
+if have_gate; then
+  printf '{"tool_name":"Edit","tool_input":{"file_path":"docs/diseño-café.md"},"cwd":"%s","session_id":"s"}' "$WADOPTED" \
+    | "$PYBIN" "$GATE" >/dev/null 2>&1
+  gate_check "$?" "stdin no-ASCII (.md exento) permite sin romper decode" 0
+else
+  echo "  ⤼ gate.py ausente — robustez stdin omitida"
+fi
 
 echo
 echo "PASS=$PASS FAIL=$FAIL"
