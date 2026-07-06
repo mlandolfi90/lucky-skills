@@ -1,5 +1,12 @@
 # IDEAS — parking lot (formato: YYYY-MM-DD · idea · contexto-sin-secretos)
 
+- 2026-07-06 · [DECIDIDO — MLL] diseño anti-slop = ADOPTAR `pbakaus/impeccable` (tercero, Apache-2.0) en cada
+  repo de PRODUCTO, jamás copiado a lucky-skills. Receta PIN_TOTAL: submodule `.impeccable` PINEADO a
+  commit/tag exacto + `npx impeccable link --source=.impeccable --providers=claude` (el `npx impeccable
+  install` pelado es floating → prohibido). Los tokens de lucky-estilo alimentan `.impeccable/design.json`
+  + DESIGN.md (marca=valores, impeccable=enforcement). La skill propia `diseno` fue RETIRADA el mismo día
+  (nunca llegó al registry). Candidatos futuros: (a) que `adoptar-crisol.sh` ofrezca instalar impeccable
+  pineado; (b) mirror propio si el takedown-risk lo amerita (copia-de-lo-crítico §2)
 - 2026-06-11 · explorar recurso "GRAFO" de Nexum AI (@agustinbadt) — grafos de
   conocimiento para memoria/organización de agentes · fuente:
   youtube.com/shorts/UhGWH_9bqaU · capturada a mano por MLL (demo del
