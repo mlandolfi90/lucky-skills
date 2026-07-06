@@ -1525,4 +1525,5 @@
 - Veredictos: Verificador fresco PASS 7/7; anti-cisma confirmado (cero regla estética propia); advisory aplicado.
 - RETRO: v1 retirada + v2 puente en 24h = el patrón correcto apareció DIALOGANDO con el operador (la pregunta '¿no vale la pena que la skill INTEGRE a impeccable?' era la respuesta). Lección: ante un tercero superior, la skill propia muta de autoridad a conductor — mismo movimiento que adoptar-crisol.
 - Cierre: 2026-07-06 · commit de cierre (fast-path, 1 iteración) · SIN forja ni tag (esperan autorización de MLL).
+- FORJA: autorizada por MLL y ejecutada 2026-07-06 · v1.27.0 (re-sello familia completa + diseno entra al registry, 10 entradas) · SELLOS/FORJA/TAG_GATE pasan de N/A a PASS con esta autorización · tag delegado a MLL.
 
