@@ -1474,3 +1474,55 @@
 - Cierre: 2026-07-05 · commit de cierre (fast-path, 1 iteración) · SIN forja ni tag (no autorizados; una forja se ejecutó por error del líder y se REVIRTIÓ del working tree antes de commitear — invariante de firma intacto). Release de diseno: cuando MLL lo autorice.
 - RETIRADA: 2026-07-06 · decisión del operador — se adopta `pbakaus/impeccable` (tercero, Apache-2.0, 43k⭐: 45 detectores deterministas + hook + 23 comandos) en lugar de una skill propia; dos autoridades de diseño = cisma. La skill nunca entró al registry (la forja no autorizada se revirtió) → retiro limpio, cero release afectado. La costura tokens↔lucky-estilo se muda a la config de impeccable (design.json).
 
+
+### main — 2026-07-06 (skill nueva: diseno v2 — INTEGRADOR de impeccable, cero reglas propias)
+- STATUS: CLOSED
+- Tier: fast-path
+- Fecha: 2026-07-06
+- TARGET: docker-local
+- MODEL: opus (solo el verificador fresco)
+- LEY: v1.26.0 (verificada: último tag remoto == sello local)
+- Alcance: SOLO crear `plugins/lucky/skills/diseno/SKILL.md` — puente de adopción: instala pbakaus/impeccable
+  PINEADO (submodule + tag exacto, PIN_TOTAL), cablea los tokens de lucky-estilo a design.json si existen,
+  humo con audit, update solo por re-pin con BUMP_REASON. CERO reglas de diseño propias (la autoridad es
+  impeccable — decisión MLL 2026-07-06 en IDEAS.md; la v1 que redefinía reglas fue RETIRADA). Sin forja
+  salvo autorización explícita de MLL.
+- MIGRATION_STRATEGY: N/A (sin DDL)
+<!-- VEREDICTOS:BEGIN -->
+- runState: closing
+- [V] TARGET · PASS · gate · docker-local
+- [V] MODEL · PASS · gate · opus (verificador fresco único)
+- [V] TARGET_ENV · N/A · — · docker-local sin @env
+- [V] REGLA0 · PASS · verificador · lectura línea-a-línea propia: cero regla estética (anti-cisma) + leak-scan + yaml + comandos de pin contrastados con §Pin total
+- [V] TEST_COVERAGE · PASS · verificador · yaml/sello=1/leak LIMPIO/comandos pinean de verdad y prohíben floating
+- [V] INDEPENDENCIA · PASS · verificador · fresco único, evidencia propia; advisory aplicado (retirar el conteo '45' que envejece)
+- [V] SCOPE_CREEP · PASS · verificador · solo diseno/SKILL.md nuevo + ledger
+- [V] PARKING · N/A · — · sin ideas fuera de scope
+- [V] CIERRE_TRAS_PASS · PASS · gate · cierre tras PASS 7/7
+- [V] CREDITO · N/A · — · aditivo por patrón sancionado (integrador tipo adoptar); decisión ya depositada en IDEAS [DECIDIDO 2026-07-06]
+- [V] MIGRATION · N/A · gate · sin DDL
+- [V] FUENTE_VERDAD · N/A · — · no toca testing/prod
+- [V] RESPONSIVE · N/A · — · frontera declarada: impeccable=estética, Crisol=RESPONSIVE
+- [V] ZERO_LEAK · PASS · verificador · LIMPIO; kit nombrado genérico ('brand kit del operador'), único tercero = pbakaus/impeccable (público)
+- [V] TECHO_ITER · PASS · gate · 1/3
+- [V] OPEN_CLOSED · PASS · verificador · aditivo puro
+- [V] ATOMICIDAD · PASS · verificador · 1 skill = 1 puente; cero autoridad estética
+- [V] COSTURA · PASS · verificador · cadena skill→impeccable→kit; update por re-pin + BUMP_REASON
+- [V] LISKOV · N/A · — · sin abstracción tocada
+- [V] INTERFACE_SEGREGATION · N/A · — · sin interfaz
+- [V] CASOS_LEGALES · N/A · — · solo AGREGAR
+- [V] CONFORMIDAD · N/A · — · sin código hexagonal
+- [V] SELLOS · N/A · — · sin release esta corrida (forja pendiente de autorización de MLL)
+- [V] FORJA · N/A · — · diferida a autorización explícita
+- [V] TAG_GATE · N/A · — · sin tag esta corrida
+- [V] PIN_TOTAL · PASS · verificador · la skill ES enforcement de pin para impeccable; ella misma no agrega deps flotantes
+- [V] BUMP_REASON · N/A · — · sin bump
+<!-- VEREDICTOS:END -->
+- BITACORA: N/A
+- Iteraciones: 1/3
+- TEST_COVERAGE: verificación directa del artefacto (verificador fresco) · leak LIMPIO
+- Escalación: none
+- Veredictos: Verificador fresco PASS 7/7; anti-cisma confirmado (cero regla estética propia); advisory aplicado.
+- RETRO: v1 retirada + v2 puente en 24h = el patrón correcto apareció DIALOGANDO con el operador (la pregunta '¿no vale la pena que la skill INTEGRE a impeccable?' era la respuesta). Lección: ante un tercero superior, la skill propia muta de autoridad a conductor — mismo movimiento que adoptar-crisol.
+- Cierre: 2026-07-06 · commit de cierre (fast-path, 1 iteración) · SIN forja ni tag (esperan autorización de MLL).
+
