@@ -7,6 +7,10 @@
   + DESIGN.md (marca=valores, impeccable=enforcement). La skill propia `diseno` fue RETIRADA el mismo día
   (nunca llegó al registry). Candidatos futuros: (a) que `adoptar-crisol.sh` ofrezca instalar impeccable
   pineado; (b) mirror propio si el takedown-risk lo amerita (copia-de-lo-crítico §2)
+- 2026-07-06 · [corrida ATOMICIDAD] Hueco A a medias: el aviso per-edit (Cambio 3) NUDGEA fuera de corrida
+  pero NO fuerza el cierre — su otra raíz (una corrida que abre ACTIVE y WIP-commitea con runState: wip
+  para siempre sin correr el design-verifier) sigue abierta. Ya parqueada como "endurecer la detección de
+  cierre más allá de runState" (2026-06-21). Candidata a unificar ambas · hallado en el plan/corrida atomicidad
 - 2026-06-11 · explorar recurso "GRAFO" de Nexum AI (@agustinbadt) — grafos de
   conocimiento para memoria/organización de agentes · fuente:
   youtube.com/shorts/UhGWH_9bqaU · capturada a mano por MLL (demo del

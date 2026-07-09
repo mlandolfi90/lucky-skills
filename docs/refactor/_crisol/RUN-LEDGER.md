@@ -1529,7 +1529,7 @@
 
 
 ### main — 2026-07-06 (ATOMICIDAD: escaneo-citación + señal de auditoría + aviso per-edit; umbral configurable)
-- STATUS: ACTIVE
+- STATUS: CLOSED
 - Tier: completo
 - Fecha: 2026-07-06
 - TARGET: docker-local
@@ -1546,7 +1546,42 @@
   archivo de código ≥ T; paridad probada por test-enforcer.sh (disciplina F1). Fail-open intacto.
   ADR 0008. Forja v1.28.0 autorizada por MLL.
 - MIGRATION_STRATEGY: N/A (sin DDL)
-- Conformidad-arq: pendiente al cierre
+- Conformidad-arq: N/A (hooks/scripts/ley — sin código hexagonal)
 <!-- VEREDICTOS:BEGIN -->
-- runState: wip
+- runState: closing
+- [V] TARGET · PASS · gate · docker-local
+- [V] MODEL · PASS · gate · opus (5 verificadores frescos)
+- [V] TARGET_ENV · N/A · — · docker-local sin @env
+- [V] REGLA0 · PASS · quality-auditor · enforcer 93/0 · atomicidad-scan 8/0 · bitacora-lint 35/0 · stale 20/20 (corridas propias en el TARGET)
+- [V] TEST_COVERAGE · PASS · quality-auditor · Grupo I (aviso paridad byte-idéntica) + I5/I5b (parseo de umbral bajo config malformada + NBSP) + test-atomicidad-scan; blind-spot de cobertura cerrado en iter2/3
+- [V] INDEPENDENCIA · PASS · parity-verifier · 5 frescos (design/scope/leak/guardian-parity + re-verificador de paridad), evidencia empírica propia; el fuzz refutó y cerró
+- [V] SCOPE_CREEP · PASS · scope-verifier · 11/11 archivos en mandato; forja/registry/cargar intactos; cero ID nuevo en §5 (solo se modificó la fila del roster)
+- [V] PARKING · PASS · lead · 1 línea a IDEAS.md (raíz residual del Hueco A: corridas que no cierran)
+- [V] CIERRE_TRAS_PASS · PASS · gate · cierre tras 5/5 verificadores + FAIL de paridad arreglado y re-probado
+- [V] CREDITO · PASS · scope-verifier · ADR 0008 cubre C1+C2+C3+umbral; entrada de ledger presente
+- [V] MIGRATION · N/A · gate · sin DDL
+- [V] FUENTE_VERDAD · N/A · — · no toca testing/prod
+- [V] RESPONSIVE · N/A · — · no toca UI
+- [V] ZERO_LEAK · PASS · leak-verifier · leak-scan exit 0 + barrido semántico limpio + aviso no filtra rutas (path relativo del input)
+- [V] TECHO_ITER · PASS · gate · 3/3 (converge JUSTO en el techo: iter1 impl · iter2 parseo ASCII · iter3 whitespace Unicode)
+- [V] OPEN_CLOSED · PASS · design-verifier · comportamiento AGREGADO (script nuevo + funciones nuevas + tests); toques a estable = 2 call-sites no invasivos, sancionados por ADR 0008 (caso c)
+- [V] ATOMICIDAD · PASS · design-verifier · el scan citó crisol_gate.py (658 líneas) → dictamen: larga-legítima N/A (hook de archivo único, ya compuesto en ~20 funciones SRP); unidades nuevas atómicas
+- [V] COSTURA · PASS · design-verifier · umbral env→conf→400 donde el sistema varía (12-factor); fuente única de código/umbral vía --print-code-policy/--print-threshold (4ta copia eliminada, hallazgo #1)
+- [V] LISKOV · PASS · parity-verifier · gate y enforcer = dos implementaciones del MISMO contrato de parseo de umbral, sustituibles: mismo output para todo input (fuzz 36/36 + NBSP + suite 93/0)
+- [V] INTERFACE_SEGREGATION · PASS · design-verifier · flags de introspección tajados por necesidad (--print-code-policy, --print-threshold): scan/fixture consumen solo lo que usan; ningún cliente depende de métodos que no usa
+- [V] CASOS_LEGALES · PASS · steward/design · edits de guardianes = aditivos (a); cambio de la ley = (c) con ADR 0008; ninguno (b)
+- [V] CONFORMIDAD · N/A · — · sin código hexagonal
+- [V] SELLOS · PASS · gate · forja v1.28.0 re-selló la familia (10 skills + 8 ADRs), 1 sello real c/u, 0 stragglers
+- [V] FORJA · PASS · gate · forjar-release.sh v1.28.0 --no-sign en una pasada; registry regenerado
+- [V] TAG_GATE · PASS · gate · v1.28.0 nace de esta corrida CLOSED; lo crea MLL
+- [V] PIN_TOTAL · N/A · — · sin cambio de dependencias
+- [V] BUMP_REASON · N/A · — · sin bump
 <!-- VEREDICTOS:END -->
+- BITACORA: N/A (los hallazgos ya canalizados: IDEAS + el propio ADR)
+- Iteraciones: 3/3 (converge en el techo)
+- TEST_COVERAGE: enforcer 93/0 (grupos I aviso-paridad · I5 parseo-malformado · I5b NBSP) · scan 8/0 · lint 35/0 · stale 20/20
+- Escalación: none
+- Veredictos: design/scope/leak/guardian-parity + re-verificador PASS. El guardian-parity cazó un FAIL real (parseo de umbral divergía con config malformada); el re-verificador de iter2 refutó la paridad TOTAL en un borde Unicode (NBSP); iter3 lo cerró (repro exacto NBSP → 400==400). Sacred parity (exit-code/fail-open/clasificación de código) intacta en todo momento.
+- RETRO: el jidoka funcionó EN el propio piso — el aviso ATOMICIDAD que agregamos citó a crisol_gate.py (658 líneas) en el dogfood, y dos verificadores frescos cazaron drift real de parseo entre los guardianes que yo había declarado "paridad EXACTA" (falso-verde de comentario, DRIFT-001). Lección: cuando dos implementaciones deben ser idénticas, el fuzz de INPUT MALFORMADO (no solo el feliz) es donde vive el drift; el fixture ahora lo prueba. Fecha del ledger/ADR (2026-07-06) < fecha real (2026-07-09): drift de reloj cosmético de siempre.
+- Cierre: 2026-07-06 · commit de cierre (Tier Completo, 3 iteraciones) · forja v1.28.0 · tag delegado a MLL.
+

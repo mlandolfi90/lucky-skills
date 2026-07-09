@@ -88,8 +88,8 @@ def _as_int_or_none(s: str):
     crisol-enforcer.sh (_trim + _is_digits + base-10): 'trim, luego TODO el token es
     [0-9]'. Rechaza espacios internos, basura ('200abc'), decimales, unicode-digit;
     normaliza a decimal ('007' -> 7). None si no aplica -> el caller cae al siguiente."""
-    s = s.strip()
-    if s and s.isascii() and s.isdigit():
+    s = s.strip(" \t\n\r\x0b\x0c")  # SOLO whitespace ASCII: paridad con bash `[[:space:]]`
+    if s and s.isascii() and s.isdigit():  # (NBSP/EM-SPACE u otro Unicode-WS NO se trima → rechaza)
         return int(s)
     return None
 

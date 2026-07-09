@@ -356,6 +356,12 @@ for bad in "  200" "200abc" "3.5" "007" "" "   " "0" "abc"; do
   ET="$(enf_threshold "$ADOPTED")"
   if have_gate; then check_eq "I5 conf=[$bad] umbral gate==enforcer" "$(gate_threshold "$WADOPTED")" "$ET"; fi
 done
+# I5b: whitespace UNICODE de borde (NBSP) → AMBOS rechazan (400). Cerrado en iter3
+# (gate strippea solo ASCII; bash [[:space:]] no incluye NBSP).
+printf '\xc2\xa0200\n' > "$CONF"
+ENB="$(enf_threshold "$ADOPTED")"
+check_eq "I5b conf NBSP+200 → enforcer=400" "400" "$ENB"
+have_gate && check_eq "I5b conf NBSP+200 → gate==enforcer" "$(gate_threshold "$WADOPTED")" "$ENB"
 rm -f "$CONF"
 for bad in " 200 " "200 " "1e3" " 007 "; do
   ET="$( export CRISOL_ATOMICIDAD_T="$bad"; enf_threshold "$ADOPTED" )"
