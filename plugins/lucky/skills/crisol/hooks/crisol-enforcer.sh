@@ -25,6 +25,19 @@ if [ "${1:-}" = "--print-code-policy" ]; then
   exit 0
 fi
 
+# Umbral ATOMICIDAD (citación al juez, NO bloqueo): env → conf → default 400.
+# Paridad EXACTA con crisol_gate.py:_atomicidad_threshold (mismo orden, mismo default).
+_atomicidad_t() {
+  local t=""
+  if printf '%s' "${CRISOL_ATOMICIDAD_T:-}" | grep -qE '^[0-9]+$' 2>/dev/null; then
+    t="${CRISOL_ATOMICIDAD_T}"
+  elif [ -f docs/refactor/_crisol/atomicidad.conf ]; then
+    t="$(grep -oE '^[0-9]+' docs/refactor/_crisol/atomicidad.conf 2>/dev/null | head -1 || true)"
+  fi
+  printf '%s' "$t" | grep -qE '^[0-9]+$' 2>/dev/null || t=400
+  printf '%s' "$t"
+}
+
 # 1. Ruta del archivo que se quiere tocar (viene en el JSON del hook por stdin)
 INPUT="$(cat)"
 FILE="$(printf '%s' "$INPUT" | grep -oE '"file_path"[[:space:]]*:[[:space:]]*"[^"]*"' | head -1 | sed -E 's/.*"file_path"[[:space:]]*:[[:space:]]*"([^"]*)".*/\1/')"
@@ -48,6 +61,17 @@ case "$LBASE" in
   ?*.*) EXT="${LBASE##*.}"; case " $CODE_EXTS " in *" $EXT "*) IS_CODE=1 ;; esac ;;
 esac
 [ "$IS_CODE" -eq 1 ] || exit 0   # no es código fuente → no opina (paridad con gate)
+
+# 2c. ATOMICIDAD (Cambio 3): citación NO bloqueante si el archivo ya tiene ≥ T
+#     líneas. A stderr; NUNCA cambia el exit. `wc -l` = newlines = paridad exacta
+#     con crisol_gate.py (read_bytes().count(b"\n")). Mensaje byte-idéntico al gate.
+if [ -f "$FILE" ]; then
+  _AT_T="$(_atomicidad_t)"
+  _AT_N="$(wc -l < "$FILE" 2>/dev/null | tr -d ' ' || true)"
+  if printf '%s' "$_AT_N" | grep -qE '^[0-9]+$' 2>/dev/null && [ "$_AT_N" -ge "$_AT_T" ]; then
+    printf '%s\n' "[CRISOL-ATOMICIDAD] $FILE: $_AT_N lineas (umbral $_AT_T) - SRP: parti antes de extender; citacion al juez, no bloqueo. Ajusta el umbral por chat -> docs/refactor/_crisol/atomicidad.conf" >&2
+  fi
+fi
 
 # 3. Branch actual
 BRANCH="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo '')"

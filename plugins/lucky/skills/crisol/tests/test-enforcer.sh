@@ -296,6 +296,47 @@ else
   echo "  ⤼ gate.py ausente — robustez stdin omitida"
 fi
 
+echo "== Grupo I: aviso ATOMICIDAD (citación NO bloqueante, paridad gate<->enforcer) =="
+# Captura SOLO la línea de aviso (stderr) de cada guardián. Cambio 3 (v1.28.0).
+enf_stderr(){ ( cd "$1" && printf '{"tool_input":{"file_path":"%s"}}' "$2" | bash "$HOOK" 2>&1 1>/dev/null | grep -F '[CRISOL-ATOMICIDAD]' || true ); }
+gate_stderr(){ have_gate || { echo ""; return; }  # $1=file_path $2=cwd
+  printf '{"tool_name":"Edit","tool_input":{"file_path":"%s"},"cwd":"%s","session_id":"s"}' "$1" "$2" \
+    | "$PYBIN" "$GATE" 2>&1 1>/dev/null | grep -F '[CRISOL-ATOMICIDAD]' || true; }
+has_adv(){ if [ -n "$2" ]; then PASS=$((PASS+1)); echo "  ✅ $1"; else FAIL=$((FAIL+1)); echo "  ❌ $1 (sin aviso)"; fi; }
+no_adv(){  if [ -z "$2" ]; then PASS=$((PASS+1)); echo "  ✅ $1"; else FAIL=$((FAIL+1)); echo "  ❌ $1 (aviso inesperado: $2)"; fi; }
+
+ledger '### main — 2026-06-20\n- STATUS: ACTIVE\n- Tier: completo\n- Fecha: 2026-06-20\n- TARGET: docker-local\n'
+( cd "$ADOPTED" && { i=1; while [ $i -le 450 ]; do echo "x=$i"; i=$((i+1)); done > big.py; }
+                  { i=1; while [ $i -le 100 ]; do echo "y=$i"; i=$((i+1)); done > small.py; } )
+rm -f "$ADOPTED/docs/refactor/_crisol/atomicidad.conf"
+
+# I1: big.py (450 >= 400 default) -> AMBOS avisan, línea byte-idéntica
+EI="$(enf_stderr "$ADOPTED" big.py)"
+has_adv "I1 enforcer avisa en big.py (450>=400)" "$EI"
+case "$EI" in *"450 lineas (umbral 400)"*) PASS=$((PASS+1)); echo "  ✅ I1 aviso cita N=450 y T=400";;
+              *) FAIL=$((FAIL+1)); echo "  ❌ I1 aviso no cita 450/400: [$EI]";; esac
+if have_gate; then
+  GI="$(gate_stderr big.py "$WADOPTED")"
+  has_adv "I1 gate avisa en big.py (450>=400)" "$GI"
+  check_eq "I1 aviso byte-idéntico gate==enforcer" "$GI" "$EI"
+fi
+
+# I2: small.py (100 < 400) -> NINGUNO avisa
+no_adv "I2 enforcer NO avisa en small.py (100<400)" "$(enf_stderr "$ADOPTED" small.py)"
+have_gate && no_adv "I2 gate NO avisa en small.py" "$(gate_stderr small.py "$WADOPTED")"
+
+# I3: conf=50 -> small.py (100>=50) ahora avisa en AMBOS (config chat-ajustable)
+printf '50\n' > "$ADOPTED/docs/refactor/_crisol/atomicidad.conf"
+has_adv "I3 enforcer avisa en small.py con conf=50" "$(enf_stderr "$ADOPTED" small.py)"
+have_gate && has_adv "I3 gate avisa en small.py con conf=50" "$(gate_stderr small.py "$WADOPTED")"
+rm -f "$ADOPTED/docs/refactor/_crisol/atomicidad.conf"
+
+# I4: env CRISOL_ATOMICIDAD_T=9999 gana sobre el default -> big.py NO avisa en AMBOS
+EI4="$( export CRISOL_ATOMICIDAD_T=9999; enf_stderr "$ADOPTED" big.py )"
+no_adv "I4 enforcer respeta env T=9999 (no avisa big.py)" "$EI4"
+if have_gate; then GI4="$( export CRISOL_ATOMICIDAD_T=9999; gate_stderr big.py "$WADOPTED" )"
+  no_adv "I4 gate respeta env T=9999 (no avisa big.py)" "$GI4"; fi
+
 echo
 echo "PASS=$PASS FAIL=$FAIL"
 [ "$FAIL" -eq 0 ]

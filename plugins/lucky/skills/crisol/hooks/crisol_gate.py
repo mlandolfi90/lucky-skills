@@ -70,6 +70,53 @@ _EXCLUDED_SUFFIXES = {".md", ".mdx", ".markdown", ".txt", ".rst"}
 # Valores que NO cuentan como TARGET declarado (placeholder = no respondio).
 _TARGET_PLACEHOLDERS = {"pendiente", "tbd", "n/d", "na", "<...>", "?"}
 
+# ATOMICIDAD (SRP): aviso NO bloqueante cuando un archivo de codigo supera el
+# umbral T de lineas. Es una CITACION al juicio, no un veredicto ni un bloqueo:
+# el gate no puede juzgar SRP (eso es un LLM), solo nudgea a mirar. Paridad EXACTA
+# con crisol-enforcer.sh (mismo umbral, mismo mensaje) — probada por test-enforcer.sh.
+# Umbral: env CRISOL_ATOMICIDAD_T -> docs/refactor/_crisol/atomicidad.conf -> 400.
+_ATOMICIDAD_DEFAULT_T = 400
+_ATOMICIDAD_MSG = (
+    "[CRISOL-ATOMICIDAD] {f}: {n} lineas (umbral {t}) - SRP: parti antes de "
+    "extender; citacion al juez, no bloqueo. Ajusta el umbral por chat -> "
+    "docs/refactor/_crisol/atomicidad.conf"
+)
+
+
+def _atomicidad_threshold(repo: Path) -> int:
+    """env CRISOL_ATOMICIDAD_T -> repo/docs/refactor/_crisol/atomicidad.conf -> 400."""
+    env = os.environ.get("CRISOL_ATOMICIDAD_T", "")
+    if env.strip().isdigit():
+        return int(env.strip())
+    try:
+        conf = repo / "docs" / "refactor" / "_crisol" / "atomicidad.conf"
+        if conf.is_file():
+            for line in conf.read_text(encoding="utf-8", errors="replace").splitlines():
+                s = line.strip()
+                if s.isdigit():
+                    return int(s)
+    except Exception:
+        pass
+    return _ATOMICIDAD_DEFAULT_T
+
+
+def _emit_atomicidad_advisory(raw_fp: str, abs_p: Path, repo: Path) -> None:
+    """Aviso a stderr si el archivo de codigo ya tiene >= T lineas. NUNCA bloquea.
+
+    Cuenta newlines (== `wc -l`) para paridad exacta con el enforcer bash.
+    Fail-open total: cualquier excepcion -> no emite (jamas rompe el gate).
+    """
+    try:
+        if not abs_p.is_file():
+            return
+        t = _atomicidad_threshold(repo)
+        n = abs_p.read_bytes().count(b"\n")
+        if n >= t:
+            sys.stderr.write(_ATOMICIDAD_MSG.format(f=raw_fp, n=n, t=t) + "\n")
+            sys.stderr.flush()
+    except Exception:
+        pass
+
 
 def _allow() -> None:
     sys.exit(0)
@@ -564,6 +611,9 @@ def main() -> None:
         if not _is_code_file(abs_p.name):
             _allow()  # no es fuente -> fail-open permitir
             return
+        # ATOMICIDAD (Cambio 3): citacion NO bloqueante si el archivo >= T lineas.
+        # Se emite a stderr y el flujo normal (allow/block) sigue igual. Fail-open.
+        _emit_atomicidad_advisory(str(target_path), abs_p, repo)
 
     adopted = (repo / "docs" / "refactor" / "_crisol").is_dir()
 

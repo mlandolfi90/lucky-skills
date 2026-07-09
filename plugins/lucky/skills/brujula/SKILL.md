@@ -49,6 +49,12 @@ tal cual" aplica a las 3 deterministas.
    entrada `ACTIVE` y commits `wip: crisol iter N` recientes → reporta
    **corrida a medias respaldada** (la sesión anterior murió; el trabajo está
    en los WIP-commits).
+   **Deuda SOLID sin auditar (no-normativo, solo SEÑAL):** si el repo declaró la
+   skill `arquitectura` pero NUNCA corrió la auditoría retroactiva (no hay reporte
+   ni marcador de `auditoria-solid`) → imprimí `deuda SOLID sin auditar → corré
+   /arquitectura (auditoría retroactiva)`. La brújula NO audita: solo señala; la
+   corrida la decide el humano. Espejo de "ley atrasada". Sin skill `arquitectura`
+   → omitir (no bloquea).
 4. **Topología (PaaS)** — con token disponible, consulta la API del control
    plane (read-only) y reporta SOLO el triplete relevante a esta sesión:
    `<proyecto>/<app>@<env>` (el que matchea el repo en curso), con esta gramática

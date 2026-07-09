@@ -1527,3 +1527,26 @@
 - Cierre: 2026-07-06 · commit de cierre (fast-path, 1 iteración) · SIN forja ni tag (esperan autorización de MLL).
 - FORJA: autorizada por MLL y ejecutada 2026-07-06 · v1.27.0 (re-sello familia completa + diseno entra al registry, 10 entradas) · SELLOS/FORJA/TAG_GATE pasan de N/A a PASS con esta autorización · tag delegado a MLL.
 
+
+### main — 2026-07-06 (ATOMICIDAD: escaneo-citación + señal de auditoría + aviso per-edit; umbral configurable)
+- STATUS: ACTIVE
+- Tier: completo
+- Fecha: 2026-07-06
+- TARGET: docker-local
+- MODEL: opus (verificadores frescos; ingeniería del líder — un set cohesivo, autoría única evita el cross-file de F3↔F4)
+- LEY: v1.27.0 (verificada: último tag remoto == sello local)
+- Alcance: PLAN-atomicidad-gate.md aprobado por MLL (1+2+3, sin spike). Umbral T=400 (default), configurable
+  env CRISOL_ATOMICIDAD_T → docs/refactor/_crisol/atomicidad.conf → 400; ajustable por chat.
+  C1 (rigor): scripts/atomicidad-scan.sh (cita unidades > T sobre el diff; reusa --print-code-policy del
+  enforcer = cero drift de "qué es código") + auditor-checklist §B [ATOMICIDAD] (cita obligatoria) + roster
+  §2 (design-verifier corre el scan) + tests/test-atomicidad-scan.sh.
+  C2 (backlog): brujula/SKILL.md fuente 3 — señal "deuda SOLID sin auditar → /arquitectura" (no-normativa,
+  read-only, espejo de "ley atrasada").
+  C3 (nudge Hueco A): aviso NO bloqueante en AMBOS guardianes (crisol_gate.py + crisol-enforcer.sh) cuando un
+  archivo de código ≥ T; paridad probada por test-enforcer.sh (disciplina F1). Fail-open intacto.
+  ADR 0008. Forja v1.28.0 autorizada por MLL.
+- MIGRATION_STRATEGY: N/A (sin DDL)
+- Conformidad-arq: pendiente al cierre
+<!-- VEREDICTOS:BEGIN -->
+- runState: wip
+<!-- VEREDICTOS:END -->

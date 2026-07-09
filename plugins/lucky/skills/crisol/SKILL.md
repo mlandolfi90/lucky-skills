@@ -119,6 +119,15 @@ Respondé el checklist. **Cualquier "SÍ" → Tier Completo.** Todos "NO" → Fa
   recibe sus dependencias por parámetro/interfaz (cero estado global nuevo), y
   lo grande se arma COMPONIENDO lo chico. Unidad que acumula responsabilidades
   → se divide ANTES de extenderla.
+  **Citación por tamaño (las líneas convocan, NO sentencian):** el
+  `design-verifier` corre `scripts/atomicidad-scan.sh` — toda unidad que cruza el
+  umbral `T` es un ítem OBLIGATORIO que su veredicto resuelve por nombre
+  (larga-legítima → N/A · responsabilidad múltiple → FAIL). Cruzar `T` NO es FAIL:
+  es citación al juicio. Además, los dos guardianes (`crisol_gate.py` +
+  `crisol-enforcer.sh`) emiten un aviso **no-bloqueante** en cada edit de un
+  archivo ≥ `T` (nudge fuera de corrida; fail-open intacto, jamás bloquea). `T`
+  configurable y **ajustable por chat**: env `CRISOL_ATOMICIDAD_T` →
+  `docs/refactor/_crisol/atomicidad.conf` → 400.
 - **Planificar la costura:** el Planificador identifica DÓNDE va a variar el
   sistema y pone ahí el punto de extensión (interfaz, tabla de dispatch,
   registro de handlers). Donde NO hay evidencia de variación → código simple:
@@ -173,7 +182,7 @@ copia acá.
 
 | `<concern>-verifier` | Reglas (IDs §5) que dictamina | TRIGGER (cuándo se spawnea) | Input extra al diff |
 |---|---|---|---|
-| `design-verifier` | `OPEN_CLOSED` + `ATOMICIDAD` + `COSTURA` + `LISKOV` + `INTERFACE_SEGREGATION` (§2 Diseño) | tier completo · fast-path **si toca código** | — |
+| `design-verifier` | `OPEN_CLOSED` + `ATOMICIDAD` + `COSTURA` + `LISKOV` + `INTERFACE_SEGREGATION` (§2 Diseño) | tier completo · fast-path **si toca código** | corre `scripts/atomicidad-scan.sh` (citación por tamaño; ver §2 Atomicidad) |
 | `scope-verifier` | `SCOPE_CREEP` + `CREDITO` (§2) | tier completo | plan `APPROVE` del Steward + `docs/decisions/` + `docs/IDEAS.md` |
 | `leak-verifier` | `ZERO_LEAK` (§2 «Sin secretos») | **SIEMPRE** (incl. fast-path) | meta-docs: ledger · ADR · COLLISION-MAP · `IDEAS.md` · mensaje de commit. Puede invocar `scripts/leak-scan.sh` |
 | `conformidad-verifier` | `CONFORMIDAD` (§2 «Conformidad estructural») | **solo si** `Glob` halla la skill `arquitectura` | reusa `conformidad-checklist.md` de esa skill TAL CUAL (fuente única, NO duplicar) |

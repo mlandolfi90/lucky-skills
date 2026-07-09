@@ -32,6 +32,14 @@
 - [ ] **`[ATOMICIDAD]`** (mapea a §Diseño · `design-verifier`): cada unidad = 1
       responsabilidad, deps por parámetro/interfaz (sin estado global nuevo),
       compone lo chico. Emite a la matriz (§5).
+      **Citación mecánica OBLIGATORIA:** el `design-verifier` corre
+      `scripts/atomicidad-scan.sh` sobre el diff; **toda unidad citada** (archivo
+      que cruza el umbral `T`) es un ítem que su veredicto DEBE resolver por
+      nombre: *larga-legítima* (lookup/switch/generado = 1 responsabilidad) → N/A
+      **vs** *responsabilidad múltiple* → FAIL con `archivo:línea`. Cruzar `T` NO
+      es FAIL: es citación al juicio (las líneas convocan, no sentencian). `T`
+      configurable: env `CRISOL_ATOMICIDAD_T` → `docs/refactor/_crisol/atomicidad.conf`
+      → 400.
 - [ ] **`[COSTURA]`** (mapea a §Diseño · `design-verifier`): el punto de extensión
       cae donde el sistema varía; sin generalidad especulativa. Emite a la matriz (§5).
 - [ ] **`[LISKOV]`** (mapea a §2 Diseño · `design-verifier`): enunciado en
