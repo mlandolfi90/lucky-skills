@@ -81,11 +81,15 @@ riesgosa por nombre. Las líneas no sentencian: **convocan al juicio**.
 - **+ correr `auditoria-solid` de verdad** en debugger y demás repos (fuera de esta
   corrida — es uso, no cambio de ley).
 
-### CAMBIO 3 — [DIFERIDO, spike aparte] advisory per-edit en el gate (ataca Hueco A)
+### CAMBIO 3 — advisory per-edit en AMBOS guardianes (ataca Hueco A) — [MLL: BAJADO, sin spike]
 
-Un aviso **no-bloqueante** (`exit 0` + stderr) en el gate cuando un Edit engorda un
-archivo de código past `T`, para nudgear incluso FUERA de una corrida.
-**NO se baja en esta corrida** — razones:
+> **Decisión de MLL (2026-07-06): 1+2+3 sin spike.** Este cambio SÍ se bajó en la
+> corrida, con la disciplina de paridad de F1 (aviso byte-idéntico en gate +
+> enforcer, probado por test-enforcer.sh Grupo I; el parseo del umbral quedó
+> canónico tras iteración 2). Lo de abajo era el análisis de riesgo original.
+
+Un aviso **no-bloqueante** (`exit 0` + stderr) en los guardianes cuando un Edit toca un
+archivo de código ≥ `T`, para nudgear incluso FUERA de una corrida. Riesgo asumido:
 1. Tocaría los DOS guardianes (`crisol_gate.py` + `crisol-enforcer.sh`), cuya paridad
    EXACTA recién estabilizamos en F1 (v1.26.0). Reabrir esa superficie sin necesidad
    es riesgo puro.

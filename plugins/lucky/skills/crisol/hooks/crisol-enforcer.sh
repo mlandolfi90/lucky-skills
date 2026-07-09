@@ -18,25 +18,34 @@ LEDGER="docs/refactor/_crisol/RUN-LEDGER.md"
 CODE_EXTS="py js jsx ts tsx go rs java rb php c h hpp cpp cc cs sh bash ps1 psm1 sql yaml yml toml"
 CODE_FILENAMES="dockerfile makefile"
 
-# Modo introspección: imprime la política para el fixture de paridad y sale.
-#   línea 1 = extensiones (sin punto) ; línea 2 = nombres de archivo completos.
+# ── Umbral ATOMICIDAD: parseo CANÓNICO (lo espeja crisol_gate.py:_as_int_or_none) ──
+# Regla: trim de BORDES, luego TODO el token debe ser [0-9]; normaliza a decimal
+# base-10 ('007' → 7). Rechaza espacios internos, basura ('200abc'), decimales,
+# unicode-digit — IDÉNTICO al gate. La paridad la prueba test-enforcer.sh Grupo I (I5).
+_trim(){ local s="$1"; s="${s#"${s%%[![:space:]]*}"}"; s="${s%"${s##*[![:space:]]}"}"; printf '%s' "$s"; }
+_is_digits(){ case "$1" in ''|*[!0-9]*) return 1 ;; *) return 0 ;; esac; }
+_atomicidad_t(){  # env → conf (1ra línea entera-dígito) → 400. Emite decimal normalizado.
+  local v line
+  v="$(_trim "${CRISOL_ATOMICIDAD_T:-}")"
+  if _is_digits "$v"; then printf '%s' "$((10#$v))"; return 0; fi
+  if [ -f docs/refactor/_crisol/atomicidad.conf ]; then
+    while IFS= read -r line || [ -n "$line" ]; do
+      v="$(_trim "$line")"
+      if _is_digits "$v"; then printf '%s' "$((10#$v))"; return 0; fi
+    done < docs/refactor/_crisol/atomicidad.conf
+  fi
+  printf '%s' "400"
+}
+
+# Modos introspección para los fixtures de paridad; salen sin leer stdin.
 if [ "${1:-}" = "--print-code-policy" ]; then
   printf '%s\n%s\n' "$CODE_EXTS" "$CODE_FILENAMES"
   exit 0
 fi
-
-# Umbral ATOMICIDAD (citación al juez, NO bloqueo): env → conf → default 400.
-# Paridad EXACTA con crisol_gate.py:_atomicidad_threshold (mismo orden, mismo default).
-_atomicidad_t() {
-  local t=""
-  if printf '%s' "${CRISOL_ATOMICIDAD_T:-}" | grep -qE '^[0-9]+$' 2>/dev/null; then
-    t="${CRISOL_ATOMICIDAD_T}"
-  elif [ -f docs/refactor/_crisol/atomicidad.conf ]; then
-    t="$(grep -oE '^[0-9]+' docs/refactor/_crisol/atomicidad.conf 2>/dev/null | head -1 || true)"
-  fi
-  printf '%s' "$t" | grep -qE '^[0-9]+$' 2>/dev/null || t=400
-  printf '%s' "$t"
-}
+if [ "${1:-}" = "--print-threshold" ]; then
+  printf '%s\n' "$(_atomicidad_t)"
+  exit 0
+fi
 
 # 1. Ruta del archivo que se quiere tocar (viene en el JSON del hook por stdin)
 INPUT="$(cat)"

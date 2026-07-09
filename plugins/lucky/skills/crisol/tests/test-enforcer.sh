@@ -337,6 +337,32 @@ no_adv "I4 enforcer respeta env T=9999 (no avisa big.py)" "$EI4"
 if have_gate; then GI4="$( export CRISOL_ATOMICIDAD_T=9999; gate_stderr big.py "$WADOPTED" )"
   no_adv "I4 gate respeta env T=9999 (no avisa big.py)" "$GI4"; fi
 
+# I5: PARIDAD del PARSEO de umbral bajo config MALFORMADA (drift cazado por el
+# verificador de guardianes v1.28.0 iter2). enforcer --print-threshold vs gate
+# _atomicidad_threshold deben coincidir para TODA basura (trim + entero-ASCII + base-10).
+enf_threshold(){ ( cd "$1" && bash "$HOOK" --print-threshold ); }
+gate_threshold(){ have_gate || { echo ""; return; }  # $1=repo (cwd-style)
+  "$PYBIN" - "$GATE" "$1" <<'PY'
+import importlib.util, sys
+from pathlib import Path
+spec = importlib.util.spec_from_file_location("cg_probe", sys.argv[1])
+m = importlib.util.module_from_spec(spec); spec.loader.exec_module(m)
+print(m._atomicidad_threshold(Path(sys.argv[2])))
+PY
+}
+CONF="$ADOPTED/docs/refactor/_crisol/atomicidad.conf"
+for bad in "  200" "200abc" "3.5" "007" "" "   " "0" "abc"; do
+  printf '%s\n' "$bad" > "$CONF"
+  ET="$(enf_threshold "$ADOPTED")"
+  if have_gate; then check_eq "I5 conf=[$bad] umbral gate==enforcer" "$(gate_threshold "$WADOPTED")" "$ET"; fi
+done
+rm -f "$CONF"
+for bad in " 200 " "200 " "1e3" " 007 "; do
+  ET="$( export CRISOL_ATOMICIDAD_T="$bad"; enf_threshold "$ADOPTED" )"
+  if have_gate; then GT="$( export CRISOL_ATOMICIDAD_T="$bad"; gate_threshold "$WADOPTED" )"
+    check_eq "I5 env=[$bad] umbral gate==enforcer" "$GT" "$ET"; fi
+done
+
 echo
 echo "PASS=$PASS FAIL=$FAIL"
 [ "$FAIL" -eq 0 ]

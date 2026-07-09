@@ -83,18 +83,31 @@ _ATOMICIDAD_MSG = (
 )
 
 
+def _as_int_or_none(s: str):
+    """Token entero ASCII tras trim de bordes. Regla de parseo CANONICA que espeja
+    crisol-enforcer.sh (_trim + _is_digits + base-10): 'trim, luego TODO el token es
+    [0-9]'. Rechaza espacios internos, basura ('200abc'), decimales, unicode-digit;
+    normaliza a decimal ('007' -> 7). None si no aplica -> el caller cae al siguiente."""
+    s = s.strip()
+    if s and s.isascii() and s.isdigit():
+        return int(s)
+    return None
+
+
 def _atomicidad_threshold(repo: Path) -> int:
-    """env CRISOL_ATOMICIDAD_T -> repo/docs/refactor/_crisol/atomicidad.conf -> 400."""
-    env = os.environ.get("CRISOL_ATOMICIDAD_T", "")
-    if env.strip().isdigit():
-        return int(env.strip())
+    """env CRISOL_ATOMICIDAD_T -> atomicidad.conf (1ra línea entera-dígito) -> 400.
+    Parseo CANONICO (_as_int_or_none), byte-por-comportamiento con el enforcer;
+    test-enforcer.sh Grupo I (I5) prueba la paridad bajo config malformada."""
+    v = _as_int_or_none(os.environ.get("CRISOL_ATOMICIDAD_T", ""))
+    if v is not None:
+        return v
     try:
         conf = repo / "docs" / "refactor" / "_crisol" / "atomicidad.conf"
         if conf.is_file():
             for line in conf.read_text(encoding="utf-8", errors="replace").splitlines():
-                s = line.strip()
-                if s.isdigit():
-                    return int(s)
+                v = _as_int_or_none(line)
+                if v is not None:
+                    return v
     except Exception:
         pass
     return _ATOMICIDAD_DEFAULT_T

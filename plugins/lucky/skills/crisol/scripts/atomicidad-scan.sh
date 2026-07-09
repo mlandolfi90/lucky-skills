@@ -17,27 +17,26 @@ set -uo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"
 ENFORCER="$HERE/../hooks/crisol-enforcer.sh"
 
-# Umbral: env → conf → default 400 (paridad con crisol_gate.py / crisol-enforcer.sh).
+# Umbral: fuente ÚNICA = el enforcer (--print-threshold; parseo canónico env→conf→400).
+# Cero copia del parseo acá. Si el enforcer no está, cae a 400 (pero sin policy no se
+# cita nada igual).
 _t() {
   local t=""
-  if printf '%s' "${CRISOL_ATOMICIDAD_T:-}" | grep -qE '^[0-9]+$' 2>/dev/null; then
-    t="${CRISOL_ATOMICIDAD_T}"
-  elif [ -f docs/refactor/_crisol/atomicidad.conf ]; then
-    t="$(grep -oE '^[0-9]+' docs/refactor/_crisol/atomicidad.conf 2>/dev/null | head -1 || true)"
-  fi
-  printf '%s' "$t" | grep -qE '^[0-9]+$' 2>/dev/null || t=400
+  [ -f "$ENFORCER" ] && t="$(bash "$ENFORCER" --print-threshold 2>/dev/null | head -1 | tr -d '[:space:]' || true)"
+  case "$t" in ''|*[!0-9]*) t=400 ;; esac
   printf '%s' "$t"
 }
 
-# Política de código desde el enforcer (fuente única; fallback si no está).
+# Política de código: fuente ÚNICA = el enforcer (--print-code-policy). SIN lista
+# hardcodeada acá (evita la 4ta copia — hallazgo del design-verifier). Si el enforcer
+# no está, la policy queda vacía y el scan NO cita nada (fail-closed-a-vacío: el
+# design-verifier igual dictamina ATOMICIDAD a mano).
 CODE_EXTS=""; CODE_FILENAMES=""
 if [ -f "$ENFORCER" ]; then
   _pol="$(bash "$ENFORCER" --print-code-policy 2>/dev/null || true)"
   CODE_EXTS="$(printf '%s' "$_pol" | sed -n 1p)"
   CODE_FILENAMES="$(printf '%s' "$_pol" | sed -n 2p)"
 fi
-[ -n "$CODE_EXTS" ] || CODE_EXTS="py js jsx ts tsx go rs java rb php c h hpp cpp cc cs sh bash ps1 psm1 sql yaml yml toml"
-[ -n "$CODE_FILENAMES" ] || CODE_FILENAMES="dockerfile makefile"
 
 is_code() {
   local base lbase ext
