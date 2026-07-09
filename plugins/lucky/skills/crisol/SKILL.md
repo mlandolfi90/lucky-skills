@@ -238,12 +238,12 @@ plan — ver §3-6 y §4).
   (`SELLO_PIN: <skill> @ <tag> · motivo`); sin esa declaración = straggler =
   `FAIL`.
 - **Forja, no a mano:** ese re-sello uniforme + el `registry.json` (sha256 por
-  archivo, pin por commit) + la firma `minisign` los hace
+  archivo, pin por commit; sin firma — retirada por ADR 0009) los hace
   `scripts/forjar-release.sh vX.Y.Z` en UNA pasada (consistencia por
   construcción; incluye el leak-scan fail-closed y deja todo en el working tree,
   sin commitear ni taggear). El Verificador solo CONFIRMA el resultado (grep de
   sellos == el tag); sellar o editar el `registry.json` a mano = deuda (arriesga
-  drift entre sello ↔ registro ↔ firma).
+  drift entre sello ↔ registro).
 
 ### Pin total (cadena de suministro) — innegociable
 
@@ -516,7 +516,7 @@ triggers, para que ningún carril derive el vocabulario.
 ## 6. La ley se gobierna a sí misma
 
 **Fuente de verdad: `github.com/mlandolfi90/lucky-skills` · esta copia = tag
-`v1.28.0` (cache local, NO la ley).** **Ley viva:** al invocar la skill, si la
+`v1.29.0` (cache local, NO la ley).** **Ley viva:** al invocar la skill, si la
 sesión tiene red: `git ls-remote --tags
 https://github.com/mlandolfi90/lucky-skills.git` — si existe un tag mayor al de
 esta copia, descargar y seguir LA DEL REPO

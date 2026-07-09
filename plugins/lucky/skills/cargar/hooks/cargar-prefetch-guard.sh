@@ -3,7 +3,7 @@
 #
 # WebFetch en `cargar` SOLO sirve para el aviso "¿hay un tag mayor?" (compara el
 # string del tag). NUNCA para traer un cuerpo que se inyecte: WebFetch muta los
-# bytes (markdown + resumen) y su salida no pasa minisign/sha256. El cuerpo lo
+# bytes (markdown + resumen) y su salida no pasa sha256. El cuerpo lo
 # trae+verifica cargar-fetch-verify.sh (curl, codigo externo).
 #
 # Este guard impone que CUALQUIER WebFetch del loader caiga dentro del unico

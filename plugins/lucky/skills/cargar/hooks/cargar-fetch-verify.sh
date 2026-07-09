@@ -3,22 +3,24 @@
 #
 # ES el `fetch_verify` del contrato: NO lo corre el modelo (el loader es solo
 # lectura, sin Bash). Lo dispara el harness al recibir un prompt `cargar <skill>`.
-# Hace, en CODIGO determinista, fail-closed:
-#   1. trae bytes CRUDOS (curl) del registry.json + su .minisig, raw@<commit>;
-#   2. normaliza CRLF->LF ANTES de minisign -V Y de sha256 (se firma/hashea LF);
-#   3. minisign -V del registry contra la clave PUBLICA baked (TOFU install-only);
-#   4. chequea que registry.tag == el tag del install y, si hay commit, el pin;
-#   5. trae el cuerpo de la skill raw@<commit>, normaliza, sha256 -c contra el
-#      hash que ESTE CODIGO extrae del registry firmado (NO transcripto por el modelo);
-#   6. SOLO si todo dio exit 0, emite el bloque delimitado por NONCE de sesion
+# Hace, en CODIGO determinista, fail-closed (integridad sha256 + pin por commit;
+# la firma minisign fue RETIRADA por ADR 0009 — dueño unico del repo):
+#   1. trae bytes CRUDOS (curl) del registry.json, raw@REF del install
+#      (REF = commit si el install lo fijo; si no, el tag — v1 pinea por tag);
+#   2. normaliza CRLF->LF ANTES de sha256 (el release hashea sobre LF);
+#   3. chequea que registry.tag == el tag del install y, si el install fijo
+#      commit, el pin (el ancla la fija el install en state.env, no el modelo);
+#   4. trae el cuerpo de la skill raw@<commit>, normaliza, sha256 -c contra el
+#      hash que ESTE CODIGO extrae del registry (NO transcripto por el modelo);
+#   5. SOLO si todo dio exit 0, emite el bloque delimitado por NONCE de sesion
 #      via additionalContext (JSON del hook). En CUALQUIER exit!=0: additionalContext
 #      VACIO, el mensaje accionable va a stderr, y el texto JAMAS entra al contexto.
 #
-# El modelo NUNCA computa NI transcribe un hash/firma. El nonce lo genera ESTE
+# El modelo NUNCA computa NI transcribe un hash. El nonce lo genera ESTE
 # codigo (entorno), no el modelo ni el payload. El marcador de cierre lo emite
 # solo este codigo.
 #
-# Entorno real: Git-Bash/Windows. minisign/sha256sum/curl deben estar en PATH;
+# Entorno real: Git-Bash/Windows. sha256sum/curl deben estar en PATH;
 # si falta alguno -> exit!=0 con mensaje (MODO MANUAL lo decide el loader).
 #
 # Contrato de E/S del hook UserPromptSubmit:
@@ -45,15 +47,13 @@ reject(){ # $1 = mensaje a stderr; additionalContext queda VACIO -> nada al cont
 }
 
 # ── 0. estado del install (NO del env que el modelo controla) ─────────────────
-# El tag/commit/registry-url/pubkey los fija el install (install-trust.sh) en un
+# El tag/commit/registry-url los fija el install (install-trust.sh) en un
 # archivo de estado FUERA del repo. El modelo no puede re-apuntarlos por prompt.
 if [ -n "${LOCALAPPDATA:-}" ]; then
   STATE_DIR="$(cygpath -u "$LOCALAPPDATA" 2>/dev/null || printf '%s' "$LOCALAPPDATA")/lucky/cargar"
 else
   STATE_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/lucky/cargar"
 fi
-TRUST_DIR="$STATE_DIR/trust"
-PUBKEY="$TRUST_DIR/cargar-release.pub"
 STATE="$STATE_DIR/state.env"
 
 # SKILLS_REGISTRY_URL: unico ancla. Preferir el estado del install; si no, el env
@@ -77,16 +77,15 @@ fi
 
 [ -n "$BASE" ]        || reject "SKILLS_REGISTRY_URL no resuelta (ni en state.env ni en env) -> MODO MANUAL."
 [ -n "$INSTALL_TAG" ] || reject "CARGAR_TAG no resuelto (el install no fijo el tag) -> MODO MANUAL."
-[ -f "$PUBKEY" ]      || reject "clave publica baked no encontrada en $PUBKEY (corré install-trust) -> MODO MANUAL."
 
 # ── deps (entorno real) ───────────────────────────────────────────────────────
-for dep in curl minisign; do
-  command -v "$dep" >/dev/null 2>&1 || reject "falta '$dep' en PATH (scoop install minisign / Git-Bash trae curl) -> MODO MANUAL."
+for dep in curl; do
+  command -v "$dep" >/dev/null 2>&1 || reject "falta '$dep' en PATH (Git-Bash lo trae) -> MODO MANUAL."
 done
 PYBIN=""
 command -v python  >/dev/null 2>&1 && PYBIN="python"
 [ -z "$PYBIN" ] && command -v python3 >/dev/null 2>&1 && PYBIN="python3"
-[ -n "$PYBIN" ] || reject "falta python/python3 (se usa para parsear el registry firmado, no para la cripto) -> MODO MANUAL."
+[ -n "$PYBIN" ] || reject "falta python/python3 (se usa para parsear el registry, no para el hash) -> MODO MANUAL."
 
 # sha256 de un archivo YA normalizado a LF -> solo el hash hex minuscula
 sha256_file(){
@@ -137,22 +136,15 @@ norm_lf(){ # $1 = archivo
   sed 's/\r$//' "$1" > "$t" && mv -f "$t" "$1"
 }
 
-# ── 2. registro + firma (bytes crudos) ────────────────────────────────────────
-REG="$TMP/registry.json"; SIG="$TMP/registry.json.minisig"
-fetch_raw "plugins/lucky/skills/registry.json"         "$REG" || reject "no pude traer el registry (sin red o origen no permitido)."
-fetch_raw "plugins/lucky/skills/registry.json.minisig" "$SIG" || reject "no pude traer la firma del registry."
+# ── 2. registry (bytes crudos, raw@REF fijado por el install) ─────────────────
+REG="$TMP/registry.json"
+fetch_raw "plugins/lucky/skills/registry.json" "$REG" || reject "no pude traer el registry (sin red o origen no permitido)."
 
-# CRLF: normalizar a LF ANTES de minisign -V (se firma sobre LF). Un \r fantasma
-# haria fallar la firma de un registry autentico (false-reject); lo evitamos.
+# CRLF: normalizar a LF ANTES de sha256 (el release hashea sobre LF). Un \r
+# fantasma haria fallar el hash de un cuerpo autentico (false-reject); lo evitamos.
 norm_lf "$REG" || reject "registry vacio/corrupto tras fetch."
-# La .minisig es ASCII de 2 lineas; normalizar tambien por si el checkout metio CR.
-norm_lf "$SIG" || reject "firma vacia/corrupta tras fetch."
 
-if ! minisign -V -p "$PUBKEY" -x "$SIG" -m "$REG" >/dev/null 2>&1; then
-  reject "FIRMA INVALIDA del registry (clave equivocada o manifiesto adulterado). Nada entra."
-fi
-
-# ── 3. parsear el registry YA verificado (por CODIGO, no por el modelo) ───────
+# ── 3. parsear el registry traido por CODIGO (no por el modelo) ────────────────
 #   emite TSV:  tag <TAB> commit <TAB> sha_de_<skill> <TAB> path_de_<skill> <TAB> loadable
 PARSED="$("$PYBIN" - "$REG" "$WANT_SKILL" <<'PY'
 import sys, json
@@ -209,7 +201,7 @@ REG_COMMIT="$(printf '%s' "$PARSED" | cut -f2)"
 WANT_SHA="$(printf '%s' "$PARSED" | cut -f3)"
 SKILL_PATH="$(printf '%s' "$PARSED" | cut -f4)"
 
-# ── 4. pin: el registry firmado debe coincidir con el install ─────────────────
+# ── 4. pin: el registry debe coincidir con el install (tag y, si hay, commit) ─
 [ "$REG_TAG" = "$INSTALL_TAG" ] || reject "pin roto: registry tag '$REG_TAG' != tag del install '$INSTALL_TAG'."
 if [ -n "$INSTALL_COMMIT" ]; then
   [ "$REG_COMMIT" = "$INSTALL_COMMIT" ] || reject "pin roto: registry commit '$REG_COMMIT' != commit del install '$INSTALL_COMMIT'."

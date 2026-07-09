@@ -159,3 +159,12 @@
   verifica el diff de cada corrida, no hace auditoría retroactiva del código ya existente). Candidata a
   corrida de AUDITORÍA read-only por repo (mapear violaciones SOLID vivas) o a enmienda del
   `conformidad-checklist`. · idea de MLL
+- 2026-07-09 · pin-por-commit REAL para cargar (v2): hoy la forja corre PRE-commit, así que el campo
+  `commit` del registry apunta al HEAD anterior al commit del release → el pin efectivo es por TAG
+  (documentado en ADR 0009). Idea v2: forja en dos pasadas (commit del release primero, registry después
+  apuntando a ese sha, amend controlado) o registry post-commit en un artefacto separado — cerraría el
+  vector tag-movido sin necesitar firma. · surgió del retiro de minisign (corrida 2026-07-09)
+- 2026-07-09 · limpiar prosa stale de la era pre-/reload-plugins: el echo final de forjar-release.sh
+  ("paso 5: corregir README L19") y la nota en cargar/references/detectar-runtime.md sobre el mismo
+  README L19 — el README ya está corregido hace rato; ambos avisos son ruido. Fix de 2 líneas, corrida
+  aparte (fuera del alcance del retiro de minisign). · hallado en la corrida 2026-07-09

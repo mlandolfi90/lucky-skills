@@ -4,6 +4,31 @@ Notas de release de la familia de skills Lucky. El historial completo del **proc
 (corridas del Crisol, RETROs) vive en `docs/refactor/_crisol/RUN-LEDGER.md`; los tags
 inmutables, en `git tag`. Formato: más nuevo arriba.
 
+## v1.29.0 — 2026-07-09 — cargar: minisign RETIRADO — integridad sha256-only + pin por commit (ADR 0009)
+
+Decisión del operador (dueño único del repo): *"eliminar minisign, sacar definitivamente; en algún
+momento se volverá pero no quiero más fastidio con eso."* La firma ya estaba DIFERIDA/dormida (el
+registry se forjaba con `--no-sign`, ningún `.minisig` commiteado) pero `cargar-fetch-verify.sh` la
+EXIGÍA → la vía-dato del loader estaba estructuralmente rota. Este release la des-rompe:
+
+- **cargar-fetch-verify.sh:** cadena sha256-only — bytes crudos `raw@commit` (HTTPS) + pin
+  tag/commit del install (state.env) + `sha256 -c` por cuerpo. Fail-closed intacto: `exit ≠ 0` →
+  nada entra al contexto. El modelo sigue sin computar ni transcribir hashes.
+- **install-trust.sh/.ps1:** ya no anclan clave pública; solo fijan el pin (registry-url/tag/commit).
+- **forjar-release.sh:** sin paso de firma ni `MINISIGN_*`; `--no-sign` queda no-op con aviso;
+  limpia `.minisig` residuales.
+- **test-verify.sh:** reescrito a la cadena sin firma — 11/11 PASS (tag/commit-mismatch, JSON roto,
+  sha malformado, requires_tools, cuerpo adulterado, CRLF en cuerpo y en registry, invariante
+  todo-reject ⇒ contexto vacío).
+- **Prosa activa** (cargar/SKILL.md, detectar-runtime.md, crisol §forja, README, registry.schema):
+  el texto dice lo que el código hace. Historia intacta (ADR 0001 marcado supersedido-parcial,
+  no reescrito).
+- **ADR 0009:** modelo de amenaza delta (riesgo repo-comprometido ACEPTADO — dueño único + 2FA) y
+  criterio de reversa explícito (multi-operador / terceros / señal de compromiso / contenido
+  ejecutable por vía-dato).
+
+Suite verde: verify 11/11 · enforcer 93/0 (contra el gate del repo) · atomicidad 8/0 · bitácora 35 PASS + 20/20.
+
 ## v1.19.2 — 2026-07-02 — Bitácora: regla "sin evidencia real, NO entra" — el catálogo guarda solo lo confirmado
 
 Decisión del operador al ver el resultado del panel v1.19.1: *"¿de qué sirve guardar algo que no

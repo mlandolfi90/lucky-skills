@@ -1585,3 +1585,63 @@
 - RETRO: el jidoka funcionó EN el propio piso — el aviso ATOMICIDAD que agregamos citó a crisol_gate.py (658 líneas) en el dogfood, y dos verificadores frescos cazaron drift real de parseo entre los guardianes que yo había declarado "paridad EXACTA" (falso-verde de comentario, DRIFT-001). Lección: cuando dos implementaciones deben ser idénticas, el fuzz de INPUT MALFORMADO (no solo el feliz) es donde vive el drift; el fixture ahora lo prueba. Fecha del ledger/ADR (2026-07-06) < fecha real (2026-07-09): drift de reloj cosmético de siempre.
 - Cierre: 2026-07-06 · commit de cierre (Tier Completo, 3 iteraciones) · forja v1.28.0 · tag delegado a MLL.
 
+### main — 2026-07-09 (retirar minisign — integridad sha256-only, ADR 0009)
+- STATUS: CLOSED
+- Tier: fast-path
+- Fecha: 2026-07-09
+- TARGET: pc-local
+- MODEL: claude-fable-5 (uniforme — sesión del líder, sin sub-agentes de código)
+- Alcance: retirar DEFINITIVAMENTE la firma minisign de la cadena activa —
+  decisión del operador MLL (dueño único del repo). La firma ya estaba
+  DIFERIDA/dormida (schema lo declara; el repo no comitea .minisig y la forja
+  corre --no-sign desde v1.28.0) pero cargar-fetch-verify.sh la EXIGÍA →
+  vía-dato del loader rota. Integridad que QUEDA: sha256 -c por archivo + pin
+  del install (v1: tag; pin-por-commit real = v2, la forja corre pre-commit) +
+  HTTPS, todo por código externo, fail-closed. Toca:
+  cargar-fetch-verify.sh, install-trust.sh/.ps1, test-verify.sh,
+  forjar-release.sh, registry.schema.json, .gitattributes, prosa activa
+  (cargar/SKILL.md, detectar-runtime.md, crisol/SKILL.md §forja, README) +
+  ADR 0009 (supersede la parte de firma del ADR 0001). Historia intacta
+  (CHANGELOG/RUN-LEDGER/bitácora/ADRs viejos solo con marca de supersesión).
+  Corrida fuera-de-flujo (camino 2 del gate) por orden explícita del operador;
+  ciclo completo autorizado hasta commit + tag anotado v1.29.0 + push.
+- MIGRATION_STRATEGY: N/A (sin DDL)
+- Conformidad-arq: N/A (hooks/scripts/prosa — sin código hexagonal)
+<!-- VEREDICTOS:BEGIN -->
+- runState: closing
+- [V] TARGET · PASS · gate · pc-local (declarado por MLL; suites corridas en esta PC)
+- [V] MODEL · PASS · gate · claude-fable-5 (uniforme: líder + verificador fresco)
+- [V] TARGET_ENV · N/A · — · pc-local sin @env
+- [V] REGLA0 · PASS · verificador-fresco · verify 11/11 · enforcer 93/0 (gate del repo vía CRISOL_GATE_OVERRIDE) · atomicidad 8/0 · bitacora-lint 35/0 · stale 20/20
+- [V] TEST_COVERAGE · PASS · gate · test-verify.sh reescrito a la cadena sha256-only: 11 casos (mismatch tag/commit/sha, JSON roto, sha malformado, requires_tools, CRLF x2, invariante todo-reject⇒vacío)
+- [V] INDEPENDENCIA · PASS · verificador-fresco · subagente re-corrió las suites y barrió restos de minisign, sin la prosa del líder
+- [V] SCOPE_CREEP · PASS · gate · solo superficie minisign activa + ADR 0009 + CHANGELOG + ledger; historia intacta (CHANGELOG viejo/RUN-LEDGER/bitácora/ADRs solo marca de supersesión); 2 hallazgos fuera de scope → IDEAS.md
+- [V] PARKING · PASS · gate · 2 líneas a IDEAS.md (pin-por-commit v2; prosa stale README L19)
+- [V] CIERRE_TRAS_PASS · PASS · gate · cierre tras suites verdes + verificador fresco PASS
+- [V] CREDITO · PASS · gate · ADR 0009 depositado; ADR 0001 marcado SUPERSEDIDO-PARCIAL sin reescribir historia
+- [V] MIGRATION · N/A · gate · sin DDL
+- [V] FUENTE_VERDAD · N/A · — · no toca testing/prod
+- [V] RESPONSIVE · N/A · — · no toca UI
+- [V] ZERO_LEAK · PASS · gate · leak-scan LIMPIO en la forja (IP/usuario/rutas/registry-url/clave-privada/secreto-valor)
+- [V] TECHO_ITER · PASS · gate · 1/3
+- [V] OPEN_CLOSED · PASS · gate · edición de estable JUSTIFICADA: retiro deliberado ordenado por el operador y sancionado por ADR 0009 (refactor de resta, no extensión editando el corazón)
+- [V] ATOMICIDAD · PASS · gate · atomicidad-scan 8/0; toda unidad tocada ACHICA (se quita un paso de la cadena)
+- [V] COSTURA · PASS · gate · ancla sigue parametrizada (`${SKILLS_REGISTRY_URL}` literal en registry; env/Infisical en runtime); cero valores horneados
+- [V] LISKOV · N/A · — · no toca los guardianes duales ni contratos sustituibles
+- [V] INTERFACE_SEGREGATION · N/A · — · sin interfaces nuevas
+- [V] CASOS_LEGALES · PASS · gate · edición de estable = caso (c) refactor deliberado con ADR (0009)
+- [V] CONFORMIDAD · N/A · — · hooks/scripts, sin código hexagonal
+- [V] SELLOS · PASS · gate · forja v1.29.0 re-selló 19 archivos (9 SKILL.md + reference + 9 ADRs), exactamente 1 ancla c/u, 0 stragglers
+- [V] FORJA · PASS · gate · forjar-release.sh v1.29.0 en una pasada (ya sin firma); registry regenerado, pin commit 25874c4affaa informativo (v1 pinea por tag)
+- [V] TAG_GATE · PASS · gate · v1.29.0 nace de esta corrida; tag anotado + push autorizados explícitamente por MLL (ciclo completo)
+- [V] PIN_TOTAL · N/A · — · sin cambio de dependencias consumidas (minisign se RETIRA, no se agrega nada)
+- [V] BUMP_REASON · PASS · gate · minor v1.29.0: cambia el contrato del loader (retiro de firma) — documentado en ADR 0009 + CHANGELOG
+<!-- VEREDICTOS:END -->
+- BITACORA: N/A (el hallazgo estructural —vía-dato rota por firma exigida y nunca producida— queda documentado en ADR 0009 y CHANGELOG; sin patrón experiencial nuevo que destile)
+- Iteraciones: 1/3
+- TEST_COVERAGE: verify 11/11 · enforcer 93/0 (gate del repo) · atomicidad 8/0 · bitacora-lint 35/0 · stale 20/20
+- Escalación: none
+- Veredictos: corrida fuera-de-flujo (camino 2 del gate) por orden explícita del operador · Verificador fresco PASS (suites + barrido de restos, evidencia propia) · líder ejecutó, no verificó su propio trabajo.
+- RETRO: el retiro destapó DOS mentiras de prosa que el fail-closed tapaba: (1) el fetcher exigía una firma que la forja no producía desde hace releases (vía-dato rota en silencio — fail-closed sin telemetría = roto invisible); (2) la prosa vendía "pin por commit (hoy: siempre)" cuando la forja corre pre-commit y el pin real es por tag. Lección: cuando un gate rechaza TODO, nadie nota que también rechaza lo legítimo — un smoke-test periódico de la vía feliz (cargar arquitectura de verdad) lo habría cazado. Parkeada la v2 del pin.
+- Cierre: 2026-07-09 · commit de cierre (fast-path, 1 iteración) · forja v1.29.0 · tag y push en esta misma corrida (autorizados por MLL).
+

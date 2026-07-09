@@ -1,12 +1,12 @@
-# Cadena de firma: forjar-release.sh hashea con sha256_lf (LF) y `cargar` verifica
-# sobre LF. Forzamos LF en TODO el repo para que el raw servido a `cargar` sea
-# byte-idéntico al que se hashea/firma — evita drift CRLF, sobre todo en UTF-8
-# multibyte. Salda la deuda hallada por el plan i18n
+# Cadena de integridad: forjar-release.sh hashea con sha256_lf (LF) y `cargar`
+# verifica sobre LF. Forzamos LF en TODO el repo para que el raw servido a
+# `cargar` sea byte-idéntico al que se hashea — evita drift CRLF, sobre todo en
+# UTF-8 multibyte. Salda la deuda hallada por el plan i18n
 # (docs/refactor/_crisol/PLAN-i18n-costura.md).
 * text=auto eol=lf
 
 # Texto explícito (LF innegociable): scripts ejecutables (corren en Linux/Git-Bash),
-# config y prosa firmada.
+# config y prosa sellada.
 *.sh       text eol=lf
 *.py       text eol=lf
 *.ps1      text eol=lf

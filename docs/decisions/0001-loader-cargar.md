@@ -1,6 +1,10 @@
 # 0001 — loader `cargar`: skill-como-datos verificado por codigo, TOFU install-only, registry firmado
 
-- estado: aceptado
+- estado: aceptado — SUPERSEDIDO PARCIALMENTE por ADR 0009 (2026-07-09): la
+  cadena de firma minisign (§2 ancla TOFU, firma del §3) fue retirada; la
+  integridad quedo sha256-only + pin por commit. El resto del diseño del loader
+  (skill-como-datos, capability-gate, nonce, MODO MANUAL, carga progresiva,
+  idempotencia activa) sigue vigente. Este documento se conserva como historia.
 - fecha: 2026-06-14
 - decide: MLL (operador)
 - tags de la familia al sellar: v1.8.0 (loader y manifiesto comparten el commit del release)
@@ -187,7 +191,7 @@ computa, ni transcribe, ni emula un hash/firma** (nada de comparar a ojo con
 ---
 
 **Fuente de verdad: `github.com/mlandolfi90/lucky-skills` · esta copia = tag
-`v1.28.0` (cache local, NO la ley).** Ley viva: con red, si el repo tiene un tag
+`v1.29.0` (cache local, NO la ley).** Ley viva: con red, si el repo tiene un tag
 mayor (`git ls-remote --tags
 https://github.com/mlandolfi90/lucky-skills.git`), seguir la del repo e informar
 al humano.

@@ -16,33 +16,27 @@
 #      requires_tools/path/url/sha256. La url es raw@COMMIT (inmutable de verdad;
 #      un tag git es MUTABLE con `git -f`). El cliente verifica raw@commit;
 #   4. corre scripts/leak-scan.sh sobre el arbol (gate zero-leak, fail-closed) y
-#      bitacora-lint.sh (coherencia INDEX<->entradas de la bitacora, fail-closed);
-#   5. firma registry.json con minisign (clave PRIVADA via Infisical/offline,
-#      JAMAS hardcodeada ni en el repo) -> registry.json.minisig, y AUTO-VERIFICA
-#      la firma si MINISIGN_PUBKEY esta seteada (no taggear algo que el loader
-#      rechazaria).
+#      bitacora-lint.sh (coherencia INDEX<->entradas de la bitacora, fail-closed).
+#
+# La firma minisign fue RETIRADA (ADR 0009, dueño unico del repo): el release ya
+# NO firma nada. La integridad la dan los sha256 por archivo + el pin por commit
+# del registry, verificados por codigo en el cliente (cargar-fetch-verify.sh).
 #
 # Deja TODO en el working tree para review humano (git status / git diff). NO
 # commitea, NO pushea, NO crea el tag: eso lo hace el operador (MLL) bajo Crisol,
-# con OK. El tag debe crearse ANOTADO (git tag -a), pero la inmutabilidad real la
-# da la firma minisign del registry (ancla commit + sha256), no el tag.
+# con OK. El tag debe crearse ANOTADO (git tag -a); el ancla inmutable real es el
+# COMMIT que el registry pinea (un tag es mutable con git -f).
 #
 # Entorno real: Git-Bash/PowerShell en Windows. Maneja CRLF (sed 's/\r$//' y
 # normalizacion LF de los artefactos firmados), paths con espacios (todo entre
 # comillas), anchor del sello ESCAPADO para ERE (grep -E / sed -E).
 #
 # Uso:
-#   bash scripts/forjar-release.sh vX.Y.Z            # bump + registry + leak-scan + firma
+#   bash scripts/forjar-release.sh vX.Y.Z            # bump + registry + leak-scan
 #   bash scripts/forjar-release.sh vX.Y.Z --dry-run  # no escribe nada, solo reporta
-#   bash scripts/forjar-release.sh vX.Y.Z --no-sign  # bump + registry + leak-scan, sin firmar
+#   (--no-sign quedo OBSOLETA: se acepta como no-op con aviso — la firma ya no existe)
 #
-# Clave privada de firma (en orden de preferencia):
-#   - $MINISIGN_SECRET_KEY  -> ruta a un archivo .key (lo provee Infisical en runtime)
-#   - $MINISIGN_SECRET      -> contenido de la .key (Infisical lo inyecta como env);
-#                             se materializa en un tmp con umask 077 y se borra (trap).
-#   - si ninguna esta y no es --no-sign -> aborta pidiendo la clave (no inventa nada).
-#   - $MINISIGN_PASSWORD    -> passphrase de la .key (si la clave la tiene); por stdin.
-#   - $MINISIGN_PUBKEY      -> clave publica (contenido) para auto-verificar la firma.
+# Entorno:
 #   - $SKILLS_REGISTRY_URL  -> ancla del catalogo; si falta, el registry usa el token
 #                             ${SKILLS_REGISTRY_URL} literal (zero-leak; no hornea valor).
 #
@@ -68,16 +62,16 @@ die(){  printf 'XX %s\n' "$*" >&2; exit 1; }
 line(){ printf '%s\n' "------------------------------------------------"; }
 
 # ── args ─────────────────────────────────────────────────────────────────────
-TAG="${1:-}"; DRY=0; SIGN=1
+TAG="${1:-}"; DRY=0
 shift || true
 for a in "$@"; do
   case "$a" in
     --dry-run) DRY=1 ;;
-    --no-sign) SIGN=0 ;;
-    *) die "flag desconocida: $a (usa --dry-run / --no-sign)" ;;
+    --no-sign) warn "--no-sign quedo obsoleta: la firma fue retirada (ADR 0009); ignorada." ;;
+    *) die "flag desconocida: $a (usa --dry-run)" ;;
   esac
 done
-[ -n "$TAG" ] || die "falta el tag. Uso: bash scripts/forjar-release.sh vX.Y.Z [--dry-run|--no-sign]"
+[ -n "$TAG" ] || die "falta el tag. Uso: bash scripts/forjar-release.sh vX.Y.Z [--dry-run]"
 [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || die "tag invalido '$TAG' — formato esperado vMAJOR.MINOR.PATCH (ej. v1.9.0)"
 
 # ── preflight de herramientas (entorno real, fallar TEMPRANO y claro) ────────
@@ -88,12 +82,6 @@ PYBIN=""
 if need python;  then PYBIN="python";  fi
 if [ -z "$PYBIN" ] && need python3; then PYBIN="python3"; fi
 [ -n "$PYBIN" ] || die "python/python3 no esta en PATH (se usa para canonicalizar JSON sin jq)."
-if [ "$SIGN" -eq 1 ] && [ "$DRY" -eq 0 ]; then
-  need minisign || die "minisign no esta en PATH. Obtenelo:
-     - scoop install minisign     (o)  choco install minisign
-     - o binario de github.com/jedisct1/minisign/releases (poné el .exe en PATH)
-   O corré con --no-sign para generar el registry sin firmar (firma diferida)."
-fi
 
 # ── el repo debe ser git y el tag NO debe existir aun ────────────────────────
 git rev-parse --git-dir >/dev/null 2>&1 || die "no es un repo git."
@@ -347,7 +335,7 @@ doc = collections.OrderedDict([
     ("tag", tag),
     ("commit", commit),
     ("raw_base", raw_base),
-    ("note", "Verificacion cripto la hace codigo externo (minisign -V del .minisig + sha256 -c por archivo, sobre bytes LF). El cliente NUNCA computa NI transcribe el hash. El ancla de seguridad es la FIRMA del registry (un tag movido con registry falso no valida sin la clave privada); v1 pinea por tag, el campo commit es informativo (pin-por-commit real = v2). Solo se cargan como dato las skills loadable_as_data=true; requires_runtime/requires_tools -> fast-path de install."),
+    ("note", "Verificacion de integridad por codigo externo: sha256 -c por archivo, sobre bytes LF, contra este registry traido raw@REF del install. El cliente NUNCA computa NI transcribe el hash. La firma minisign fue RETIRADA (ADR 0009, dueño unico del repo; vuelve si el trade-off cambia): el ancla es el PIN que fija el install en state.env — v1 pinea por TAG; el campo commit es informativo (la forja corre pre-commit; pin-por-commit real = v2). Solo se cargan como dato las skills loadable_as_data=true; requires_runtime/requires_tools -> fast-path de install."),
     ("skills", skills),
 ])
 sys.stdout.write(json.dumps(doc, ensure_ascii=False, indent=2) + "\n")
@@ -396,62 +384,10 @@ else
 fi
 line
 
-# ── 5. firmar registry.json con minisign + auto-verificar ────────────────────
-if [ "$SIGN" -eq 0 ]; then
-  warn "--no-sign: registry.json SIN firmar. El loader lo rechazara hasta que lo firmes:
-     minisign -S -s <clave.key> -m \"$REGISTRY\""
-elif [ "$DRY" -eq 1 ]; then
-  info "[dry] se firmaria: minisign -S -s <clave> -m $REGISTRY -> $REGISTRY.minisig"
-else
-  KEYFILE=""; KEY_IS_TMP=0
-  if [ -n "${MINISIGN_SECRET_KEY:-}" ]; then
-    [ -f "$MINISIGN_SECRET_KEY" ] || die "MINISIGN_SECRET_KEY apunta a un archivo inexistente: $MINISIGN_SECRET_KEY"
-    KEYFILE="$MINISIGN_SECRET_KEY"
-    info "firma con clave en archivo (MINISIGN_SECRET_KEY)"
-  elif [ -n "${MINISIGN_SECRET:-}" ]; then
-    umask 077
-    KEYFILE="$(mktemp)"; KEY_IS_TMP=1
-    printf '%s' "$MINISIGN_SECRET" > "$KEYFILE"
-    info "firma con clave inyectada (MINISIGN_SECRET) — materializada en tmp 077, se borra al salir"
-  else
-    die "no hay clave privada para firmar. Sete MINISIGN_SECRET_KEY (ruta) o MINISIGN_SECRET (contenido),
-   tipicamente via:  infisical run --env=dev -- bash scripts/forjar-release.sh $TAG
-   O corré con --no-sign para firmar despues."
-  fi
-  if [ "$KEY_IS_TMP" -eq 1 ]; then
-    trap 'cleanup_tmp; rm -f "$KEYFILE"' EXIT
-  fi
+# ── 5. limpiar restos de firma (ADR 0009: el release ya no produce .minisig) ─
+if [ "$DRY" -eq 0 ] && [ -f "$REGISTRY.minisig" ]; then
   rm -f "$REGISTRY.minisig"
-  # trusted comment lleva tag + commit (no es vinculante por si solo; el binding
-  # fuerte es la firma sobre el contenido que YA ancla commit+sha256).
-  TC="lucky-skills $TAG commit=$RELEASE_COMMIT"
-  if [ -n "${MINISIGN_PASSWORD:-}" ]; then
-    printf '%s\n' "$MINISIGN_PASSWORD" | minisign -S -s "$KEYFILE" -m "$REGISTRY" \
-      -t "$TC" -c "registry de la familia lucky-skills, $TC" \
-      || die "minisign fallo al firmar."
-  else
-    minisign -S -s "$KEYFILE" -m "$REGISTRY" \
-      -t "$TC" -c "registry de la familia lucky-skills, $TC" \
-      </dev/null \
-      || die "minisign fallo al firmar (passphrase? sete MINISIGN_PASSWORD o corré en terminal interactiva)."
-  fi
-  [ -f "$REGISTRY.minisig" ] || die "minisign no produjo $REGISTRY.minisig."
-  ok "registry.json firmado -> $REGISTRY.minisig"
-  if [ -n "${MINISIGN_PUBKEY:-}" ]; then
-    if printf '%s' "$MINISIGN_PUBKEY" | grep -q 'minisign public key\|^RW'; then
-      pub_tmp="$(mktemp)"; printf '%s\n' "$MINISIGN_PUBKEY" > "$pub_tmp"
-      if minisign -V -p "$pub_tmp" -m "$REGISTRY" >/dev/null 2>&1; then
-        ok "auto-verificacion minisign -V con MINISIGN_PUBKEY: OK"
-      else
-        rm -f "$pub_tmp"; die "auto-verificacion FALLO: la firma no valida con MINISIGN_PUBKEY. NO taggear."
-      fi
-      rm -f "$pub_tmp"
-    else
-      warn "MINISIGN_PUBKEY no parece una clave publica minisign — salto la auto-verificacion."
-    fi
-  else
-    info "MINISIGN_PUBKEY no seteada -> omito auto-verificacion (el loader la hara en runtime)."
-  fi
+  ok "resto de firma eliminado: $REGISTRY.minisig (ADR 0009)"
 fi
 line
 
@@ -463,7 +399,7 @@ echo "Proximos pasos (los hace el operador MLL, bajo Crisol, con OK):"
 echo "   1. git diff $SKILLS_DIR $DECISIONS_DIR"
 echo "   2. correr el Crisol sobre el cambio (Verificador: grep de sellos == $TAG; leak-scan limpio)"
 echo "   3. git add -A && git commit"
-echo "   4. git tag -a $TAG -m \"release $TAG\"   # TAG ANOTADO (la inmutabilidad real la da la firma del registry: ancla commit $RELEASE_COMMIT + sha256)"
+echo "   4. git tag -a $TAG -m \"release $TAG\"   # TAG ANOTADO (ancla inmutable real: commit $RELEASE_COMMIT pineado en el registry + sha256)"
 echo "   5. corregir README L19 (reload-skills -> /reload-plugins) si no se hizo aun"
 echo "   6. git push && git push --tags"
 line

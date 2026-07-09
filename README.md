@@ -20,12 +20,13 @@ Actualizar: editar aqui -> push -> web agarra lo ultimo en sesion nueva; local `
 
 ## Release (ritual)
 
-El bump de sellos de version, el `registry.json` (sha256 por archivo + pin por commit) y la
-firma `minisign` se forjan en UNA pasada con el script — **nunca a mano**:
+El bump de sellos de version y el `registry.json` (sha256 por archivo + pin por commit)
+se forjan en UNA pasada con el script — **nunca a mano**:
 ```
-bash scripts/forjar-release.sh vX.Y.Z             # bump + registry + leak-scan + firma
-bash scripts/forjar-release.sh vX.Y.Z --no-sign   # sin firmar (firma diferida)
+bash scripts/forjar-release.sh vX.Y.Z             # bump + registry + leak-scan
+bash scripts/forjar-release.sh vX.Y.Z --dry-run   # solo reporta, no escribe
 ```
 Deja todo en el working tree (no commitea/taggea). Luego, bajo Crisol: review del diff ->
-commit -> `git tag -a vX.Y.Z` (anotado) -> push. La firma minisign del registry (ancla commit +
-sha256) es la inmutabilidad real.
+commit -> `git tag -a vX.Y.Z` (anotado) -> push. El ancla inmutable real es el COMMIT
+pineado en el registry + los sha256 por archivo (la firma minisign fue retirada — ADR 0009;
+vuelve si el trade-off cambia).
