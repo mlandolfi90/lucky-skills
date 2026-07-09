@@ -76,10 +76,38 @@ Se absorbe el MECANISMO (push + observación) preservando la DOCTRINA lucky:
 - (=) Doctrina intacta: INDEX curado por humanos, consulta dirigida sigue
   siendo pull, SENALES sigue sin decidir acciones.
 
+## Enmienda (2026-07-09) — timbre de juicio
+
+Pregunta del operador que la disparó: *"¿qué mecanismo hay para que el humano
+sepa que tiene que juzgar?"* — la acumulación era automática pero la cola de
+juicio no tenía timbre (mismo defecto que ECC: sus instincts se apilan y
+`/instinct-status` es manual).
+
+**Se agrega al push la sección `⚖ JUICIO PENDIENTE`** (solo si hay algo que
+juzgar; cero ruido si no):
+
+- cuenta **señales con visto ≥ 2** en el log local del observador (líneas =
+  sesiones avistadas por etiqueta — la semántica `visto: N` de SENALES.md) →
+  remite a `bitacora-observar.sh --resumen`;
+- cuenta **entradas CANDIDATE** del INDEX esperando endoso → LIVE o retirar;
+- **instruye al agente a avisarle al humano en su primera respuesta** — el
+  additionalContext lo lee el modelo, no el humano: el relevo explícito ES el
+  timbre;
+- va **antes** de los patrones en el bloque (sobrevive al recorte de
+  presupuesto);
+- **cero juicio automático**: solo conteo y aviso — quién investiga, refuta,
+  promueve o retira sigue siendo el humano (invariante de este ADR intacto).
+
+`bitacora-push.sh` copia `log_dir` de `bitacora-observar.sh` (comentario
+"editar acá => editar allá") y la paridad se prueba por introspección
+`--print-log-dir` en ambos hooks (patrón ADR 0008). El ítem "edad de las ideas
+parkeadas" quedó fuera por alcance quirúrgico (IDEAS es por-repo, no del
+plugin; se reevalúa si duele).
+
 ---
 
 **Fuente de verdad: `github.com/mlandolfi90/lucky-skills` · esta copia = tag
-`v1.30.0` (cache local, NO la ley).** Ley viva: con red, si el repo tiene un tag
+`v1.30.1` (cache local, NO la ley).** Ley viva: con red, si el repo tiene un tag
 mayor (`git ls-remote --tags
 https://github.com/mlandolfi90/lucky-skills.git`), seguir la del repo e informar
 al humano.

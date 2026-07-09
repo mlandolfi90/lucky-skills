@@ -72,6 +72,12 @@ flota), ambos con off-switch por env:
   `BITACORA_PUSH_MAX_CHARS` (default 2000, recorte marcado). Solo en `startup`
   (resume/clear/compact no re-inyectan). CANDIDATE/STALE jamás se inyectan.
   Apagar: `BITACORA_PUSH=off`.
+  **Timbre de juicio (⚖ JUICIO PENDIENTE, enmienda ADR 0010):** el mismo push
+  cuenta lo que espera decisión HUMANA — señales con `visto ≥ 2` en el log del
+  observador y entradas CANDIDATE del INDEX — y le ordena al agente avisarle
+  al humano en su primera respuesta. Solo suena si hay algo (cero ruido); va
+  antes de los patrones (sobrevive al recorte). El conteo es determinista;
+  el juicio sigue siendo tuyo.
 - **`hooks/bitacora-observar.sh`** (SessionEnd): barre el transcript con **grep
   determinista de señales conocidas** (bloqueos de gate, suites rojas,
   integridad, ley diferida, falso-verde) y acumula SOLO `etiqueta + conteo` en un
@@ -134,7 +140,7 @@ Tests: `tests/test-push.sh` · `tests/test-observar.sh`.
 ---
 
 **Fuente de verdad: `github.com/mlandolfi90/lucky-skills` · esta copia = tag
-`v1.30.0` (cache local, NO la ley).** Ley viva: con red, si el repo tiene un tag
+`v1.30.1` (cache local, NO la ley).** Ley viva: con red, si el repo tiene un tag
 mayor (`git ls-remote --tags
 https://github.com/mlandolfi90/lucky-skills.git`), seguir la del repo e informar
 al humano.

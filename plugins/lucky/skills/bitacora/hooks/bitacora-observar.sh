@@ -44,6 +44,13 @@ log_dir(){
 }
 LOG="$(log_dir)/observaciones.log"
 
+# Introspección para el fixture de paridad con bitacora-push.sh (que copia
+# log_dir para el timbre de juicio); sale sin leer stdin. Patrón ADR 0008.
+if [ "${1:-}" = "--print-log-dir" ]; then
+  printf '%s\n' "$(log_dir)"
+  exit 0
+fi
+
 # ── modo resumen (lo corre el humano; agrega el log acumulado) ─────────────────
 if [ "${1:-}" = "--resumen" ]; then
   if [ ! -s "$LOG" ]; then echo "bitacora-observar: log vacío ($LOG) — nada observado aún."; exit 0; fi

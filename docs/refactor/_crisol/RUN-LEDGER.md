@@ -1707,3 +1707,62 @@
 - RETRO: absorber ≠ copiar — las 3 mecánicas de ECC con juicio-LLM embebido (confidence estimada, escritura automática de instincts, /evolve generativo) chocaban con "sin evidencia real, NO entra"; la adaptación correcta fue reemplazar juicio-LLM por determinismo (usos reales como confidence, grep de señales como observador) y dejar el juicio donde lucky lo pone: el humano. El verificador fresco volvió a pagar el peaje: cazó una asimetría fail-open pre-existente entre guardianes (repo sin commit inicial) que ninguna suite cubría → IDEAS. El cuello de la corrida anterior (lectura secuencial) se resolvió con agentes de lectura en paralelo: 5 piezas en 1 iteración.
 - Cierre: 2026-07-09 · commit de cierre (Tier completo, 1 iteración) · forja v1.30.0 · tag y push en esta misma corrida (autorizados por MLL).
 
+### main — 2026-07-09 (timbre de juicio — la cola de juicio humano suena sola, v1.30.1)
+- STATUS: CLOSED
+- Tier: completo
+- Fecha: 2026-07-09
+- TARGET: pc-local
+- MODEL: claude-fable-5 (uniforme — líder + verificadores frescos por workflow)
+- Alcance: cerrar el gap señalado por el operador ("¿qué mecanismo hay para que
+  el humano sepa que tiene que juzgar?"): la acumulación era automática pero la
+  cola de juicio no tenía timbre. Cambio QUIRÚRGICO: bitacora-push.sh suma una
+  sección "⚖ JUICIO PENDIENTE" (solo si hay algo que juzgar; cero ruido si no)
+  que cuenta (a) señales con visto ≥ 2 en el log local del observador y (b)
+  entradas CANDIDATE del INDEX esperando endoso — e instruye al agente a
+  avisarle al humano en su primera respuesta. El timbre va ANTES de los
+  patrones (sobrevive al recorte de presupuesto). bitacora-observar.sh gana
+  --print-log-dir (introspección para el fixture de paridad de la resolución
+  del log, patrón ADR 0008). Cero juicio automático: solo conteo y aviso.
+  El ítem opcional (edad de IDEAS) queda AFUERA por alcance quirúrgico.
+  Corrida fuera-de-flujo (camino 2 del gate) por orden explícita ("aplica con
+  ojo quirúrgico"); ciclo completo autorizado hasta forja v1.30.1 + push.
+- MIGRATION_STRATEGY: N/A (sin DDL)
+- Conformidad-arq: N/A (hooks/scripts/prosa — sin código hexagonal)
+<!-- VEREDICTOS:BEGIN -->
+- runState: closing
+- [V] TARGET · PASS · gate · pc-local (suites y ataques corridos en esta PC)
+- [V] MODEL · PASS · gate · claude-fable-5 (uniforme: líder + panel de 3 lentes por workflow + refutador iter2)
+- [V] TARGET_ENV · N/A · — · pc-local sin @env
+- [V] REGLA0 · PASS · panel-suites · push 25/0 · observar 11/0 · verify 11/0 · enforcer 110/0 (gate del repo) · atomicidad 8/0 · lint 35/0 (14↔14) · stale 20/20 — corridas propias del verificador
+- [V] TEST_COVERAGE · PASS · gate · 13 casos nuevos en test-push (timbre CANDIDATE/señales/orden/presupuesto/timbre-solo/cero-ruido/off/paridad log_dir/control-chars con json.loads real)
+- [V] INDEPENDENCIA · PASS · panel-3-lentes · workflow con 3 verificadores frescos en paralelo (suites / adversarial / doctrina-paridad) + refutador iter2 fresco; el líder no verificó su propio trabajo
+- [V] SCOPE_CREEP · PASS · gate · bisturí: solo push.sh, observar.sh (+introspección), test-push.sh, SKILL.md §Push, enmienda ADR 0010, CHANGELOG, ledger + destilación FALSO-VERDE-002; ítem opcional (edad de IDEAS) explícitamente AFUERA
+- [V] PARKING · N/A · — · sin ideas fuera de scope (el hallazgo del panel se ARREGLÓ en iter2 — era del sitio quirúrgico mismo — y se destiló a bitácora)
+- [V] CIERRE_TRAS_PASS · PASS · gate · cierre tras panel PASS(suites,doctrina) + FAIL adversarial ARREGLADO y re-refutado (FIX SOSTIENE 7/7)
+- [V] CREDITO · PASS · gate · enmienda al ADR 0010 (timbre) + CHANGELOG v1.30.1
+- [V] MIGRATION · N/A · gate · sin DDL
+- [V] FUENTE_VERDAD · N/A · — · no toca testing/prod
+- [V] RESPONSIVE · N/A · — · no toca UI
+- [V] ZERO_LEAK · PASS · panel-doctrina · el timbre imprime SOLO conteos (verificado por lente doctrina 6/6); leak-scan corre en la forja
+- [V] TECHO_ITER · PASS · gate · 2/3 (iter1: timbre; iter2: fix control-chars RFC 8259 hallado por el panel adversarial)
+- [V] OPEN_CLOSED · PASS · gate · timbre AGREGADO al flujo del push (sección nueva); el único toque al corazón del escape fue el FIX del defecto que el panel probó (bug fix = caso sancionado)
+- [V] ATOMICIDAD · PASS · gate · scan sin citaciones nuevas; el hook sigue < umbral
+- [V] COSTURA · PASS · gate · cero config nueva horneada; reusa BITACORA_OBSERVAR_DIR y los env existentes
+- [V] LISKOV · PASS · panel-doctrina · log_dir copiado push↔observar con paridad probada por introspección --print-log-dir en 3 envs (override/LOCALAPPDATA/XDG)
+- [V] INTERFACE_SEGREGATION · PASS · gate · --print-log-dir tajado igual que --print-threshold/--print-profile (patrón ADR 0008)
+- [V] CASOS_LEGALES · PASS · gate · timbre = aditivo (a); fix del escape = bug fix (b) probado por repro+refutador
+- [V] CONFORMIDAD · N/A · — · sin código hexagonal
+- [V] SELLOS · PASS · gate · forja v1.30.1 re-sella la familia (0 stragglers, pre-flight 1 ancla c/u)
+- [V] FORJA · PASS · gate · forjar-release.sh v1.30.1 en una pasada; registry regenerado
+- [V] TAG_GATE · PASS · gate · v1.30.1 nace de esta corrida CLOSED; tag anotado + push autorizados por MLL ("aplica con ojo quirúrgico")
+- [V] PIN_TOTAL · N/A · — · sin dependencias nuevas
+- [V] BUMP_REASON · PASS · gate · patch v1.30.1: completa el mecanismo del ADR 0010 (timbre) + fix de contrato JSON — sin capacidad de clase nueva
+<!-- VEREDICTOS:END -->
+- BITACORA: FALSO-VERDE-002 destilada como CANDIDATE (escape JSON a mano vs control chars — evidencia: repro del panel + fix + 25/25). El PROPIO timbre de esta corrida la va a sonar al operador para su endoso: el mecanismo se demuestra a sí mismo.
+- Iteraciones: 2/3 (iter1 timbre · iter2 fix RFC 8259 cazado por el panel adversarial)
+- TEST_COVERAGE: push 25/0 (13 nuevos) · observar 11/0 · resto de la familia sin regresión (110/0 · 11/0 · 8/0 · 35/0 · 20/20)
+- Escalación: none
+- Veredictos: panel de 3 lentes frescas por workflow (suites PASS 8/8 · adversarial FAIL 1/7 → repro exacto ESC 0x1b · doctrina PASS 6/6) · fix mínimo (1 gsub) · refutador iter2 fresco: FIX SOSTIENE 7/7 (atacó orden de gsub, batería 0x01-0x7f, TAB/UTF-8/multilínea, contaminación vía log, regresión).
+- RETRO: el ojo quirúrgico lo puso el PANEL, no el bisturí — la lente adversarial con inputs hostiles encontró en 10 minutos un falso-verde (contrato JSON roto por control chars) que 22 tests verdes no veían, y estaba en el código de AYER, no en el de hoy. Lección ya destilada a FALSO-VERDE-002: escape JSON a mano exige caso de bytes hostiles + json.loads real en la suite. Segunda vez que el fuzz de input malformado paga (DRIFT-001 fue la primera): patrón confirmado, no casualidad.
+- Cierre: 2026-07-09 · commit de cierre (Tier completo, 2 iteraciones) · forja v1.30.1 · tag y push en esta misma corrida (autorizados por MLL).
+

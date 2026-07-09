@@ -4,6 +4,17 @@ Notas de release de la familia de skills Lucky. El historial completo del **proc
 (corridas del Crisol, RETROs) vive en `docs/refactor/_crisol/RUN-LEDGER.md`; los tags
 inmutables, en `git tag`. Formato: más nuevo arriba.
 
+## v1.30.1 — 2026-07-09 — Timbre de juicio: la cola de juicio humano ahora suena sola (enmienda ADR 0010)
+
+Pregunta del operador: *"¿qué mecanismo hay para que el humano sepa que tiene que juzgar?"* — la
+acumulación (v1.30.0) era automática pero la cola de juicio dependía de la memoria humana. Cambio
+quirúrgico: `bitacora-push.sh` suma la sección **⚖ JUICIO PENDIENTE** (solo si hay algo que juzgar):
+cuenta señales con `visto ≥ 2` en el log del observador + entradas CANDIDATE esperando endoso, e
+instruye al agente a avisar al humano en su primera respuesta. Timbre ANTES de los patrones
+(sobrevive al presupuesto). Cero juicio automático. `bitacora-observar.sh` gana `--print-log-dir`
+(paridad de resolución del log probada por fixture, patrón ADR 0008). Tests: push 22/22 (10 nuevos,
+con aislamiento del log real de la máquina) · observar 11/11 sin regresión.
+
 ## v1.30.0 — 2026-07-09 — Absorción ECC lote 1: bitácora push, cumplimiento, perfiles de guardianes, guía de autoría, reglas por lenguaje
 
 Cinco piezas absorbidas de github.com/affaan-m/ECC (analizado a fondo en clon local), adaptadas a la
