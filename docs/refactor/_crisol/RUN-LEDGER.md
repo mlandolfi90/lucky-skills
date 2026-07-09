@@ -1766,3 +1766,62 @@
 - RETRO: el ojo quirúrgico lo puso el PANEL, no el bisturí — la lente adversarial con inputs hostiles encontró en 10 minutos un falso-verde (contrato JSON roto por control chars) que 22 tests verdes no veían, y estaba en el código de AYER, no en el de hoy. Lección ya destilada a FALSO-VERDE-002: escape JSON a mano exige caso de bytes hostiles + json.loads real en la suite. Segunda vez que el fuzz de input malformado paga (DRIFT-001 fue la primera): patrón confirmado, no casualidad.
 - Cierre: 2026-07-09 · commit de cierre (Tier completo, 2 iteraciones) · forja v1.30.1 · tag y push en esta misma corrida (autorizados por MLL).
 
+### main — 2026-07-09 (portabilidad multi-OS — Linux es primera clase)
+- STATUS: CLOSED
+- Tier: completo
+- Fecha: 2026-07-09
+- TARGET: docker-local (Linux fiel vía WSL Ubuntu — REGLA 0 multi-OS) + pc-local (paridad Windows)
+- MODEL: claude-fable-5 (uniforme)
+- Alcance: reporte del operador — "los hooks/gates en una sesión de LINUX dieron
+  error; no están hechos para Linux, solo Windows". REPRO CONFIRMADO en WSL
+  Ubuntu (python3-only): el comando cableado por instalar-gate.sh es
+  `python "C:\...\crisol_gate.py"` → `python: command not found`, exit 127
+  (ruta Windows horneada + binario `python` pelado; el header del script lo
+  confiesa: "Entorno real: Git-Bash en Windows"). El CÓDIGO del gate es
+  portable (python3 directo → exit 2 correcto en Linux); el push/timbre ya
+  funciona en Linux (smoke verde). Fix: cableado portable en instalar-gate.sh
+  ($HOME + python3||python + fail-open si falta el gate) con REEMPLAZO de
+  entradas viejas ya cableadas, template del CLAUDE.md global portable,
+  re-instalación en esta máquina, y batería COMPLETA de suites en WSL
+  (python3-only) + Windows antes de forjar. Fuera-de-flujo (camino 2) por
+  orden del operador; ciclo completo hasta push.
+- MIGRATION_STRATEGY: N/A (sin DDL)
+- Conformidad-arq: N/A (instalador/cableado — sin código hexagonal)
+<!-- VEREDICTOS:BEGIN -->
+- runState: closing
+- [V] TARGET · PASS · gate · docker-local (WSL Ubuntu python3-only, REGLA 0 corrida AHÍ) + pc-local (paridad Windows)
+- [V] MODEL · PASS · gate · claude-fable-5 (uniforme: líder + verificador fresco multi-OS)
+- [V] TARGET_ENV · N/A · — · sin @env
+- [V] REGLA0 · PASS · verificador-fresco · EN LINUX: enforcer 110/0 · push 25/0 (+ líder: observar 11/0, verify 11/0, atomicidad 8/0, lint 35/0 16↔16, stale 20/20 en WSL) · EN WINDOWS: enforcer 110/0 · observar 11/0 — corridas propias en ambos TARGET
+- [V] TEST_COVERAGE · PASS · gate · verificación empírica en el OS que faltaba (WSL python3-only) + humo del stub de Store en Windows; sin casos de suite nuevos (el defecto era de CABLEADO, no de código — la suite ya existente corrió por fin donde debía)
+- [V] INDEPENDENCIA · PASS · verificador-fresco · re-probó TODO él mismo en ambos OS (14/14): migración, idempotencia x2, gate muerde (exit 2) donde debe, fail-open (exit 0) donde debe, cero "Python was not found"
+- [V] SCOPE_CREEP · PASS · gate · solo instalar-gate.sh (cableado+PYBIN+template) y MENSAJE_B del gate; cero cambios en hooks del plugin (ya eran portables — probado, no asumido)
+- [V] PARKING · N/A · — · sin ideas fuera de scope
+- [V] CIERRE_TRAS_PASS · PASS · gate · cierre tras batería doble-OS verde + verificador fresco PASS 14/14
+- [V] CREDITO · PASS · gate · CHANGELOG v1.30.2 + DRIFT-007 destilada; sin cambio de arquitectura (no exige ADR)
+- [V] MIGRATION · N/A · gate · sin DDL
+- [V] FUENTE_VERDAD · N/A · — · no toca testing/prod
+- [V] RESPONSIVE · N/A · — · no toca UI
+- [V] ZERO_LEAK · PASS · gate · el cableado nuevo elimina la ruta absoluta horneada (menos leak que antes); leak-scan en la forja
+- [V] TECHO_ITER · PASS · gate · 2/3 (iter1: $HOME+python3||python; iter2: el humo Windows cazó el stub de Store → probar-intérprete)
+- [V] OPEN_CLOSED · PASS · gate · reescritura del bloque de cableado = bug fix de contrato (caso b), probado por repro exit 127/49 antes y verde después
+- [V] ATOMICIDAD · PASS · gate · sin unidades nuevas; el instalador sigue < umbral
+- [V] COSTURA · PASS · gate · el fix ES costura 12-factor: valores por-máquina ($HOME, intérprete) resueltos en runtime, cero horneado
+- [V] LISKOV · N/A · — · sin contratos duales tocados (el comando cableado es UNO, generado por UN solo lugar)
+- [V] INTERFACE_SEGREGATION · N/A · — · sin interfaces nuevas
+- [V] CASOS_LEGALES · PASS · gate · bug fix (b) con repro + verificación doble-OS
+- [V] CONFORMIDAD · N/A · — · sin código hexagonal
+- [V] SELLOS · PASS · gate · forja v1.30.2 re-sella la familia (pre-flight 1 ancla c/u)
+- [V] FORJA · PASS · gate · forjar-release.sh v1.30.2 en una pasada; registry regenerado
+- [V] TAG_GATE · PASS · gate · v1.30.2 nace de esta corrida CLOSED; push autorizado ("que funcione en todas partes")
+- [V] PIN_TOTAL · N/A · — · sin dependencias nuevas
+- [V] BUMP_REASON · PASS · gate · patch v1.30.2: fix de cableado, sin capacidad nueva — CHANGELOG lo documenta
+<!-- VEREDICTOS:END -->
+- BITACORA: DRIFT-007 destilada como CANDIDATE ("existir en PATH ≠ correr": cableado portable con prueba de intérprete + verificar en el otro OS) — evidencia: reporte del operador + repro exit 127 (WSL) y 49 (stub Store) + batería doble-OS verde. El timbre la suma a la cola de endoso (junto a FALSO-VERDE-002).
+- Iteraciones: 2/3 (iter1 cableado portable · iter2 probar-intérprete tras cazar el stub de Store en el humo Windows)
+- TEST_COVERAGE: batería completa en AMBOS OS — Linux: 110/0 · 25/0 · 11/0 · 11/0 · 8/0 · 35/0 · 20/20; Windows: 110/0 · 11/0 + humos del comando cableado real
+- Escalación: none
+- Veredictos: repro primero (exit 127 en WSL con el comando cableado real — el error exacto del operador) · fix mínimo en el ORIGEN (instalador), no en las máquinas · verificador fresco multi-OS PASS 14/14 con limpieza total de sus fixtures.
+- RETRO: el falso-verde más viejo del repo era ambiental — TODA la verificación histórica corrió en Git-Bash/Windows y la flota es mitad Linux; "REGLA 0: el Verificador corre EN el TARGET" ya lo prohibía y no lo veníamos cumpliendo para el 50% de los targets. Segundo hallazgo del mismo golpe: `command -v` miente en Windows (stub de Store) — existir ≠ correr, ahora es doctrina en DRIFT-007. Los consumidores se auto-curan: /ley corre instalar-gate.sh, que ahora MIGRA el cableado viejo in situ.
+- Cierre: 2026-07-09 · commit de cierre (Tier completo, 2 iteraciones) · forja v1.30.2 · tag y push en esta misma corrida (autorizados por MLL).
+

@@ -4,6 +4,26 @@ Notas de release de la familia de skills Lucky. El historial completo del **proc
 (corridas del Crisol, RETROs) vive en `docs/refactor/_crisol/RUN-LEDGER.md`; los tags
 inmutables, en `git tag`. Formato: más nuevo arriba.
 
+## v1.30.2 — 2026-07-09 — Portabilidad multi-OS: los hooks/gates funcionan en Windows Y Linux
+
+Reporte del operador: los hooks/gates dieron error en una sesión Linux ("no están hechos para
+Linux"). Repro confirmado en WSL Ubuntu (python3-only): `instalar-gate.sh` cableaba el gate global
+con RUTA WINDOWS horneada + binario `python` pelado → `python: command not found`, exit 127. El
+CÓDIGO del gate siempre fue portable; el cableado no.
+
+- **instalar-gate.sh:** el comando cableado ahora es portable — `$HOME` por-OS, PRUEBA el intérprete
+  (`for PY in python3 python; do "$PY" -c "" && exec …`) en vez de confiar en `command -v` (el stub
+  de Microsoft Store existe en PATH sin funcionar: exit 49, cazado por humo en Windows), y fail-open
+  (`[ -f "$GATE" ] || exit 0`) para que una sandbox Linux/web fresca sin install jamás se rompa.
+  MIGRA cableados viejos in situ (los repos que corran `/ley` → `instalar-gate.sh` quedan portables
+  solos). Ídem la instrucción de registro de TARGET en el mensaje del gate y en el template global.
+- **Verificación REGLA 0 multi-OS:** batería completa en WSL Ubuntu (python3-only, mawk presente):
+  enforcer 110/0 · push 25/0 · observar 11/0 · verify 11/0 · atomicidad 8/0 · lint 35/0 · stale
+  20/20 + fail-open sin gate + paridad en Windows Git-Bash. Bonus: `[[:cntrl:]]` (fix v1.30.1)
+  verificado también bajo mawk.
+- **DRIFT-007** destilada (CANDIDATE): "existir en PATH ≠ correr" — cableado portable con
+  prueba de intérprete + verificación en el otro OS antes de forjar.
+
 ## v1.30.1 — 2026-07-09 — Timbre de juicio: la cola de juicio humano ahora suena sola (enmienda ADR 0010)
 
 Pregunta del operador: *"¿qué mecanismo hay para que el humano sepa que tiene que juzgar?"* — la
