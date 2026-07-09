@@ -37,6 +37,16 @@ _atomicidad_t(){  # env → conf (1ra línea entera-dígito) → 400. Emite deci
   printf '%s' "400"
 }
 
+# ── Perfil del guardián (ADR 0011): estricto (default) | aviso | off ──────────
+# Parseo CANONICO (paridad con crisol_gate.py:_gate_profile, probada por Grupo K):
+# trim ASCII de bordes + lowercase ASCII; valor fuera del enum → 'estricto'
+# (fail-closed a DUREZA: un perfil mal tipeado jamás afloja el gate).
+_gate_profile(){
+  local v; v="$(_trim "${CRISOL_GATE_PROFILE:-}")"
+  v="$(printf '%s' "$v" | tr '[:upper:]' '[:lower:]')"
+  case "$v" in estricto|aviso|off) printf '%s' "$v" ;; *) printf 'estricto' ;; esac
+}
+
 # Modos introspección para los fixtures de paridad; salen sin leer stdin.
 if [ "${1:-}" = "--print-code-policy" ]; then
   printf '%s\n%s\n' "$CODE_EXTS" "$CODE_FILENAMES"
@@ -46,6 +56,13 @@ if [ "${1:-}" = "--print-threshold" ]; then
   printf '%s\n' "$(_atomicidad_t)"
   exit 0
 fi
+if [ "${1:-}" = "--print-profile" ]; then
+  printf '%s\n' "$(_gate_profile)"
+  exit 0
+fi
+
+# Perfil off → guardián inerte (elección explícita del operador vía env).
+[ "$(_gate_profile)" = "off" ] && exit 0
 
 # 1. Ruta del archivo que se quiere tocar (viene en el JSON del hook por stdin)
 INPUT="$(cat)"
@@ -119,6 +136,11 @@ ACTIVE="$(awk -v b="$BRANCH" '
 ' "$LEDGER" 2>/dev/null || echo no)"
 
 if [ "$ACTIVE" != "yes" ]; then
+  if [ "$(_gate_profile)" = "aviso" ]; then
+    echo "[CRISOL-AVISO] (modo aviso: NO bloqueado — el perfil estricto habría bloqueado)" >&2
+    echo "🚨 CRISOL BLOQUEADO: no hay entrada 'STATUS: ACTIVE' con campos mínimos (Tier: + Fecha: + TARGET:) para el branch '$BRANCH' en $LEDGER." >&2
+    exit 0   # aviso: el texto llega, la tool-call pasa (ADR 0011)
+  fi
   echo "🚨 CRISOL BLOQUEADO: no hay entrada 'STATUS: ACTIVE' con campos mínimos (Tier: + Fecha: + TARGET:) para el branch '$BRANCH' en $LEDGER." >&2
   echo "Falta el ledger ACTIVE o el campo TARGET (dónde corre/verifica). Preguntá al humano dónde corre; no asumas local." >&2
   echo "Abrí/completá la corrida del Crisol (/crisol) — paso 2 — antes de tocar código fuente." >&2

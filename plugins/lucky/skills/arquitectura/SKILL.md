@@ -78,6 +78,9 @@ método. Cuando sí corresponde escanear:
 | Quiero ver UNA feature ubicada de punta a punta en las 4 capas | `references/end-to-end.md` | walkthrough de una feature cruzando front → MVC → puerto → núcleo → puerto → adaptador |
 | ¿Cuáles son los anti-patrones que rechaza? | `references/anti-patrones.md` | catálogo transversal: síntoma → por qué rompe → veredicto |
 | Auditar si el código YA existente cumple SOLID (retroactivo, read-only) — ¿qué violaciones viven y cuáles duelen primero? | `templates/auditoria-solid.md` | procedimiento detectá→clasificá→priorizá→reportá→alimentá con severidad anclada al gate del Crisol |
+| ¿Este código está bien ESCRITO? — estilo, errores, naming, seguridad, testing, review (agnóstico de lenguaje) | `references/reglas-comunes.md` | inmutabilidad, boundaries, checklist de seguridad, TDD/AAA, conventional commits, repository/envelope, severidades de review (curado de ECC) |
+| ¿Esto es Python idiomático? | `references/python.md` | PEP8+types, frozen dataclass, Protocol-como-puerto, pytest/bandit, oro de diseño de API — extiende reglas-comunes |
+| ¿Esto es TypeScript idiomático? | `references/typescript.md` | tipar APIs públicas, unknown>any, uniones>enum, Zod+infer, ApiResponse/Repository tipados — extiende reglas-comunes |
 | ¿Por qué esta arquitectura? | `references/contexto.md` | fundamento, no procedimiento |
 
 ## Reglas de estructura (innegociables, binarias)
@@ -162,7 +165,7 @@ edita para sumar un estilo. Es Open/Closed aplicado a la skill misma.
 ---
 
 **Fuente de verdad: `github.com/mlandolfi90/lucky-skills` · esta copia = tag
-`v1.29.0` (cache local, NO la ley).** Ley viva: con red, si el repo tiene un tag
+`v1.30.0` (cache local, NO la ley).** Ley viva: con red, si el repo tiene un tag
 mayor (`git ls-remote --tags
 https://github.com/mlandolfi90/lucky-skills.git`), seguir la del repo
 (`raw.githubusercontent.com/mlandolfi90/lucky-skills/<tag>/plugins/lucky/skills/arquitectura/SKILL.md`)
@@ -175,5 +178,7 @@ verificar)` en el ledger.
 **Capas:** `references/hexagonal.md` · `references/mvc-adaptador.md` ·
 `references/atomic-design.md` · `references/doce-factor.md` ·
 `references/migracion.md` · `references/end-to-end.md` ·
-`references/anti-patrones.md` · `references/contexto.md`
+`references/anti-patrones.md` · `references/contexto.md` ·
+`references/reglas-comunes.md` · `references/python.md` ·
+`references/typescript.md`
 **Templates:** `templates/conformidad-checklist.md` · `templates/estructura.md`

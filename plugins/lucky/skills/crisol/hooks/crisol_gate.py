@@ -70,6 +70,21 @@ _EXCLUDED_SUFFIXES = {".md", ".mdx", ".markdown", ".txt", ".rst"}
 # Valores que NO cuentan como TARGET declarado (placeholder = no respondio).
 _TARGET_PLACEHOLDERS = {"pendiente", "tbd", "n/d", "na", "<...>", "?"}
 
+# Perfiles del guardian (ADR 0011): estricto = hoy; aviso = mismo diagnostico
+# pero SIN bloquear (el mensaje llega, la tool-call pasa); off = inerte.
+_GATE_PROFILES = {"estricto", "aviso", "off"}
+
+
+def _gate_profile() -> str:
+    """env CRISOL_GATE_PROFILE -> estricto|aviso|off; invalido/vacio -> estricto.
+
+    Parseo CANONICO espejo de crisol-enforcer.sh:_gate_profile (paridad probada
+    por test-enforcer.sh Grupo K): trim de whitespace ASCII de bordes + lower;
+    cualquier valor fuera del enum (basura, unicode-ws, mayusculas raras) cae a
+    'estricto' — FAIL-CLOSED A DUREZA: un perfil mal tipeado jamas afloja."""
+    v = os.environ.get("CRISOL_GATE_PROFILE", "").strip(" \t\n\r\x0b\x0c").lower()
+    return v if v in _GATE_PROFILES else "estricto"
+
 # ATOMICIDAD (SRP): aviso NO bloqueante cuando un archivo de codigo supera el
 # umbral T de lineas. Es una CITACION al juicio, no un veredicto ni un bloqueo:
 # el gate no puede juzgar SRP (eso es un LLM), solo nudgea a mirar. Paridad EXACTA
@@ -136,6 +151,14 @@ def _allow() -> None:
 
 
 def _block(msg: str) -> None:
+    # Perfil 'aviso' (ADR 0011): el diagnostico completo llega a stderr con un
+    # marcador inequivoco, pero la tool-call PASA. Paridad con el enforcer.
+    if _gate_profile() == "aviso":
+        sys.stderr.write(
+            "[CRISOL-AVISO] (modo aviso: NO bloqueado — el perfil estricto habria bloqueado)\n" + msg
+        )
+        sys.stderr.flush()
+        sys.exit(0)
     sys.stderr.write(msg)
     sys.stderr.flush()
     sys.exit(2)
@@ -565,6 +588,15 @@ def main() -> None:
     # CLI de registro (no lee stdin, no es una tool-call gateada).
     if len(sys.argv) > 1 and sys.argv[1] == "--register-target":
         _handle_register(sys.argv[1:])
+        return
+    # Introspeccion del perfil resuelto (fixture de paridad, Grupo K).
+    if len(sys.argv) > 1 and sys.argv[1] == "--print-profile":
+        print(_gate_profile())
+        sys.exit(0)
+
+    # Perfil off (ADR 0011): guardian inerte por eleccion explicita del operador.
+    if _gate_profile() == "off":
+        _allow()
         return
 
     try:

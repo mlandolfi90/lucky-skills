@@ -108,6 +108,13 @@ Respondé el checklist. **Cualquier "SÍ" → Tier Completo.** Todos "NO" → Fa
 - **Techo = 3 iteraciones.** Si Plan↔REJECT/FAIL no converge en 3 ciclos → marcar
   `STATUS: ESCALATED` con la divergencia exacta y **DETENERSE**: el agente no
   inicia más ciclos ni busca workarounds; decide el humano. No ciclar infinito.
+- **Perfil de los guardianes (ADR 0011):** `CRISOL_GATE_PROFILE` = `estricto`
+  (default) | `aviso` (diagnóstico completo con marcador `[CRISOL-AVISO]`, sin
+  bloquear) | `off` (inerte). Inválido → `estricto` (fail-closed a dureza).
+  Paridad gate↔enforcer probada por fixture (Grupo K). **Aflojar el perfil es
+  acto del OPERADOR (env de su shell), JAMÁS del agente**: un agente que se
+  auto-setea `aviso`/`off` para esquivar un bloqueo viola la ley — el marcador
+  en stderr lo delata.
 
 ### Diseño (agnóstico a lenguaje) — criterios de REJECT del Steward
 
@@ -516,7 +523,7 @@ triggers, para que ningún carril derive el vocabulario.
 ## 6. La ley se gobierna a sí misma
 
 **Fuente de verdad: `github.com/mlandolfi90/lucky-skills` · esta copia = tag
-`v1.29.0` (cache local, NO la ley).** **Ley viva:** al invocar la skill, si la
+`v1.30.0` (cache local, NO la ley).** **Ley viva:** al invocar la skill, si la
 sesión tiene red: `git ls-remote --tags
 https://github.com/mlandolfi90/lucky-skills.git` — si existe un tag mayor al de
 esta copia, descargar y seguir LA DEL REPO

@@ -4,6 +4,33 @@ Notas de release de la familia de skills Lucky. El historial completo del **proc
 (corridas del Crisol, RETROs) vive en `docs/refactor/_crisol/RUN-LEDGER.md`; los tags
 inmutables, en `git tag`. Formato: más nuevo arriba.
 
+## v1.30.0 — 2026-07-09 — Absorción ECC lote 1: bitácora push, cumplimiento, perfiles de guardianes, guía de autoría, reglas por lenguaje
+
+Cinco piezas absorbidas de github.com/affaan-m/ECC (analizado a fondo en clon local), adaptadas a la
+doctrina lucky y traducidas — orden del operador: "aplica todo lo que propusiste hasta el final".
+
+- **Bitácora push (ADR 0010):** hook `SessionStart` inyecta el top-N LIVE del INDEX (cap 6 +
+  presupuesto 2KB + off-switch `BITACORA_PUSH`, fail-open) — el patrón llega ANTES del tropiezo;
+  hook `SessionEnd` observa señales deterministas del transcript a un log local (`--resumen` las
+  agrega; alimenta SENALES a criterio humano — nada entra al catálogo solo). NO se absorbió el
+  confidence-por-LLM ni la escritura automática (chocan con "sin evidencia real, NO entra").
+  Tests: test-push 12/12 · test-observar 11/11.
+- **Skill nueva `cumplimiento`:** audita que las skills SE CUMPLEN (conducta observable, no código):
+  escenario → subagente fresco que no sabe que es test → clasificación por significado → veredicto
+  binario → degradación por presión (favorable/neutro/adverso = independencia del prompt). Pilotos:
+  brujula, idea, ley. Válvula: NO-CUMPLE repetido → endurecer prosa o promover a hook/gate.
+- **Perfiles de guardianes (ADR 0011):** `CRISOL_GATE_PROFILE` = estricto (default) | aviso
+  (diagnóstico completo con marcador, sin bloquear) | off. Inválido → estricto (fail-closed a
+  dureza). Paridad gate↔enforcer probada por fixture nuevo (Grupo K, 17 casos → enforcer 110/0).
+  Aflojar el perfil es acto del OPERADOR, jamás del agente.
+- **docs/GUIA-SKILLS.md:** doctrina de autoría destilada (200-500 líneas, description-como-trigger,
+  mostrar-no-declamar, anti-patrones en pareja, progressive disclosure, checklist) + auditoría de
+  tamaños: ninguna skill exige compactación hoy (crisol = larga-legítima, precedente v1.28.0).
+- **arquitectura crece 3 references** (Router + capas): `reglas-comunes.md` (inmutabilidad,
+  boundaries, seguridad, TDD/AAA, review con severidades), `python.md` y `typescript.md`
+  (idiomáticas, extienden la común) — curadas del `rules/` de ECC (MIT), solo el oro atemporal,
+  umbrales como recomendación.
+
 ## v1.29.0 — 2026-07-09 — cargar: minisign RETIRADO — integridad sha256-only + pin por commit (ADR 0009)
 
 Decisión del operador (dueño único del repo): *"eliminar minisign, sacar definitivamente; en algún

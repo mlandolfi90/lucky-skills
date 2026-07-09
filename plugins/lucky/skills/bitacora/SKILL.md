@@ -25,7 +25,9 @@ encyclopedia* (devolvé la acción, jamás vuelques el archivo entero).
 
 ## Consultar (AL PLANEAR / solucionar — pull, on-demand)
 
-1. **Cuándo:** justo ANTES de planear o resolver algo (no al arranque de la sesión). **Grep del
+1. **Cuándo:** justo ANTES de planear o resolver algo (la CONSULTA no es al
+   arranque; lo que sí llega al arranque es el **push** del top del INDEX — ver
+   §Push — que no reemplaza esta consulta dirigida). **Grep del
    INDEX por el SÍNTOMA de la tarea** — las palabras de lo que vas a tocar:
    `grep -i "<lo que vas a tocar>" INDEX.md` (relativo a esta skill). **El síntoma ES el filtro;
    no hay "dominios".** El INDEX está ordenado por `usos` — lo que más duele, arriba.
@@ -57,6 +59,29 @@ hallado**. Entonces:
    deliberado de cierre. El LLM destila, el humano decide qué es verdad.
 5. Agregá la fila al `INDEX.md` y listá la entrada en el resumen de cierre del
    Crisol (junto al Parking de IDEAS.md).
+
+## Push (hooks del plugin — ADR 0010, absorbido de ECC continuous-learning-v2)
+
+Dos hooks deterministas, **fail-open total** (jamás rompen una sesión de la
+flota), ambos con off-switch por env:
+
+- **`hooks/bitacora-push.sh`** (SessionStart): inyecta el **top-N de filas LIVE**
+  del INDEX (síntoma → acción → ID) como contexto al arrancar — modelo push: el
+  patrón llega ANTES del tropiezo. Respeta la regla del INDEX ("no volcar el
+  archivo entero"): cap `BITACORA_PUSH_MAX` (default 6) + presupuesto duro
+  `BITACORA_PUSH_MAX_CHARS` (default 2000, recorte marcado). Solo en `startup`
+  (resume/clear/compact no re-inyectan). CANDIDATE/STALE jamás se inyectan.
+  Apagar: `BITACORA_PUSH=off`.
+- **`hooks/bitacora-observar.sh`** (SessionEnd): barre el transcript con **grep
+  determinista de señales conocidas** (bloqueos de gate, suites rojas,
+  integridad, ley diferida, falso-verde) y acumula SOLO `etiqueta + conteo` en un
+  log LOCAL por máquina (rotación dura 400 líneas; cero contenido, cero rutas
+  completas — zero-leak por construcción). El log es **evidencia cruda para el
+  humano** (`--resumen` lo agrega): alimenta los contadores de `SENALES.md` a
+  mano; NADA entra al INDEX por esta vía (la regla "sin evidencia real, NO
+  entra" y el endoso humano quedan intactos). Apagar: `BITACORA_OBSERVAR=off`.
+
+Tests: `tests/test-push.sh` · `tests/test-observar.sh`.
 
 ## Mantener (mecánico, no por disciplina)
 
@@ -109,7 +134,7 @@ hallado**. Entonces:
 ---
 
 **Fuente de verdad: `github.com/mlandolfi90/lucky-skills` · esta copia = tag
-`v1.29.0` (cache local, NO la ley).** Ley viva: con red, si el repo tiene un tag
+`v1.30.0` (cache local, NO la ley).** Ley viva: con red, si el repo tiene un tag
 mayor (`git ls-remote --tags
 https://github.com/mlandolfi90/lucky-skills.git`), seguir la del repo e informar
 al humano.

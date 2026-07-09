@@ -168,3 +168,8 @@
   ("paso 5: corregir README L19") y la nota en cargar/references/detectar-runtime.md sobre el mismo
   README L19 — el README ya está corregido hace rato; ambos avisos son ruido. Fix de 2 líneas, corrida
   aparte (fuera del alcance del retiro de minisign). · hallado en la corrida 2026-07-09
+- 2026-07-09 · paridad de guardianes en el borde "repo git SIN commit inicial" (HEAD irresoluble): el
+  gate python hace fail-open (permite: "no podemos saber el branch") y el enforcer bash usa el literal
+  `HEAD` como branch y bloquea — asimetría pre-existente, NO introducida por el lote ECC (el verificador
+  fresco la reprodujo en toy repo). Fix chico: decidir UNA semántica (sugerido: fail-open en ambos, es
+  el espíritu del gate) + caso nuevo en test-enforcer. Corrida aparte. · cazada por verificador-fresco 2026-07-09

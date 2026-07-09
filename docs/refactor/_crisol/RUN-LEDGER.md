@@ -1645,3 +1645,65 @@
 - RETRO: el retiro destapó DOS mentiras de prosa que el fail-closed tapaba: (1) el fetcher exigía una firma que la forja no producía desde hace releases (vía-dato rota en silencio — fail-closed sin telemetría = roto invisible); (2) la prosa vendía "pin por commit (hoy: siempre)" cuando la forja corre pre-commit y el pin real es por tag. Lección: cuando un gate rechaza TODO, nadie nota que también rechaza lo legítimo — un smoke-test periódico de la vía feliz (cargar arquitectura de verdad) lo habría cazado. Parkeada la v2 del pin.
 - Cierre: 2026-07-09 · commit de cierre (fast-path, 1 iteración) · forja v1.29.0 · tag y push en esta misma corrida (autorizados por MLL).
 
+### main — 2026-07-09 (absorción ECC lote 1 — 5 piezas, v1.30.0)
+- STATUS: CLOSED
+- Tier: completo
+- Fecha: 2026-07-09
+- TARGET: pc-local
+- MODEL: claude-fable-5 (uniforme — líder + agentes de lectura ECC + verificador fresco)
+- Alcance: absorber 5 piezas de github.com/affaan-m/ECC (clon local, análisis previo
+  en esta sesión), adaptadas a la doctrina lucky y TRADUCIDAS al español:
+  (1) Bitácora push — hook SessionStart que inyecta las entradas LIVE del INDEX
+  (cap + presupuesto de chars + off-switch, fail-open) + observador SessionEnd
+  que registra señales del transcript en log local (evidencia cruda, NO entra
+  al catálogo — la promoción sigue siendo panel del operador); (2) skill nueva
+  `cumplimiento` — método escenario→subagente→conducta observable→veredicto
+  binario para auditar que las skills SE CUMPLEN (concepto de skill-comply);
+  (3) perfiles de guardianes — LUCKY_GATE_PROFILE (estricto|aviso|off, default
+  estricto fail-closed) en crisol_gate.py + crisol-enforcer.sh con PARIDAD
+  probada por fixture; (4) docs/GUIA-SKILLS.md (doctrina de autoría destilada
+  de SKILL-DEVELOPMENT-GUIDE) + compactación piloto de 1 skill por evidencia;
+  (5) arquitectura/references nuevas: reglas-comunes/python/typescript curadas
+  y traducidas de rules/. Corrida fuera-de-flujo (camino 2 del gate) por orden
+  explícita del operador ("aplica todo lo que propusiste hasta el final");
+  ciclo completo autorizado hasta forja v1.30.0 + commit + tag + push.
+- MIGRATION_STRATEGY: N/A (sin DDL)
+- Conformidad-arq: N/A (hooks/scripts/prosa/escenarios — sin código hexagonal)
+<!-- VEREDICTOS:BEGIN -->
+- runState: closing
+- [V] TARGET · PASS · gate · pc-local (declarado por MLL; suites y humo corridos en esta PC)
+- [V] MODEL · PASS · gate · claude-fable-5 (uniforme: líder + 2 agentes de lectura ECC + verificador fresco)
+- [V] TARGET_ENV · N/A · — · pc-local sin @env
+- [V] REGLA0 · PASS · verificador-fresco · verify 11/0 · enforcer 110/0 (gate del repo) · atomicidad 8/0 · lint 35/0 · stale 20/20 · push 12/0 · observar 11/0 — corridas propias + humo real de push y perfiles
+- [V] TEST_COVERAGE · PASS · gate · 40 casos NUEVOS: test-push 12 + test-observar 11 + Grupo K 17 (paridad de perfiles)
+- [V] INDEPENDENCIA · PASS · verificador-fresco · subagente re-corrió las 7 suites + humo push/perfiles en toy-repo propio + estructura/sellos, sin la prosa del líder — PASS 12/12
+- [V] SCOPE_CREEP · PASS · gate · 5 piezas del mandato, cero extra; el hallazgo de borde del verificador fue a IDEAS (no se coló fix)
+- [V] PARKING · PASS · gate · 1 línea a IDEAS.md (asimetría fail-open gate↔enforcer en repo sin commit inicial — pre-existente)
+- [V] CIERRE_TRAS_PASS · PASS · gate · cierre tras 7 suites verdes + verificador fresco PASS 12/12
+- [V] CREDITO · PASS · gate · ADR 0010 (bitácora push) + ADR 0011 (perfiles) + docs/GUIA-SKILLS.md depositados
+- [V] MIGRATION · N/A · gate · sin DDL
+- [V] FUENTE_VERDAD · N/A · — · no toca testing/prod
+- [V] RESPONSIVE · N/A · — · no toca UI
+- [V] ZERO_LEAK · PASS · gate · leak-scan LIMPIO en la forja; el observador registra SOLO etiqueta+conteo (3 casos zero-leak propios en test-observar)
+- [V] TECHO_ITER · PASS · gate · 1/3
+- [V] OPEN_CLOSED · PASS · gate · todo AGREGADO (2 hooks, skill nueva, 3 references, guía, Grupo K); toques a estable = extensión sancionada: guardianes por ADR 0011, Router de arquitectura por su propio camino declarado ("ampliar = reference nueva + fila"), bitacora §Push por ADR 0010
+- [V] ATOMICIDAD · PASS · gate · scan 8/0; unidades nuevas chicas (push ~120 · observar ~100); citación sobre crisol_gate.py = larga-legítima (precedente v1.28.0)
+- [V] COSTURA · PASS · gate · TODOS los controles nuevos por env 12-factor (CRISOL_GATE_PROFILE, BITACORA_PUSH/_MAX/_MAX_CHARS, BITACORA_OBSERVAR/_DIR); cero valores horneados
+- [V] LISKOV · PASS · gate · los dos guardianes = mismo contrato de perfil, sustituibles: resolución + exit + marcador idénticos (Grupo K 17/17, incl. introspección --print-profile)
+- [V] INTERFACE_SEGREGATION · PASS · gate · --print-profile tajado por necesidad igual que --print-threshold (patrón ADR 0008); cada fixture consume solo su flag
+- [V] CASOS_LEGALES · PASS · gate · guardianes = caso (c) refactor deliberado con ADR 0011; el resto aditivo (a)
+- [V] CONFORMIDAD · N/A · — · sin código hexagonal
+- [V] SELLOS · PASS · gate · forja v1.30.0 re-selló 22 archivos (10 SKILL.md + reference + 11 ADRs), exactamente 1 ancla c/u, 0 stragglers
+- [V] FORJA · PASS · gate · forjar-release.sh v1.30.0 en una pasada; registry regenerado (10 skills + ref, cumplimiento clasificada runtime/no-cargable por sus allowed-tools)
+- [V] TAG_GATE · PASS · gate · v1.30.0 nace de esta corrida CLOSED; tag anotado + push autorizados por MLL ("hasta el final")
+- [V] PIN_TOTAL · N/A · — · cero dependencias nuevas consumidas (el contenido ECC se CURÓ y TRADUJO — MIT, con atribución en cada archivo — no se consume como dependencia viva)
+- [V] BUMP_REASON · PASS · gate · minor v1.30.0: capacidades nuevas (2 hooks de flota, skill nueva, perfiles) — ADRs 0010/0011 + CHANGELOG
+<!-- VEREDICTOS:END -->
+- BITACORA: N/A (sin patrón experiencial nuevo confirmado; la asimetría fail-open quedó en IDEAS hasta tener corrida propia)
+- Iteraciones: 1/3
+- TEST_COVERAGE: verify 11/0 · enforcer 110/0 · atomicidad 8/0 · lint 35/0 · stale 20/20 · push 12/0 · observar 11/0 (40 casos nuevos en esta corrida)
+- Escalación: none
+- Veredictos: corrida fuera-de-flujo (camino 2 del gate) por orden explícita del operador · lectura ECC por 2 agentes paralelos con informes verbatim · Verificador fresco PASS 12/12 con humo real (push emitió el INDEX vivo; perfiles probados en toy-repo) · líder ejecutó, no verificó su propio trabajo.
+- RETRO: absorber ≠ copiar — las 3 mecánicas de ECC con juicio-LLM embebido (confidence estimada, escritura automática de instincts, /evolve generativo) chocaban con "sin evidencia real, NO entra"; la adaptación correcta fue reemplazar juicio-LLM por determinismo (usos reales como confidence, grep de señales como observador) y dejar el juicio donde lucky lo pone: el humano. El verificador fresco volvió a pagar el peaje: cazó una asimetría fail-open pre-existente entre guardianes (repo sin commit inicial) que ninguna suite cubría → IDEAS. El cuello de la corrida anterior (lectura secuencial) se resolvió con agentes de lectura en paralelo: 5 piezas en 1 iteración.
+- Cierre: 2026-07-09 · commit de cierre (Tier completo, 1 iteración) · forja v1.30.0 · tag y push en esta misma corrida (autorizados por MLL).
+

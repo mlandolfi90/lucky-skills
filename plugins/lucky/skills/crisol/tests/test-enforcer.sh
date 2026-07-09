@@ -369,6 +369,42 @@ for bad in " 200 " "200 " "1e3" " 007 "; do
     check_eq "I5 env=[$bad] umbral gate==enforcer" "$GT" "$ET"; fi
 done
 
+echo "== Grupo K: perfiles del guardián (CRISOL_GATE_PROFILE — ADR 0011) =="
+# Fixture: ledger SIN entrada ACTIVE para main → en estricto AMBOS bloquean.
+ledger '### otro-branch — 2026-06-20\n- STATUS: CLOSED\n- Tier: completo\n- Fecha: 2026-06-20\n- TARGET: docker-local\n'
+K_hook(){ ( cd "$ADOPTED" && printf '{"tool_input":{"file_path":"src/app.c"}}' | env CRISOL_GATE_PROFILE="$1" bash "$HOOK" >/dev/null 2>&1; echo $? ); }
+K_gate(){ have_gate || { echo skip; return; }
+  printf '{"tool_name":"Edit","tool_input":{"file_path":"src/app.c"},"cwd":"%s"}' "$WADOPTED" \
+    | env CRISOL_GATE_PROFILE="$1" "$PYBIN" "$GATE" >/dev/null 2>&1; echo $?; }
+
+check "K enforcer: default (sin perfil) bloquea"          2 "$(run_hook "$ADOPTED" src/app.c)"
+check "K enforcer: perfil off permite"                    0 "$(K_hook off)"
+check "K enforcer: perfil aviso permite (avisa, no bloquea)" 0 "$(K_hook aviso)"
+check "K enforcer: perfil inválido → estricto bloquea"    2 "$(K_hook zaraza)"
+check "K enforcer: ' AVISO ' (trim+case) permite"         0 "$(K_hook ' AVISO ')"
+gate_check "$(run_gate src/app.c "$WADOPTED" "")" "K default (sin perfil) bloquea" 2
+gate_check "$(K_gate off)"      "K perfil off permite" 0
+gate_check "$(K_gate aviso)"    "K perfil aviso permite (avisa, no bloquea)" 0
+gate_check "$(K_gate zaraza)"   "K perfil inválido → estricto bloquea" 2
+gate_check "$(K_gate ' AVISO ')" "K ' AVISO ' (trim+case) permite" 0
+
+# K-paridad: la RESOLUCIÓN del perfil es idéntica en ambos guardianes (introspección).
+for v in "" "aviso" " OFF " "basura" "Estricto"; do
+  EPF="$(env CRISOL_GATE_PROFILE="$v" bash "$HOOK" --print-profile 2>/dev/null || echo err)"
+  if have_gate; then
+    GPF="$(env CRISOL_GATE_PROFILE="$v" "$PYBIN" "$GATE" --print-profile 2>/dev/null || echo err)"
+    check_eq "K paridad perfil env=[$v] gate==enforcer" "$GPF" "$EPF"
+  fi
+done
+
+# K-marcador: en aviso, el diagnóstico llega a stderr con el marcador inequívoco.
+K_MSG="$( ( cd "$ADOPTED" && printf '{"tool_input":{"file_path":"src/app.c"}}' | env CRISOL_GATE_PROFILE=aviso bash "$HOOK" 2>&1 >/dev/null ) || true)"
+check "K enforcer aviso: marcador [CRISOL-AVISO] en stderr" 0 "$(printf '%s' "$K_MSG" | grep -q 'CRISOL-AVISO' && echo 0 || echo 1)"
+if have_gate; then
+  K_GMSG="$(printf '{"tool_name":"Edit","tool_input":{"file_path":"src/app.c"},"cwd":"%s"}' "$WADOPTED" | env CRISOL_GATE_PROFILE=aviso "$PYBIN" "$GATE" 2>&1 >/dev/null || true)"
+  check "K gate aviso: marcador [CRISOL-AVISO] en stderr" 0 "$(printf '%s' "$K_GMSG" | grep -q 'CRISOL-AVISO' && echo 0 || echo 1)"
+fi
+
 echo
 echo "PASS=$PASS FAIL=$FAIL"
 [ "$FAIL" -eq 0 ]
