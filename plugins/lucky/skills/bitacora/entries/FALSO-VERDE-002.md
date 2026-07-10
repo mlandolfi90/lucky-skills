@@ -29,5 +29,4 @@
   JSON real (python/jq) en vez de escape a mano
 - **origen:** RUN-LEDGER main 2026-07-09 (timbre de juicio, iter2)   ·   **usos:** 1
 - **REFS:** ADR 0010 (enmienda) · RFC 8259 §7   ·   **NEXT:** n/a
-- **estado:** LIVE
-  <!-- endoso del operador MLL, 2026-07-09 -→ promovida de CANDIDATE -->
+- **estado:** LIVE  <!-- endoso MLL 2026-07-09, promovida de CANDIDATE -->

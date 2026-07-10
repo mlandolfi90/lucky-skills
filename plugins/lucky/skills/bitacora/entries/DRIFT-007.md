@@ -32,5 +32,4 @@
   ya resuelva intérprete/OS por sí mismo
 - **origen:** RUN-LEDGER main 2026-07-09 (portabilidad multi-OS) · reporte del operador   ·   **usos:** 1
 - **REFS:** scripts/instalar-gate.sh · GUIA-SKILLS (hooks de flota)   ·   **NEXT:** n/a
-- **estado:** LIVE
-  <!-- endoso del operador MLL, 2026-07-09 -→ promovida de CANDIDATE -->
+- **estado:** LIVE  <!-- endoso MLL 2026-07-09, promovida de CANDIDATE -->
