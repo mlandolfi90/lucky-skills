@@ -174,3 +174,4 @@
   fresco la reprodujo en toy repo). Fix chico: decidir UNA semántica (sugerido: fail-open en ambos, es
   el espíritu del gate) + caso nuevo en test-enforcer. Corrida aparte. · cazada por verificador-fresco 2026-07-09
 
+- 2026-07-09 · REPENSAR el planteo del parking de ideas: hoy conviven ideas GLOBALES (~/.claude/IDEAS-GLOBAL.md) e ideas DEL REPO/PROYECTO (docs/IDEAS.md) como fallback accidental, no como diseño — convertir los dos ámbitos en concepto de primera clase (¿dónde nace cada una, cómo se consultan juntas, cuándo asciende una global a un repo?). Decisión del operador: parqueada, NO entrar todavía. · orden de MLL 2026-07-09
