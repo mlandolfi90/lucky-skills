@@ -4,6 +4,20 @@ Notas de release de la familia de skills Lucky. El historial completo del **proc
 (corridas del Crisol, RETROs) vive en `docs/refactor/_crisol/RUN-LEDGER.md`; los tags
 inmutables, en `git tag`. Formato: más nuevo arriba.
 
+## v1.31.0 — 2026-07-09 — Señales: puente log↔SENALES en el timbre + cosecha on-demand (enmienda 2 ADR 0010)
+
+Segunda tanda de absorción del sistema de instincts de ECC, con la escalera de frecuencia
+terminando SIEMPRE en endoso humano:
+
+- **Puente (bitacora-push.sh):** etiquetas del log del observador con ≥2 sesiones acumuladas y SIN
+  señal formal en SENALES.md → línea nueva en el ⚖ JUICIO PENDIENTE proponiendo la cosecha. Donde
+  ECC auto-promueve al cruzar confianza 0.7, acá el umbral PROPONE.
+- **Cosecha (`/bitacora cosechar`, §Cosechar):** on-demand, solo operador: el agente borra
+  BORRADORES de señal desde el conteo real del log (visto: N como evidencia), presenta uno a uno,
+  y solo lo endosado se escribe. Con descargo explícito de meta-ruido.
+- Sin absorber (sigue): decay automático y promoción sin humano.
+- Tests: push 28/28 (3 nuevos del puente: propone sin SENALES, cuenta bien, calla si ya formalizada).
+
 ## v1.30.2 — 2026-07-09 — Portabilidad multi-OS: los hooks/gates funcionan en Windows Y Linux
 
 Reporte del operador: los hooks/gates dieron error en una sesión Linux ("no están hechos para

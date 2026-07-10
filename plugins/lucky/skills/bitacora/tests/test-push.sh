@@ -136,6 +136,27 @@ OUT14="$(BITACORA_PUSH=off run_push '{"source":"startup"}')"
 check "off: apaga también el timbre" "yes" "$(printf '%s' "$OUT14" | grep -q '"additionalContext":""' && echo yes || echo no)"
 rm -f "$OBSDIR/observaciones.log"
 
+# ── 14b. PUENTE log↔SENALES: etiqueta ≥2 sesiones sin señal formal → propone ──
+cat > "$TMP/INDEX.md" <<'EOF'
+| SÍNTOMA OBSERVABLE (lo que ves) | TIPO | ACCIÓN (1 línea) | ENTRADA | validated_on | usos | estado |
+|---|---|---|---|---|---|---|
+| Sintoma A | GAP | Accion A | [GAP-001](entries/GAP-001.md) | 2026-07-01 | 1 | LIVE |
+EOF
+cat > "$OBSDIR/observaciones.log" <<'EOF'
+2026-07-09 10:00 · repo-a · GATE-BLOQUEO · x1
+2026-07-09 11:00 · repo-b · GATE-BLOQUEO · x1
+2026-07-09 11:00 · repo-b · SUITE-ROJA · x1
+EOF
+rm -f "$TMP/SENALES.md"
+OUTP="$(run_push '{"source":"startup"}')"
+check "puente: etiqueta ≥2 sesiones sin SENALES.md → propone cosecha" "yes" "$(printf '%s' "$OUTP" | grep -q 'SIN señal formal' && echo yes || echo no)"
+check "puente: cuenta 1 (GATE-BLOQUEO sí, SUITE-ROJA x1 no)" "yes" "$(printf '%s' "$OUTP" | grep -q '1 etiqueta(s) del log' && echo yes || echo no)"
+# etiqueta YA formalizada en SENALES → no propone
+printf '| GATE-BLOQUEO ya tiene señal formal | 2 | contexto |\n' > "$TMP/SENALES.md"
+OUTP2="$(run_push '{"source":"startup"}')"
+check "puente: etiqueta ya en SENALES → silencio" "no" "$(printf '%s' "$OUTP2" | grep -q 'SIN señal formal' && echo yes || echo no)"
+rm -f "$OBSDIR/observaciones.log" "$TMP/SENALES.md"
+
 # ── 15. control chars crudos en el INDEX no rompen el contrato JSON (RFC 8259) ─
 #    (hallazgo del panel adversarial: ESC 0x1b de ANSI pegado en un síntoma)
 printf '| S\303\215NTOMA OBSERVABLE (lo que ves) | TIPO | ACCI\303\223N (1 l\303\255nea) | ENTRADA | validated_on | usos | estado |\n|---|---|---|---|---|---|---|\n| log muestra \033[31mFAIL\033[0m con \001 crudo | GAP | mirar el gate | [EV-9](entries/EV-9.md) | 2026-07-09 | 2 | LIVE |\n' > "$TMP/INDEX.md"

@@ -1880,3 +1880,57 @@
 - RETRO: el retest destapó DOS capas que la prosa sola no cura: (1) los candidatos eligieron un repo VECINO cuando cwd no resuelve — la cascada necesitaba la prohibición explícita; (2) dentro de una misma sesión el listing de skills está CONGELADO: retests con cache refrescado repitieron conducta viaja → en nano-skills la DESCRIPTION es el driver real de conducta y el fix debe vivir AHÍ. Señal a SENALES (no certeza). Efecto colateral gestionado: los retests commitearon+pushearon ideas ficticias al IDEAS.md público — limpiadas en este cierre; regla futura de batería: casos de idea en sandbox sin remoto.
 - Cierre: 2026-07-09 · commit de cierre (fast-path, 2 iteraciones) · forja v1.30.3 · tag y push en esta corrida.
 
+### main — 2026-07-09 (señales: puente log↔SENALES + cosecha on-demand — absorción ECC 2da tanda)
+- STATUS: CLOSED
+- Tier: fast-path
+- Fecha: 2026-07-09
+- TARGET: pc-local
+- MODEL: claude-fable-5 (uniforme)
+- Alcance: orden del operador ("absorbe 1+2"). (1) PUENTE en el timbre del push:
+  etiquetas del log del observador con ≥2 sesiones acumuladas y SIN señal
+  formal en SENALES.md → el timbre propone formalizarlas (la escalera de
+  frecuencia de ECC terminando en ENDOSO humano, jamás auto-promoción).
+  (2) COSECHA on-demand en bitacora/SKILL.md ("/bitacora cosechar"): agente
+  borra BORRADORES de señal desde el log para endoso — la pieza LLM de ECC que
+  se rechazó como automática, vuelta doctrinal por ser operador-invocada y
+  sin escritura sin endoso. Enmienda 2 al ADR 0010. Tests nuevos en test-push.
+- MIGRATION_STRATEGY: N/A (sin DDL)
+- Conformidad-arq: N/A (hook + prosa)
+<!-- VEREDICTOS:BEGIN -->
+- runState: closing
+- [V] TARGET · PASS · gate · pc-local (suites corridas acá)
+- [V] MODEL · PASS · gate · claude-fable-5 (uniforme)
+- [V] TARGET_ENV · N/A · — · sin @env
+- [V] REGLA0 · PASS · gate · push 28/0 (3 casos nuevos del puente) · observar 11/0 · lint en la forja
+- [V] TEST_COVERAGE · PASS · gate · puente cubierto: propone sin SENALES, cuenta bien (≥2 sesiones sí, x1 no), calla si ya formalizada
+- [V] INDEPENDENCIA · PASS · gate · fixture determinista (el puente es grep+awk, sin juicio); la cosecha es prosa operador-invocada sin runtime nuevo
+- [V] SCOPE_CREEP · PASS · gate · push.sh (puente) + SKILL.md (§Cosechar + bullet) + test-push + ADR enmienda 2 + CHANGELOG; nada más
+- [V] PARKING · N/A · — · sin hallazgos fuera de scope
+- [V] CIERRE_TRAS_PASS · PASS · gate · cierre tras 28/0 + 11/0
+- [V] CREDITO · PASS · gate · enmienda 2 al ADR 0010 + CHANGELOG v1.31.0
+- [V] MIGRATION · N/A · gate · sin DDL
+- [V] FUENTE_VERDAD · N/A · — · —
+- [V] RESPONSIVE · N/A · — · —
+- [V] ZERO_LEAK · PASS · gate · el puente emite solo conteos; leak-scan en la forja
+- [V] TECHO_ITER · PASS · gate · 1/3
+- [V] OPEN_CLOSED · PASS · gate · puente AGREGADO al timbre existente; cosecha = sección nueva
+- [V] ATOMICIDAD · PASS · gate · sin citaciones nuevas
+- [V] COSTURA · PASS · gate · reusa log_dir/SENALES existentes; cero config nueva
+- [V] LISKOV · N/A · — · —
+- [V] INTERFACE_SEGREGATION · N/A · — · —
+- [V] CASOS_LEGALES · PASS · gate · aditivo (a)
+- [V] CONFORMIDAD · N/A · — · —
+- [V] SELLOS · PASS · gate · forja v1.31.0 re-sella la familia
+- [V] FORJA · PASS · gate · registry regenerado
+- [V] TAG_GATE · PASS · gate · v1.31.0 nace de esta corrida CLOSED; autorizado ("absorbe 1+2")
+- [V] PIN_TOTAL · N/A · — · —
+- [V] BUMP_REASON · PASS · gate · minor v1.31.0: capacidad nueva (puente + cosecha)
+<!-- VEREDICTOS:END -->
+- BITACORA: N/A (la corrida IMPLEMENTA el mecanismo de señales; sin patrón nuevo)
+- Iteraciones: 1/3
+- TEST_COVERAGE: push 28/0 · observar 11/0
+- Escalación: none
+- Veredictos: fixture determinista del puente + doctrina de cosecha revisada contra las reglas duras de la bitácora (sin escritura sin endoso, meta-ruido declarado).
+- RETRO: la absorción por tandas paga — la 1ra tanda (v1.30.0) rechazó la pieza LLM de ECC entera; hoy volvió PARTIDA: el conteo (determinista) al timbre, el juicio (LLM) a comando operador-invocado. Rechazar ≠ descartar: era cuestión de encontrarle la forma doctrinal.
+- Cierre: 2026-07-09 · commit de cierre (fast-path, 1 iteración) · forja v1.31.0 · tag y push en esta corrida.
+

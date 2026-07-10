@@ -124,8 +124,25 @@ if [ -f "$OBSLOG" ]; then
 fi
 case "$SEN" in ''|*[!0-9]*) SEN=0 ;; esac
 
+# (c) PUENTE log↔SENALES (enmienda 2 ADR 0010, escalera de frecuencia de ECC
+#     terminando en ENDOSO): etiquetas con ≥2 sesiones acumuladas que NO tienen
+#     señal formal en SENALES.md → proponer formalizar (cosecha), jamás escribir.
+PUENTE=0
+SENALES_MD="$HERE/../SENALES.md"
+if [ -f "$OBSLOG" ]; then
+  while IFS= read -r _ETI; do
+    [ -n "$_ETI" ] || continue
+    if [ ! -f "$SENALES_MD" ] || ! grep -q "$_ETI" "$SENALES_MD" 2>/dev/null; then
+      PUENTE=$((PUENTE+1))
+    fi
+  done <<PUENTE_EOF
+$(awk -F' · ' 'NF>=4 { c[$3]++ } END { for (k in c) if (c[k]>=2) print k }' "$OBSLOG" 2>/dev/null || true)
+PUENTE_EOF
+fi
+case "$PUENTE" in ''|*[!0-9]*) PUENTE=0 ;; esac
+
 BELL=""
-if [ "$SEN" -gt 0 ] || [ "$CAND" -gt 0 ]; then
+if [ "$SEN" -gt 0 ] || [ "$CAND" -gt 0 ] || [ "$PUENTE" -gt 0 ]; then
   BELL="⚖ JUICIO PENDIENTE — avisale al humano en tu primera respuesta (vos no juzgás; él decide):"
   if [ "$SEN" -gt 0 ]; then
     BELL="$BELL
@@ -134,6 +151,10 @@ if [ "$SEN" -gt 0 ] || [ "$CAND" -gt 0 ]; then
   if [ "$CAND" -gt 0 ]; then
     BELL="$BELL
 - $CAND entrada(s) CANDIDATE esperando endoso humano → promover a LIVE o retirar (INDEX de la bitácora)"
+  fi
+  if [ "$PUENTE" -gt 0 ]; then
+    BELL="$BELL
+- $PUENTE etiqueta(s) del log acumulan ≥ 2 sesiones SIN señal formal en SENALES.md → pedí la cosecha (\"/bitacora cosechar\") para formalizarlas o refutarlas"
   fi
 fi
 

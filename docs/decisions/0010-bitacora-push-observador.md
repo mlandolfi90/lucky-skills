@@ -104,10 +104,30 @@ juzgar; cero ruido si no):
 parkeadas" quedó fuera por alcance quirúrgico (IDEAS es por-repo, no del
 plugin; se reevalúa si duele).
 
+## Enmienda 2 (2026-07-09) — puente log↔SENALES + cosecha on-demand
+
+Absorción de la segunda mitad del sistema de instincts de ECC, otra vez con la
+escalera terminando en el humano:
+
+- **Puente (timbre):** las etiquetas del log con **≥2 sesiones acumuladas y sin
+  señal formal en SENALES.md** suman una línea al ⚖ JUICIO PENDIENTE que
+  propone la cosecha. Es la escalera de frecuencia de ECC (3-5 avistamientos →
+  sube de nivel) pero el cruce de umbral PROPONE, jamás promueve solo.
+- **Cosecha (`/bitacora cosechar`, prosa en SKILL.md §Cosechar):** la pieza
+  LLM del observer de ECC (que la decisión original rechazó como proceso
+  AUTOMÁTICO) entra en su forma doctrinal: la invoca el operador, el agente
+  borra BORRADORES de señal desde el conteo real del log (`visto: N` heredado
+  como evidencia), los presenta uno a uno, y SOLO lo endosado se escribe.
+  Incluye descargo de meta-ruido (sesiones que editan la bitácora inflan el
+  conteo crudo).
+- **Lo que sigue sin absorberse:** decay automático (−0.02/semana) y promoción
+  sin humano — la poda de SENALES (>90 días) y el endoso siguen siendo actos
+  del operador.
+
 ---
 
 **Fuente de verdad: `github.com/mlandolfi90/lucky-skills` · esta copia = tag
-`v1.30.3` (cache local, NO la ley).** Ley viva: con red, si el repo tiene un tag
+`v1.31.0` (cache local, NO la ley).** Ley viva: con red, si el repo tiene un tag
 mayor (`git ls-remote --tags
 https://github.com/mlandolfi90/lucky-skills.git`), seguir la del repo e informar
 al humano.

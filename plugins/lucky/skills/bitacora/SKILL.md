@@ -87,7 +87,34 @@ flota), ambos con off-switch por env:
   mano; NADA entra al INDEX por esta vía (la regla "sin evidencia real, NO
   entra" y el endoso humano quedan intactos). Apagar: `BITACORA_OBSERVAR=off`.
 
+**Puente log↔SENALES (enmienda 2, absorbido de la escalera de frecuencia de
+ECC):** el timbre además detecta etiquetas del log con **≥2 sesiones acumuladas
+que no tienen señal formal en SENALES.md** y propone la cosecha. Donde ECC
+auto-promueve al cruzar un umbral de confianza, acá la escalera TERMINA en el
+endoso — el conteo sugiere, el humano formaliza.
+
 Tests: `tests/test-push.sh` · `tests/test-observar.sh`.
+
+## Cosechar (`/bitacora cosechar` — on-demand, SOLO lo invoca el operador)
+
+La pieza LLM del observer de ECC, vuelta doctrinal: nunca corre sola, nunca
+escribe sin endoso. Cuando el operador la pide:
+
+1. Leé el agregado del log: `bash hooks/bitacora-observar.sh --resumen`.
+2. Por cada etiqueta con `≥2 sesiones` SIN señal formal en `SENALES.md`,
+   **borrá un BORRADOR de señal** (formato de la tabla de SENALES: señal en
+   prosa observable · `visto: N` heredado del conteo real del log · fecha ·
+   contexto de 1 línea). Si tenés contexto de las sesiones donde sonó, usalo;
+   si no, el borrador lo declara ("contexto por confirmar").
+3. **Presentá los borradores al humano** — uno por uno, con el conteo como
+   evidencia. Endosado → se agrega a `SENALES.md`; refutado → se descarta
+   anotando el porqué en la respuesta (no en el archivo). JAMÁS escribas una
+   señal no endosada.
+4. Etiquetas que ya tienen señal formal: solo reportá "la señal X acumuló
+   N avistamientos nuevos" para que el humano actualice `visto:` si endosa.
+5. Meta-ruido: si la sesión cosechada EDITÓ la bitácora/tests (las palabras de
+   las señales aparecen por trabajo, no por incidente), decláralo y descontá
+   con criterio — el conteo crudo del log no distingue.
 
 ## Mantener (mecánico, no por disciplina)
 
@@ -140,7 +167,7 @@ Tests: `tests/test-push.sh` · `tests/test-observar.sh`.
 ---
 
 **Fuente de verdad: `github.com/mlandolfi90/lucky-skills` · esta copia = tag
-`v1.30.3` (cache local, NO la ley).** Ley viva: con red, si el repo tiene un tag
+`v1.31.0` (cache local, NO la ley).** Ley viva: con red, si el repo tiene un tag
 mayor (`git ls-remote --tags
 https://github.com/mlandolfi90/lucky-skills.git`), seguir la del repo e informar
 al humano.
