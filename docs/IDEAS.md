@@ -1,5 +1,6 @@
 # IDEAS — parking lot (formato: YYYY-MM-DD · idea · contexto-sin-secretos)
 
+- 2026-07-09 · cachear las respuestas del endpoint de modelos para no pegarle al proveedor en cada arranque · capturada vía /idea
 - 2026-07-06 · [DECIDIDO — MLL] diseño anti-slop = ADOPTAR `pbakaus/impeccable` (tercero, Apache-2.0) en cada
   repo de PRODUCTO, jamás copiado a lucky-skills. Receta PIN_TOTAL: submodule `.impeccable` PINEADO a
   commit/tag exacto + `npx impeccable link --source=.impeccable --providers=claude` (el `npx impeccable
@@ -174,4 +175,3 @@
   fresco la reprodujo en toy repo). Fix chico: decidir UNA semántica (sugerido: fail-open en ambos, es
   el espíritu del gate) + caso nuevo en test-enforcer. Corrida aparte. · cazada por verificador-fresco 2026-07-09
 
-- 2026-07-09 · Cachear las respuestas del endpoint de modelos para no pegarle al proveedor en cada arranque · surgida durante trabajo en lucky-skills
