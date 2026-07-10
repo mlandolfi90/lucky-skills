@@ -16,6 +16,10 @@
         "hooks": [
           {
             "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/skills/ley/hooks/ley-live.sh\""
+          },
+          {
+            "type": "command",
             "command": "bash \"${CLAUDE_PLUGIN_ROOT}/skills/bitacora/hooks/bitacora-push.sh\""
           }
         ]

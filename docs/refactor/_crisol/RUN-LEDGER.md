@@ -2207,3 +2207,60 @@
 - Veredictos: panel adversarial ultracode en fase de plan (5 lentes × 2 jueces por hallazgo, 65 agentes) — hallazgos críticos incorporados: mecánica BASE/restore del cierre, ZERO_LEAK del vault, exención del techo, runState dentro del bloque VEREDICTOS, WIP-commit por bump, taxonomía ✓/~/✗, stamp confirmado, gramáticas de versión, colisión/huérfanas, cosecha común con marca.
 - RETRO: primera skill de la familia REFUTADA antes de nacer — el panel encontró 4 críticas que la versión inicial del plan habría shippeado (el cierre habría generado patches incompletos con WIP-commits previos; el vault habría brickeado forjas futuras por leak; el techo de 3 habría criminalizado el caso de uso; un closing fuera del bloque habría apagado la red final en silencio). Lección de proceso: para skills nuevas, el costo del enjambre en fase de PLAN es una fracción del costo de descubrir esos gaps en producción. La validación empírica real queda para el primer hotfix de verdad + el escenario de cumplimiento en sesión fresca.
 - Cierre: 2026-07-10 · commit de cierre (fast-path, 1 iteración) · forja v1.35.0 · tag y push en esta corrida.
+
+### main — 2026-07-10 (ley-live: la ley se trae sola al arranque)
+- STATUS: CLOSED
+- Tier: fast-path
+- Fecha: 2026-07-10
+- TARGET: pc-local
+- MODEL: claude-fable-5 (uniforme)
+- Alcance: eliminar el lag de ley entre sesiones (hoy: sesión nueva cargó
+  v1.27.0 con v1.35.0 publicada). (1) hook SessionStart `ley-live` en el
+  plugin: ff-only del clon del marketplace al último tag SI está en main —
+  misma lógica de /ley (version-sort, diferido, árbol sucio) pero silenciosa
+  y FAIL-OPEN total, off-switch LEY_LIVE=off; (2) junction del cache del
+  harness al clon (acto de máquina, documentado en ley/SKILL.md) — muere la
+  clase "actualicé el clon pero el harness carga otra carpeta"; (3) fix del
+  paso 6b de /ley: sonda de intérprete portable en vez de `command -v`
+  (DRIFT-007 mordió ahí HOY: el stub de la Store hizo fallar el paso en
+  silencio); (4) DRIFT-007 usos 1→2 (segunda validación real). ADR 0013.
+  Autorizado por el operador ("plomo aplica").
+- MIGRATION_STRATEGY: N/A (sin DDL)
+- Conformidad-arq: hook bash mismo patrón familia (fail-open, off-switch, budget)
+<!-- VEREDICTOS:BEGIN -->
+- runState: closing
+- [V] TARGET · PASS · gate · pc-local (junction creado en esta máquina)
+- [V] MODEL · PASS · gate · claude-fable-5 (uniforme)
+- [V] TARGET_ENV · N/A · — · sin @env
+- [V] REGLA0 · PASS · gate · test-ley-live 7/0 (sintaxis, off-switch, fail-open ×3, silencioso, sin colgar) · forja verde
+- [V] TEST_COVERAGE · PASS · gate · casos deterministas cubren off-switch y todas las ramas fail-open sin red; la rama de red (ff real) se validó EN VIVO en esta sesión (v1.27.0→v1.35.0 por el mismo procedimiento)
+- [V] INDEPENDENCIA · PASS · gate · la lógica del hook es espejo de /ley ya probada en corrida real hoy; suite propia con HOME aislado
+- [V] SCOPE_CREEP · PASS · gate · hook + wiring + doc 6b/6c/§live + DRIFT-007 usos+1 + ADR 0013 + junction (máquina); exactamente lo autorizado ("plomo aplica")
+- [V] PARKING · N/A · — · sin hallazgos fuera de scope
+- [V] CIERRE_TRAS_PASS · PASS · gate · cierre tras 7/0 + forja verde
+- [V] CREDITO · PASS · gate · ADR 0013 + CHANGELOG v1.36.0 (postura de seguridad explícita firmada por el operador)
+- [V] MIGRATION · N/A · gate · sin DDL
+- [V] FUENTE_VERDAD · N/A · — · —
+- [V] RESPONSIVE · N/A · — · —
+- [V] ZERO_LEAK · PASS · gate · hook silencioso (jamás emite contenido); ADR sin rutas de máquina más allá de ~/.claude; leak-scan en la forja
+- [V] TECHO_ITER · PASS · gate · 1/3
+- [V] OPEN_CLOSED · PASS · gate · hook AGREGADO al SessionStart existente; /ley intacta como camino verificado; 6b corregido sin cambiar su contrato
+- [V] ATOMICIDAD · PASS · gate · un hook = una responsabilidad (acercar el clon al tag); gate/integridad quedan en /ley
+- [V] COSTURA · PASS · gate · LEY_LIVE y LEY_LIVE_CLON por env con defaults (12-factor, patrón familia)
+- [V] LISKOV · N/A · — · —
+- [V] INTERFACE_SEGREGATION · N/A · — · —
+- [V] CASOS_LEGALES · PASS · gate · aditivo (a)
+- [V] CONFORMIDAD · PASS · gate · mismo esqueleto que bitacora-push/observar (fail-open, off-switch, silencioso)
+- [V] SELLOS · PASS · gate · forja v1.36.0 re-sella la familia (ADR 0013 nace con ancla)
+- [V] FORJA · PASS · gate · registry regenerado
+- [V] TAG_GATE · PASS · gate · v1.36.0 nace de esta corrida CLOSED; autorización explícita del operador
+- [V] PIN_TOTAL · N/A · — · sin dependencias nuevas
+- [V] BUMP_REASON · PASS · gate · minor v1.36.0: capacidad nueva (hook de flota) — ADR 0013 + CHANGELOG
+<!-- VEREDICTOS:END -->
+- BITACORA: DRIFT-007 usos 1→2 (2ª validación real: el 6b de /ley falló en silencio por el stub; la entrada diagnosticó al toque); síntoma del INDEX reescrito para incluir la falla SILENCIOSA.
+- Iteraciones: 1/3
+- TEST_COVERAGE: test-ley-live 7/0 · forja (sellos+registry+leak+lint)
+- Escalación: none
+- Veredictos: suite determinista con HOME/clon aislados; validación en vivo del procedimiento (update real v1.27→v1.35 esta sesión); postura de seguridad documentada en ADR.
+- RETRO: el incidente que motivó la corrida se auto-documentó — /ley corrió a mano, DRIFT-007 mordió DENTRO del propio /ley (6b con command -v), y el catálogo pagó: la entrada existente diagnosticó el silencio en segundos. Límite honesto registrado en el ADR: el hook garantiza frescura del PRÓXIMO arranque; si el harness enumera antes de correr SessionStart, la sesión presente puede seguir viendo el listado anterior — verificar empíricamente en sesión fresca (misma familia que la señal listing-congelado, visto: 2 ya).
+- Cierre: 2026-07-10 · commit de cierre (fast-path, 1 iteración) · forja v1.36.0 · tag y push en esta corrida.

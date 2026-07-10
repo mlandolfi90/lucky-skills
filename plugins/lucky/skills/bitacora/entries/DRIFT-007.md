@@ -24,12 +24,12 @@
 - **PREVENCIÓN (cómo evitar reincidencia):** todo cableado que escriba un
   instalador lleva las 3 patas (portable + probar-intérprete + fail-open) y la
   corrida que lo toque corre la suite en Linux fiel (REGLA 0 multi-OS).
-- **validated_on:** `main` · 2026-07-09 · `faa405c` (repro del operador en
-  sesión Linux real + repro propio en WSL Ubuntu python3-only: exit 127 →
-  fix → batería completa verde en ambos OS: 110/0, 25/0, 11/0×2, 8/0, 35/0,
-  20/20; stub de Store cazado por humo en Windows: exit 49)
+- **validated_on:** `main` · 2026-07-10 · 1ª: `faa405c` (repro Linux real + WSL
+  python3-only: 127→fix→batería verde ambos OS; stub de Store cazado: exit 49) ·
+  2ª: el 6b de /ley usaba `command -v` y falló EN SILENCIO por el stub en una
+  corrida real — la entrada lo diagnosticó al toque; corregido a sonda (v1.36.0)
 - **stale_si:** >90 días sin re-validar, O el cableado migra a un launcher que
   ya resuelva intérprete/OS por sí mismo
-- **origen:** RUN-LEDGER main 2026-07-09 (portabilidad multi-OS) · reporte del operador   ·   **usos:** 1
+- **origen:** RUN-LEDGER main 2026-07-09 (portabilidad multi-OS) · reporte del operador   ·   **usos:** 2
 - **REFS:** scripts/instalar-gate.sh · GUIA-SKILLS (hooks de flota)   ·   **NEXT:** n/a
 - **estado:** LIVE  <!-- endoso MLL 2026-07-09, promovida de CANDIDATE -->

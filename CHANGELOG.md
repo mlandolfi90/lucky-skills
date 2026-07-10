@@ -4,6 +4,19 @@ Notas de release de la familia de skills Lucky. El historial completo del **proc
 (corridas del Crisol, RETROs) vive en `docs/refactor/_crisol/RUN-LEDGER.md`; los tags
 inmutables, en `git tag`. Formato: más nuevo arriba.
 
+## v1.36.0 — 2026-07-10 — ley-live: la ley se trae sola al arranque (ADR 0013)
+
+Incidente del día: sesión nueva cargó v1.27.0 con v1.35.0 publicada (y desde un TERCER lugar que
+nada cubría). El flujo "arrancar → notar atraso → /ley → reiniciar" muere:
+
+- **Hook `ley-live` (SessionStart, flota):** ff-only del clon al último tag SI está en main —
+  version-sort, respeta DIFERIDO y árbol sucio, FAIL-OPEN total, off-switch `LEY_LIVE=off`,
+  silencioso. `/ley` sigue siendo el camino verificado (gate + integridad sha256). Suite 7/7.
+- **Junction cache→clon** (acto de máquina, doc en /ley §6c): el snapshot del harness pasa de copia
+  a espejo — muere la clase "actualicé el clon pero el harness carga otra carpeta".
+- **Fix /ley §6b:** intérprete por SONDA, jamás `command -v` — el stub de la Store pasó ese check y
+  el paso falló en silencio en una corrida real. DRIFT-007 sube a usos: 2 (segunda validación).
+
 ## v1.35.0 — 2026-07-10 — skill nueva: hotfix — permiso de trabajo en caliente (ADR 0012)
 
 Pedido del operador: "un mecanismo para iterar rápido conmigo en frente", con "hotfix versionados

@@ -89,9 +89,12 @@ carga el snapshot registrado en `~/.claude/plugins/installed_plugins.json`
 sesión cargando la ley vieja (incidente 2026-07-04). Si la clave no existe
 (plugin no instalado por esa vía) → omití el paso y reportalo en una línea.
 Ídem sin `python3` ni `python` en PATH (Linux moderno suele traer SOLO `python3`).
+El intérprete se resuelve por SONDA (`"$c" -c ""`), jamás `command -v`: en
+Windows el stub de la Store EXISTE en PATH pero no corre (exit 49) y el paso
+fallaría en silencio — DRIFT-007, mordió acá mismo el 2026-07-10.
 ```bash
 PLUGS="$HOME/.claude/plugins/installed_plugins.json"
-PYBIN=$(command -v python3 || command -v python || true)
+PYBIN=""; for c in python3 python; do "$c" -c "" >/dev/null 2>&1 && PYBIN="$c" && break; done
 DEST=$([ -n "$PYBIN" ] && "$PYBIN" -c "import json,sys;e=json.load(open(sys.argv[1],encoding='utf-8'))['plugins'].get('lucky@lucky-skills');print(e[0]['installPath'] if e else '')" "$PLUGS" 2>/dev/null)
 if [ -n "$DEST" ]; then
   rm -rf "$DEST" && cp -r "$CLON/plugins/lucky" "$DEST"
@@ -109,6 +112,27 @@ fi
 ```
 El refresco pisa SOLO el snapshot del plugin (`installPath`), jamás otra cosa
 de `~/.claude/plugins`. Las skills refrescadas cargan al reiniciar la sesión.
+
+**6c. Snapshots adicionales del harness.** Algunos harness cargan el plugin
+desde `~/.claude/plugins/cache/lucky-skills/lucky/<ver>/` (una COPIA, no el
+clon). Dos remedios: (a) refrescarlo igual que 6b (`rm -rf` + `cp -r` desde
+`$CLON/plugins/lucky`), o (b) — recomendado, una sola vez por máquina —
+convertirlo en **junction/symlink al clon** para que nunca más divorcie:
+```bash
+# Windows (Git Bash, sin admin):  cmd //c mklink /J "<cache>" "<clon>\plugins\lucky"
+# Linux/macOS:                    ln -sfn "$CLON/plugins/lucky" "<cache>"
+```
+Con el junction, este paso desaparece: cache == clon por construcción.
+
+## Modo live (hook `ley-live`, desde v1.36.0)
+
+`hooks/ley-live.sh` corre en cada SessionStart de la flota: espejo silencioso
+de los pasos 2-5 (version-sort, tag-en-main, árbol limpio, ff-only) con
+**fail-open total** — cualquier duda → no toca nada y la sesión arranca con lo
+que haya. Off-switch: `LEY_LIVE=off`. Diferencias con `/ley` (que sigue siendo
+el camino VERIFICADO): el hook no re-instala el gate, no verifica integridad
+sha256 y no reporta — solo acerca el clon al último tag para que la próxima
+enumeración cargue fresco. La brújula sigue siendo quien te AVISA el atraso.
 
 **7. Verificación opcional de integridad.** Si hay `plugins/lucky/skills/registry.json`,
 confirmá sha256 de al menos `crisol/SKILL.md` contra el registry (cadena de
@@ -140,7 +164,7 @@ reiniciar la sesión** (el gate ya quedó vivo sin reiniciar).
 ---
 
 **Fuente de verdad: `github.com/mlandolfi90/lucky-skills` · esta copia = tag
-`v1.35.0` (cache local, NO la ley).** Ley viva: con red, si el repo tiene un tag
+`v1.36.0` (cache local, NO la ley).** Ley viva: con red, si el repo tiene un tag
 mayor (`git ls-remote --tags
 https://github.com/mlandolfi90/lucky-skills.git`), seguir la del repo e informar
 al humano.
