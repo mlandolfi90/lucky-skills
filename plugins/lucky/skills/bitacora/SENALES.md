@@ -20,3 +20,4 @@
 | SEÑAL (lo que parece pasar) | visto | avistamientos (fecha · contexto 1 línea) |
 |---|---|---|
 | winget se cuelga en "DeliveryOptimization downloading" con instaladores grandes (~600MB); dos instancias winget se bloquean mutuamente sin error visible | 1 | 2026-07-03 · upgrade Docker Desktop; workaround: descarga directa del vendor + Get-AuthenticodeSignature Valid antes de ejecutar |
+| Endurecer la PROSA de una skill no cambia la conducta de subagentes DENTRO de la misma sesión — parecen actuar sobre la description del listing congelado al session-start, no sobre el cuerpo refrescado en disco | 1 | 2026-07-09 · corrida idea-fallback: 2 retests con cache refrescado repitieron la conducta vieja; el fix se movió a la description; re-verificar en sesión FRESCA |

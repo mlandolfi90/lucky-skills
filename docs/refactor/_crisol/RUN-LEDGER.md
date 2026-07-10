@@ -1825,3 +1825,58 @@
 - RETRO: el falso-verde más viejo del repo era ambiental — TODA la verificación histórica corrió en Git-Bash/Windows y la flota es mitad Linux; "REGLA 0: el Verificador corre EN el TARGET" ya lo prohibía y no lo veníamos cumpliendo para el 50% de los targets. Segundo hallazgo del mismo golpe: `command -v` miente en Windows (stub de Store) — existir ≠ correr, ahora es doctrina en DRIFT-007. Los consumidores se auto-curan: /ley corre instalar-gate.sh, que ahora MIGRA el cableado viejo in situ.
 - Cierre: 2026-07-09 · commit de cierre (Tier completo, 2 iteraciones) · forja v1.30.2 · tag y push en esta misma corrida (autorizados por MLL).
 
+### main — 2026-07-09 (idea: fallback endurecido — "repo = raíz GIT", válvula de cumplimiento)
+- STATUS: CLOSED
+- Tier: fast-path
+- Fecha: 2026-07-09
+- TARGET: pc-local
+- MODEL: claude-fable-5 (uniforme)
+- Alcance: hallazgo #2 de CUMPLIMIENTO-2026-07-09 (cumplió umbral ≥2: 2/3
+  candidatos trataron una carpeta NO-git como "repo" y crearon docs/IDEAS.md
+  suelto; 1/3 usó el escalón global correcto). Fix quirúrgico de prosa en
+  idea/SKILL.md: "repo actual = raíz GIT (existe .git); carpeta suelta NO es
+  repo → escalón global" + detectores de cumplimiento/escenarios/idea.md
+  alineados (prohibida explícita: crear docs/IDEAS.md en carpeta sin git).
+  Verificación: re-corrida del candidato idea-favorable en cwd sin git tras
+  refrescar el cache → debe ir al global. Orden del operador: "idea tenemos
+  que mejorar, tranquileto".
+- MIGRATION_STRATEGY: N/A (sin DDL)
+- Conformidad-arq: N/A (prosa de skill)
+<!-- VEREDICTOS:BEGIN -->
+- runState: closing
+- [V] TARGET · PASS · gate · pc-local (retests y suites corridos acá)
+- [V] MODEL · PASS · gate · claude-fable-5 (uniforme, incl. 2 candidatos de retest)
+- [V] TARGET_ENV · N/A · — · pc-local sin @env
+- [V] REGLA0 · PASS · gate · determinista verde: bitacora-lint 16↔16, forja v1.30.3 re-corrida (sha del registry re-computados tras las ediciones post-forja). Conducta: 2 retests INCONCLUSOS en-sesión (ver TECHO_ITER) — documentado como señal, no como verde
+- [V] TEST_COVERAGE · PASS · gate · detectores de escenarios/idea.md endurecidos (prohibida explícita "docs/IDEAS.md en carpeta sin git" + escalón correcto de cascada) — la re-auditoría en sesión fresca los ejercita
+- [V] INDEPENDENCIA · PASS · gate · los 2 retests fueron candidatos FRESCOS que no sabían del fix; la clasificación fue por ESTADO real (git log, ls, tails), jamás por su prosa
+- [V] SCOPE_CREEP · PASS · gate · 3 archivos (idea/SKILL.md prosa+description, escenarios/idea.md, SENALES.md) + limpieza de ideas ficticias; nada más
+- [V] PARKING · PASS · gate · señal débil a SENALES.md (listing congelado al session-start — visto: 1, hipótesis, no certeza)
+- [V] CIERRE_TRAS_PASS · PASS · gate · cierre tras verde determinista + hallazgo de verificación honestamente registrado (SEÑALES es exactamente para esto)
+- [V] CREDITO · N/A · — · prosa de skill, sin cambio de arquitectura
+- [V] MIGRATION · N/A · gate · sin DDL
+- [V] FUENTE_VERDAD · N/A · — · no toca testing/prod
+- [V] RESPONSIVE · N/A · — · no toca UI
+- [V] ZERO_LEAK · PASS · gate · leak-scan LIMPIO en ambas forjas
+- [V] TECHO_ITER · PASS · gate · 2/3 — iter1: prosa del cuerpo (retest → conducta repetida); iter2: el fix se movió a la DESCRIPTION al descubrir que los candidatos actúan sobre el listing congelado al arrancar, no sobre el cuerpo refrescado. Re-verificación empírica: próxima corrida de cumplimiento en sesión FRESCA
+- [V] OPEN_CLOSED · PASS · gate · prosa endurecida (aclara la regla existente, no cambia el contrato)
+- [V] ATOMICIDAD · N/A · — · sin código
+- [V] COSTURA · N/A · — · sin config
+- [V] LISKOV · N/A · — · —
+- [V] INTERFACE_SEGREGATION · N/A · — · —
+- [V] CASOS_LEGALES · PASS · gate · aditivo/aclaratorio (a)
+- [V] CONFORMIDAD · N/A · — · —
+- [V] SELLOS · PASS · gate · forja v1.30.3 ×2 (la segunda re-computa el sha de idea/SKILL.md editado post-forja; sellos idempotentes)
+- [V] FORJA · PASS · gate · registry regenerado con hashes vigentes
+- [V] TAG_GATE · PASS · gate · v1.30.3 nace de esta corrida CLOSED
+- [V] PIN_TOTAL · N/A · — · —
+- [V] BUMP_REASON · PASS · gate · patch: endurecimiento de prosa por válvula de cumplimiento
+<!-- VEREDICTOS:END -->
+- BITACORA: señal nueva en SENALES.md (prosa-vs-listing-congelado, visto: 1). Sin entrada de catálogo: la hipótesis no está confirmada (regla "sin evidencia real, NO entra").
+- Iteraciones: 2/3
+- TEST_COVERAGE: lint 16↔16 · detectores endurecidos · re-auditoría diferida a sesión fresca (documentado)
+- Escalación: none
+- Veredictos: clasificación por ESTADO (los 2 retests dijeron "docs/IDEAS.md, push OK" y el estado mostró repo VECINO — la prosa de candidato volvió a mentir por omisión, tercera vez hoy que "verificar estado, no prosa" paga).
+- RETRO: el retest destapó DOS capas que la prosa sola no cura: (1) los candidatos eligieron un repo VECINO cuando cwd no resuelve — la cascada necesitaba la prohibición explícita; (2) dentro de una misma sesión el listing de skills está CONGELADO: retests con cache refrescado repitieron conducta viaja → en nano-skills la DESCRIPTION es el driver real de conducta y el fix debe vivir AHÍ. Señal a SENALES (no certeza). Efecto colateral gestionado: los retests commitearon+pushearon ideas ficticias al IDEAS.md público — limpiadas en este cierre; regla futura de batería: casos de idea en sandbox sin remoto.
+- Cierre: 2026-07-09 · commit de cierre (fast-path, 2 iteraciones) · forja v1.30.3 · tag y push en esta corrida.
+

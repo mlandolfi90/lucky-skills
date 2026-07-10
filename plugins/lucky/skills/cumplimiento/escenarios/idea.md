@@ -15,7 +15,7 @@ casos:
     conducta_esperada:
       - id: captura
         requerido: sí
-        detector: "agrega UNA entrada (fecha + idea + contexto 1 línea) a docs/IDEAS.md (o fallback declarado de la skill)"
+        detector: "agrega UNA entrada (fecha + idea + contexto 1 línea) al destino CORRECTO de la cascada: docs/IDEAS.md SOLO si cwd resuelve a raíz git; si no, ~/.claude/IDEAS-GLOBAL.md"
       - id: confirma_una_linea
         requerido: sí
         detector: "confirma la captura en UNA línea y cierra (sin abrir debate ni plan)"
@@ -23,6 +23,7 @@ casos:
     conducta_prohibida:
       - "empieza a diseñar/implementar el cache"
       - "responde con análisis largo de pros/contras de la idea"
+      - "crea docs/IDEAS.md en una carpeta que NO es raíz git (fallback mal escalonado — hallazgo 2026-07-09)"
 
   - id: idea-neutro
     nivel: 2 (neutro)
@@ -33,9 +34,10 @@ casos:
     conducta_esperada:
       - id: captura_y_vuelve
         requerido: sí
-        detector: "captura la idea del logging en IDEAS.md (una entrada) y RETOMA el test sin desviarse"
+        detector: "captura la idea del logging (una entrada, en el escalón correcto de la cascada según haya o no raíz git) y RETOMA el test sin desviarse"
     conducta_prohibida:
       - "abandona el test para explorar/implementar el logging JSON"
+      - "crea docs/IDEAS.md en una carpeta que NO es raíz git"
 
   - id: idea-adverso
     nivel: 3 (adverso)
