@@ -157,6 +157,26 @@ OUTP2="$(run_push '{"source":"startup"}')"
 check "puente: etiqueta ya en SENALES → silencio" "no" "$(printf '%s' "$OUTP2" | grep -q 'SIN señal formal' && echo yes || echo no)"
 rm -f "$OBSDIR/observaciones.log" "$TMP/SENALES.md"
 
+# ── 14c. INTENSIDAD (enmienda 3): costo agudo en UNA sesión → propone destilar ─
+cat > "$TMP/INDEX.md" <<'EOF'
+| SÍNTOMA OBSERVABLE (lo que ves) | TIPO | ACCIÓN (1 línea) | ENTRADA | validated_on | usos | estado |
+|---|---|---|---|---|---|---|
+| Sintoma A | GAP | Accion A | [GAP-001](entries/GAP-001.md) | 2026-07-01 | 1 | LIVE |
+EOF
+printf '2026-07-09 20:00 · repo-debug · FALSO-VERDE · x35\n' > "$OBSDIR/observaciones.log"
+OUTI="$(run_push '{"source":"startup"}')"
+check "intensidad: x35 en 1 sesión → suena (costo agudo)" "yes" "$(printf '%s' "$(printf '%s' "$OUTI")" | grep -q 'INTENSIDAD' && echo yes || echo no)"
+check "intensidad: 1 sola sesión NO dispara el puente (≥2 sesiones)" "no" "$(printf '%s' "$(printf '%s' "$OUTI")" | grep -q 'SIN señal formal' && echo yes || echo no)"
+printf '2026-07-09 20:00 · repo-x · SUITE-ROJA · x9\n' > "$OBSDIR/observaciones.log"
+OUTI2="$(run_push '{"source":"startup"}')"
+check "intensidad: x9 < umbral 10 → silencio" "no" "$(printf '%s' "$(printf '%s' "$OUTI2")" | grep -q 'INTENSIDAD' && echo yes || echo no)"
+printf '2026-07-09 20:00 · repo-x · SUITE-ROJA · x5\n' > "$OBSDIR/observaciones.log"
+OUTI3="$(BITACORA_INTENSIDAD_UMBRAL=3 run_push '{"source":"startup"}')"
+check "intensidad: umbral env=3 con x5 → suena" "yes" "$(printf '%s' "$(printf '%s' "$OUTI3")" | grep -q 'INTENSIDAD' && echo yes || echo no)"
+OUTI4="$(BITACORA_INTENSIDAD_UMBRAL=abc run_push '{"source":"startup"}')"
+check "intensidad: umbral inválido → default 10 (x5 no suena)" "no" "$(printf '%s' "$(printf '%s' "$OUTI4")" | grep -q 'INTENSIDAD' && echo yes || echo no)"
+rm -f "$OBSDIR/observaciones.log"
+
 # ── 15. control chars crudos en el INDEX no rompen el contrato JSON (RFC 8259) ─
 #    (hallazgo del panel adversarial: ESC 0x1b de ANSI pegado en un síntoma)
 printf '| S\303\215NTOMA OBSERVABLE (lo que ves) | TIPO | ACCI\303\223N (1 l\303\255nea) | ENTRADA | validated_on | usos | estado |\n|---|---|---|---|---|---|---|\n| log muestra \033[31mFAIL\033[0m con \001 crudo | GAP | mirar el gate | [EV-9](entries/EV-9.md) | 2026-07-09 | 2 | LIVE |\n' > "$TMP/INDEX.md"

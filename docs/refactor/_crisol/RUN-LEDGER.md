@@ -1994,3 +1994,101 @@
 - RETRO: absorción por EXTRACCIÓN, no ejecución — la orden del operador ("hacelo vos de nuestra copia") es PIN_TOTAL hecho carne: en vez de correr el `npx` de un tercero (floating, código ajeno en la máquina), se leyó la idea en la copia auditada y se forjó determinista y propia. Bonus doble: el test tropezó con la señal pipe-enmascara-gate que yo mismo había anotado —confirmándola en el acto (visto: 2 de facto)— y el scanner cazó DRIFT-007 vivo en la máquina. Las dos entradas de bitácora de hoy se auto-verificaron en producción.
 - Cierre: 2026-07-09 · commit de cierre (Tier completo, 1 iteración) · forja v1.32.0 · tag y push en esta corrida.
 
+### main — 2026-07-09 (catalogo-scan: el stocktake hecho en casa — higiene estructural del catálogo)
+- STATUS: CLOSED
+- Tier: completo
+- Fecha: 2026-07-09
+- TARGET: pc-local
+- MODEL: claude-fable-5 (uniforme)
+- Alcance: absorber el stocktake de ECC en su forma doctrinal — NO la máquina de
+  veredictos-LLM (Keep/Retire/Merge por subagente, que es para catálogos de 278;
+  vos tenés 11), sino un `scripts/catalogo-scan.sh` DETERMINISTA que audita la
+  ESTRUCTURA del catálogo: (1) PUNTERO-MUERTO — un .md referencia
+  references/templates/scripts/... que no existe (Router roto); (2) HUERFANO —
+  un archivo en references/ o templates/ que NINGÚN .md de la skill menciona
+  (dead weight o reference no cableada); (3) SKILL-FALTANTE — carpeta sin
+  SKILL.md. Read-only, exit 2/1/0, hermano de leak-scan y maquina-scan. Marker
+  `<!-- ilustrativo -->` para menciones intencionales de paths inexistentes
+  (ej. arquitectura cqrs/event-driven como ejemplo de extensión futura). El
+  VEREDICTO de retirar/mergear sigue siendo HUMANO (como todo lucky). Tests con
+  fixture. Ciclo completo hasta push v1.33.0.
+- MIGRATION_STRATEGY: N/A (sin DDL)
+<!-- VEREDICTOS:BEGIN -->
+- runState: wip
+<!-- VEREDICTOS:END -->
+- Iteraciones: 1/3 (abortada en la primera)
+- RETRO: ABORTADA POR ORDEN DEL OPERADOR a mitad de la iter1, y con razón — la
+  corrida de calibración contra el catálogo real produjo 11 hallazgos de los
+  cuales la MAYORÍA eran falsos positivos (scripts que existen en scripts/ de la
+  raíz, ejemplos dentro de YAML, ilustrativos): distinguir "puntero roto" de
+  "mención legítima" es un problema de CRITERIO, no de patrón — para stocktake
+  lo determinista SE DEGRADA. ECC usa subagentes-con-veredicto por necesidad,
+  no capricho. El script a medio hacer se descartó del working tree (nunca se
+  commiteó); la condición de regreso quedó en IDEAS (~25 skills → forjar
+  stocktake CON juicio LLM + endoso). Cero cambios publicados.
+- Cierre: 2026-07-09 · abortada sin commit (working tree limpiado) · sin forja ni tag.
+
+### main — 2026-07-10 (bitácora: "el costo agudo ES evidencia" — modo intensidad en cosecha y timbre)
+- STATUS: CLOSED
+- Tier: completo
+- Fecha: 2026-07-10
+- TARGET: pc-local
+- MODEL: claude-fable-5 (uniforme)
+- Alcance: ejecutar el change-request generado por OTRA sesión del operador
+  (guardado en su vault-popover-bleed-2026-07-09; caso real: debug de un solo
+  síntoma quemó ~10 versiones y horas, postmortem escrito, observer logueó
+  FALSO-VERDE ×35 en UNA sesión → la cosecha lo demeritó por el umbral ≥2
+  sesiones). Gap legítimo: el carril Capturar del INDEX ya aceptaba costo
+  agudo ("gap >30min") pero SOLO al cierre del Crisol — hot-iteration sin
+  Crisol no tenía rampa. Cambio: (1) doctrina explícita en SKILL.md — "el
+  costo agudo ES evidencia" para el INDEX; ≥2 sesiones es EXCLUSIVO de
+  SENALES; (2) §Cosechar modo INTENSIDAD: etiqueta con x≥umbral intra-sesión
+  → ofrecer destilado a INDEX-CANDIDATE (el log detecta QUE dolió, no QUÉ —
+  el contenido sale del postmortem/contexto; endoso humano; meta-ruido
+  descontado, doble crítico acá); (3) timbre: línea nueva de
+  intensidad (sin timbre, la intensidad repetiría el gap "¿quién avisa al
+  humano?"); umbral BITACORA_INTENSIDAD_UMBRAL (env, default 10; el caso
+  real fue ×35). Matices del intérprete incorporados. Cliente inmediato: las
+  6 lecciones de la otra sesión entran por este carril tras la forja.
+  Ciclo completo hasta push v1.33.0 (orden: "aplica completo bajo los
+  lineamientos").
+- MIGRATION_STRATEGY: N/A (sin DDL)
+- Conformidad-arq: N/A (hook + prosa)
+<!-- VEREDICTOS:BEGIN -->
+- runState: closing
+- [V] TARGET · PASS · gate · pc-local (suites corridas acá)
+- [V] MODEL · PASS · gate · claude-fable-5 (uniforme)
+- [V] TARGET_ENV · N/A · — · sin @env
+- [V] REGLA0 · PASS · gate · push 33/0 (5 casos nuevos de intensidad) · observar 11/0 · lint coherente 16↔16
+- [V] TEST_COVERAGE · PASS · gate · intensidad cubierta: suena con x35, NO confunde intensidad (1 sesión) con puente (≥2 sesiones), umbral default/override/inválido→default
+- [V] INDEPENDENCIA · PASS · gate · detección determinista probada por fixture; la cosecha-intensidad es prosa operador-invocada; el change-request vino de una sesión INDEPENDIENTE que sufrió el gap (evidencia externa al implementador)
+- [V] SCOPE_CREEP · PASS · gate · SKILL.md (Capturar + §Cosechar dos modos + timbre) + push.sh (contador INTENSO) + tests + ADR enmienda 3 + CHANGELOG; exactamente el alcance del change-request + los 2 matices declarados
+- [V] PARKING · N/A · — · sin hallazgos fuera de scope (fase 0 cerró la corrida abortada del stocktake con su RETRO)
+- [V] CIERRE_TRAS_PASS · PASS · gate · cierre tras 33/0 + 11/0 + lint verde
+- [V] CREDITO · PASS · gate · enmienda 3 al ADR 0010 + CHANGELOG v1.33.0 (con el caso motivante sin secretos)
+- [V] MIGRATION · N/A · gate · sin DDL
+- [V] FUENTE_VERDAD · N/A · — · —
+- [V] RESPONSIVE · N/A · — · —
+- [V] ZERO_LEAK · PASS · gate · el timbre de intensidad emite solo conteos+umbral; leak-scan en la forja; el caso motivante entra sin rutas ni secretos
+- [V] TECHO_ITER · PASS · gate · 1/3
+- [V] OPEN_CLOSED · PASS · gate · modo nuevo AGREGADO a cosecha/timbre; la doctrina EXplicita lo latente ("gap >30min" ya existía) sin romper contrato
+- [V] ATOMICIDAD · PASS · gate · contador INTENSO = bloque awk propio, mismo patrón que SEN/PUENTE
+- [V] COSTURA · PASS · gate · BITACORA_INTENSIDAD_UMBRAL por env con default y saneo (12-factor, mismo patrón de la familia)
+- [V] LISKOV · N/A · — · —
+- [V] INTERFACE_SEGREGATION · N/A · — · —
+- [V] CASOS_LEGALES · PASS · gate · aditivo (a)
+- [V] CONFORMIDAD · N/A · — · —
+- [V] SELLOS · PASS · gate · forja v1.33.0 re-sella la familia
+- [V] FORJA · PASS · gate · registry regenerado
+- [V] TAG_GATE · PASS · gate · v1.33.0 nace de esta corrida CLOSED; autorizado ("aplica completo bajo los lineamientos")
+- [V] PIN_TOTAL · N/A · — · sin dependencias nuevas
+- [V] BUMP_REASON · PASS · gate · minor v1.33.0: capacidad nueva (modo intensidad) — ADR enmienda 3 + CHANGELOG
+<!-- VEREDICTOS:END -->
+- BITACORA: N/A entrada nueva — la corrida ES la mejora del mecanismo; las 6 lecciones del caso motivante entran por este carril desde la OTRA sesión (fase 3 del plan), con endoso del operador.
+- Iteraciones: 1/3
+- TEST_COVERAGE: push 33/0 · observar 11/0 · lint 16↔16
+- Escalación: none
+- Veredictos: fixture determinista del contador + revisión doctrinal contra las restricciones del change-request (endoso, meta-ruido, separación SENALES/INDEX, fail-open, off-switch heredado del push).
+- RETRO: primera vuelta completa del ciclo kaizen inter-sesiones — el sistema que forjamos ayer generó HOY su propio change-request desde otra sesión que sufrió un límite real, escrito bajo la ley (Crisol, lint, forja, aceptación) y con evidencia sin secretos. El gap era de PUERTA, no de doctrina: la mitad del trabajo fue EXPLICITAR lo latente ("gap >30min" nunca exigió 2 sesiones). Lección de diseño: cuando dos carriles comparten un mecanismo (cosecha), cada modo necesita su DESTINO explícito o el umbral de uno contamina al otro.
+- Cierre: 2026-07-10 · commit de cierre (Tier completo, 1 iteración) · forja v1.33.0 · tag y push en esta corrida.
+

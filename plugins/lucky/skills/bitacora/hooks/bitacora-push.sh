@@ -141,8 +141,23 @@ PUENTE_EOF
 fi
 case "$PUENTE" in ''|*[!0-9]*) PUENTE=0 ;; esac
 
+# (d) INTENSIDAD (enmienda 3 ADR 0010 — "el costo agudo ES evidencia"):
+#     etiquetas con x≥umbral en UNA sola sesión → proponer cosecha de
+#     INTENSIDAD (destilar a INDEX-CANDIDATE). El log prueba QUE dolió;
+#     el QUÉ lo pone el postmortem/humano en la cosecha.
+UMBRAL_INT="${BITACORA_INTENSIDAD_UMBRAL:-10}"
+case "$UMBRAL_INT" in ''|*[!0-9]*) UMBRAL_INT=10 ;; esac
+INTENSO=0
+if [ -f "$OBSLOG" ] && [ "$UMBRAL_INT" -gt 0 ]; then
+  INTENSO="$(awk -F' · ' -v u="$UMBRAL_INT" '
+    NF>=4 { n=$4; sub(/^x/,"",n); if (n+0 >= u) c[$3]=1 }
+    END { t=0; for (k in c) t++; print t+0 }
+  ' "$OBSLOG" 2>/dev/null || echo 0)"
+fi
+case "$INTENSO" in ''|*[!0-9]*) INTENSO=0 ;; esac
+
 BELL=""
-if [ "$SEN" -gt 0 ] || [ "$CAND" -gt 0 ] || [ "$PUENTE" -gt 0 ]; then
+if [ "$SEN" -gt 0 ] || [ "$CAND" -gt 0 ] || [ "$PUENTE" -gt 0 ] || [ "$INTENSO" -gt 0 ]; then
   BELL="⚖ JUICIO PENDIENTE — avisale al humano en tu primera respuesta (vos no juzgás; él decide):"
   if [ "$SEN" -gt 0 ]; then
     BELL="$BELL
@@ -155,6 +170,10 @@ if [ "$SEN" -gt 0 ] || [ "$CAND" -gt 0 ] || [ "$PUENTE" -gt 0 ]; then
   if [ "$PUENTE" -gt 0 ]; then
     BELL="$BELL
 - $PUENTE etiqueta(s) del log acumulan ≥ 2 sesiones SIN señal formal en SENALES.md → pedí la cosecha (\"/bitacora cosechar\") para formalizarlas o refutarlas"
+  fi
+  if [ "$INTENSO" -gt 0 ]; then
+    BELL="$BELL
+- $INTENSO etiqueta(s) con INTENSIDAD x ≥ $UMBRAL_INT en una sola sesión (costo agudo) → si hubo aprendizaje real, pedí la cosecha de intensidad: destila a INDEX-CANDIDATE (descontando meta-ruido)"
   fi
 fi
 

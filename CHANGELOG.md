@@ -4,6 +4,23 @@ Notas de release de la familia de skills Lucky. El historial completo del **proc
 (corridas del Crisol, RETROs) vive en `docs/refactor/_crisol/RUN-LEDGER.md`; los tags
 inmutables, en `git tag`. Formato: más nuevo arriba.
 
+## v1.33.0 — 2026-07-10 — Bitácora: "el costo agudo ES evidencia" — modo intensidad (enmienda 3 ADR 0010)
+
+Primer kaizen generado POR el propio sistema: otra sesión del operador quemó horas en un solo
+síntoma (postmortem + FALSO-VERDE ×35 en UNA sesión), la cosecha lo demeritó por `≥2 sesiones`, y
+esa sesión escribió el change-request completo bajo la ley. Ejecutado acá:
+
+- **Doctrina (Capturar):** el costo agudo de UNA sesión ES evidencia para el INDEX (ya estaba
+  latente en "gap >30min"); `≥2 sesiones` queda EXPLÍCITO como exclusivo de SENALES. Dos rampas al
+  INDEX: cierre del Crisol (clásica) + cosecha por intensidad (hot-iteration sin Crisol).
+- **Cosecha, dos modos:** FRECUENCIA (≥2 sesiones → borrador de SEÑAL) e INTENSIDAD
+  (`x ≥ BITACORA_INTENSIDAD_UMBRAL`, default 10, en una sesión → ofrecer destilado a
+  INDEX-CANDIDATE). El log prueba QUE dolió, no QUÉ: el contenido sale del postmortem; sin material,
+  no se inventa. Endoso humano y descuento de meta-ruido en ambos.
+- **Timbre:** línea nueva de intensidad (sin timbre, la intensidad repetiría el gap "¿quién avisa?").
+- Tests: push 33/33 (5 nuevos: suena con x35, no confunde intensidad con puente, umbral default,
+  override por env, env inválido→default).
+
 ## v1.32.0 — 2026-07-09 — maquina-scan: el AgentShield hecho en casa (auditor de ~/.claude, cero paquetes de terceros)
 
 Decisión del operador: NO ejecutar el `npx ecc-agentshield` de terceros (violaría PIN_TOTAL y el

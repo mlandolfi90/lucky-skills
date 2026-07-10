@@ -42,12 +42,26 @@ encyclopedia* (devolvé la acción, jamás vuelques el archivo entero).
 
 `/bitacora` sin argumentos = mostrar el INDEX tal cual.
 
-## Capturar (Destilación — la ESCRIBE el Crisol al cerrar)
+## Capturar (Destilación — el costo agudo ES evidencia)
 
-No se escriben entradas sueltas a mano: nacen al cerrar una corrida del Crisol
-(§4 paso 8). **Disparador OBJETIVO** (no "cuando parezca"): la corrida tuvo un
-**gap que costó >30min**, un **grep que re-derivó algo ya sabido**, o un **drift
-hallado**. Entonces:
+**Principio (2026-07-10): el costo agudo de UNA sola sesión ES evidencia
+suficiente para el INDEX.** Un incidente completo que quemó horas/iteraciones
+y dejó postmortem no es una "sospecha" que deba repetirse para valer: ya pagó
+su entrada. El umbral `≥2 sesiones` es EXCLUSIVO del carril SENALES (sospechas
+crónicas, Heinrich); jamás se le exige a un confirmado-por-dolor. Dos rampas
+al INDEX:
+
+- **Cierre del Crisol** (§4 paso 8) — la rampa clásica: no se escriben
+  entradas sueltas a mano; nacen al cerrar la corrida.
+- **Cosecha por INTENSIDAD** (§Cosechar, modo intensidad) — la rampa para
+  sesiones hot-iteration SIN Crisol: el timbre detecta la intensidad, el
+  humano pide la cosecha, el agente destila CANDIDATE.
+
+**Disparador OBJETIVO** (no "cuando parezca"): la sesión/corrida tuvo un
+**gap que costó >30min**, un **grep que re-derivó algo ya sabido**, un **drift
+hallado**, o **costo agudo intra-sesión** (etiqueta del observador con
+`x ≥ umbral` en UNA sesión · ≥K iteraciones fallidas sobre el mismo síntoma ·
+postmortem escrito). Entonces:
 
 1. **Destilá UNA entrada** con `templates/entrada.md`. Una entrada = un síntoma =
    una acción. El título ES el síntoma observable, con tag `[TIPO-NNN]`.
@@ -93,6 +107,12 @@ que no tienen señal formal en SENALES.md** y propone la cosecha. Donde ECC
 auto-promueve al cruzar un umbral de confianza, acá la escalera TERMINA en el
 endoso — el conteo sugiere, el humano formaliza.
 
+**Timbre de intensidad (enmienda 3 — "el costo agudo ES evidencia"):** el
+timbre también detecta etiquetas con `x ≥ BITACORA_INTENSIDAD_UMBRAL`
+(default 10) en UNA sola sesión del log y propone la **cosecha de INTENSIDAD**
+(destilar a INDEX-CANDIDATE si hubo aprendizaje real). Sin este timbre, la
+intensidad repetiría el gap original: acumular sin que nadie avise.
+
 Tests: `tests/test-push.sh` · `tests/test-observar.sh`.
 
 ## Cosechar (`/bitacora cosechar` — on-demand, SOLO lo invoca el operador)
@@ -100,21 +120,41 @@ Tests: `tests/test-push.sh` · `tests/test-observar.sh`.
 La pieza LLM del observer de ECC, vuelta doctrinal: nunca corre sola, nunca
 escribe sin endoso. Cuando el operador la pide:
 
+Dos modos, cada uno con su DESTINO — no confundirlos:
+
+**Modo FRECUENCIA (→ SENALES, sospechas crónicas):**
+
 1. Leé el agregado del log: `bash hooks/bitacora-observar.sh --resumen`.
 2. Por cada etiqueta con `≥2 sesiones` SIN señal formal en `SENALES.md`,
    **borrá un BORRADOR de señal** (formato de la tabla de SENALES: señal en
    prosa observable · `visto: N` heredado del conteo real del log · fecha ·
    contexto de 1 línea). Si tenés contexto de las sesiones donde sonó, usalo;
    si no, el borrador lo declara ("contexto por confirmar").
-3. **Presentá los borradores al humano** — uno por uno, con el conteo como
-   evidencia. Endosado → se agrega a `SENALES.md`; refutado → se descarta
-   anotando el porqué en la respuesta (no en el archivo). JAMÁS escribas una
-   señal no endosada.
-4. Etiquetas que ya tienen señal formal: solo reportá "la señal X acumuló
+3. Etiquetas que ya tienen señal formal: solo reportá "la señal X acumuló
    N avistamientos nuevos" para que el humano actualice `visto:` si endosa.
-5. Meta-ruido: si la sesión cosechada EDITÓ la bitácora/tests (las palabras de
-   las señales aparecen por trabajo, no por incidente), decláralo y descontá
-   con criterio — el conteo crudo del log no distingue.
+
+**Modo INTENSIDAD (→ INDEX-CANDIDATE, costo agudo de UNA sesión):**
+
+4. Por cada etiqueta con `x ≥ umbral` en UNA sola línea/sesión del log
+   (`BITACORA_INTENSIDAD_UMBRAL`, default 10), ofrecé **destilar una entrada
+   CANDIDATE del INDEX** con `templates/entrada.md` — NO una señal.
+   **El log solo prueba QUE dolió, no QUÉ dolió:** el contenido (síntoma
+   observable, causa raíz, acción que FUNCIONÓ) sale del postmortem, del
+   transcript o de lo que el humano cuente — si no hay material para el QUÉ,
+   declaralo y NO inventes la entrada. `validated_on` = la sesión del
+   incidente; la evidencia es el COSTO (conteo + postmortem).
+
+**Reglas de AMBOS modos:**
+
+5. **Presentá los borradores al humano** — uno por uno, con el conteo como
+   evidencia. Endosado → se escribe (SENALES o INDEX+entrada según el modo);
+   refutado → se descarta anotando el porqué en la respuesta (no en el
+   archivo). JAMÁS escribas nada no endosado.
+6. Meta-ruido (CRÍTICO, doble en intensidad): si la sesión cosechada EDITÓ la
+   bitácora/tests/gates (las palabras de las señales aparecen por TRABAJO, no
+   por incidente), declaralo y descontá con criterio — el conteo crudo no
+   distingue: una sesión que forjó la bitácora marca ×35 sin que nada haya
+   dolido; una de debug real marca ×35 porque dolió. El contexto decide.
 
 ## Mantener (mecánico, no por disciplina)
 
@@ -167,7 +207,7 @@ escribe sin endoso. Cuando el operador la pide:
 ---
 
 **Fuente de verdad: `github.com/mlandolfi90/lucky-skills` · esta copia = tag
-`v1.32.0` (cache local, NO la ley).** Ley viva: con red, si el repo tiene un tag
+`v1.33.0` (cache local, NO la ley).** Ley viva: con red, si el repo tiene un tag
 mayor (`git ls-remote --tags
 https://github.com/mlandolfi90/lucky-skills.git`), seguir la del repo e informar
 al humano.

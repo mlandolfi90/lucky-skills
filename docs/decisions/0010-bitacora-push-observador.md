@@ -124,10 +124,34 @@ escalera terminando en el humano:
   sin humano — la poda de SENALES (>90 días) y el endoso siguen siendo actos
   del operador.
 
+## Enmienda 3 (2026-07-10) — "el costo agudo ES evidencia" (modo intensidad)
+
+Change-request generado por OTRA sesión del operador que se golpeó con el
+diseño: un debug de UN síntoma quemó ~10 versiones y horas (postmortem
+escrito, observer logueó FALSO-VERDE ×35 en una sesión) y la cosecha lo
+demeritó por el umbral `≥2 sesiones`. El gap era de PUERTA, no de doctrina:
+el carril Capturar del INDEX ya aceptaba costo agudo ("gap >30min") pero solo
+al cierre del Crisol — hot-iteration sin Crisol no tenía rampa.
+
+- **Doctrina explícita:** el costo agudo de UNA sesión es evidencia suficiente
+  para el INDEX; `≥2 sesiones` es EXCLUSIVO de SENALES (la sospecha necesita
+  frecuencia; el incidente completo ya pagó su entrada).
+- **Cosecha modo INTENSIDAD:** etiqueta con `x ≥ BITACORA_INTENSIDAD_UMBRAL`
+  (default 10) en UNA sesión → ofrecer destilado a **INDEX-CANDIDATE** (no a
+  SENALES). **El log prueba QUE dolió, no QUÉ dolió**: el contenido sale del
+  postmortem/contexto; sin material para el QUÉ, no se inventa la entrada.
+- **Timbre de intensidad:** línea nueva en ⚖ JUICIO PENDIENTE — sin timbre, la
+  intensidad repetiría el gap original (acumular sin avisar).
+- **Meta-ruido, doble crítico:** una sesión que FORJÓ la bitácora marca ×35
+  sin dolor; una de debug real marca ×35 por dolor. El descuento con contexto
+  es obligatorio antes de destilar.
+- Invariantes intactos: endoso humano (CANDIDATE→LIVE), nada auto-promueve,
+  separación SENALES=sospechas / INDEX=confirmados.
+
 ---
 
 **Fuente de verdad: `github.com/mlandolfi90/lucky-skills` · esta copia = tag
-`v1.32.0` (cache local, NO la ley).** Ley viva: con red, si el repo tiene un tag
+`v1.33.0` (cache local, NO la ley).** Ley viva: con red, si el repo tiene un tag
 mayor (`git ls-remote --tags
 https://github.com/mlandolfi90/lucky-skills.git`), seguir la del repo e informar
 al humano.
