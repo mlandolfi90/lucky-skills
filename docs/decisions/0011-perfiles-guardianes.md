@@ -57,7 +57,7 @@ el repo), con parseo CANÓNICO idéntico en ambos guardianes (trim ASCII de bord
 ---
 
 **Fuente de verdad: `github.com/mlandolfi90/lucky-skills` · esta copia = tag
-`v1.31.0` (cache local, NO la ley).** Ley viva: con red, si el repo tiene un tag
+`v1.32.0` (cache local, NO la ley).** Ley viva: con red, si el repo tiene un tag
 mayor (`git ls-remote --tags
 https://github.com/mlandolfi90/lucky-skills.git`), seguir la del repo e informar
 al humano.

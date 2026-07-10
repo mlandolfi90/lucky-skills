@@ -46,6 +46,7 @@ Las únicas `.env` de una sesión nueva. Solo **nombres** — los valores viven 
 | Pedir/auditar/rotar/buscar/shred un secreto; saber qué hay y dónde en Infisical | **vault.md** | login a Infisical, **§Descubrir** estructura, fetch puntual, rotar/shred |
 | Conectarse a un VPS, abrir túnel Chisel, verificar SSH/host-keys/salud del túnel | **conectar.md** | deja un canal SSH (Método A directo · Método B túnel Chisel) |
 | Inventariar/monitorear/desplegar/crear apps/dar de alta servers en Coolify | **operar.md** | opera la API de Coolify (INIT, inventario, health, deploy, alta de server) |
+| Auditar la SEGURIDAD de la config local (`~/.claude`): secretos en settings, hooks peligrosos, permisos anchos, cableado no-portable | **`scripts/maquina-scan.sh`** | `bash scripts/maquina-scan.sh` — el "AgentShield hecho en casa": hermano del leak-scan (repo) pero sobre la MÁQUINA. Exit 2=CRITICAL, 1=HIGH, 0=limpio; zero-leak (nunca imprime el valor). Override para tests: `MAQUINA_SCAN_DIR` |
 
 > **API Coolify:** entra por su **FQDN público + Bearer token** (default, desde cualquier PC); `localhost:8000` es fallback solo dentro del host. SSH es **condicional** (docker crudo / apps remotas). El FQDN se descubre (Infisical o se pide 1 vez), nunca se hardcodea.
 
@@ -70,6 +71,20 @@ Cuando el usuario carga `management`, NO esperes instrucciones — arrancá:
    operar→`operar.md`. `operar.md` entra a Coolify por **FQDN público + token**;
    `conectar.md` (SSH) es **condicional** (solo docker crudo / apps remotas).
 
+## Auditar la máquina (`scripts/maquina-scan.sh`)
+
+El **AgentShield hecho en casa**: la capacidad se extrajo de la copia auditada
+de ECC/AgentShield (MIT) y se forjó propia — **cero ejecución de paquetes de
+terceros** (PIN_TOTAL). Auditor determinista de `~/.claude` (settings, CLAUDE.md
+global, hooks propios, hooks.json de plugins, configs MCP), 100% código sin
+juicio LLM. Categorías: SECRETO-CON-VALOR / CLAVE-PRIVADA / HOOK-PELIGROSO
+(curl|sh, base64|sh, eval de red, rm -rf raíz/HOME) / BYPASS-PERMISOS (CRITICAL,
+exit 2); PERMISO-ANCHO / HOOK-NO-PORTABLE (DRIFT-007 vuelta regla: ruta Windows
+horneada o `python` pelado en un command — HIGH, exit 1); MCP-SUPERFICIE (INFO).
+**Zero-leak:** el reporte da severidad+categoría+archivo:línea, JAMÁS el valor
+hallado. Gate-able en CI. Tests: `tests/test-maquina-scan.sh`. Correlo cada tanto
+o antes de compartir/heredar una config `.claude`.
+
 ## Seguridad (no negociable)
 
 - Valores de secretos **solo** en Infisical: nunca a stdout/log/git/chat. A las capas se les pasan **nombres**.
@@ -92,7 +107,7 @@ Este snapshot es de un operador **Windows/PowerShell**; adaptá a tu shell/OS.
 > *Procedencia: consolida las ex-skills vault-credenciales, conectar-vps y centro-de-mando (2026-06-11).*
 
 **Fuente de verdad: `github.com/mlandolfi90/lucky-skills` · esta copia = tag
-`v1.31.0` (cache local, NO la ley).** Ley viva: con red, si el repo tiene un tag
+`v1.32.0` (cache local, NO la ley).** Ley viva: con red, si el repo tiene un tag
 mayor (`git ls-remote --tags
 https://github.com/mlandolfi90/lucky-skills.git`), seguir la del repo e informar
 al humano.

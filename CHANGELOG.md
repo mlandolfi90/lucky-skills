@@ -4,6 +4,25 @@ Notas de release de la familia de skills Lucky. El historial completo del **proc
 (corridas del Crisol, RETROs) vive en `docs/refactor/_crisol/RUN-LEDGER.md`; los tags
 inmutables, en `git tag`. Formato: más nuevo arriba.
 
+## v1.32.0 — 2026-07-09 — maquina-scan: el AgentShield hecho en casa (auditor de ~/.claude, cero paquetes de terceros)
+
+Decisión del operador: NO ejecutar el `npx ecc-agentshield` de terceros (violaría PIN_TOTAL y el
+espíritu del stack). La capacidad se EXTRAJO de la copia auditada de ECC/AgentShield (MIT) y se
+forjó propia en `management/scripts/maquina-scan.sh` — auditor determinista de la MÁQUINA
+(`~/.claude`), hermano del leak-scan (que audita el repo).
+
+- Categorías (100% código, sin juicio LLM): SECRETO-CON-VALOR · CLAVE-PRIVADA · HOOK-PELIGROSO
+  (curl|sh, base64|sh, eval de red, rm -rf raíz/HOME) · BYPASS-PERMISOS → CRITICAL (exit 2);
+  PERMISO-ANCHO · HOOK-NO-PORTABLE (DRIFT-007 ascendida a regla determinista) → HIGH (exit 1);
+  MCP-SUPERFICIE → INFO. Severidades de reglas-comunes; gate-able.
+- Zero-leak: el reporte JAMÁS imprime el valor hallado, solo severidad+categoría+archivo:línea.
+- Reusa los patrones de secreto/clave del leak-scan (costura) + corrige el suyo para claves JSON
+  (`"API_KEY":` con comilla de cierre — bug cazado por el fixture).
+- Router en management/SKILL.md + §Auditar la máquina. Tests: test-maquina-scan 18/18 (cada categoría
+  hit/no-hit, zero-leak, severidad, prosa-no-dispara, dir inexistente).
+- **Hallazgo real en la primera corrida**: cazó un plugin legacy (`crisol-enforcer`) con `python`
+  pelado no-portable en `~/.claude` — el propio bug de DRIFT-007, en la máquina del operador.
+
 ## v1.31.0 — 2026-07-09 — Señales: puente log↔SENALES en el timbre + cosecha on-demand (enmienda 2 ADR 0010)
 
 Segunda tanda de absorción del sistema de instincts de ECC, con la escalera de frecuencia

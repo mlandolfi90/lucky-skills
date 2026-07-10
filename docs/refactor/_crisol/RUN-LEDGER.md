@@ -1934,3 +1934,63 @@
 - RETRO: la absorción por tandas paga — la 1ra tanda (v1.30.0) rechazó la pieza LLM de ECC entera; hoy volvió PARTIDA: el conteo (determinista) al timbre, el juicio (LLM) a comando operador-invocado. Rechazar ≠ descartar: era cuestión de encontrarle la forma doctrinal.
 - Cierre: 2026-07-09 · commit de cierre (fast-path, 1 iteración) · forja v1.31.0 · tag y push en esta corrida.
 
+### main — 2026-07-09 (maquina-scan: el AgentShield hecho en casa — auditor de ~/.claude propio)
+- STATUS: CLOSED
+- Tier: completo
+- Fecha: 2026-07-09
+- TARGET: pc-local
+- MODEL: claude-fable-5 (uniforme)
+- Alcance: decisión del operador — NO ejecutar el paquete npm de terceros
+  (violaría PIN_TOTAL y el espíritu del stack): la capacidad se EXTRAE de
+  nuestra copia auditada de ECC/AgentShield y se forja propia. Nuevo
+  `management/scripts/maquina-scan.sh`: auditor determinista de la MÁQUINA
+  (~/.claude) — hermano del leak-scan (que audita el repo). Categorías v1:
+  secretos-con-valor y claves privadas en configs (reusa los patrones del
+  leak-scan), hooks peligrosos (curl|sh, base64|sh, rm -rf raíz/HOME, eval
+  de red), permisos anchos / bypass, hooks NO-portables (DRIFT-007 ascendida
+  a regla determinista: ruta Windows horneada o `python` pelado en commands),
+  superficie MCP (conteo informativo). Severidades de reglas-comunes
+  (CRITICAL→exit 2, HIGH→exit 1, limpio→0; gate-able). Zero-leak del reporte:
+  jamás imprime el VALOR hallado, solo archivo:línea+categoría. Tests con
+  fixture de .claude falso (override MAQUINA_SCAN_DIR). Router en
+  management/SKILL.md. Ciclo completo hasta push v1.32.0.
+- MIGRATION_STRATEGY: N/A (sin DDL)
+- Conformidad-arq: N/A (script + prosa)
+<!-- VEREDICTOS:BEGIN -->
+- runState: closing
+- [V] TARGET · PASS · gate · pc-local (scanner corrido contra ~/.claude real acá)
+- [V] MODEL · PASS · gate · claude-fable-5 (uniforme)
+- [V] TARGET_ENV · N/A · — · sin @env
+- [V] REGLA0 · PASS · gate · test-maquina-scan 18/0 + auditoría REAL (encontró 1 HIGH verídico: plugin legacy no-portable) + resto de la familia sin regresión
+- [V] TEST_COVERAGE · PASS · gate · 18 casos: cada categoría hit+no-hit, zero-leak (valor no aparece), severidad (critical>high), prosa-no-dispara, ref-a-var-no-dispara, dir inexistente
+- [V] INDEPENDENCIA · PASS · gate · fixture determinista con .claude falso (MAQUINA_SCAN_DIR); la validación final fue la máquina REAL, evidencia empírica
+- [V] SCOPE_CREEP · PASS · gate · scanner+test+Router+§Auditar+CHANGELOG; el hallazgo real (plugin legacy) NO se arregló inline → IDEAS (es config de máquina, no repo)
+- [V] PARKING · PASS · gate · 2 líneas a IDEAS (higiene del plugin legacy + maquina-scan v2)
+- [V] CIERRE_TRAS_PASS · PASS · gate · cierre tras 18/0 + auditoría real verde-con-hallazgo-esperado
+- [V] CREDITO · PASS · gate · Router + §Auditar en management/SKILL.md + CHANGELOG v1.32.0 (capacidad nueva documentada; sin ADR — no cambia arquitectura, es tooling)
+- [V] MIGRATION · N/A · gate · sin DDL
+- [V] FUENTE_VERDAD · N/A · — · —
+- [V] RESPONSIVE · N/A · — · —
+- [V] ZERO_LEAK · PASS · gate · DOBLE: leak-scan del repo LIMPIO en la forja + el scanner mismo es zero-leak por diseño (test lo prueba: el valor del secreto no aparece en su reporte)
+- [V] TECHO_ITER · PASS · gate · 1/3 (los 2 bugs —regex JSON, pipefail del test— se arreglaron en la misma iteración de puesta a punto del fixture)
+- [V] OPEN_CLOSED · PASS · gate · script + sección nuevos; reusa patrones del leak-scan sin editarlo
+- [V] ATOMICIDAD · PASS · gate · el scanner compone checks por categoría, cada uno una función/bloque; universos separados por tipo de archivo
+- [V] COSTURA · PASS · gate · patrones de secreto/clave heredados del leak-scan (fuente común de la regla); MAQUINA_SCAN_DIR parametriza el destino (12-factor, tests)
+- [V] LISKOV · N/A · — · —
+- [V] INTERFACE_SEGREGATION · N/A · — · —
+- [V] CASOS_LEGALES · PASS · gate · aditivo (a); el fix del regex JSON es del código nuevo, no de estable
+- [V] CONFORMIDAD · N/A · — · —
+- [V] SELLOS · PASS · gate · forja v1.32.0 re-sella la familia
+- [V] FORJA · PASS · gate · registry regenerado
+- [V] TAG_GATE · PASS · gate · v1.32.0 nace de esta corrida CLOSED; autorizado por el operador ("lo vamos a hacer nosotros mismos de nuestra copia")
+- [V] PIN_TOTAL · PASS · design · el PUNTO de la corrida: cero ejecución del paquete de terceros; capacidad extraída de la copia auditada y forjada propia
+- [V] BUMP_REASON · PASS · gate · minor v1.32.0: capacidad nueva (auditor de máquina)
+<!-- VEREDICTOS:END -->
+- BITACORA: N/A directo — pero la corrida VALIDÓ dos entradas vivas en el mundo real: DRIFT-007 (el scanner encontró el bug no-portable en la máquina) y la señal del pipe-enmascara-gate (el propio test lo sufrió y se corrigió). Ninguna entrada nueva; ambas ya catalogadas.
+- Iteraciones: 1/3
+- TEST_COVERAGE: test-maquina-scan 18/0 + auditoría real (1 HIGH esperable) + familia sin regresión
+- Escalación: none
+- Veredictos: puesta a punto del fixture destapó 2 bugs (regex no cubría claves JSON quoteadas; el test se comía su gate con pipefail — la MISMA señal que registré horas antes) · ambos arreglados · auditoría real cazó un hallazgo verídico → el scanner sirve.
+- RETRO: absorción por EXTRACCIÓN, no ejecución — la orden del operador ("hacelo vos de nuestra copia") es PIN_TOTAL hecho carne: en vez de correr el `npx` de un tercero (floating, código ajeno en la máquina), se leyó la idea en la copia auditada y se forjó determinista y propia. Bonus doble: el test tropezó con la señal pipe-enmascara-gate que yo mismo había anotado —confirmándola en el acto (visto: 2 de facto)— y el scanner cazó DRIFT-007 vivo en la máquina. Las dos entradas de bitácora de hoy se auto-verificaron en producción.
+- Cierre: 2026-07-09 · commit de cierre (Tier completo, 1 iteración) · forja v1.32.0 · tag y push en esta corrida.
+
