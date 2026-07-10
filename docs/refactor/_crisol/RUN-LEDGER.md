@@ -2149,3 +2149,61 @@
 - Veredictos: dedup contra el catálogo existente hecho (familia GAP-006 por REFS, DRIFT-008 hermana de DRIFT-004); descuento de meta-ruido documentado (×35 = sesión forjadora, no la del incidente).
 - RETRO: la enmienda 3 pagó en su primer uso real — el destilado salió del postmortem en una pasada, sin inventar contenido. Dato honesto que quedó: el observador NO corría en el repo del incidente (el ×35 era meta-ruido de la propia forja); el timbre habría sonado igual pero por la razón equivocada. Señal implícita: el valor del observador depende de que la flota completa lo tenga instalado. COLISIÓN resuelta en el push: la OTRA sesión cosechó el MISMO postmortem en paralelo (3 entradas CANDIDATE gruesas: su GAP-007≈nuestro GAP-008, su DRIFT-008≈GAP-007+FALSO-VERDE-003, su DRIFT-009≈DRIFT-008). Resolución: gana lo ENDOSADO (LIVE, grano fino por síntoma = diseño del INDEX); lo único de la suya se absorbió (orden del barrido antes de la excepción, grep-invariante, gotcha :root→:host, commit ee3b470 en validated_on); sus 3 archivos supersedidos por dedup. Señal de proceso: dos sesiones cosechando el mismo postmortem sin coordinación ⇒ la cosecha debería marcar el postmortem como "cosechado" (línea al vault) para no duplicar.
 - Cierre: 2026-07-10 · commit de cierre (fast-path, 1 iteración) · forja v1.34.0 · tag y push en esta corrida.
+
+### main — 2026-07-10 (skill nueva: hotfix — permiso de trabajo en caliente)
+- STATUS: CLOSED
+- Tier: fast-path
+- Fecha: 2026-07-10
+- TARGET: pc-local
+- MODEL: claude-fable-5 (uniforme)
+- Alcance: skill nueva `hotfix` (v1 prosa pura) — carril legal para iterar fixes
+  en caliente con el operador en frente: UN permiso ACTIVE+wip para todo el
+  hotfix, betas versionadas con veredicto guardado (vault en el repo,
+  INTENTOS.md con WIP-commit por bump), matriz UNA vez al cierre con la
+  solución. Plan perfeccionado por enjambre ultracode (30 hallazgos, 24
+  incorporados: mecánica BASE/restore del cierre, ZERO_LEAK del vault,
+  exención del techo para betas, runState dentro del bloque VEREDICTOS,
+  taxonomía de veredictos ✓/~/✗, gramáticas de versión por artefacto,
+  huérfanas, colisión de ACTIVE, cosecha común a ambas ramas con marca
+  `cosechado:`). Satélites: ADR 0012, escenario cumplimiento 3 niveles,
+  actualización de listados (cumplimiento §Alcance, README, GUIA-SKILLS),
+  idea MCP-vault a IDEAS. Release v1.35.0.
+- MIGRATION_STRATEGY: N/A (sin DDL)
+- Conformidad-arq: N/A (prosa + docs)
+<!-- VEREDICTOS:BEGIN -->
+- runState: closing
+- [V] TARGET · PASS · gate · pc-local
+- [V] MODEL · PASS · gate · claude-fable-5 (uniforme)
+- [V] TARGET_ENV · N/A · — · sin @env
+- [V] REGLA0 · PASS · gate · prosa pura: forja verde = suite de este cambio (sellos, registry, leak-scan, bitacora-lint); frontmatter validado por el pre-flight de la forja
+- [V] TEST_COVERAGE · N/A · — · sin código nuevo (v1 prosa); el escenario de cumplimiento de 3 niveles es la cobertura de CONDUCTA (corre post-release en sesión fresca)
+- [V] INDEPENDENCIA · PASS · gate · el diseño fue refutado por panel adversarial independiente (24/30 hallazgos sobrevivieron doble juez doctrinal+práctico); 6 propuestas refutadas NO entraron
+- [V] SCOPE_CREEP · PASS · gate · exactamente el plan aprobado: SKILL.md + ADR 0012 + escenario + 4 listados + IDEAS; gate/enforcer y bitacora/SKILL.md intactos (fuera de alcance declarado)
+- [V] PARKING · PASS · gate · idea MCP-vault capturada en IDEAS.md (parking, no construida)
+- [V] CIERRE_TRAS_PASS · PASS · gate · cierre tras forja verde
+- [V] CREDITO · PASS · gate · ADR 0012 + CHANGELOG v1.35.0
+- [V] MIGRATION · N/A · gate · sin DDL
+- [V] FUENTE_VERDAD · N/A · — · —
+- [V] RESPONSIVE · N/A · — · —
+- [V] ZERO_LEAK · PASS · gate · la skill IMPONE zero-leak a sus vaults (scrub + leak-verifier del cierre); esta corrida sin rutas/IPs/identidad; leak-scan en la forja
+- [V] TECHO_ITER · PASS · gate · 1/3
+- [V] OPEN_CLOSED · PASS · gate · carril AGREGADO sobre mecánica existente (ACTIVE+wip); ninguna regla previa alterada — la exención del techo EXPLICITA el dominio del techo (loops autónomos), no lo debilita
+- [V] ATOMICIDAD · PASS · gate · una skill = un dominio (iteración en caliente); satélites en sus archivos propios
+- [V] COSTURA · N/A · — · sin config nueva
+- [V] LISKOV · N/A · — · —
+- [V] INTERFACE_SEGREGATION · N/A · — · —
+- [V] CASOS_LEGALES · PASS · gate · aditivo (a)
+- [V] CONFORMIDAD · N/A · — · prosa
+- [V] SELLOS · PASS · gate · forja v1.35.0 re-sella la familia (SKILL.md nuevo y ADR 0012 nacen con ancla exacta, 1 ocurrencia c/u)
+- [V] FORJA · PASS · gate · registry regenerado con hotfix detectada automáticamente
+- [V] TAG_GATE · PASS · gate · v1.35.0 nace de esta corrida CLOSED; plan aprobado por el operador (ExitPlanMode)
+- [V] PIN_TOTAL · N/A · — · sin dependencias nuevas
+- [V] BUMP_REASON · PASS · gate · minor v1.35.0: capacidad nueva (skill hotfix) — ADR 0012 + CHANGELOG
+<!-- VEREDICTOS:END -->
+- BITACORA: N/A entrada nueva — la skill ES la absorción operativa de GAP-007/008, GREP-004, DRIFT-008, FALSO-VERDE-003/004 (citadas en su §Ciclo); el dolor futuro de hotfixes entra por su propia rampa de cosecha.
+- Iteraciones: 1/3
+- TEST_COVERAGE: forja (sellos+registry+leak+lint) · conducta: escenario 3 niveles pendiente de sesión fresca
+- Escalación: none
+- Veredictos: panel adversarial ultracode en fase de plan (5 lentes × 2 jueces por hallazgo, 65 agentes) — hallazgos críticos incorporados: mecánica BASE/restore del cierre, ZERO_LEAK del vault, exención del techo, runState dentro del bloque VEREDICTOS, WIP-commit por bump, taxonomía ✓/~/✗, stamp confirmado, gramáticas de versión, colisión/huérfanas, cosecha común con marca.
+- RETRO: primera skill de la familia REFUTADA antes de nacer — el panel encontró 4 críticas que la versión inicial del plan habría shippeado (el cierre habría generado patches incompletos con WIP-commits previos; el vault habría brickeado forjas futuras por leak; el techo de 3 habría criminalizado el caso de uso; un closing fuera del bloque habría apagado la red final en silencio). Lección de proceso: para skills nuevas, el costo del enjambre en fase de PLAN es una fracción del costo de descubrir esos gaps en producción. La validación empírica real queda para el primer hotfix de verdad + el escenario de cumplimiento en sesión fresca.
+- Cierre: 2026-07-10 · commit de cierre (fast-path, 1 iteración) · forja v1.35.0 · tag y push en esta corrida.

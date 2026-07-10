@@ -86,6 +86,7 @@
 | crisol | 555+ | **larga-legítima** (cuerpo normativo único, precedente v1.28.0 sobre crisol_gate.py 671) — se re-dictamina por corrida |
 | cargar | ~293 | OK |
 | arquitectura | 179 | OK |
+| hotfix | ~174 | OK (nació 2026-07-10 bajo esta guía) |
 | ley | 146 | OK |
 | bitacora | ~135 | OK |
 | cumplimiento | ~110 | OK |

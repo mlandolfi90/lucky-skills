@@ -5,6 +5,7 @@ Marketplace propio de skills de Lucky — **fuente unica**.
 Plugin `lucky`:
 - **crisol** — loop jidoka de calidad incorporada para cambios de codigo.
 - **brujula** — ancla la sesion al estado real del repo/deploy (no alucina contexto).
+- **hotfix** — permiso de trabajo en caliente: iterar betas con el operador en frente, formalizar por Crisol al final.
 
 ## Uso
 ```

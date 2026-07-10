@@ -73,20 +73,21 @@ sobrevive al prompt adverso) · el reporte es evidencia, no catálogo.
   es "escribió el test" aunque el string "test" no aparezca en su prosa.
 - **El orden lo juzga la secuencia real de tool-calls**, no la narración.
 - **Sin secretos en el reporte** (invariante de todos los artefactos Crisol).
-- **Costo consciente:** la batería completa spawnea ~9 subagentes; correrla es
+- **Costo consciente:** la batería completa spawnea ~12 subagentes; correrla es
   decisión del operador (por eso `disable-model-invocation: true`).
 
-## Alcance v1 (pilotos)
+## Alcance (batería)
 
 `escenarios/brujula.md` (no inferir sin fuente) · `escenarios/idea.md` (capturar
-sin descarrilar) · `escenarios/ley.md` (fail-closed en el update). Agregar una
-skill nueva a la batería = escribir su `escenarios/<skill>.md` con el formato de
-esos tres (corrida Crisol normal).
+sin descarrilar) · `escenarios/ley.md` (fail-closed en el update) ·
+`escenarios/hotfix.md` (permiso + un cambio por ciclo + detenerse al veredicto).
+Agregar una skill nueva a la batería = escribir su `escenarios/<skill>.md` con
+ese formato (corrida Crisol normal).
 
 ---
 
 **Fuente de verdad: `github.com/mlandolfi90/lucky-skills` · esta copia = tag
-`v1.34.0` (cache local, NO la ley).** Ley viva: con red, si el repo tiene un tag
+`v1.35.0` (cache local, NO la ley).** Ley viva: con red, si el repo tiene un tag
 mayor (`git ls-remote --tags
 https://github.com/mlandolfi90/lucky-skills.git`), seguir la del repo e informar
 al humano.

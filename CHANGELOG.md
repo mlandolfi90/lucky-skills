@@ -4,6 +4,29 @@ Notas de release de la familia de skills Lucky. El historial completo del **proc
 (corridas del Crisol, RETROs) vive en `docs/refactor/_crisol/RUN-LEDGER.md`; los tags
 inmutables, en `git tag`. Formato: más nuevo arriba.
 
+## v1.35.0 — 2026-07-10 — skill nueva: hotfix — permiso de trabajo en caliente (ADR 0012)
+
+Pedido del operador: "un mecanismo para iterar rápido conmigo en frente", con "hotfix versionados
+con su resultado guardado". Diseño perfeccionado por enjambre adversarial (5 lentes × panel de
+jueces: 30 hallazgos, 24 incorporados).
+
+- **El carril:** UN permiso (entrada ACTIVE + `runState: wip` dentro del bloque VEREDICTOS + `BASE:
+  <sha>`) para todo el hotfix — la ley ya lo bancaba, la skill lo coreografía. Solo mesa caliente
+  (pc-local / docker-local / paas@dev). Matriz UNA vez, al cierre, con la solución.
+- **Betas versionadas con resultado guardado:** vault en el repo con INTENTOS.md — fila por beta
+  (versión · commit · hipótesis · cambio · veredicto ✓/~/✗ textual · evidencia), WIP-commit por cada
+  bump (cada fila apunta al código exacto), árbol revertido a BASE entre hipótesis, ZERO_LEAK con
+  scrub. Gramática de versión adaptada al artefacto (manifest de extensión no admite sufijos).
+- **Disciplina anti-adivinanza** cableada desde la bitácora: 2 strikes ⇒ instrumentar (GREP-004),
+  stamp confirmado o no hay veredicto (DRIFT-008), releer diff tras replace_all (GAP-008), preview
+  con validación cruzada (FALSO-VERDE-003). Exención del techo: betas con operador ≠ iteraciones
+  Crisol.
+- **Cierre mecánico:** restore a BASE + diff de la solución (forward-only), re-clasificación de Tier
+  sobre ese diff, cosecha por INTENSIDAD común a ambas ramas (≥3 filas o sin solución) con marca
+  `cosechado:` anti-duplicados.
+- Satélites: ADR 0012 · escenario cumplimiento de 3 niveles (batería ahora 4 skills, ~12 subagentes)
+  · README y GUIA-SKILLS actualizados · idea MCP-vault a IDEAS (parking).
+
 ## v1.34.0 — 2026-07-10 — Bitácora: primera cosecha por INTENSIDAD real — 6 entradas nuevas al INDEX (16 → 22)
 
 El mecanismo forjado en v1.33.0 se usó por primera vez con el caso que lo motivó. Del postmortem
