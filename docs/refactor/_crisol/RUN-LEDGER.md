@@ -2092,3 +2092,60 @@
 - RETRO: primera vuelta completa del ciclo kaizen inter-sesiones — el sistema que forjamos ayer generó HOY su propio change-request desde otra sesión que sufrió un límite real, escrito bajo la ley (Crisol, lint, forja, aceptación) y con evidencia sin secretos. El gap era de PUERTA, no de doctrina: la mitad del trabajo fue EXPLICITAR lo latente ("gap >30min" nunca exigió 2 sesiones). Lección de diseño: cuando dos carriles comparten un mecanismo (cosecha), cada modo necesita su DESTINO explícito o el umbral de uno contamina al otro.
 - Cierre: 2026-07-10 · commit de cierre (Tier completo, 1 iteración) · forja v1.33.0 · tag y push en esta corrida.
 
+
+### main — 2026-07-10 (cosecha popover-bleed + promoción pipe-enmascara)
+- STATUS: CLOSED
+- Tier: fast-path
+- Fecha: 2026-07-10
+- TARGET: pc-local
+- MODEL: claude-fable-5 (uniforme)
+- Alcance: primera cosecha por INTENSIDAD real (fase 3 del plan v1.33.0):
+  destilar las lecciones 1-5 del postmortem popover-bleed (vault de la otra
+  sesión) a entradas del INDEX + promover la señal pipe-enmascara-gate de
+  SENALES al INDEX (2 mordidas en una sesión + antídoto validado). Endoso del
+  operador: "endosalas pero no como candidatos sino como soluciones reales" →
+  entran LIVE directo (el endoso humano ES la transición CANDIDATE→LIVE;
+  acá ocurre en el mismo acto). Meta-ruido descontado con honestidad: el
+  FALSO-VERDE ×35 del log vino de la sesión que FORJÓ la bitácora (repo
+  lucky-skills), no de la del incidente — la evidencia real es el postmortem
+  escrito (~10 versiones/horas), no el log. La lección 6 (Shadow DOM) NO entra:
+  es arquitectura del repo de la extensión (destino: su ADR/IDEAS).
+- MIGRATION_STRATEGY: N/A (sin DDL)
+- Conformidad-arq: N/A (solo contenido de catálogo, sin código)
+<!-- VEREDICTOS:BEGIN -->
+- runState: closing
+- [V] TARGET · PASS · gate · pc-local
+- [V] MODEL · PASS · gate · claude-fable-5 (uniforme)
+- [V] TARGET_ENV · N/A · — · sin @env
+- [V] REGLA0 · PASS · gate · bitacora-lint coherente 22↔22 (verificado en la forja, exit desnudo)
+- [V] TEST_COVERAGE · N/A · — · solo contenido de catálogo (md), sin código nuevo
+- [V] INDEPENDENCIA · PASS · gate · el contenido sale del postmortem escrito por OTRA sesión (evidencia externa); el destilador no inventó el QUÉ
+- [V] SCOPE_CREEP · PASS · gate · exactamente lo endosado: 5 entries del postmortem + 1 promoción + cross-links + señal retirada de SENALES + CHANGELOG; lección 6 excluida a propósito
+- [V] PARKING · N/A · — · sin hallazgos fuera de scope
+- [V] CIERRE_TRAS_PASS · PASS · gate · cierre tras lint verde
+- [V] CREDITO · PASS · gate · CHANGELOG v1.34.0 con el caso motivante sin secretos
+- [V] MIGRATION · N/A · gate · sin DDL
+- [V] FUENTE_VERDAD · N/A · — · —
+- [V] RESPONSIVE · N/A · — · —
+- [V] ZERO_LEAK · PASS · gate · entries sin rutas absolutas ni identidad local; leak-scan en la forja
+- [V] TECHO_ITER · PASS · gate · 1/3
+- [V] OPEN_CLOSED · PASS · gate · solo filas/entries AGREGADAS + REFS enriquecidos; ninguna entrada existente alterada en su contrato
+- [V] ATOMICIDAD · PASS · gate · una entry = un patrón; la familia light-DOM va por cross-link, no por entrada-madre (preserva el matcheo por síntoma)
+- [V] COSTURA · N/A · — · sin config nueva
+- [V] LISKOV · N/A · — · —
+- [V] INTERFACE_SEGREGATION · N/A · — · —
+- [V] CASOS_LEGALES · PASS · gate · aditivo (a)
+- [V] CONFORMIDAD · N/A · — · —
+- [V] SELLOS · PASS · gate · forja v1.34.0 re-sella la familia
+- [V] FORJA · PASS · gate · registry regenerado
+- [V] TAG_GATE · PASS · gate · v1.34.0 nace de esta corrida CLOSED; endoso explícito del operador ("endosalas... como soluciones reales")
+- [V] PIN_TOTAL · N/A · — · sin dependencias nuevas
+- [V] BUMP_REASON · PASS · gate · minor v1.34.0: el catálogo (contenido que viaja a la flota) crece 16→22 entradas
+<!-- VEREDICTOS:END -->
+- BITACORA: 6 entradas nuevas LIVE (GAP-007, GREP-004, FALSO-VERDE-003, DRIFT-008, GAP-008, FALSO-VERDE-004); señal pipe-enmascara retirada de SENALES (promovida); GAP-006 cross-linkeado a su familia.
+- Iteraciones: 1/3
+- TEST_COVERAGE: bitacora-lint 22↔22 · leak-scan en forja
+- Escalación: none
+- Veredictos: dedup contra el catálogo existente hecho (familia GAP-006 por REFS, DRIFT-008 hermana de DRIFT-004); descuento de meta-ruido documentado (×35 = sesión forjadora, no la del incidente).
+- RETRO: la enmienda 3 pagó en su primer uso real — el destilado salió del postmortem en una pasada, sin inventar contenido. Dato honesto que quedó: el observador NO corría en el repo del incidente (el ×35 era meta-ruido de la propia forja); el timbre habría sonado igual pero por la razón equivocada. Señal implícita: el valor del observador depende de que la flota completa lo tenga instalado. COLISIÓN resuelta en el push: la OTRA sesión cosechó el MISMO postmortem en paralelo (3 entradas CANDIDATE gruesas: su GAP-007≈nuestro GAP-008, su DRIFT-008≈GAP-007+FALSO-VERDE-003, su DRIFT-009≈DRIFT-008). Resolución: gana lo ENDOSADO (LIVE, grano fino por síntoma = diseño del INDEX); lo único de la suya se absorbió (orden del barrido antes de la excepción, grep-invariante, gotcha :root→:host, commit ee3b470 en validated_on); sus 3 archivos supersedidos por dedup. Señal de proceso: dos sesiones cosechando el mismo postmortem sin coordinación ⇒ la cosecha debería marcar el postmortem como "cosechado" (línea al vault) para no duplicar.
+- Cierre: 2026-07-10 · commit de cierre (fast-path, 1 iteración) · forja v1.34.0 · tag y push en esta corrida.

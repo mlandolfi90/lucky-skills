@@ -4,6 +4,32 @@ Notas de release de la familia de skills Lucky. El historial completo del **proc
 (corridas del Crisol, RETROs) vive en `docs/refactor/_crisol/RUN-LEDGER.md`; los tags
 inmutables, en `git tag`. Formato: más nuevo arriba.
 
+## v1.34.0 — 2026-07-10 — Bitácora: primera cosecha por INTENSIDAD real — 6 entradas nuevas al INDEX (16 → 22)
+
+El mecanismo forjado en v1.33.0 se usó por primera vez con el caso que lo motivó. Del postmortem
+popover-bleed (otra sesión: ~10 versiones y horas en UN síntoma) se destilaron 5 lecciones, más la
+promoción de una señal confirmada. Endoso del operador: directo a **LIVE** ("soluciones reales").
+
+- **GAP-007** — la caja mide de más con box-props propios en 0 → medí al HIJO (flex toma la altura
+  del hijo más alto), no sigas reseteando al padre.
+- **GREP-004** — dos fixes visuales fallidos ⇒ instrumentá (`getComputedStyle` +
+  `getBoundingClientRect`) antes del tercero; adivinar quemó ~5 versiones, medir resolvió en un tiro.
+- **FALSO-VERDE-003** — un preview de UI que normaliza defaults del entorno MIENTE: debe
+  reproducirlos (UA + bleed de la página), jamás limpiarlos.
+- **DRIFT-008** — content script se refresca con F5 de la PÁGINA, no con ↻ de la extensión →
+  version-stamp doble (panel + consola) para distinguir fix-roto de script-viejo.
+- **GAP-008** — `replace_all` pisa la línea que RECIÉN agregaste si matchea el patrón → releer a
+  mano la región editada tras todo reemplazo masivo.
+- **FALSO-VERDE-004** (promovida desde SENALES, usos: 2) — gate/lint con pipe en cadena `&&` queda
+  enmascarado (el exit es el de `tail`) → capturar salida y chequear `$?` desnudo.
+- Cross-links de familia "la página se filtra a UI light-DOM": GAP-006 ↔ GAP-007 ↔ FALSO-VERDE-003.
+- Meta-ruido descontado con honestidad: el ×35 del log era de la sesión que forjó la bitácora; la
+  evidencia real de esta cosecha es el postmortem, no el log. La lección 6 (Shadow DOM) no entra:
+  es arquitectura del repo de la extensión.
+- Colisión resuelta: otra sesión cosechó el mismo postmortem en paralelo (3 CANDIDATEs gruesas);
+  ganó lo endosado LIVE con grano fino por síntoma, absorbiendo sus detalles únicos (orden del
+  barrido, grep-invariante, gotcha `:root`→`:host`, commit de validación).
+
 ## v1.33.0 — 2026-07-10 — Bitácora: "el costo agudo ES evidencia" — modo intensidad (enmienda 3 ADR 0010)
 
 Primer kaizen generado POR el propio sistema: otra sesión del operador quemó horas en un solo
