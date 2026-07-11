@@ -180,3 +180,4 @@
 - 2026-07-10 · MCP para vaults de hotfix: hoy el vault vive en el repo (docs/refactor/_hotfix/); la idea
   es un MCP que los gestione fuera del repo (sobrevive rollbacks/clones frescos, consulta cross-repo,
   marca de cosecha centralizada). Esperar a que el carril hotfix pruebe su valor en uso real primero. · idea de MLL (al diseñar la skill hotfix)
+- 2026-07-11 · limpiar la inconsistencia interna de DRIFT-009 (ejemplo etch-mode): L5 dice "pastilla REC = etch-mode" pero L14 dice que gatear por etch-mode hacía reaparecer el bug POR la pastilla REC — no cierra si pastilla=etch-mode; el operador no reconoció etch-mode al revisarlo. Aterrizar la topología real de HOT-MIC y corregir la entrada. · surgió al usar DRIFT-009 de molde en la corrida hotfix anti-círculo (ADR 0014)

@@ -2322,7 +2322,7 @@
 - Cierre: 2026-07-10 · repo lucky-saber PRIVADO creado y pusheado (commit bootstrap ad29f17) · gates propios verdes · Etapa B pendiente.
 
 ### main — 2026-07-11 (hotfix anti-círculo + colapso vault→hotfixs/)
-- STATUS: ACTIVE
+- STATUS: CLOSED
 - Tier: completo
 - Fecha: 2026-07-11
 - TARGET: pc-local (Git-Bash del operador — edita el toolchain de skills-CLI de este repo; docker N/D esta sesión)
@@ -2332,5 +2332,39 @@
 - MIGRATION_STRATEGY: N/A (sin DDL)
 - BASE: df67627
 <!-- VEREDICTOS:BEGIN -->
-- runState: wip
+- runState: closing
+- [V] REGLA0 · PASS · regla0-verifier · test-enforcer.sh 110/110 en pc-local (Git-Bash), exit 0; diff = 6 .md, no toca enforcer/gate → regresión verde
+- [V] TARGET · PASS · regla0-verifier · pc-local declarado (no placeholder); ambos guardianes → ACTIVE_OK, branch match exacto 'main'
+- [V] MODEL · PASS · líder · opus (uniforme), Compuerta del Paso 0
+- [V] TEST_COVERAGE · PASS · regla0-verifier · hooks/test-enforcer.sh 110/110 (grupos 0/A..K, incl. gate de cobertura + paridad guardianes)
+- [V] INDEPENDENCIA · PASS · líder · 5 verificadores frescos (contexto nuevo, input = diff real df67627..HEAD)
+- [V] ZERO_LEAK · PASS · leak-verifier · scripts/leak-scan.sh sobre git ls-files → LIMPIO, exit 0; 0 IP/token/ruta/host reales en diff+ADR+ledger+commit
+- [V] SCOPE_CREEP · PASS · scope-verifier · diff = exactamente los 6 .md del Alcance (a..e); (d) REDUCIDO (adoptar-crisol.sh no tocado), no ampliado
+- [V] CREDITO · PASS · scope-verifier · ADR 0014 deposita el crédito (colapso + anti-círculo; supersede PARCIAL de 0012)
+- [V] OPEN_CLOSED · PASS · design-verifier · §Registro/§Cerrar reescritos como CAMBIO DE CONTRATO declarado en ADR 0014 (caso legal (c))
+- [V] CASOS_LEGALES · PASS · design-verifier · caso legal (c) cambio de contrato: tier completo + ADR 0014 (aceptado)
+- [V] ATOMICIDAD · PASS · design-verifier · la skill conserva 1 responsabilidad; el colapso FUSIONA vault+memoria (reduce acoplamiento); consumidor viejo re-apuntado en cumplimiento
+- [V] FIDELIDAD · PASS · fidelidad-verifier · los 4 artefactos encoden las decisiones (espina/coinciden/régimen/breaker-1er-rebote); TODO-NUDGE intacto (únicos 'candado' son negaciones; 0 MUST/obligatorio/'no cierra hasta' agregados); §Abrir 3 auto-bootstrap coherente
+- [V] PARKING · PASS · líder · idea fuera de scope (limpiar inconsistencia etch-mode de DRIFT-009) → docs/IDEAS.md
+- [V] TECHO_ITER · PASS · líder · 1 iteración, bajo techo 3
+- [V] CIERRE_TRAS_PASS · PASS · líder · matriz completa PASS/N/A (0 FAIL, 0 PENDIENTE) → commit de cierre habilitado
+- [V] CONFORMIDAD · N/A · design-verifier · diff .md, sin código hexagonal (puertos/adaptadores)
+- [V] TARGET_ENV · N/A · — · pc-local sin @env
+- [V] MIGRATION · N/A · — · sin DDL
+- [V] FUENTE_VERDAD · N/A · — · no toca testing/prod (mesa = toolchain local)
+- [V] RESPONSIVE · N/A · — · no toca UI
+- [V] LISKOV · N/A · — · sin implementación nueva de una abstracción existente
+- [V] INTERFACE_SEGREGATION · N/A · — · sin interfaz/puerto con ≥2 clientes
+- [V] COSTURA · N/A · — · no agrega punto de extensión de código (prosa)
+- [V] SELLOS · N/A · — · esta corrida NO habilita release (tag/forja diferidos, decisión del operador)
+- [V] FORJA · N/A · — · sin forja (diferida)
+- [V] TAG_GATE · N/A · — · sin tag estable (diferido)
+- [V] PIN_TOTAL · N/A · — · sin dependencias
+- [V] BUMP_REASON · N/A · — · sin bump de pin
 <!-- VEREDICTOS:END -->
+- Iteraciones: 1/3
+- TEST_COVERAGE: hooks (test-enforcer.sh, 110/110)
+- BITACORA: DRIFT-009 consultada (síntoma whack-a-mole) — la corrida la ENCARNA en la skill (aplicación del patrón, no destila entrada nueva). HALLAZGO menor: el ejemplo `etch-mode` de DRIFT-009 tiene inconsistencia interna (L5 pastilla=etch-mode vs L14 gatear por etch-mode rompía por la pastilla) → parkeado en docs/IDEAS.md (no bloqueante; lo decide el operador).
+- Veredictos: 5 verificadores frescos opus (INDEPENDENCIA), matriz PASS — REGLA0 110/110 · leak-scan LIMPIO · scope exacto (d reducido) · OPEN_CLOSED por cambio-de-contrato (ADR 0014) · fidelidad+todo-nudge sin candados. 0 FAIL, sin iteración de re-trabajo.
+- RETRO (proceso, blameless): la sesión ancló primero a un marco equivocado ("el modelo nunca puede testear → elicitá los controles") que el panel adversarial corrigió — descubrir la superficie de control es LEER CÓDIGO (grep), la elicitación complementa; y el ejemplo `etch-mode` de la bitácora resultó turbio bajo la lupa del operador. Lección: anclar el rediseño a un ejemplo verificable ANTES de construir; el panel de diseño + la verificación adversarial pagaron (cazaron 2 candados que contradecían "todo nudge" antes del cierre).
+- Cierre: 2026-07-11 · commit de trabajo f1d3428 (juzgado ACTIVE) + flip a CLOSED (docs-only) · push a origin/main (respaldo) · SIN tag (forja/release = decisión deliberada aparte del operador, §Versionado).
