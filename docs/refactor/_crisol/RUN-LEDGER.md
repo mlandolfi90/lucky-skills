@@ -2368,3 +2368,42 @@
 - Veredictos: 5 verificadores frescos opus (INDEPENDENCIA), matriz PASS — REGLA0 110/110 · leak-scan LIMPIO · scope exacto (d reducido) · OPEN_CLOSED por cambio-de-contrato (ADR 0014) · fidelidad+todo-nudge sin candados. 0 FAIL, sin iteración de re-trabajo.
 - RETRO (proceso, blameless): la sesión ancló primero a un marco equivocado ("el modelo nunca puede testear → elicitá los controles") que el panel adversarial corrigió — descubrir la superficie de control es LEER CÓDIGO (grep), la elicitación complementa; y el ejemplo `etch-mode` de la bitácora resultó turbio bajo la lupa del operador. Lección: anclar el rediseño a un ejemplo verificable ANTES de construir; el panel de diseño + la verificación adversarial pagaron (cazaron 2 candados que contradecían "todo nudge" antes del cierre).
 - Cierre: 2026-07-11 · commit de trabajo f1d3428 (juzgado ACTIVE) + flip a CLOSED (docs-only) · push a origin/main (respaldo) · SIN tag (forja/release = decisión deliberada aparte del operador, §Versionado).
+
+### main — 2026-07-11 (release v1.37.0 — forja del hotfix anti-círculo)
+- STATUS: CLOSED
+- Tier: fast-path
+- Fecha: 2026-07-11
+- TARGET: pc-local (Git-Bash del operador — forja local de la familia de skills)
+- MODEL: opus (uniforme — Verificador fresco)
+- LEY: v1.36.0 (verificado online — último tag remoto == copia local; §6)
+- Alcance: release v1.37.0 — `forjar-release.sh v1.37.0` re-sella la familia (todos los SKILL.md + references de cargar + docs/decisions/*.md, incl. ADR 0014) de v1.36.0→v1.37.0, sincroniza plugin.json.version, regenera registry.json (sha256 por archivo + pin commit) y corre leak-scan + bitacora-lint fail-closed. Promueve la corrida CLOSED+PASS del hotfix anti-círculo (commit 5ce40ed, "se promueve lo que se probó"). Minor: capacidad nueva (rediseño anti-whack-a-mole + colapso vault→hotfixs/).
+- BASE: 5ce40ed
+<!-- VEREDICTOS:BEGIN -->
+- runState: closing
+- [V] REGLA0 · PASS · verificador-release · leak-scan.sh + bitacora-lint fail-closed VERDES; suite test-enforcer 110/110 heredada de la corrida promovida (5ce40ed)
+- [V] TARGET · PASS · líder · pc-local (forja local de la familia)
+- [V] MODEL · PASS · líder · opus (uniforme)
+- [V] TEST_COVERAGE · PASS · verificador-release · hooks/test-enforcer.sh 110/110 (heredado de 5ce40ed)
+- [V] INDEPENDENCIA · PASS · líder · Verificador fresco (contexto nuevo), no verifica su propio trabajo
+- [V] SELLOS · PASS · verificador-release · 26/26 archivos == v1.37.0, exactamente 1 sello c/u, 0 stragglers
+- [V] FORJA · PASS · verificador-release · registry.json tag v1.37.0 + pin commit 5ce40ed; sha256 spot-check (crisol) MATCH byte-a-byte
+- [V] TAG_GATE · PASS · verificador-release · v1.37.0 no existe aún; corrida CLOSED+PASS (hotfix 5ce40ed) promovida ("se promueve lo que se probó")
+- [V] ZERO_LEAK · PASS · leak-verifier · scripts/leak-scan.sh LIMPIO, exit 0 (árbol completo incl. registry regenerado)
+- [V] SCOPE_CREEP · PASS · líder · diff = re-sello 26 + registry.json + plugin.json = exactamente el ritual de release, sin extras
+- [V] CIERRE_TRAS_PASS · PASS · líder · matriz PASS → commit + tag habilitados
+- [V] TECHO_ITER · PASS · líder · 1 iteración
+- [V] OPEN_CLOSED · N/A · — · re-sello = marcador de release (sancionado como mover latest), no comportamiento
+- [V] CREDITO · N/A · — · release promueve; el ADR 0014 vive en la corrida previa
+- [V] CONFORMIDAD · N/A · — · sin código hexagonal
+- [V] BUMP_REASON · N/A · — · sin bump de pin de dependencia
+- [V] PIN_TOTAL · N/A · — · sin dependencias
+- [V] MIGRATION · N/A · — · sin DDL
+- [V] RESPONSIVE · N/A · — · no toca UI
+- [V] TARGET_ENV · N/A · — · pc-local sin @env
+- [V] FUENTE_VERDAD · N/A · — · no toca testing/prod
+- [V] PARKING · N/A · — · sin ideas fuera de scope
+<!-- VEREDICTOS:END -->
+- Iteraciones: 1/1 (fast-path, sin re-trabajo)
+- TEST_COVERAGE: hooks (test-enforcer.sh, 110/110 heredado de 5ce40ed) + forja (leak-scan + bitacora-lint fail-closed) + sha256 spot-check registry↔archivo
+- Veredictos: Verificador fresco opus (INDEPENDENCIA) — SELLOS 26/26 · leak-scan LIMPIO · registry tag v1.37.0 + sha256 MATCH (crisol) · plugin.json 1.37.0 · TAG_GATE ok. Gate Crisol habilitado.
+- Cierre: 2026-07-11 · `forjar-release.sh v1.37.0` (26 sellos + registry pin 5ce40ed + plugin.json 1.37.0) · commit de release + tag anotado v1.37.0 · push a origin/main + tags.
