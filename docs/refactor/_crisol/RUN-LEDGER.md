@@ -2320,3 +2320,17 @@
 - Veredictos: publish gate propio verde; endoso de scope interactivo (22 entradas, 2 corregidas por el operador).
 - RETRO: primer bootstrap de un repo SEPARADO del ecosistema Lucky. El endoso de scope reveló un principio que no estaba explícito: hay entradas que son GUARDRAILS contra errores recurrentes de la IA (DRIFT-002 auth-sin-PRG, DRIFT-008 "el fix no anda"=content-script-viejo) → esas van `global` porque la IA las comete en cualquier repo, y el match por síntoma evita la polución; vs quirks de una tecnología → `stack:x`. Quedó grabado en el README de lucky-saber. También: el operador absorbió impeccable Live Mode dentro de su Lucky-Debugger, así que FALSO-VERDE-001 es `stack:lucky-debugger` (la tool que carga la falla), no `stack:extension`. Etapa B (MCP lucky-tool-saber: pull a cache local + escritura + telemetría) pendiente.
 - Cierre: 2026-07-10 · repo lucky-saber PRIVADO creado y pusheado (commit bootstrap ad29f17) · gates propios verdes · Etapa B pendiente.
+
+### main — 2026-07-11 (hotfix anti-círculo + colapso vault→hotfixs/)
+- STATUS: ACTIVE
+- Tier: completo
+- Fecha: 2026-07-11
+- TARGET: pc-local (Git-Bash del operador — edita el toolchain de skills-CLI de este repo; docker N/D esta sesión)
+- MODEL: opus (uniforme — verificadores frescos)
+- LEY: v1.36.0 (verificado online — último tag remoto == copia local; §6 Ley viva)
+- Alcance: rediseño de la skill `hotfix` contra el modo de falla "iteraciones en círculo / whack-a-mole" (DRIFT-009) + COLAPSO del vault efímero (docs/refactor/_hotfix/…/INTENTOS.md) al catálogo PERSISTENTE `docs/hotfixs/Bug-<frase-corta>.md` (3ª capa de memoria: instancia, per-repo). Cambios: (a) `plugins/lucky/skills/hotfix/SKILL.md` reescrito — 2º enemigo (el CÍRCULO) en el encabezado, regla-5 de mapeo de controles (grep+operador DEBEN COINCIDIR → `modelo-estado` firme), breaker "choque cruzado" (hermano ortogonal del 2-strikes: 1er rebote, todo-nudge, puntero a DRIFT-009), §Registro/§Cerrar re-homados al `Bug-`, barrido de cura entera ADVISORY; (b) `plugins/lucky/skills/hotfix/templates/{_PLANTILLA,INDICE}.md` (scaffolding de `docs/hotfixs/`); (c) `plugins/lucky/skills/cumplimiento/escenarios/hotfix.md` re-apunta detectores vault→Bug-; (d) el skill AUTO-BOOTSTRAPEA `docs/hotfixs/{INDICE,Bug-*}` desde sus templates (single-source en el plugin; `adoptar-crisol.sh` NO se toca — evita duplicar contenido, scope REDUCIDO no ampliado); (e) ADR `docs/decisions/0014` supersede parcial de 0012 (colapso + anti-círculo). Decisiones del operador: descubrir=grep+operador coinciden · breaker 1er-rebote · TODO-NUDGE (cero enforcement, ni al cierre) · leanness 232 líneas · columna evidencia mantener.
+- MIGRATION_STRATEGY: N/A (sin DDL)
+- BASE: df67627
+<!-- VEREDICTOS:BEGIN -->
+- runState: wip
+<!-- VEREDICTOS:END -->
