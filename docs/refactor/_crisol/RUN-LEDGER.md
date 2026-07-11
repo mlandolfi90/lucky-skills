@@ -2264,3 +2264,59 @@
 - Veredictos: suite determinista con HOME/clon aislados; validación en vivo del procedimiento (update real v1.27→v1.35 esta sesión); postura de seguridad documentada en ADR.
 - RETRO: el incidente que motivó la corrida se auto-documentó — /ley corrió a mano, DRIFT-007 mordió DENTRO del propio /ley (6b con command -v), y el catálogo pagó: la entrada existente diagnosticó el silencio en segundos. Límite honesto registrado en el ADR: el hook garantiza frescura del PRÓXIMO arranque; si el harness enumera antes de correr SessionStart, la sesión presente puede seguir viendo el listado anterior — verificar empíricamente en sesión fresca (misma familia que la señal listing-congelado, visto: 2 ya).
 - Cierre: 2026-07-10 · commit de cierre (fast-path, 1 iteración) · forja v1.36.0 · tag y push en esta corrida.
+
+### main — 2026-07-10 (Etapa A: bootstrap del repo lucky-saber)
+- STATUS: CLOSED
+- Tier: completo
+- Fecha: 2026-07-10
+- TARGET: pc-local
+- MODEL: claude-opus-4-8
+- Alcance: Etapa A del proyecto lucky-saber (capa de conocimiento centralizada).
+  Crear el repo PRIVADO y SEPARADO `lucky-saber` (fuera de lucky-skills, fuera
+  del bus ley-live), migrar la bitácora (INDEX + SENALES + 22 entries) + ideas
+  con el campo `scope` (global / stack:x / repo:x), y montar su publish gate
+  propio (lint + leak-scan fail-closed). COPIAR, no cortar: lucky-skills queda
+  intacto (la bitácora vieja sigue viva como fuente hasta el corte futuro). El
+  MCP (lucky-tool-saber) y el cableado de las skills son Etapa B. Diseño en
+  memoria del operador, confirmado hoy. Endoso de scopes = checkpoint humano
+  antes de crear el repo GitHub.
+- MIGRATION_STRATEGY: N/A (sin DDL; migración de contenido markdown)
+- Conformidad-arq: repo de datos con publish gate propio; sin gate de código
+  (las escrituras irán por el MCP+endoso en Etapa B)
+<!-- VEREDICTOS:BEGIN -->
+- runState: closing
+- [V] TARGET · PASS · gate · pc-local (registrado para lucky-saber; scripts del gate corren local)
+- [V] MODEL · PASS · gate · claude-opus-4-8
+- [V] TARGET_ENV · N/A · — · sin @env
+- [V] REGLA0 · PASS · gate · publish gate propio de lucky-saber verde: lint 22/22 coherente (columna scope validada+espejada) + leak-scan LIMPIO
+- [V] TEST_COVERAGE · PASS · gate · el lint adaptado cubre el campo scope nuevo (presencia + valor legal global|stack:x|repo:x + espejo entry↔INDEX + techo 36 por el campo extra); fail-closed
+- [V] INDEPENDENCIA · PASS · gate · scope endosado por el humano UNO POR UNO (corrigió FALSO-VERDE-001→lucky-debugger y promovió DRIFT-008→global); el modelo propuso, el humano decidió
+- [V] SCOPE_CREEP · PASS · gate · exactamente Etapa A: repo + migración COPIA + scope + gate; lucky-skills INTACTO (copiar no cortar); MCP lucky-tool-saber y cableado de skills = Etapa B, no tocados
+- [V] PARKING · N/A · — · sin hallazgos fuera de scope
+- [V] CIERRE_TRAS_PASS · PASS · gate · cierre tras gates verdes + repo creado + push
+- [V] CREDITO · PASS · gate · README documenta el modelo scope + el principio guardrail-IA→global / tech-quirk→stack:x que emergió del endoso
+- [V] MIGRATION · N/A · gate · sin DDL (migración de markdown)
+- [V] FUENTE_VERDAD · N/A · — · —
+- [V] RESPONSIVE · N/A · — · —
+- [V] ZERO_LEAK · PASS · gate · leak-scan LIMPIO sobre git ls-files; repo PRIVADO no relaja (mismo scan, hallazgo #15 del enjambre); entries ya scrubeadas + README sin IP/ruta/identidad
+- [V] TECHO_ITER · PASS · gate · 1/3
+- [V] OPEN_CLOSED · N/A · — · repo nuevo, sin contrato previo que romper
+- [V] ATOMICIDAD · PASS · gate · un repo = una responsabilidad (conocimiento); la ley queda en lucky-skills
+- [V] COSTURA · N/A · — · —
+- [V] LISKOV · N/A · — · —
+- [V] INTERFACE_SEGREGATION · N/A · — · —
+- [V] CASOS_LEGALES · N/A · — · —
+- [V] CONFORMIDAD · PASS · gate · repo de datos con publish gate propio (lint+leak-scan), sin gate de código; escrituras irán por MCP+endoso en Etapa B
+- [V] SELLOS · N/A · — · lucky-saber no usa el sello de Ley viva (no está en el bus de skills)
+- [V] FORJA · N/A · — · sin ritual de forja aún (no hay tags de release en Etapa A)
+- [V] TAG_GATE · N/A · — · sin tag
+- [V] PIN_TOTAL · N/A · — · sin dependencias
+- [V] BUMP_REASON · N/A · — · sin versión
+<!-- VEREDICTOS:END -->
+- BITACORA: N/A entrada nueva — la corrida MIGRA la bitácora a su repo propio; el dolor futuro de este proyecto entra por su rampa normal.
+- Iteraciones: 1/3
+- TEST_COVERAGE: lucky-saber lint 22/22 · leak-scan LIMPIO
+- Escalación: none
+- Veredictos: publish gate propio verde; endoso de scope interactivo (22 entradas, 2 corregidas por el operador).
+- RETRO: primer bootstrap de un repo SEPARADO del ecosistema Lucky. El endoso de scope reveló un principio que no estaba explícito: hay entradas que son GUARDRAILS contra errores recurrentes de la IA (DRIFT-002 auth-sin-PRG, DRIFT-008 "el fix no anda"=content-script-viejo) → esas van `global` porque la IA las comete en cualquier repo, y el match por síntoma evita la polución; vs quirks de una tecnología → `stack:x`. Quedó grabado en el README de lucky-saber. También: el operador absorbió impeccable Live Mode dentro de su Lucky-Debugger, así que FALSO-VERDE-001 es `stack:lucky-debugger` (la tool que carga la falla), no `stack:extension`. Etapa B (MCP lucky-tool-saber: pull a cache local + escritura + telemetría) pendiente.
+- Cierre: 2026-07-10 · repo lucky-saber PRIVADO creado y pusheado (commit bootstrap ad29f17) · gates propios verdes · Etapa B pendiente.
