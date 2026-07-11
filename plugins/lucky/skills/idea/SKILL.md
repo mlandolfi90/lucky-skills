@@ -45,6 +45,15 @@ perseguirla ahora.
    sobre ella, investigarla u ofrecer implementarla — el Crisol las lista al
    cierre de cada corrida (§Parking) y ahí el humano decide.
 
+## Publicar al saber (opt-in, si el MCP está)
+
+Si en la sesión están las tools `mcp__lucky-mcp__lucky_saber-*`, tras anotar la idea LOCAL (pasos
+de arriba) ofrecé en UNA línea publicarla también al **saber centralizado** con
+`saber_capturar_idea(<texto>, scope)` — para que viaje al conocimiento del stack (va a una rama de
+revisión, **nunca a main**). Opt-in: no lo hagas sin el "dale" del humano; si dice que no, quedó el
+parking local. Fallback: sin las tools, solo el flujo local de arriba, intacto. Nunca bloquees ni
+descarriles por el MCP.
+
 ## Leer (`/idea` sin argumentos)
 
 Mostrar las últimas 10 entradas del archivo que corresponda (repo o global),
@@ -53,7 +62,7 @@ tal cual. Nada más.
 ---
 
 **Fuente de verdad: `github.com/mlandolfi90/lucky-skills` · esta copia = tag
-`v1.37.0` (cache local, NO la ley).** Ley viva: con red, si el repo tiene un tag
+`v1.38.0` (cache local, NO la ley).** Ley viva: con red, si el repo tiene un tag
 mayor (`git ls-remote --tags
 https://github.com/mlandolfi90/lucky-skills.git`), seguir la del repo e informar
 al humano.

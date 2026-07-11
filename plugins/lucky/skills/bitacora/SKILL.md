@@ -42,6 +42,24 @@ encyclopedia* (devolvé la acción, jamás vuelques el archivo entero).
 
 `/bitacora` sin argumentos = mostrar el INDEX tal cual.
 
+## Saber vivo (MCP) — preferilo si está disponible
+
+El **saber centralizado** del stack vive fuera de esta skill (repo privado, servido por el MCP
+`lucky-tool-saber`, agregado en el gateway litellm). Si en la sesión están las tools
+`mcp__lucky-mcp__lucky_saber-*`:
+
+- **Consultar:** preferí `saber_buscar(<síntoma>, scopes=[...])` al grep local — trae el catálogo
+  VIVO y centralizado, filtrado por scope (`global` + el stack del repo actual). Devuelve la línea
+  de acción; `saber_ficha(<ID>)` para el cuerpo. Complementa el INDEX local; si dudás, mirá los dos.
+- **Capturar/proponer:** en vez de escribir la entrada a mano, `saber_proponer_ficha(...)` la propone
+  al saber (va a una rama `mcp-inbox/*`, **nunca a main**; el humano mergea) — así el patrón viaja al
+  conocimiento central. Sospecha débil → `saber_senal(...)`.
+- **Fallback (el MCP acelera, nunca bloquea):** si las tools NO están (sesión sin el connector
+  litellm), seguí con el flujo LOCAL de esta skill (grep del INDEX, destilar a mano). Cero fricción.
+
+El saber y el INDEX local de esta skill **convergen por reconciliación** (etapa aparte); mientras
+diverjan, el local es el fallback autoritativo.
+
 ## Capturar (Destilación — el costo agudo ES evidencia)
 
 **Principio (2026-07-10): el costo agudo de UNA sola sesión ES evidencia
@@ -207,7 +225,7 @@ Dos modos, cada uno con su DESTINO — no confundirlos:
 ---
 
 **Fuente de verdad: `github.com/mlandolfi90/lucky-skills` · esta copia = tag
-`v1.37.0` (cache local, NO la ley).** Ley viva: con red, si el repo tiene un tag
+`v1.38.0` (cache local, NO la ley).** Ley viva: con red, si el repo tiene un tag
 mayor (`git ls-remote --tags
 https://github.com/mlandolfi90/lucky-skills.git`), seguir la del repo e informar
 al humano.

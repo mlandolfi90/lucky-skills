@@ -2407,3 +2407,44 @@
 - TEST_COVERAGE: hooks (test-enforcer.sh, 110/110 heredado de 5ce40ed) + forja (leak-scan + bitacora-lint fail-closed) + sha256 spot-check registry↔archivo
 - Veredictos: Verificador fresco opus (INDEPENDENCIA) — SELLOS 26/26 · leak-scan LIMPIO · registry tag v1.37.0 + sha256 MATCH (crisol) · plugin.json 1.37.0 · TAG_GATE ok. Gate Crisol habilitado.
 - Cierre: 2026-07-11 · `forjar-release.sh v1.37.0` (26 sellos + registry pin 5ce40ed + plugin.json 1.37.0) · commit de release + tag anotado v1.37.0 · push a origin/main + tags.
+
+### main — 2026-07-11 (release v1.38.0 — cableo de bitacora/idea al MCP saber)
+- STATUS: CLOSED
+- Tier: fast-path
+- Fecha: 2026-07-11
+- TARGET: pc-local (Git-Bash del operador — forja local de la familia de skills)
+- MODEL: opus (uniforme — Verificador fresco)
+- LEY: v1.37.0 (último tag local; la copia local ES la fuente en esta corrida de forja, §6)
+- Alcance: Fase 3 del proyecto MCP de conocimiento — CABLEAR dos skills al MCP `lucky-tool-saber` (saber centralizado, agregado por litellm). CONTENIDO: 2 secciones ADITIVAS+DEFENSIVAS opt-in/fallback — `bitacora` §"Saber vivo (MCP)" (si están las tools `mcp__lucky-mcp__lucky_saber-*`: consultar por `saber_buscar`/`saber_ficha`, proponer por `saber_proponer_ficha`/`saber_senal` a ramas `mcp-inbox/*` NUNCA main; sin tools → grep/destilado LOCAL intacto) + `idea` §"Publicar al saber" (opt-in `saber_capturar_idea` tras el parking local, solo con el "dale" del humano; sin tools → flujo local). Luego RELEASE: `forjar-release.sh v1.38.0` re-sella 26 archivos v1.37→v1.38, sincroniza plugin.json, regenera registry.json (sha256 + pin) y corre leak-scan + bitacora-lint fail-closed. Minor: capacidad nueva (cableo al saber), no rompe consumidores (fallback total).
+- BASE: ec6b95b (pin del registry — HEAD pre-release)
+<!-- VEREDICTOS:BEGIN -->
+- runState: closing
+- [V] REGLA0 · PASS · verificador-release · leak-scan.sh + bitacora-lint fail-closed VERDES (forja exit 0, árbol completo)
+- [V] TARGET · PASS · líder · pc-local (forja local de la familia)
+- [V] MODEL · PASS · líder · opus (uniforme)
+- [V] INDEPENDENCIA · PASS · verificador-fresco · Verificador fresco opus (contexto nuevo) sobre las 2 secciones = APPROVE (5/5 puntos); caveat `allowed-tools` RESUELTO por doc oficial (skills.md: `allowed-tools` es grant, NO acota tools ambientes → MCP sigue invocable)
+- [V] FLEET_SAFE · PASS · verificador-fresco · cableo opt-in/fallback: sesión sin el connector litellm → flujo LOCAL de cada skill intacto (no rompe ni bloquea la flota de ~21 repos)
+- [V] SELLOS · PASS · forja · 26/26 archivos == v1.38.0, exactamente 1 sello c/u, 0 stragglers
+- [V] FORJA · PASS · forja · registry.json tag v1.38.0 + pin commit ec6b95b; plugin.json 1.38.0
+- [V] ZERO_LEAK · PASS · leak-verifier · leak-scan.sh LIMPIO exit 0 (árbol completo incl. registry regenerado); secciones nuevas sin secretos/IP/ruta/identidad
+- [V] SCOPE_CREEP · PASS · líder · diff = 2 secciones aditivas (bitacora/idea) + re-sello 26 + registry.json + plugin.json = exactamente el cableo + el ritual de release
+- [V] NO_MAIN · PASS · verificador-fresco · ambas secciones explícitas: escritura a ramas `mcp-inbox/*`/revisión, NUNCA a main
+- [V] CIERRE_TRAS_PASS · PASS · líder · matriz PASS/N/A (0 FAIL, 0 PENDIENTE) → commit + tag habilitados
+- [V] TAG_GATE · PASS · líder · v1.38.0 no existe aún; sellos consistentes
+- [V] TECHO_ITER · PASS · líder · 1 iteración (la forja timeó a 2min en Windows por el leak-scan del árbol; re-corrida en background = exit 0, sellos idempotentes — no es re-trabajo de contenido)
+- [V] TEST_COVERAGE · N/A · — · sin código nuevo (prosa aditiva); integridad cubierta por los gates de forja (leak-scan + bitacora-lint)
+- [V] OPEN_CLOSED · N/A · — · prosa aditiva opt-in, sin comportamiento hexagonal
+- [V] CONFORMIDAD · N/A · — · sin código
+- [V] MIGRATION · N/A · — · sin DDL
+- [V] TARGET_ENV · N/A · — · pc-local sin @env
+- [V] FUENTE_VERDAD · N/A · — · no toca testing/prod
+- [V] RESPONSIVE · N/A · — · no toca UI
+- [V] BUMP_REASON · N/A · — · sin bump de pin de dependencia
+- [V] PIN_TOTAL · N/A · — · sin dependencias
+- [V] PARKING · N/A · — · sin ideas fuera de scope (caveat allowed-tools resuelto, no parkeado)
+<!-- VEREDICTOS:END -->
+- Iteraciones: 1/1 (fast-path, sin re-trabajo de contenido)
+- TEST_COVERAGE: forja (leak-scan + bitacora-lint fail-closed) + sellos 26/26 consistentes; sin suite unitaria (prosa)
+- BITACORA: cableo = aplicación del proyecto MCP de conocimiento (Fase 3); no destila entrada nueva. FALSO-VERDE-004 respetado: exit de forja chequeado desnudo/por PIPESTATUS (no enmascarado por pipe).
+- Veredictos: Verificador fresco opus (INDEPENDENCIA) APPROVE 5/5 (FLEET_SAFE · CORRECCION · ETHOS · ZERO_LEAK · NO_MAIN); caveat `allowed-tools` refutado por doc oficial (grant, no allowlist). Forja exit 0: SELLOS 26/26 v1.38.0 · leak-scan LIMPIO · registry v1.38.0 pin ec6b95b · plugin.json 1.38.0.
+- Cierre: 2026-07-11 · `forjar-release.sh v1.38.0` (26 sellos + registry pin ec6b95b + plugin.json 1.38.0) · commit de release + tag anotado v1.38.0 · push a origin/main + tags.
