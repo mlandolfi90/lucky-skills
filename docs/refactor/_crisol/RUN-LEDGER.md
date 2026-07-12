@@ -2472,7 +2472,7 @@
 - [V] FLEET_SAFE · PASS · verificador-fresco · APPROVE — la flota SIN el MCP conserva los 2 caminos de lectura (grep del INDEX + push hook desde disco); el des-scopeo a 7 col es JUSTO lo que mantiene alineado el `awk -F'|'` del hook (`$8=estado`, filtro LIVE). Captura offline → `/idea` (carril real: la skill idea puede escribir).
 - [V] CORRECCION · PASS · verificador-fresco · 0 refs viejas de autoría a mano (templates/entrada, "agregá la fila", "destilá una entrada local"); tools (`saber_proponer_ficha`/`saber_senal`/`saber_mergear`) + generador coherentes; `allowed-tools: Read,Grep,Bash` coherente (toda mutación delegada).
 - [V] ETHOS · PASS · verificador-fresco · brújula-no-enciclopedia + "el humano decide qué es verdad" + "sin evidencia no entra" intactos; el push hook/timbre sigue con sentido sobre el espejo (refleja CANDIDATE).
-- [V] ZERO_LEAK · PASS · verificador-fresco+forja · leak-scan LIMPIO; el generador usa `tempfile` + `Path(__file__)` (sin rutas absolutas) y `gh repo clone` (sin PAT-en-URL); sin "vikingo"/IP/secreto.
+- [V] ZERO_LEAK · PASS · verificador-fresco+forja · leak-scan LIMPIO; el generador usa `tempfile` + `Path(__file__)` (sin rutas absolutas) y `gh repo clone` (sin PAT-en-URL); atribución = MLL, sin IP/secreto.
 - [V] INDEPENDENCIA · PASS · líder · verificador fresco opus (contexto nuevo) APPROVE 6/6; 4 nits de pulido (1 corregido: L74; 3 cosméticos diferidos)
 - [V] SCOPE_CREEP · PASS · líder · diff = generador `bitacora-espejo.py` + flip `bitacora/SKILL.md` + ADR 0015 + re-sello ritual (27) + registry + plugin.json; el mirror (INDEX/entries/SENALES) byte-idéntico, no cambió contenido
 - [V] TEST_COVERAGE · N/A · — · prosa (flip) + script de mantenimiento; verificado por el ZERO-diff del regenerado + bitacora-lint fail-closed en la forja (no hay suite unitaria del generador; su output ES el test)
@@ -2482,3 +2482,30 @@
 - BITACORA: el flip la vuelve ESPEJO; el mirror regenerado byte-idéntico prueba que el local ya estaba en sync (Fase 1). Nits diferidos: `saber_mergear`/PR en prosa (ok), timbre del push "INDEX" (fail-open cosmético), `templates/entrada.md` huérfano (poda futura).
 - Veredictos: Verificador fresco opus (INDEPENDENCIA) APPROVE — FLEET_SAFE offline intacto (des-scopeo 7-col = alineación del push hook), captura offline→/idea real, sin contradicciones, ethos + zero-leak OK. Forja exit 0: sellos 27/27 v1.39.0 · leak-scan LIMPIO · registry v1.39.0 pin 3c3df20 · plugin.json 1.39.0. Generador: mirror byte-idéntico + lint coherente.
 - Cierre: 2026-07-11 · `forjar-release.sh v1.39.0` (27 sellos + registry pin 3c3df20 + plugin.json 1.39.0) · commit de release + tag anotado v1.39.0 · push a origin/main + tags.
+
+### main — 2026-07-12 (release v1.40.0 — consistencia post-flip: el timbre del push apunta al saber, no al INDEX local)
+- STATUS: CLOSED
+- Tier: fast-path (nit de consistencia doctrinal tras el flip v1.39.0; texto del timbre del push hook + §Push del SKILL.md)
+- Fecha: 2026-07-12
+- TARGET: pc-local (Git-Bash del operador — forja la familia)
+- MODEL: opus (claude-opus-4-8)
+- LEY: v1.39.0
+- ORIGEN: nit cazado por el verificador fresco de v1.39.0: el **timbre de juicio del push hook** (corre en CADA sesión de la flota) todavía decía "promover a LIVE… **(INDEX de la bitácora)**" y "destila **a INDEX-CANDIDATE**" — MISDIRIGE tras el flip (el espejo local es READ-ONLY; la promoción/destilación va al SABER). Completar la consistencia del flip para que el hook no dirija a editar el espejo.
+- Alcance: `plugins/lucky/skills/bitacora/hooks/bitacora-push.sh` (líneas del BELL: CANDIDATE → "en el saber (`saber_*`)"; INTENSIDAD → "propone al saber (`saber_proponer_ficha`)") + `bitacora/SKILL.md` §Push (intensidad "destilar a INDEX-CANDIDATE" → "al saber"). Forja v1.40.0. El CONTEO (behavior) del timbre no cambia; solo el texto que dirige la acción.
+- VERIFICAR: el timbre ya no dirige a editar el INDEX local (dirige al saber / cosecha); el conteo intacto; forja verde (sellos + leak-scan + bitacora-lint).
+<!-- VEREDICTOS:BEGIN -->
+- runState: closing
+- [V] TARGET · PASS · líder · pc-local (forja de la familia)
+- [V] MODEL · PASS · líder · opus (claude-opus-4-8)
+- [V] FORJA · PASS · forja · `forjar-release.sh v1.40.0` exit 0; sellos 27/27 == v1.40.0 (0 stragglers); registry tag v1.40.0; plugin.json 1.40.0
+- [V] REGLA0 · PASS · forja · leak-scan.sh + bitacora-lint.sh fail-closed VERDES (árbol completo)
+- [V] CONSISTENCIA_FLIP · PASS · líder · el BELL del push hook ya no dice "(INDEX de la bitácora)"/"destila a INDEX-CANDIDATE" (dirigía a editar el espejo read-only); ahora dirige al saber (`saber_*`/`saber_proponer_ficha`) / cosecha. El CONTEO del timbre (behavior) intacto.
+- [V] TEST_COVERAGE · PASS · líder · `tests/test-push.sh` 33/0 tras el cambio (JSON válido + contenido sobrevive); `bash -n` del hook OK
+- [V] ZERO_LEAK · PASS · forja · leak-scan LIMPIO. HALLAZGO cazado y corregido: la matriz de cierre de v1.39.0 tenía el literal de la atribución-local en un veredicto "sin <atribución>" — la forja corre ANTES de escribirse la matriz de cierre, así que esa línea no se escaneó en v1.39.0; el leak-scan de v1.40.0 (árbol completo) la cazó. Atribución = MLL.
+- [V] SCOPE_CREEP · PASS · líder · diff = hook (2 líneas del BELL) + `bitacora/SKILL.md` §Push (1 línea) + re-sello ritual (27) + registry + plugin.json; el mirror (INDEX/entries/SENALES) byte-idéntico
+- [V] CIERRE_TRAS_PASS · PASS · líder · matriz PASS → commit + tag habilitados
+<!-- VEREDICTOS:END -->
+- Iteraciones: 1/1 (la 1ra forja abortó fail-closed por el literal de la atribución en la matriz de v1.39.0 → corregido + re-forja verde)
+- BITACORA: LECCIÓN (candidata a señal): la forja re-sella + escanea ANTES de que se escriba la matriz `runState: closing` → el texto de la matriz de cierre queda SIN leak-scan hasta la próxima forja; escribir la matriz sin literales de atribución/IP, y el próximo release la valida. Se evitó nombrar el literal en este mismo veredicto.
+- Veredictos: forja exit 0 tras corregir el literal; sellos 27/27 v1.40.0 · leak-scan LIMPIO · bitacora-lint coherente. El timbre del push completa la consistencia del flip v1.39.0 (no dirige a editar el espejo).
+- Cierre: 2026-07-12 · `forjar-release.sh v1.40.0` (27 sellos + registry + plugin.json 1.40.0) · commit de release + tag anotado v1.40.0 · push a origin/main + tags.

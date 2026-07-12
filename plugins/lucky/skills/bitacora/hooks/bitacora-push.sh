@@ -165,7 +165,7 @@ if [ "$SEN" -gt 0 ] || [ "$CAND" -gt 0 ] || [ "$PUENTE" -gt 0 ] || [ "$INTENSO" 
   fi
   if [ "$CAND" -gt 0 ]; then
     BELL="$BELL
-- $CAND entrada(s) CANDIDATE esperando endoso humano → promover a LIVE o retirar (INDEX de la bitácora)"
+- $CAND entrada(s) CANDIDATE esperando endoso humano → promover a LIVE o retirar EN EL SABER (\`saber_*\`; el espejo local es read-only)"
   fi
   if [ "$PUENTE" -gt 0 ]; then
     BELL="$BELL
@@ -173,7 +173,7 @@ if [ "$SEN" -gt 0 ] || [ "$CAND" -gt 0 ] || [ "$PUENTE" -gt 0 ] || [ "$INTENSO" 
   fi
   if [ "$INTENSO" -gt 0 ]; then
     BELL="$BELL
-- $INTENSO etiqueta(s) con INTENSIDAD x ≥ $UMBRAL_INT en una sola sesión (costo agudo) → si hubo aprendizaje real, pedí la cosecha de intensidad: destila a INDEX-CANDIDATE (descontando meta-ruido)"
+- $INTENSO etiqueta(s) con INTENSIDAD x ≥ $UMBRAL_INT en una sola sesión (costo agudo) → si hubo aprendizaje real, pedí la cosecha de intensidad: propone una ficha CANDIDATE al saber (\`saber_proponer_ficha\`; descontando meta-ruido)"
   fi
 fi
 
