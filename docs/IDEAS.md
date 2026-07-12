@@ -181,3 +181,11 @@
   es un MCP que los gestione fuera del repo (sobrevive rollbacks/clones frescos, consulta cross-repo,
   marca de cosecha centralizada). Esperar a que el carril hotfix pruebe su valor en uso real primero. · idea de MLL (al diseñar la skill hotfix)
 - 2026-07-11 · limpiar la inconsistencia interna de DRIFT-009 (ejemplo etch-mode): L5 dice "pastilla REC = etch-mode" pero L14 dice que gatear por etch-mode hacía reaparecer el bug POR la pastilla REC — no cierra si pastilla=etch-mode; el operador no reconoció etch-mode al revisarlo. Aterrizar la topología real de HOT-MIC y corregir la entrada. · surgió al usar DRIFT-009 de molde en la corrida hotfix anti-círculo (ADR 0014)
+- 2026-07-12 · [APAGADA / no activa — hoy queda md plano] proyección SQLite consultable para el RUN-LEDGER (y
+  catálogos): un único .db GENERADO desde el md (que sigue siendo la fuente de verdad auditable/git-diffable,
+  por ADR 0015). Da SQL para analítica del ledger (fast-path vs completo, corridas por skill…) y reserva
+  `sqlite-vec` para búsqueda semántica APAGADO. Gatillo para prenderlo: escala del corpus + un miss de recall
+  REAL que se sienta — NO la disponibilidad tecnológica. Restricciones duras: nunca un gate (embeddings
+  probabilísticos vs Crisol determinístico/fail-closed) → siempre lado consejo; el .db es proyección
+  regenerable, JAMÁS la fuente de verdad (blob binario, no auditable). Relacionado: ADR 0015 (espejo saber),
+  substrato lucky-saber. · discusión md→estructurado + vectorial (2026-07-12)
