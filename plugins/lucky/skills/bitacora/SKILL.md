@@ -10,7 +10,7 @@ description: >-
   argumentos = mostrar el INDEX. NO disparar para implementar la solución (eso es
   trabajo normal), ni para capturar ideas a futuro (eso es /idea). Consultá →
   devolvé SOLO la línea de acción → volvé al trabajo.
-allowed-tools: Read, Grep, Bash, Write, Edit
+allowed-tools: Read, Grep, Bash
 ---
 
 # La Bitácora — "esto ya pasó: así se sortea"
@@ -42,55 +42,51 @@ encyclopedia* (devolvé la acción, jamás vuelques el archivo entero).
 
 `/bitacora` sin argumentos = mostrar el INDEX tal cual.
 
-## Saber vivo (MCP) — preferilo si está disponible
+## El saber central es la fuente de verdad (este INDEX es un ESPEJO)
 
-El **saber centralizado** del stack vive fuera de esta skill (repo privado, servido por el MCP
-`lucky-tool-saber`, agregado en el gateway litellm). Si en la sesión están las tools
-`mcp__lucky-mcp__lucky_saber-*`:
+El **saber centralizado** del stack (repo privado `lucky-saber`, servido por el MCP
+`lucky-tool-saber` vía litellm) es la **ÚNICA fuente de verdad** de la bitácora. Los
+`INDEX.md` / `entries/` / `SENALES.md` de esta skill son un **ESPEJO read-only regenerado
+desde el saber** (`scripts/bitacora-espejo.py`, des-scopeado a 7 columnas) — **NO se autoran a
+mano** (una edición a mano se PIERDE en la próxima regeneración). La flota SIN el MCP consume este
+espejo embebido en la LEY (grep del INDEX + el push hook del arranque); las sesiones CON el MCP
+prefieren el saber vivo.
 
-- **Consultar:** preferí `saber_buscar(<síntoma>, scopes=[...])` al grep local — trae el catálogo
-  VIVO y centralizado, filtrado por scope (`global` + el stack del repo actual). Devuelve la línea
-  de acción; `saber_ficha(<ID>)` para el cuerpo. Complementa el INDEX local; si dudás, mirá los dos.
-- **Capturar/proponer:** en vez de escribir la entrada a mano, `saber_proponer_ficha(...)` la propone
-  al saber (va a una rama `mcp-inbox/*`, **nunca a main**; el humano mergea) — así el patrón viaja al
-  conocimiento central. Sospecha débil → `saber_senal(...)`.
-- **Fallback (el MCP acelera, nunca bloquea):** si las tools NO están (sesión sin el connector
-  litellm), seguí con el flujo LOCAL de esta skill (grep del INDEX, destilar a mano). Cero fricción.
+- **Consultar con el MCP** (si están las tools `mcp__lucky-mcp__lucky_saber-*`): preferí
+  `saber_buscar(<síntoma>, scopes=[...])` al grep local — trae el catálogo VIVO y centralizado,
+  filtrado por scope (`global` + el stack del repo). `saber_ficha(<ID>)` para el cuerpo.
+- **Consultar sin el MCP** (offline): grep del INDEX espejado de esta skill (§Consultar) — el
+  espejo es el fallback FIEL, no una fuente independiente.
+- **El espejo se refresca** cuando el saber cambia: el operador corre `scripts/bitacora-espejo.py`
+  y forja un release; la flota lo recibe por ley-live. El saber y el espejo convergen por esa vía.
 
-El saber y el INDEX local de esta skill **convergen por reconciliación** (etapa aparte); mientras
-diverjan, el local es el fallback autoritativo.
-
-## Capturar (Destilación — el costo agudo ES evidencia)
+## Capturar (el costo agudo ES evidencia) — SIEMPRE al saber, NUNCA al espejo
 
 **Principio (2026-07-10): el costo agudo de UNA sola sesión ES evidencia
-suficiente para el INDEX.** Un incidente completo que quemó horas/iteraciones
-y dejó postmortem no es una "sospecha" que deba repetirse para valer: ya pagó
-su entrada. El umbral `≥2 sesiones` es EXCLUSIVO del carril SENALES (sospechas
-crónicas, Heinrich); jamás se le exige a un confirmado-por-dolor. Dos rampas
-al INDEX:
-
-- **Cierre del Crisol** (§4 paso 8) — la rampa clásica: no se escriben
-  entradas sueltas a mano; nacen al cerrar la corrida.
-- **Cosecha por INTENSIDAD** (§Cosechar, modo intensidad) — la rampa para
-  sesiones hot-iteration SIN Crisol: el timbre detecta la intensidad, el
-  humano pide la cosecha, el agente destila CANDIDATE.
+suficiente.** Un incidente que quemó horas/iteraciones y dejó postmortem no es
+una "sospecha" que deba repetirse para valer: ya pagó su entrada. El umbral
+`≥2 sesiones` es EXCLUSIVO del carril SENALES (sospechas crónicas, Heinrich).
 
 **Disparador OBJETIVO** (no "cuando parezca"): la sesión/corrida tuvo un
 **gap que costó >30min**, un **grep que re-derivó algo ya sabido**, un **drift
-hallado**, o **costo agudo intra-sesión** (etiqueta del observador con
-`x ≥ umbral` en UNA sesión · ≥K iteraciones fallidas sobre el mismo síntoma ·
-postmortem escrito). Entonces:
+hallado**, o **costo agudo intra-sesión** (postmortem escrito · ≥K iteraciones
+fallidas sobre el mismo síntoma). Entonces — la captura va al **SABER**, JAMÁS
+al espejo local (que es READ-ONLY, generado):
 
-1. **Destilá UNA entrada** con `templates/entrada.md`. Una entrada = un síntoma =
-   una acción. El título ES el síntoma observable, con tag `[TIPO-NNN]`.
-2. **Dedup primero:** `grep` del síntoma en `INDEX.md`. Si ya existe → NO crees
-   otra: incrementá `usos` y refrescá `validated_on`.
-3. **`validated_on` OBLIGATORIO** (`branch · fecha · commit`). Sin él, nace STALE.
+1. **Con el MCP:** destilá el patrón (un síntoma observable = una acción) y
+   proponelo con `saber_proponer_ficha(sintoma, tipo, causa_raiz, accion,
+   anti_accion, prevencion, scope=…)`. Nace `CANDIDATE` en una rama `mcp-inbox/*`
+   — **nunca toca main**; el humano la mergea (`saber_mergear` o por PR). Sospecha
+   débil, sin evidencia dura → `saber_senal(sospecha, contexto)`.
+2. **Sin el MCP (offline):** anotá el patrón a **`/idea`** (parking local) como
+   "síntoma → acción" y proponelo al saber después, desde una sesión con el
+   connector. **El espejo local NO se edita a mano.**
+3. **`scope`:** `global` (guardrail transversal) · `stack:<tec>` · `repo:<nombre>`
+   — lo afina el humano al endosar.
 4. **Propiedad humana sobre la promoción (anti documentation-theater):** el agente
-   destila con `estado: CANDIDATE`; **el humano** promueve a `LIVE` como acto
-   deliberado de cierre. El LLM destila, el humano decide qué es verdad.
-5. Agregá la fila al `INDEX.md` y listá la entrada en el resumen de cierre del
-   Crisol (junto al Parking de IDEAS.md).
+   PROPONE `CANDIDATE`; **el humano** mergea a main (entra al saber) y luego lo
+   promueve a `LIVE` como acto deliberado. El LLM destila, el humano decide qué es
+   verdad; el MCP nunca escribe `usos`/`estado`/`scope`.
 
 ## Push (hooks del plugin — ADR 0010, absorbido de ECC continuous-learning-v2)
 
@@ -140,35 +136,31 @@ escribe sin endoso. Cuando el operador la pide:
 
 Dos modos, cada uno con su DESTINO — no confundirlos:
 
-**Modo FRECUENCIA (→ SENALES, sospechas crónicas):**
+**Modo FRECUENCIA (→ `saber_senal`, sospechas crónicas):**
 
 1. Leé el agregado del log: `bash hooks/bitacora-observar.sh --resumen`.
-2. Por cada etiqueta con `≥2 sesiones` SIN señal formal en `SENALES.md`,
-   **borrá un BORRADOR de señal** (formato de la tabla de SENALES: señal en
-   prosa observable · `visto: N` heredado del conteo real del log · fecha ·
-   contexto de 1 línea). Si tenés contexto de las sesiones donde sonó, usalo;
-   si no, el borrador lo declara ("contexto por confirmar").
-3. Etiquetas que ya tienen señal formal: solo reportá "la señal X acumuló
-   N avistamientos nuevos" para que el humano actualice `visto:` si endosa.
+2. Por cada etiqueta con `≥2 sesiones` SIN señal formal, **redactá un BORRADOR de
+   señal** (síntoma en prosa observable · `visto: N` del conteo real · contexto de
+   1 línea) y, endosado, proponelo al saber con `saber_senal(sospecha, contexto)`
+   (offline → `/idea`). Si la señal ya existe en el saber: reportá "acumuló N
+   avistamientos" para que el humano la suba al endosar.
 
-**Modo INTENSIDAD (→ INDEX-CANDIDATE, costo agudo de UNA sesión):**
+**Modo INTENSIDAD (→ `saber_proponer_ficha`, costo agudo de UNA sesión):**
 
-4. Por cada etiqueta con `x ≥ umbral` en UNA sola línea/sesión del log
-   (`BITACORA_INTENSIDAD_UMBRAL`, default 10), ofrecé **destilar una entrada
-   CANDIDATE del INDEX** con `templates/entrada.md` — NO una señal.
-   **El log solo prueba QUE dolió, no QUÉ dolió:** el contenido (síntoma
-   observable, causa raíz, acción que FUNCIONÓ) sale del postmortem, del
-   transcript o de lo que el humano cuente — si no hay material para el QUÉ,
-   declaralo y NO inventes la entrada. `validated_on` = la sesión del
-   incidente; la evidencia es el COSTO (conteo + postmortem).
+3. Por cada etiqueta con `x ≥ umbral` en UNA sola sesión del log
+   (`BITACORA_INTENSIDAD_UMBRAL`, default 10), ofrecé **proponer una ficha
+   CANDIDATE al saber** con `saber_proponer_ficha(...)` (offline → `/idea`).
+   **El log solo prueba QUE dolió, no QUÉ dolió:** el contenido (síntoma, causa
+   raíz, acción que FUNCIONÓ) sale del postmortem/transcript o de lo que el humano
+   cuente — si no hay material para el QUÉ, declaralo y NO inventes la ficha.
 
 **Reglas de AMBOS modos:**
 
-5. **Presentá los borradores al humano** — uno por uno, con el conteo como
-   evidencia. Endosado → se escribe (SENALES o INDEX+entrada según el modo);
-   refutado → se descarta anotando el porqué en la respuesta (no en el
-   archivo). JAMÁS escribas nada no endosado.
-6. Meta-ruido (CRÍTICO, doble en intensidad): si la sesión cosechada EDITÓ la
+4. **Presentá los borradores al humano** — uno por uno, con el conteo como
+   evidencia. Endosado → se PROPONE al saber (`saber_senal` / `saber_proponer_ficha`;
+   el humano mergea); refutado → se descarta anotando el porqué en la respuesta.
+   **JAMÁS edites el espejo local a mano; JAMÁS propongas nada no endosado.**
+5. Meta-ruido (CRÍTICO, doble en intensidad): si la sesión cosechada EDITÓ la
    bitácora/tests/gates (las palabras de las señales aparecen por TRABAJO, no
    por incidente), declaralo y descontá con criterio — el conteo crudo no
    distingue: una sesión que forjó la bitácora marca ×35 sin que nada haya
@@ -176,6 +168,11 @@ Dos modos, cada uno con su DESTINO — no confundirlos:
 
 ## Mantener (mecánico, no por disciplina)
 
+- **Espejo:** el catálogo VIVE en el saber; acá se REGENERA el espejo con
+  `python scripts/bitacora-espejo.py` (des-scopea desde `lucky-saber`) y se forja
+  un release para propagarlo a la flota. Poda, ascenso y la promoción CANDIDATE→LIVE
+  ocurren en el saber (el espejo los refleja); las verificaciones de abajo son
+  read-only sobre el espejo generado.
 - **STALE:** `bash scripts/bitacora-stale.sh` marca toda entrada con
   `validated_on` > 90 días o sin `validated_on`. Read-only: reporta, no borra.
   Candidato a correr desde el heartbeat (`crisol-pulso`) o el CI.
@@ -199,6 +196,10 @@ Dos modos, cada uno con su DESTINO — no confundirlos:
 
 ## Reglas duras
 
+- **El espejo local es READ-ONLY.** `INDEX.md`/`entries/`/`SENALES.md` se REGENERAN
+  desde el saber (`scripts/bitacora-espejo.py`); una edición a mano se pierde en la
+  próxima regeneración. Toda captura va al saber (`saber_proponer_ficha`/`saber_senal`)
+  o, offline, a `/idea`. El saber es la fuente de verdad; esta skill LEE + refleja.
 - **Sin evidencia real, NO entra.** El catálogo guarda solo lo CONFIRMADO por el
   uso: una entrada nace de una corrida con dolor real y evidencia verificable
   (sha/ledger/postmortem). La previsión/teoría va a `/idea` (parking) hasta que la
@@ -225,7 +226,7 @@ Dos modos, cada uno con su DESTINO — no confundirlos:
 ---
 
 **Fuente de verdad: `github.com/mlandolfi90/lucky-skills` · esta copia = tag
-`v1.38.0` (cache local, NO la ley).** Ley viva: con red, si el repo tiene un tag
+`v1.39.0` (cache local, NO la ley).** Ley viva: con red, si el repo tiene un tag
 mayor (`git ls-remote --tags
 https://github.com/mlandolfi90/lucky-skills.git`), seguir la del repo e informar
 al humano.

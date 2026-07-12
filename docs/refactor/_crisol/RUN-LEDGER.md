@@ -2448,3 +2448,37 @@
 - BITACORA: cableo = aplicación del proyecto MCP de conocimiento (Fase 3); no destila entrada nueva. FALSO-VERDE-004 respetado: exit de forja chequeado desnudo/por PIPESTATUS (no enmascarado por pipe).
 - Veredictos: Verificador fresco opus (INDEPENDENCIA) APPROVE 5/5 (FLEET_SAFE · CORRECCION · ETHOS · ZERO_LEAK · NO_MAIN); caveat `allowed-tools` refutado por doc oficial (grant, no allowlist). Forja exit 0: SELLOS 26/26 v1.38.0 · leak-scan LIMPIO · registry v1.38.0 pin ec6b95b · plugin.json 1.38.0.
 - Cierre: 2026-07-11 · `forjar-release.sh v1.38.0` (26 sellos + registry pin ec6b95b + plugin.json 1.38.0) · commit de release + tag anotado v1.38.0 · push a origin/main + tags.
+
+### main — 2026-07-11 (release v1.39.0 — espejo generado + flip de doctrina: saber = única fuente de verdad)
+- STATUS: CLOSED
+- Tier: completo (script nuevo `bitacora-espejo.py` + flip de doctrina en bitacora/SKILL.md + ADR + release; toca la LEY que viaja a la flota)
+- Fecha: 2026-07-11
+- TARGET: pc-local (Git-Bash del operador — genera el espejo desde el saber y forja la familia de skills)
+- MODEL: opus (claude-opus-4-8)
+- LEY: v1.38.0
+- ORIGEN: Fase 2+3 del proyecto MCP de conocimiento. Decisión del operador: el SABER (`lucky-saber`, servido por el MCP) es la ÚNICA fuente de verdad de la bitácora; el INDEX/entries/SENALES locales pasan a ESPEJO read-only regenerado desde el saber (así la flota SIN el MCP no pierde la bitácora). Sub-decisiones: captura offline → `/idea`; el espejo incluye INDEX+entries+SENALES (por clone directo, el MCP no expone SENALES).
+- Alcance:
+  - **Fase 2 — `scripts/bitacora-espejo.py`**: clona `lucky-saber` (read-only), **DES-SCOPEA** (borra el campo `- **scope:**` de cada entry + la 8ª columna del INDEX → formato local 7-col, ≤35 líneas) y regenera `plugins/lucky/skills/bitacora/{INDEX.md, entries/*.md, SENALES.md}`. Debe pasar el `bitacora-lint.sh` local. Preserva el contrato de los hooks (tabla 7-col ordenada por usos, estado literal LIVE/CANDIDATE, link `[ID](entries/ID.md)`).
+  - **Fase 3 — flip de doctrina** en `bitacora/SKILL.md`: el saber es AUTORITATIVO, el local es ESPEJO read-only (NO se autora a mano); §Capturar/§Cosechar pasan a PROPONER al saber (`saber_proponer_ficha`/`saber_senal` → `mcp-inbox`, el humano mergea con `saber_mergear`); captura OFFLINE (sin el connector) → `/idea`; sacar `Write, Edit` del `allowed-tools`. ADR del flip.
+  - Regenerar el espejo (Fase 2) + forja v1.39.0.
+- VERIFICAR: el generador des-scopea correcto y el mirror pasa `bitacora-lint`; el diff vs el local actual es MÍNIMO (los 24 ya están sincronizados tras Fase 1); el flip NO rompe el fallback offline (el mirror sigue alimentando el push hook + el grep); forja v1.39.0 verde (sellos + leak-scan + bitacora-lint).
+<!-- VEREDICTOS:BEGIN -->
+- runState: closing
+- [V] TARGET · PASS · líder · pc-local (genera el espejo + forja la familia)
+- [V] MODEL · PASS · líder · opus (claude-opus-4-8)
+- [V] FORJA · PASS · forja · `forjar-release.sh v1.39.0` exit 0; sellos 27/27 == v1.39.0 (0 stragglers); registry tag v1.39.0 + pin 3c3df20; plugin.json 1.39.0
+- [V] REGLA0 · PASS · forja · leak-scan.sh + bitacora-lint.sh fail-closed VERDES (árbol completo, incl. el generador nuevo)
+- [V] ESPEJO_FIEL · PASS · líder · `bitacora-espejo.py` regenera un mirror **byte-idéntico** al local (diff 0) desde el saber (24 entries); bitacora-lint 24↔24 coherente. Des-scopeo 8→7 col + borra la línea `- **scope:**` + copia SENALES; idempotente.
+- [V] FLEET_SAFE · PASS · verificador-fresco · APPROVE — la flota SIN el MCP conserva los 2 caminos de lectura (grep del INDEX + push hook desde disco); el des-scopeo a 7 col es JUSTO lo que mantiene alineado el `awk -F'|'` del hook (`$8=estado`, filtro LIVE). Captura offline → `/idea` (carril real: la skill idea puede escribir).
+- [V] CORRECCION · PASS · verificador-fresco · 0 refs viejas de autoría a mano (templates/entrada, "agregá la fila", "destilá una entrada local"); tools (`saber_proponer_ficha`/`saber_senal`/`saber_mergear`) + generador coherentes; `allowed-tools: Read,Grep,Bash` coherente (toda mutación delegada).
+- [V] ETHOS · PASS · verificador-fresco · brújula-no-enciclopedia + "el humano decide qué es verdad" + "sin evidencia no entra" intactos; el push hook/timbre sigue con sentido sobre el espejo (refleja CANDIDATE).
+- [V] ZERO_LEAK · PASS · verificador-fresco+forja · leak-scan LIMPIO; el generador usa `tempfile` + `Path(__file__)` (sin rutas absolutas) y `gh repo clone` (sin PAT-en-URL); sin "vikingo"/IP/secreto.
+- [V] INDEPENDENCIA · PASS · líder · verificador fresco opus (contexto nuevo) APPROVE 6/6; 4 nits de pulido (1 corregido: L74; 3 cosméticos diferidos)
+- [V] SCOPE_CREEP · PASS · líder · diff = generador `bitacora-espejo.py` + flip `bitacora/SKILL.md` + ADR 0015 + re-sello ritual (27) + registry + plugin.json; el mirror (INDEX/entries/SENALES) byte-idéntico, no cambió contenido
+- [V] TEST_COVERAGE · N/A · — · prosa (flip) + script de mantenimiento; verificado por el ZERO-diff del regenerado + bitacora-lint fail-closed en la forja (no hay suite unitaria del generador; su output ES el test)
+- [V] CIERRE_TRAS_PASS · PASS · líder · matriz PASS/N/A (0 FAIL) → commit + tag habilitados
+<!-- VEREDICTOS:END -->
+- Iteraciones: 1/1 (la 1ra forja abortó fail-closed por el ADR 0015 sin sello ancla → agregado + re-forja verde; no es re-trabajo de contenido)
+- BITACORA: el flip la vuelve ESPEJO; el mirror regenerado byte-idéntico prueba que el local ya estaba en sync (Fase 1). Nits diferidos: `saber_mergear`/PR en prosa (ok), timbre del push "INDEX" (fail-open cosmético), `templates/entrada.md` huérfano (poda futura).
+- Veredictos: Verificador fresco opus (INDEPENDENCIA) APPROVE — FLEET_SAFE offline intacto (des-scopeo 7-col = alineación del push hook), captura offline→/idea real, sin contradicciones, ethos + zero-leak OK. Forja exit 0: sellos 27/27 v1.39.0 · leak-scan LIMPIO · registry v1.39.0 pin 3c3df20 · plugin.json 1.39.0. Generador: mirror byte-idéntico + lint coherente.
+- Cierre: 2026-07-11 · `forjar-release.sh v1.39.0` (27 sellos + registry pin 3c3df20 + plugin.json 1.39.0) · commit de release + tag anotado v1.39.0 · push a origin/main + tags.
