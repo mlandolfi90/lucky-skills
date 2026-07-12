@@ -57,9 +57,12 @@ nuevo escrito a mano: es un **ciclo colgado del Crisol que ya corre**.
 2. **Unidad atómica = entrada por SÍNTOMA.** El título ES el síntoma observable, con tag para
    Ctrl-F (`[GAP-001]`, `[DRIFT-003]`). Campos: tipo, síntoma, causa-raíz (1 línea), acción
    (≤7 pasos), anti-acción (el camino muerto, evita re-derivar), prevención, `validated_on`
-   (branch·fecha·commit — OBLIGATORIO), `stale_si`, origen, usos, REFS, NEXT, estado. Plantilla:
-   `skills/bitacora/templates/entrada.md`. Máx ~20-35 líneas: si necesita más, es un ADR
-   (decisión) o un skill (proceso), no una entrada.
+   (branch·fecha·commit — OBLIGATORIO), `stale_si`, origen, usos, REFS, NEXT, estado.
+   **(SUPERSEDIDO-EN-PARTE por ADR 0015, 2026-07-12):** el template local
+   `skills/bitacora/templates/entrada.md` se RETIRÓ — la captura ya no se autora a mano: se
+   PROPONE al saber (`saber_proponer_ficha`, que compone el formato) y el local es un espejo
+   generado read-only. El formato de campos y la taxonomía de abajo siguen vigentes. Máx ~20-35
+   líneas: si necesita más, es un ADR (decisión) o un skill (proceso), no una entrada.
 
 3. **Taxonomía mínima centrada en el dolor:** `GAP` · `GREP` · `DRIFT` · `FALSO-VERDE`. La cuarta
    clase es el failure-mode dominante de esta familia según sus propios RETROs ("el comentario dice
@@ -134,7 +137,7 @@ nuevo escrito a mano: es un **ciclo colgado del Crisol que ya corre**.
 ---
 
 **Fuente de verdad: `github.com/mlandolfi90/lucky-skills` · esta copia = tag
-`v1.40.0` (cache local, NO la ley).** Ley viva: con red, si el repo tiene un tag
+`v1.41.0` (cache local, NO la ley).** Ley viva: con red, si el repo tiene un tag
 mayor (`git ls-remote --tags
 https://github.com/mlandolfi90/lucky-skills.git`), seguir la del repo e informar
 al humano.

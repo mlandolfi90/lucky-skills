@@ -2509,3 +2509,28 @@
 - BITACORA: LECCIÓN (candidata a señal): la forja re-sella + escanea ANTES de que se escriba la matriz `runState: closing` → el texto de la matriz de cierre queda SIN leak-scan hasta la próxima forja; escribir la matriz sin literales de atribución/IP, y el próximo release la valida. Se evitó nombrar el literal en este mismo veredicto.
 - Veredictos: forja exit 0 tras corregir el literal; sellos 27/27 v1.40.0 · leak-scan LIMPIO · bitacora-lint coherente. El timbre del push completa la consistencia del flip v1.39.0 (no dirige a editar el espejo).
 - Cierre: 2026-07-12 · `forjar-release.sh v1.40.0` (27 sellos + registry + plugin.json 1.40.0) · commit de release + tag anotado v1.40.0 · push a origin/main + tags.
+
+### main — 2026-07-12 (release v1.41.0 — cleanup: retirar templates/entrada.md huérfano + anotar ADR 0005)
+- STATUS: CLOSED
+- Tier: fast-path (docs-only: anotación de ADR + remover un template muerto; sin código)
+- Fecha: 2026-07-12
+- TARGET: pc-local (Git-Bash del operador — forja la familia)
+- MODEL: opus (claude-opus-4-8)
+- LEY: v1.40.0
+- ORIGEN: nit diferido del flip v1.39.0. `templates/entrada.md` (plantilla para AUTORAR entradas a mano) quedó muerto tras el flip a espejo read-only, pero su única referencia viva es el ADR 0005 §2 ("Plantilla: skills/bitacora/templates/entrada.md"). Removerlo sin más dejaría una ref colgando en un ADR foundational sellado. Se hace bien: anotar 0005 supersedido-EN-PARTE por 0015 + remover el template.
+- Alcance: `docs/decisions/0005-bitacora-capa-experiencial.md` §2 (nota de supersesión-en-parte por ADR 0015: el template local se retiró, la captura se PROPONE al saber que compone el formato; el formato de campos y la taxonomía siguen vigentes) + `git rm plugins/lucky/skills/bitacora/templates/entrada.md`. Forja v1.41.0. Publicación como GitHub Release (title + notas), no solo tag.
+- VERIFICAR: cero refs colgando a templates/entrada.md tras remover; ADR 0005 anotado (no reescrito); forja verde (sellos + leak-scan + bitacora-lint); GitHub Release publicado.
+<!-- VEREDICTOS:BEGIN -->
+- runState: closing
+- [V] TARGET · PASS · líder · pc-local
+- [V] MODEL · PASS · líder · opus (claude-opus-4-8)
+- [V] FORJA · PASS · forja · `forjar-release.sh v1.41.0` exit 0; sellos == v1.41.0 (pre-flight de consistencia OK); registry tag v1.41.0; plugin.json 1.41.0
+- [V] REGLA0 · PASS · forja · leak-scan.sh + bitacora-lint.sh fail-closed VERDES (árbol completo)
+- [V] ADR_ANOTADO · PASS · líder · ADR 0005 §2 anotado SUPERSEDIDO-EN-PARTE por 0015 (no reescrito — disciplina de ADR = anotar, no borrar decisiones de registro); `templates/entrada.md` removido; refs restantes solo documentan la remoción (la nota del ADR + el ledger), cero pointer colgando
+- [V] SCOPE_CREEP · PASS · líder · diff = nota en ADR 0005 + `git rm` del template + re-sello ritual (registry + plugin.json + sellos); el mirror (INDEX/entries/SENALES) byte-idéntico
+- [V] ZERO_LEAK · PASS · forja · leak-scan LIMPIO; atribución = MLL
+- [V] CIERRE_TRAS_PASS · PASS · líder · matriz PASS → commit + tag + GitHub Release habilitados
+<!-- VEREDICTOS:END -->
+- Iteraciones: 1/1 (fast-path docs-only, sin re-trabajo)
+- Veredictos: forja exit 0; leak-scan LIMPIO · bitacora-lint coherente · registry v1.41.0. Cleanup del nit diferido del flip v1.39.0: template muerto removido con la disciplina de ADR (anotar 0005, no dejar ref colgando).
+- Cierre: 2026-07-12 · `forjar-release.sh v1.41.0` · commit de release + tag anotado v1.41.0 · push a origin/main + tags · **GitHub Release publicado (`gh release create`, title + notas)**.

@@ -226,7 +226,7 @@ Dos modos, cada uno con su DESTINO — no confundirlos:
 ---
 
 **Fuente de verdad: `github.com/mlandolfi90/lucky-skills` · esta copia = tag
-`v1.40.0` (cache local, NO la ley).** Ley viva: con red, si el repo tiene un tag
+`v1.41.0` (cache local, NO la ley).** Ley viva: con red, si el repo tiene un tag
 mayor (`git ls-remote --tags
 https://github.com/mlandolfi90/lucky-skills.git`), seguir la del repo e informar
 al humano.
