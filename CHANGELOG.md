@@ -4,6 +4,29 @@ Notas de release de la familia de skills Lucky. El historial completo del **proc
 (corridas del Crisol, RETROs) vive en `docs/refactor/_crisol/RUN-LEDGER.md`; los tags
 inmutables, en `git tag`. Formato: más nuevo arriba.
 
+## v2.4.0 — 2026-07-16 — Ecosistema: features, Manualizador, /migrar, evals y métricas (ADR 0020)
+
+**Cierre del programa del debate 2026-07-16 (5 releases en la sesión: v2.0.0 → v2.4.0).**
+
+- **Skill `feature`**: lo que el proyecto DEBE TENER como registro de primera
+  clase — nacimiento, origen, intentos (funcionó/descartado), sub-features vía
+  `padre:` (jamás cierra). Promoción desde idea madura (línea → PROMOVIDA).
+  **Gate de doc**: no llega a VIVA sin su documentación.
+- **Agente `manualizador`** (bautizado por el operador): docs de 3 audiencias
+  (user=docs/manual renderizable en la app, dev=docs/sistema, LLM=CLAUDE.md),
+  método Diátaxis, **gatillos estrictos** (feature→VIVA u orden explícita —
+  documentar lo inestable = fabricar drift).
+- **Skill `migrar` + agente `migrar-clasificador`**: retrofit de repos
+  pre-2.0 — inventariar → clasificar contra el manifiesto → **endoso del
+  operador** (decisión convocable) → congelar verbatim / adoptar / lint a 0.
+  La adopción siembra lo nuevo; la migración ordena lo viejo. Secretos
+  sueltos = primera prioridad, jamás se transcriben.
+- **Evals de ruteo** (`test-ruteo.sh`, fail-closed en la forja): troncos con
+  disparadores, gatillos únicos y útiles — probado que caza duplicados.
+- **Métricas M1-M9** (`scripts/metricas.py`, report-only) con baseline del
+  debate: hoy M2 = 5 corridas ≤60 líneas (vs monolito 2.536), M1 = 1 citado
+  (crisol 592, deuda parkeada), resto VERDE.
+
 ## v2.3.0 — 2026-07-16 — Gobierno Observable: tablero, telemetría, concejos y decisiones convocables (ADR 0019)
 
 - **`docs/TABLERO.md`** — proyección nueva: la bandeja del operador. Decisiones

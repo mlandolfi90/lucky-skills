@@ -34,4 +34,4 @@ lo trivial-reversible (eso es criterio propio + RETRO si salió mal).
 
 ---
 **Fuente: `github.com/mlandolfi90/lucky-skills` · esta copia = tag
-`v2.3.0` (cache local, NO la ley).**
+`v2.4.0` (cache local, NO la ley).**

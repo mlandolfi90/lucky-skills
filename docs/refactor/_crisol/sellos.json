@@ -1,6 +1,7 @@
 {
   "schema": "lucky-sellos/1",
   "sellos": {
+    "corrida:2026-07-16-ecosistema-features-migrar": "d8cee97b7c08b420f9263c4f80809be4c375db04e16e2b1e0b27cabf9ce1aa85",
     "corrida:2026-07-16-escalera-diagnostico-microfix": "405f6fbb58f34502f7dcd08eabba5cea341ba5ccce385eb88bcd6612006d5e8d",
     "corrida:2026-07-16-gobierno-observable": "6cb62d2d04460ef12ae541967eb54f63aabb1e45baa5319a60251b4b4cee0541",
     "corrida:2026-07-16-ramas-agentes-canonicos": "36eed2afe2fe0c7cd2b5be26e4f99a2c4f34ad11d35b9b68dcd745a1554346f9",

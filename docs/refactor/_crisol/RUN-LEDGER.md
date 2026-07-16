@@ -2537,7 +2537,7 @@
 - Cierre: 2026-07-12 · `forjar-release.sh v1.41.0` · commit de release + tag anotado v1.41.0 · push a origin/main + tags · **GitHub Release publicado (`gh release create`, title + notas)**.
 
 ### main — 2026-07-16 (v2.4.0 — T4: ecosistema — features, Manualizador, /migrar, evals de ruteo, métricas)
-- STATUS: ACTIVE
+- STATUS: CLOSED
 - Tier: completo (skills nuevas + agentes + toca la forja + cierra el programa del debate 2026-07-16)
 - Fecha: 2026-07-16
 - TARGET: pc-local (Git-Bash del operador — forja la familia; directiva de sesión del operador)
@@ -2546,10 +2546,41 @@
 - ORIGEN: tranche T4 — última del programa del debate 2026-07-16 (capturas: "FEATURES como registro de primera clase", "AGENTE DOCUMENTADOR (Manualizador)", "DOCUMENTACIÓN por soft para TRES audiencias", "SKILL-AGENTE DE MIGRACIÓN", "EVALS de la ley EXTENDIDOS", "MÉTRICAS DE ÉXITO M1-M8/M9").
 - Alcance: [T4a] ADR 0020 (ecosistema). [T4b] skill `feature`: lo-que-el-proyecto-debe-tener como registro de primera clase (nacimiento, evolución, intentos, sub-features vía padre:, NUNCA cierra) — promoción desde idea madura; gate de doc: no llega a VIVA sin su doc. [T4c] agente canónico `manualizador` (nombre del operador): mantiene docs/manual (user) + docs/sistema (dev) renderizables en la app desde fuente única; gatillos ESTRICTOS: feature→VIVA u orden explícita — jamás documenta trabajo inestable; narrativa producto declarada en el manifiesto. [T4d] skill `migrar` + agente canónico `migrar-clasificador`: retrofit de repos pre-2.0 — inventariar → clasificar contra registros.yaml → proponer mapeo → ENDOSO del operador (decisión convocable) → congelar monolitos verbatim / adoptar huérfanos / lint a 0; jamás mueve sin endoso; complementa a adoptar-crisol (siembra) — este ORDENA lo viejo. [T4e] evals de ruteo mecánicos: test-ruteo.sh (gatillos únicos/no-vacíos por skill, descriptions con disparadores) cableado fail-closed en la forja; evals LLM (promptfoo pineado) = deuda declarada. [T4f] scripts/metricas.py: reporte M1-M9 (troncos, corridas, huérfanos, evals, idempotencia, paridad, sellos, presupuesto de contexto por activación) — report-only, baseline del programa.
 - MIGRATION_STRATEGY: N/A (sin DDL destructivo; tablas feature/agente ya declaradas desde v2.0.0)
+- ITER-2: nits de los verificadores aplicados — curador de features a deuda declarada de ADR 0020; import io muerto removido de metricas.py; RUTEO_REPO_OVERRIDE conservado (SÍ tiene usuario: el quality-auditor lo usó para la prueba negativa en sandbox).
+- RETRO: cierre del programa del debate 2026-07-16 (C1..C8 + T1..T4, 5 releases v2.0.0→v2.4.0 en una sesión): el patrón ADR-al-abrir eliminó los FAIL de CREDITO desde T2; la regla transaccional sigue siendo el punto frágil humano/agente (2 violaciones cazadas) — Fase 2 del gate es la próxima corrida natural.
 <!-- VEREDICTOS:BEGIN -->
-- runState: wip
+- runState: closing
+- [V] TARGET · PASS · líder · pc-local, directiva de sesión
+- [V] MODEL · PASS · líder · fable (uniforme)
+- [V] REGLA0 · PASS · quality-auditor · 145 asserts + ruteo 15/3 + lints 0 + drift 0 + forja-dry 47 sellos exit 0, pc-local
+- [V] TEST_COVERAGE · PASS · quality-auditor · 6 suites + lints + metricas + prueba negativa: gatillo duplicado → exit 1 R3
+- [V] INDEPENDENCIA · PASS · líder · 2 verificadores frescos (quality + triple design/leak/scope)
+- [V] SCOPE_CREEP · PASS · scope-verifier · mapeo T4a..T4f 1:1; cero sobrantes/faltantes
+- [V] FIDELIDAD_ESPEC · PASS · scope-verifier · capturas del operador punto por punto (feature/manualizador/migrar/evals/métricas)
+- [V] CREDITO · PASS · scope-verifier · ADR 0020 al abrir; refs recíprocas ambas direcciones; nit del curador → deuda declarada en iter-2
+- [V] PARKING · PASS · scope-verifier · deudas con hogar (evals LLM, render por-app, M4, curador)
+- [V] MIGRATION · N/A · gate · sin DDL
+- [V] ZERO_LEAK · PASS · leak-verifier · leak-scan exit 0; ALL-SECRETS citado solo como patrón de nombre con doctrina en la misma frase; 559 líneas limpias
+- [V] OPEN_CLOSED · PASS · design-verifier · todo agregado; forja +10 anexas con if-exists (caso legal declarado en plan)
+- [V] ATOMICIDAD · PASS · design-verifier · 75/76/46/51/70/112 líneas; una responsabilidad c/u; fronteras feature↔idea y migrar↔adoptar nítidas
+- [V] COSTURA · PASS · design-verifier · eval nuevo = bloque R-N; métrica nueva = print-block; forja invoca por if-exists
+- [V] LISKOV · PASS · design-verifier · 2 agentes nuevos honran el contrato agente/1 (mismo shape que crisol-*)
+- [V] INTERFACE_SEGREGATION · PASS · design-verifier · clasificador SIN Write/Edit (solo propone); manualizador CON (su rol escribe)
+- [V] CASOS_LEGALES · PASS · design-verifier · única edición a estable = sección anexa de forja, declarada en T4e
+- [V] PIN_TOTAL · PASS · design-verifier · cero deps nuevas; promptfoo NO entró (deuda pineada)
+- [V] CONFORMIDAD · N/A · líder · tooling sin capas
+- [V] TARGET_ENV · N/A · líder · local sin @env
+- [V] RESPONSIVE · N/A · líder · sin UI
+- [V] FUENTE_VERDAD · N/A · líder · no toca testing/prod
+- [V] TECHO_ITER · PASS · líder · convergió en 2/3 (nits aplicados en iter-2)
+- [V] SELLOS · PASS · forja · pre-flight 47 archivos 1 ancla; re-sello uniforme v2.4.0
+- [V] FORJA · PASS · forja · forjar-release.sh v2.4.0 exit 0 con test-ruteo cableado
+- [V] TAG_GATE · PASS · líder · tag anotado v2.4.0 tras CLOSED + matriz verde
+- [V] CIERRE_TRAS_PASS · PASS · líder · cierre tras 2 verificadores frescos PASS + nits aplicados
+- [V] BUMP_REASON · N/A · gate · sin bumps
 <!-- VEREDICTOS:END -->
-- Iteraciones: 1/3
+- Iteraciones: 2/3
+- Cierre: 2026-07-16 · commit de cierre + tag anotado v2.4.0 + GitHub Release
 
 ### main — 2026-07-16 (v2.1.0 — escalera T1: skills diagnostico (peldaño 0) + microfix (peldaño 1) + cableado)
 - STATUS: CLOSED

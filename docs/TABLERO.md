@@ -11,8 +11,8 @@
 ## ⚠ Ramas EN_DUDA — una corrida las contradijo (frescura) (0)
 - (nada)
 
-## 🔥 Corridas ACTIVE (1)
-- corrida:2026-07-16-ecosistema-features-migrar · v2.4.0 — T4: ecosistema — features, Manualizador, /migrar, evals de ruteo, métricas
+## 🔥 Corridas ACTIVE (0)
+- (nada)
 
 ## 🩹 Hotfixes abiertos (0)
 - (nada)

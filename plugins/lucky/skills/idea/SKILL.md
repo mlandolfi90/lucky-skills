@@ -62,7 +62,7 @@ tal cual. Nada más.
 ---
 
 **Fuente de verdad: `github.com/mlandolfi90/lucky-skills` · esta copia = tag
-`v2.3.0` (cache local, NO la ley).** Ley viva: con red, si el repo tiene un tag
+`v2.4.0` (cache local, NO la ley).** Ley viva: con red, si el repo tiene un tag
 mayor (`git ls-remote --tags
 https://github.com/mlandolfi90/lucky-skills.git`), seguir la del repo e informar
 al humano.

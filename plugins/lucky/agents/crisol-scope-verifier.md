@@ -41,4 +41,4 @@ Si FAIL: qué sobró/faltó, concreto.
 
 ---
 **Fuente: `github.com/mlandolfi90/lucky-skills` · esta copia = tag
-`v2.3.0` (cache local, NO la ley).**
+`v2.4.0` (cache local, NO la ley).**

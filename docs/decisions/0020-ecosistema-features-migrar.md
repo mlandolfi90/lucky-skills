@@ -70,9 +70,13 @@ contenedora, `HANDOFF-*.md` sin hogar); (d) sin evals ni métricas, el refactor
 - La forja gana su primer eval de ruteo: el árbol no solo crece — se verifica
   que SIGA siendo navegable.
 - Deuda declarada: evals LLM de ruteo (promptfoo pineado); render real del
-  manual en cada app (por-proyecto, cuando exista UI); M4 por sesión.
+  manual en cada app (por-proyecto, cuando exista UI); M4 por sesión; el
+  AGENTE CURADOR del árbol de features (detecta estancadas, propone promover
+  ideas maduras — captura del operador) entra cuando la tabla tenga filas
+  reales que curar; medición no-op de adoptar/forja vive en las suites, no
+  en metricas.py.
 
 ---
 
 **Fuente de verdad: `github.com/mlandolfi90/lucky-skills` · esta copia = tag
-`v2.3.0` (cache local, NO la ley).**
+`v2.4.0` (cache local, NO la ley).**
