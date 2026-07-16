@@ -6,9 +6,14 @@ set -euo pipefail
 export PYTHONIOENCODING=utf-8  # Windows: cp1252 no imprime emojis
 
 # Intérprete Python: resolver UNA vez (Linux-solo-python3 no trae `python` pelado).
-# Preferir python3; caer a python. Sin ninguno → fail-closed con mensaje claro.
-PYTHON="$(command -v python3 || command -v python || true)"
-[ -n "$PYTHON" ] || { echo "❌ Falta Python: ni 'python3' ni 'python' están en el PATH. Instalá Python 3 y reintentá."; exit 1; }
+# Preferir python3; caer a python. VERIFICANDO que ejecute de verdad: en Windows
+# el alias de Microsoft Store aparece en PATH pero no corre (shim que solo abre
+# el Store) — `command -v` solo no alcanza. Sin ninguno → fail-closed.
+PYTHON=""
+for _cand in python3 python; do
+  if command -v "$_cand" >/dev/null 2>&1 && "$_cand" -c "" >/dev/null 2>&1; then PYTHON="$_cand"; break; fi
+done
+[ -n "$PYTHON" ] || { echo "❌ Falta Python: ni 'python3' ni 'python' EJECUTAN en este PATH (¿alias del Microsoft Store?). Instalá Python 3 y reintentá."; exit 1; }
 
 [ -d ".git" ] || { echo "❌ Corré esto desde la raíz de un repo git."; exit 1; }
 echo "⚒️  Adoptando el Crisol en: $(pwd)"
@@ -56,6 +61,94 @@ if [ ! -f "docs/refactor/_crisol/RUN-LEDGER.md" ]; then
 else
   echo "  ↻ ledger ya existía — opt-in ya estaba activo"
 fi
+
+# 2b. Sistema de registros (ADR 0016) — todo write-if-absent (idempotente):
+#     una corrida = una fila en runs/; el ledger legacy pasa a ser proyección.
+ADOPTAR_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+mkdir -p "docs/refactor/_crisol/runs" "scripts"
+if [ ! -f "docs/registros.yaml" ]; then
+  cat > "docs/registros.yaml" << 'YML'
+# registros.yaml — mapa del sistema de escritura (ADR 0016, lucky-skills)
+# Carpeta = tabla · archivo = fila · frontmatter = columnas · cuerpo = payload.
+schema: lucky-registros/1
+backend: fs
+sellos: docs/refactor/_crisol/sellos.json
+
+tablas:
+  corrida:
+    path: docs/refactor/_crisol/runs/
+    patron: "????-??-??-*.md"
+    duenio: skill:crisol
+    estados: [ACTIVE, CLOSED, ESCALATED]
+    terminales: [CLOSED, ESCALATED]
+    sellado: true
+    proyecciones:
+      - docs/refactor/_crisol/RUN-LEDGER.md
+      - docs/refactor/_crisol/_ACTIVE
+    visibilidad: taller
+  decision:
+    path: docs/decisions/
+    patron: "[0-9][0-9][0-9][0-9]-*.md"
+    duenio: corrida+humano
+    estados: [PROPUESTA, ACEPTADA, RECHAZADA, SUPERSEDIDA]
+    terminales: [RECHAZADA, SUPERSEDIDA]
+    lazy: true
+    proyecciones:
+      - docs/decisions/INDEX.md
+    visibilidad: taller
+  plan:
+    path: docs/refactor/_crisol/planes/
+    patron: "*.md"
+    duenio: skill:crisol
+    lazy: true
+    estados: [BORRADOR, VIGENTE, CUMPLIDO, SUPERSEDIDO, CERRADA]
+    terminales: [CUMPLIDO, SUPERSEDIDO, CERRADA]
+    visibilidad: taller
+  idea:
+    path: docs/IDEAS.md
+    forma: linea
+    append_only: true
+    duenio: skill:idea
+    visibilidad: taller
+  hotfix:
+    path: docs/hotfixs/
+    patron: "Bug-*.md"
+    duenio: skill:hotfix
+    lazy: true
+    estados: [ACTIVE, CLOSED, ABANDONADO]
+    terminales: [CLOSED, ABANDONADO]
+    proyecciones:
+      - docs/hotfixs/INDICE.md
+    visibilidad: taller
+  concejo:
+    path: docs/concejos/
+    patron: "????-??-??-*.md"
+    duenio: lider-orquestador
+    lazy: true
+    estados: [CERRADO]
+    terminales: [CERRADO]
+    visibilidad: taller
+
+narrativa:
+  - README.md
+  - CLAUDE.md
+
+config:
+  - docs/registros.yaml
+  - docs/refactor/_crisol/atomicidad.conf
+YML
+  echo "  ✅ docs/registros.yaml — manifiesto de registros sembrado"
+else
+  echo "  ↻ docs/registros.yaml ya existía (no se pisa)"
+fi
+for tool in proyectar.py registros-lint.py; do
+  if [ ! -f "scripts/$tool" ] && [ -f "$ADOPTAR_DIR/$tool" ]; then
+    cp -- "$ADOPTAR_DIR/$tool" "scripts/$tool"
+    echo "  ✅ scripts/$tool — copiado (proyecciones/lint del sistema de registros)"
+  else
+    echo "  ↻ scripts/$tool ya existía o no disponible (no se pisa)"
+  fi
+done
 
 # 3. CLAUDE.md — directiva que TODA sesión lee al arrancar (idempotente)
 MARK="<!-- crisol-adoptado -->"
