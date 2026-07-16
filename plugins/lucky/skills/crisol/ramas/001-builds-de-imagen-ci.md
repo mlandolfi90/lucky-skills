@@ -26,3 +26,7 @@ El Verificador satisface la REGLA 0 así:
 3. Suma su verificación **funcional/e2e propia** contra el artefacto desplegado.
 
 Único build legal fuera del CI: minutos de CI agotados (fallback declarado).
+
+---
+**Fuente: `github.com/mlandolfi90/lucky-skills` · esta copia = tag
+`v2.1.0` (cache local, NO la ley).**

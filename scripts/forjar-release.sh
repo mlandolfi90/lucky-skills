@@ -184,6 +184,13 @@ if [ -d "$DECISIONS_DIR" ]; then
   # INDEX.md es PROYECCIÓN generada (ADR 0016): no lleva sello — se excluye.
   while IFS= read -r a; do [ -n "$a" ] && SEALED+=("$a"); done < <(find "$DECISIONS_DIR" -type f -name '*.md' ! -name 'INDEX.md' 2>/dev/null | sort)
 fi
+# Guardianes canónicos (ADR 0018): viajan sellados con la familia.
+AGENTS_DIR="plugins/lucky/agents"
+if [ -d "$AGENTS_DIR" ]; then
+  while IFS= read -r a; do [ -n "$a" ] && SEALED+=("$a"); done < <(find "$AGENTS_DIR" -type f -name '*.md' 2>/dev/null | sort)
+fi
+# Ramas de skills (ADR 0018): también selladas (son ley que rutea al contexto).
+while IFS= read -r a; do [ -n "$a" ] && SEALED+=("$a"); done < <(find "$SKILLS_DIR" -type f -path '*/ramas/*.md' 2>/dev/null | sort)
 
 # PRE-FLIGHT: validar EXACTAMENTE 1 sello ancla en TODOS los archivos ANTES de
 # tocar ninguno. Asi un archivo sin sello aborta con CERO escrituras (transaccional).

@@ -182,7 +182,10 @@ Respondé el checklist. **Cualquier "SÍ" → Tier Completo.** Todos "NO" → Fa
 
 En tier completo, las reglas de **juicio/híbridas** las dictamina un roster de
 `<concern>-verifier` **frescos** (subagente nuevo, contexto limpio: no verifican
-su propio trabajo, INDEPENDENCIA §2). **Input = SOLO el diff** (+ los meta-docs
+su propio trabajo, INDEPENDENCIA §2). **Sus definiciones CANÓNICAS viven en
+`plugins/lucky/agents/crisol-*.md` (ADR 0018): el líder spawnea por nombre y el
+prompt SE LEE tal cual — solo completa los placeholders de input ({REPO},
+{DIFF_RANGE}, {PLAN_REF}…). Redactar el mandato a mano = temperatura = deriva.** **Input = SOLO el diff** (+ los meta-docs
 que cada uno declare); **output = veredicto binario** (`PASS`/`FAIL`/`N/A`) +
 `archivo:línea` **a la matriz de veredictos** (§5). Cada verificador cubre UNA
 preocupación (atomicidad del rol). **REFERENCIAN** las reglas por nombre+sección
