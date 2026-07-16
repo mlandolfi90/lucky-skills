@@ -2582,6 +2582,21 @@
 - Iteraciones: 3/3
 - Cierre: 2026-07-16 · commit de cierre + tag anotado v2.1.0 + GitHub Release
 
+### main — 2026-07-16 (v2.2.0 — T2: mecanismo de ramas con cuarentena + guardianes canónicos)
+- STATUS: ACTIVE
+- Tier: completo (toca proyectar.py/forja + establece los patrones rama y agente-canónico en la ley)
+- Fecha: 2026-07-16
+- TARGET: pc-local (Git-Bash del operador — forja la familia; directiva de sesión del operador)
+- MODEL: fable (uniforme — Compuerta respondida por el operador en esta sesión)
+- LEY: v2.1.0 (recién forjada y publicada en esta sesión)
+- ORIGEN: tranche T2 del backlog aprobado (debate 2026-07-16); lección del RETRO de T1 aplicada: el ADR de patrón se deposita AL ABRIR, no tras un FAIL.
+- Alcance: [T2a] ADR 0018 (el árbol vivo: ramas + cuarentena + guardianes canónicos). [T2b] mecanismo de RAMAS en proyectar.py — bloque <!-- RAMAS:BEGIN/END --> del tronco regenerado desde <skill>/ramas/*.md (patrón blockinfile); SOLO ramas canal:estable y estado LIVE/EN_DUDA entran al índice (cuarentena: canal:propuesta NO rutea hasta endoso del operador); lint extendido (ramas sin bloque en el tronco = hallazgo). [T2c] test-ramas.sh (indexado, cuarentena, idempotencia, drift). [T2d] primera rama real: crisol/ramas/001-builds-de-imagen-ci.md — extrae del tronco la regla condicional "builds de imagen: gate-test horneado en CI" (gatillo: el artefacto es una imagen) — el tronco ADELGAZA y estrena el mecanismo. [T2e] guardianes canónicos en plugins/lucky/agents/ (quality-auditor, design-verifier, leak-verifier, scope-verifier, conformidad-verifier, steward): frontmatter harness (name/description/tools) + columnas fila (id/schema/estado/dictamina/delega) + cuerpo = prompt canónico — el rol se LEE, no se redacta; sellados por la forja; nota de una línea en el roster del crisol. Deuda declarada: hash de agents en registry.json (parkeado).
+- MIGRATION_STRATEGY: N/A (DDL solo aditivo: sin tablas nuevas — rama y agente ya declaradas en el manifiesto desde v2.0.0)
+<!-- VEREDICTOS:BEGIN -->
+- runState: wip
+<!-- VEREDICTOS:END -->
+- Iteraciones: 1/3
+
 ### main — 2026-07-16 (v2.0.0 — refactor árbol/registros: ledger por corrida + manifiesto + proyecciones)
 - STATUS: CLOSED
 - Tier: completo (multi-archivo de código + cambia el patrón del sistema documental — la ley que viaja a la flota)
