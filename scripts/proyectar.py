@@ -38,7 +38,12 @@ if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 MARCADOR = "<!-- GENERADO por scripts/proyectar.py — NO EDITAR: fuente = las filas (ADR 0016) -->"
+RAMAS_BEGIN = "<!-- RAMAS:BEGIN (generado por scripts/proyectar.py — propuesta = cuarentena, no rutea; ADR 0018) -->"
+RAMAS_END = "<!-- RAMAS:END -->"
 _FRONT_RE = re.compile(r"\A---\s*\n(.*?)\n---\s*\n", re.DOTALL)
+_RAMAS_RE = re.compile(
+    re.escape("<!-- RAMAS:BEGIN") + r".*?" + re.escape(RAMAS_END), re.DOTALL
+)
 
 
 def _leer(p: Path) -> str:
@@ -167,6 +172,55 @@ def proyectar_decisiones(repo: Path, check: bool) -> bool:
     return _escribir(ddir / "INDEX.md", "\n".join(out) + "\n", check)
 
 
+def proyectar_ramas(repo: Path, check: bool) -> tuple[bool, list[str]]:
+    """Regenera el bloque RAMAS de cada tronco desde <skill>/ramas/*.md
+    (ADR 0018, patrón blockinfile). CUARENTENA: solo canal `estable` con
+    estado LIVE (o EN_DUDA, marcada ⚠ para juicio) entra al índice —
+    `propuesta` y `SUPERSEDIDA` no rutean. Ramas sin bloque en el tronco o
+    ilegibles → error (fail-closed)."""
+    skills_dir = repo / "plugins" / "lucky" / "skills"
+    if not skills_dir.is_dir():
+        return False, []  # repo adoptado sin la familia: no aplica
+    cambio = False
+    errores: list[str] = []
+    for skill in sorted(skills_dir.iterdir()):
+        ramas_dir = skill / "ramas"
+        tronco = skill / "SKILL.md"
+        if not ramas_dir.is_dir() or not tronco.is_file():
+            continue
+        filas = []
+        for p in sorted(ramas_dir.glob("[0-9][0-9][0-9]-*.md")):
+            fm, _ = _fila(p)
+            if fm is None:
+                errores.append(f"rama ilegible (sin frontmatter): {skill.name}/ramas/{p.name}")
+                continue
+            estado = str(fm.get("estado", "")).upper()
+            canal = str(fm.get("canal", "propuesta")).lower()
+            if canal != "estable" or estado not in ("LIVE", "EN_DUDA"):
+                continue  # cuarentena
+            marca = " ⚠EN_DUDA" if estado == "EN_DUDA" else ""
+            filas.append(f"| {p.name[:3]} | {fm.get('gatillo', '')}{marca} | ramas/{p.name} |")
+        bloque = "\n".join(
+            [RAMAS_BEGIN,
+             "| # | gatillo (si tu situación matchea → abrí SOLO esa rama) | rama |",
+             "|---|---|---|"] + filas + [RAMAS_END]
+        )
+        contenido = _leer(tronco)
+        if not _RAMAS_RE.search(contenido):
+            errores.append(
+                f"{skill.name}: tiene ramas/ pero el tronco no lleva el bloque "
+                f"RAMAS:BEGIN/END — agregalo una vez (la regeneración lo mantiene)"
+            )
+            continue
+        nuevo = _RAMAS_RE.sub(lambda _m: bloque, contenido, count=1)
+        if nuevo != contenido:
+            cambio = True
+            if not check:
+                with io.open(tronco, "w", encoding="utf-8", newline="") as f:
+                    f.write(nuevo)
+    return cambio, errores
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--repo", default=".")
@@ -177,6 +231,9 @@ def main() -> int:
 
     cambio_l, errores = proyectar_crisol(repo, args.check)
     cambio_d = proyectar_decisiones(repo, args.check)
+    cambio_r, err_r = proyectar_ramas(repo, args.check)
+    errores.extend(err_r)
+    cambio_d = cambio_d or cambio_r
 
     for e in errores:
         print(f"XX {e}")
