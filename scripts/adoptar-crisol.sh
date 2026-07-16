@@ -54,12 +54,14 @@ print(f"  ✅ .claude/settings.json — marketplace lucky-skills + {_au} + plugi
 PY
 
 # 2. Opt-in del enforcement: el ledger (su existencia activa ambos guardianes)
+SEEDED_LEDGER=0
 if [ ! -f "docs/refactor/_crisol/RUN-LEDGER.md" ]; then
   mkdir -p "docs/refactor/_crisol"
   printf '# RUN-LEDGER — %s (bajo el Crisol, lucky-skills)\n' "$(basename "$(pwd)")" > "docs/refactor/_crisol/RUN-LEDGER.md"
+  SEEDED_LEDGER=1
   echo "  ✅ docs/refactor/_crisol/RUN-LEDGER.md — opt-in creado (el gate ya muerde acá)"
 else
-  echo "  ↻ ledger ya existía — opt-in ya estaba activo"
+  echo "  ↻ ledger ya existía — opt-in ya estaba activo (si es legacy pre-2.0, lo ordena /migrar — NO se pisa acá)"
 fi
 
 # 2b. Sistema de registros (ADR 0016) — todo write-if-absent (idempotente):
@@ -165,6 +167,17 @@ for tool in proyectar.py registros-lint.py; do
     echo "  ↻ scripts/$tool ya existía o no disponible (no se pisa)"
   fi
 done
+# Si ESTA corrida sembró el ledger, proyectarlo (marcador GENERADO + estado
+# consistente con cero filas → el lint queda verde desde el día 0). JAMÁS se
+# proyecta un ledger que ya existía: uno legacy pre-2.0 tiene entradas que la
+# proyección pisaría — ese retrofit es de /migrar, no de la adopción.
+if [ "$SEEDED_LEDGER" = "1" ] && [ -f "scripts/proyectar.py" ]; then
+  if "$PYTHON" "scripts/proyectar.py" >/dev/null 2>&1; then
+    echo "  ✅ RUN-LEDGER.md/_ACTIVE proyectados (marcador GENERADO; lint verde desde el día 0)"
+  else
+    echo "  ⚠️  no se pudo proyectar (¿falta PyYAML?) — corré: python scripts/proyectar.py"
+  fi
+fi
 
 # 3. CLAUDE.md — directiva que TODA sesión lee al arrancar (idempotente)
 MARK="<!-- crisol-adoptado -->"

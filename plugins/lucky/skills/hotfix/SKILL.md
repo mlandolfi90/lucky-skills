@@ -258,7 +258,7 @@ intentó") y continuá la numeración; sin operador: cierre honesto, `Bug-`
 preservado, fuente revertida a BASE. (El protocolo de huérfanas del Crisol
 no aplica acá: un hotfix no tiene techo 3 ni COLLISION-MAP.)
 
-## Peldaño 2 de la escalera (ADR 0016 — aditivo, no cambia el flujo)
+## Peldaño 2 de la escalera (ADR 0017 — aditivo, no cambia el flujo)
 
 El hotfix es el peldaño **2** de `diagnostico → microfix → hotfix → crisol`:
 - Puede nacer **por escalada** de un microfix que reveló profundidad: hereda

@@ -16,7 +16,7 @@ allowed-tools: Read, Grep, Glob, Bash
 
 # Diagnóstico — ¿qué está pasando y dónde hay que tocar?
 
-Peldaño **0** de la escalera (ADR 0016): `diagnostico → microfix → hotfix →
+Peldaño **0** de la escalera (ADR 0017): `diagnostico → microfix → hotfix →
 crisol`. Es una brújula para bugs: reemplaza suposiciones por evidencia, y su
 única escritura es SU PROPIA FILA en el repo del taller.
 

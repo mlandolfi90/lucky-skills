@@ -16,7 +16,7 @@ allowed-tools: Read, Grep, Glob, Bash, Write, Edit
 
 # Microfix — ¿tocando acá se corrige?
 
-Peldaño **1** de la escalera (ADR 0016): `diagnostico → microfix → hotfix →
+Peldaño **1** de la escalera (ADR 0017): `diagnostico → microfix → hotfix →
 crisol`. La sonda: UN comportamiento objetivo, UN punto tocado, un veredicto.
 La ceremonia cara llega recién cuando el camino está claro — nunca antes.
 
