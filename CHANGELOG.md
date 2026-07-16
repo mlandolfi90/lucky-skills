@@ -4,6 +4,44 @@ Notas de release de la familia de skills Lucky. El historial completo del **proc
 (corridas del Crisol, RETROs) vive en `docs/refactor/_crisol/RUN-LEDGER.md`; los tags
 inmutables, en `git tag`. Formato: más nuevo arriba.
 
+## v2.0.0 — 2026-07-16 — El Árbol: todo documento es una fila, la ley crece por agregado (ADR 0016)
+
+**Major: cambia la ARQUITECTURA DOCUMENTAL del sistema (el comportamiento de las
+skills no cambia; los guardianes no se tocaron — paridad probada).**
+
+- **Una corrida = un archivo**: `docs/refactor/_crisol/runs/<id>.md` con
+  frontmatter tipado (id/estado/tier/target/model/veredictos = columnas). El
+  monolito de 2.536 líneas quedó CONGELADO verbatim en
+  `runs/_archivo-hasta-2026-07.md` — la historia no se convierte, se archiva.
+- **`RUN-LEDGER.md` ahora es PROYECCIÓN** generada por `scripts/proyectar.py`
+  (formato legacy, mismo path): los guardianes (`crisol_gate.py`,
+  `crisol-enforcer.sh`) siguen funcionando SIN CAMBIOS. Candado de la
+  migración: `tests/test-paridad.sh` (10/10 — mismo veredicto del gate sobre
+  ledger manuscrito y proyección; idempotencia byte-a-byte). `_ACTIVE` =
+  puntero O(1) a la corrida abierta. Fase 2 (guardianes leen frontmatter) =
+  corrida futura separada.
+- **Manifiesto `docs/registros.yaml`** (DDL declarativo: tabla → path → dueño →
+  estados → proyecciones → visibilidad producto|taller) +
+  `scripts/registros-lint.py` fail-closed en la forja (0 huérfanos, frontmatter
+  válido, sellos íntegros). Preparado para el futuro backend DB (diferido:
+  archivo=fila ES el contrato; `backend: fs` = dueño único de escritura).
+- **Sellos de historia**: corrida cerrada se sella sha256 (bytes LF) en
+  `sellos.json` — editar historia rompe el sello y la forja aborta (patrón
+  Flyway).
+- **Huérfanos adoptados**: `PLAN-*.md` y `CUMPLIMIENTO-*` → `planes/` con
+  frontmatter y estado (CUMPLIDO/VIGENTE/CERRADA). `docs/decisions/INDEX.md`
+  generado. ADRs 0016+ llevan frontmatter (0001–0015 intactos).
+- **Adopción**: `adoptar-crisol.sh` siembra el sistema de registros completo
+  (manifiesto + runs/ + proyector + lint), todo write-if-absent e idempotente;
+  fix: el resolver de Python verifica que el intérprete ejecute (shim de
+  Microsoft Store en Windows).
+- Corrida Crisol tier completo: 5/5 verificadores frescos PASS (enforcer
+  110/110 · paridad 10/10 · atomicidad 8/8 · leak-scan limpio · scope 1:1 con
+  ADR 0016). Origen: debate operador↔agente + concejo de diseño (3 diseños ·
+  3 jueces) + concejo 4-criterios — espec completa en `docs/IDEAS.md`
+  (backlog aprobado: escalera diagnóstico→microfix→hotfix→crisol, ramas,
+  agentes canónicos, concejos archivados, features, tablero, telemetría).
+
 ## v1.36.0 — 2026-07-10 — ley-live: la ley se trae sola al arranque (ADR 0013)
 
 Incidente del día: sesión nueva cargó v1.27.0 con v1.35.0 publicada (y desde un TERCER lugar que

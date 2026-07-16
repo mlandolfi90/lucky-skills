@@ -104,4 +104,4 @@ proceso; (b) al liberar un proyecto, la retroalimentación del proceso (el
 ---
 
 **Fuente de verdad: `github.com/mlandolfi90/lucky-skills` · esta copia = tag
-`v1.41.0` (cache local, NO la ley).**
+`v2.0.0` (cache local, NO la ley).**

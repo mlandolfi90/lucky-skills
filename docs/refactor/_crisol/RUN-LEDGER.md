@@ -2537,16 +2537,45 @@
 - Cierre: 2026-07-12 · `forjar-release.sh v1.41.0` · commit de release + tag anotado v1.41.0 · push a origin/main + tags · **GitHub Release publicado (`gh release create`, title + notas)**.
 
 ### main — 2026-07-16 (v2.0.0 — refactor árbol/registros: ledger por corrida + manifiesto + proyecciones)
-- STATUS: ACTIVE
+- STATUS: CLOSED
 - Tier: completo (multi-archivo de código + cambia el patrón del sistema documental — la ley que viaja a la flota)
 - Fecha: 2026-07-16
 - TARGET: pc-local (Git-Bash del operador — forja la familia de skills; directiva del operador, debate 2026-07-16)
 - MODEL: fable (uniforme — Compuerta del Paso 0 respondida por el operador en el debate)
 - LEY: v1.41.0 (verificada contra remoto en esta sesión)
 - ORIGEN: debate operador↔agente 2026-07-16 (capturas en docs/IDEAS.md) + concejo de diseño (3 diseños · 3 jueces → ganador git-nativo-mínimo con injertos) + concejo 4-criterios (12 mejoras). PLAY del operador: "aplicar la refactorización por pasos atómicos, terminar sin mi intervención, commits atómicos para rollback, tag final con título y notas".
-- Alcance: migración aprobada (Punto 5 del debate), commits atómicos C1..C8: [C1] ADR 0016; [C2] docs/registros.yaml + .gitattributes + scripts/registros-lint.py; [C3] congelar monolito → runs/_archivo-hasta-2026-07.md + runs/2026-07-16-refactor-arbol-registros.md + scripts/proyectar.py (RUN-LEDGER.md pasa a PROYECCIÓN legacy en el MISMO path — cero cambios en guardianes) + _ACTIVE + prueba de paridad; [C4] skill crisol abre corridas como registros (prosa); [C5] huérfanos → planes/ con frontmatter estado; [C6] forja sella corridas CLOSED (sha256 LF) + adoptar-crisol siembra manifiesto write-if-absent; [C7] roster de verificadores frescos; [C8] cierre + forja v2.0.0 + tag anotado + GitHub Release. FASE 2 del gate (guardianes leen frontmatter) = corrida FUTURA separada (decisión del debate: jamás juntas).
+- Alcance: migración aprobada (Punto 5 del debate), commits atómicos C1..C8: [C1] ADR 0016; [C2] docs/registros.yaml + .gitattributes + scripts/registros-lint.py; [C3] congelar monolito → runs/_archivo-hasta-2026-07.md + runs/2026-07-16-refactor-arbol-registros.md + scripts/proyectar.py (RUN-LEDGER.md pasa a PROYECCIÓN legacy en el MISMO path — cero cambios en guardianes) + _ACTIVE + prueba de paridad; [C4] skill crisol abre corridas como registros (prosa); [C5] huérfanos → planes/ con frontmatter estado; [C6] forja sella corridas CLOSED (sha256 LF) + adoptar-crisol siembra manifiesto write-if-absent; [C6b] fix de orden sellar→lint; [C7] roster de verificadores frescos (5/5 PASS); [C8] cierre + forja v2.0.0 + tag anotado + GitHub Release. FASE 2 del gate (guardianes leen frontmatter) = corrida FUTURA separada (decisión del debate: jamás juntas).
 - MIGRATION_STRATEGY: N/A (sin DDL; migración de archivos reversible por commit atómico)
+- RETRO: la corrida nació híbrida (abrió en formato legacy y se auto-migró a fila a mitad de camino — la próxima nace fila desde el Paso 2); el defecto de orden sellar↔lint de la forja apareció recién al ENSAYAR el cierre, no en el diseño: ensayar el cierre antes de codearlo debería ser paso del Planificador. El tronco de crisol subió a 589 líneas porque el mecanismo de ramas se decretó sin estrenarse — la primera rama debe adelgazarlo (parkeado).
 <!-- VEREDICTOS:BEGIN -->
-- runState: wip
+- runState: closing
+- [V] TARGET · PASS · líder · pc-local, directiva explícita del operador
+- [V] MODEL · PASS · líder · fable (uniforme), Compuerta respondida en debate
+- [V] REGLA0 · PASS · quality-auditor · 7 verificaciones propias en pc-local: enforcer 110-0 · paridad 10-0 · atomicidad 8-0 · lint 0 · drift 0 · forja-dry 0 · sandbox 2x byte-idéntico
+- [V] TEST_COVERAGE · PASS · quality-auditor · test-enforcer 110 + test-paridad 10 + test-atomicidad 8 + registros-lint + proyectar --check + forja dry + sandbox adopción
+- [V] INDEPENDENCIA · PASS · líder · 5 verificadores frescos (subagentes nuevos, fable), input = diff real a94b964..HEAD
+- [V] SCOPE_CREEP · PASS · scope-verifier · 20 archivos del diff mapean 1:1 a C1..C6; fix resolver Python = condición de C6
+- [V] PARKING · PASS · scope-verifier · Fase 2 + poda tronco + backlog del debate en docs/IDEAS.md; obs del design-verifier parkeadas al instante
+- [V] CREDITO · PASS · scope-verifier · ADR 0016 frontmatter decision/1 válido, refs recíprocas con esta fila, sellado
+- [V] MIGRATION · N/A · gate · sin DDL en el diff
+- [V] ZERO_LEAK · PASS · leak-verifier · leak-scan exit 0 (143 archivos) + 20 del diff a mano + mensajes de commit limpios
+- [V] OPEN_CLOSED · PASS · design-verifier · todo lo nuevo = archivos nuevos; guardianes intactos (fuera del diff); estables editados = casos legales con ADR 0016
+- [V] ATOMICIDAD · PASS · design-verifier · proyectar 197L / lint 219L una responsabilidad c/u; >400 resueltos por nombre (forja larga-legítima; archivo congelado por diseño; SKILL.md 589 citado → deuda parkeada)
+- [V] COSTURA · PASS · design-verifier · manifiesto = dato; render legacy aislado en _render_run marcada a morir en Fase 2; puerto DB diferido (sin especulación)
+- [V] LISKOV · PASS · design-verifier · proyección = sustituto drop-in del ledger manuscrito ante el gate, probado conductualmente (paridad 10-0)
+- [V] INTERFACE_SEGREGATION · N/A · design-verifier · sin contratos multi-cliente nuevos; el puerto de 4 ops deliberadamente NO se construyó
+- [V] CASOS_LEGALES · PASS · design-verifier · SKILL.md/forja/adoptar = refactor deliberado documentado en ADR 0016
+- [V] PIN_TOTAL · PASS · design-verifier · PyYAML declarada (docstrings, 6.0.1 probado) y fail-closed en import/test/forja; tool de forja, no artefacto consumido
+- [V] CONFORMIDAD · PASS · conformidad-verifier · hexagonal N/A honesto (tooling de proceso); ubicación scripts/ + naming coherente + deps sanas: verde
+- [V] TARGET_ENV · N/A · líder · TARGET local sin @env (no paas)
+- [V] RESPONSIVE · N/A · líder · la corrida no toca UI
+- [V] FUENTE_VERDAD · N/A · líder · no toca testing/producción
+- [V] TECHO_ITER · N/A · líder · 1 iteración, sin ciclo Plan↔FAIL
+- [V] SELLOS · PASS · forja · forjar-release.sh v2.0.0: pre-flight 28 archivos con 1 ancla exacta; re-sello uniforme a v2.0.0
+- [V] FORJA · PASS · forja · forjar-release.sh v2.0.0 exit 0: sellos + plugin.json + registry + leak-scan + bitacora-lint + sellado de corrida + registros-lint + no-drift
+- [V] TAG_GATE · PASS · líder · tag anotado v2.0.0 creado recién tras STATUS CLOSED + matriz completa verde
+- [V] CIERRE_TRAS_PASS · PASS · líder · commit de cierre tras 5/5 veredictos PASS del roster fresco
+- [V] BUMP_REASON · N/A · gate · sin bump de pins de terceros
 <!-- VEREDICTOS:END -->
 - Iteraciones: 1/3
+- Cierre: 2026-07-16 · commit de cierre + tag anotado v2.0.0 + GitHub Release (título y notas)
