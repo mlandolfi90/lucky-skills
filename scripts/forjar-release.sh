@@ -465,6 +465,16 @@ if [ -f "$PROYECTAR" ]; then
     die "DRIFT de proyecciones. Regenera con 'python scripts/proyectar.py' y commitea junto a las filas."
   fi
 fi
+# Evals de ruteo (ADR 0020 §5, M5): el arbol debe seguir siendo navegable.
+TEST_RUTEO="$SKILLS_DIR/crisol/tests/test-ruteo.sh"
+if [ -f "$TEST_RUTEO" ]; then
+  info "corriendo evals de ruteo (gatillos unicos/utiles, descriptions con disparadores)..."
+  if bash "$TEST_RUTEO"; then
+    ok "ruteo navegable"
+  else
+    die "test-ruteo encontro fallas. Release ABORTADO — un arbol que no rutea es ley muerta."
+  fi
+fi
 line
 
 # ── 5. limpiar restos de firma (ADR 0009: el release ya no produce .minisig) ─

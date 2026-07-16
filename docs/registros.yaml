@@ -121,6 +121,8 @@ tablas:
 
 # Docs vivos, editables en el lugar (NO son registros; sin frontmatter exigido)
 narrativa:
+  - docs/manual/      # PRODUCTO: la app renderiza el manual desde esta fuente única (ADR 0020)
+  - docs/sistema/     # PRODUCTO: referencia para el dev futuro (Diátaxis)
   - README.md
   - CHANGELOG.md
   - CLAUDE.md
