@@ -189,3 +189,5 @@
   probabilísticos vs Crisol determinístico/fail-closed) → siempre lado consejo; el .db es proyección
   regenerable, JAMÁS la fuente de verdad (blob binario, no auditable). Relacionado: ADR 0015 (espejo saber),
   substrato lucky-saber. · discusión md→estructurado + vectorial (2026-07-12)
+
+- 2026-07-16 · Refactorizar TODAS las skills del plugin lucky (plugins/lucky/skills/) para mejorar claridad/estructura: reordenar secciones, unificar formato y gramática entre skills, SIN cambiar comportamiento · corrida Crisol tier completo pendiente; TARGET pc-local confirmado; MODEL sin definir (operador pidió esperar su permiso claro)
