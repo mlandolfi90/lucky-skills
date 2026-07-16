@@ -367,17 +367,31 @@ bitácora del paso 3 se conserva).
    en la entrada del ledger (igual que `TARGET:`).
 1. Clasificar **tier** con el checklist §1. Todos NO → fast-path.
 2. `git fetch && git rebase origin/main` (conflicto → resolver antes de seguir;
-   prohibido `--force` en `main`). Abrir entrada en
-   `docs/refactor/_crisol/RUN-LEDGER.md` — crear directorio/archivo si no
-   existen, con los campos mínimos:
+   prohibido `--force` en `main`). Abrir la corrida como **FILA** (ADR 0016):
+   `docs/refactor/_crisol/runs/<YYYY-MM-DD-slug>.md` — crear `runs/` si no
+   existe — con el frontmatter tipado mínimo:
    ```
-   ### <branch> — <YYYY-MM-DD>
-   - STATUS: ACTIVE
-   - Tier: <completo|fast-path>
-   - Fecha: <YYYY-MM-DD>
-   - TARGET: <paas:<proyecto>/<app>@<env> | docker-local | pc-local>
+   ---
+   id: <YYYY-MM-DD-slug>        # = nombre de archivo (clave primaria)
+   schema: corrida/1
+   tipo: corrida
+   estado: ACTIVE
+   creado: <YYYY-MM-DD>
+   branch: <branch>
+   titulo: "<descripción corta>"
+   tier: "<completo|fast-path>"
+   target: "<paas:<proyecto>/<app>@<env> | docker-local | pc-local>"
+   model: "<alias> (uniforme) | default (por-rol)"
+   runState: wip
+   veredictos: []
+   ---
    ```
-   (plantilla completa: `templates/run-ledger.md`, si existe).
+   (anatomía completa: `templates/run-ledger.md`) y **regenerar las
+   proyecciones EN EL MISMO PASO**: `python scripts/proyectar.py` —
+   `RUN-LEDGER.md` y `_ACTIVE` son GENERADOS, jamás se editan a mano.
+   **Regla transaccional:** toda mutación del run (veredicto nuevo,
+   `runState`, cierre) va acompañada de la regeneración y viajan en el
+   MISMO commit.
    **Huérfana `ACTIVE` previa:** reportarla al humano (Fecha · Tier ·
    iteraciones N · WIP-commits) y esperar su decisión — **reanudar** (si hay
    COLLISION-MAP `APPROVE` → saltar al paso 5; techo restante = 3−N) o
@@ -439,18 +453,28 @@ bitácora del paso 3 se conserva).
 
 ---
 
-## 5. Run-ledger (llave del enforcement)
+## 5. Registros de corrida (llave del enforcement)
 
-El ledger es obligatorio **con o sin hook instalado** — el hook automatiza el
-enforcement, no lo origina. Cada corrida se registra en
-`docs/refactor/_crisol/RUN-LEDGER.md`. **Dos guardianes** leen la misma regla
-(fixture compartido `tests/test-enforcer.sh`, para que jamás deriven): el hook
-per-repo `hooks/crisol-enforcer.sh` (PreToolUse Edit|Write|MultiEdit, montado por
-`adoptar-crisol.sh` en repos adoptados) y el gate global `hooks/crisol_gate.py`
-(en `~/.claude/hooks/`, lo instala `scripts/instalar-gate.sh`, aplica en TODOS los
-repos). **Sin entrada `STATUS: ACTIVE` con `Tier` + `Fecha` + `TARGET` (valor real)
-para el branch actual, todo cambio de código fuente queda bloqueado (exit 2)** —
-codear sin declarar DÓNDE corre = verificar a ciegas. Docs/.md quedan exentos.
+**La corrida es una FILA** (ADR 0016): `docs/refactor/_crisol/runs/<id>.md`
+— frontmatter = columnas, cuerpo = prosa; un archivo por corrida; inmutable
+tras estado terminal (única mutación legal: transición de `estado` /
+`superseded_by`); sellada sha256 (LF) en el release. La fuente de verdad son
+las filas; `RUN-LEDGER.md` es **PROYECCIÓN** generada por
+`scripts/proyectar.py` (formato legacy, path histórico) y `_ACTIVE` es el
+puntero O(1) a la corrida abierta. La historia previa vive congelada en
+`runs/_archivo-hasta-2026-07.md` (verbatim, no se convierte). El registro es
+obligatorio **con o sin hook instalado** — el hook automatiza el enforcement,
+no lo origina. **Dos guardianes** leen la misma regla SOBRE LA PROYECCIÓN
+(Fase 1 — paridad probada por `tests/test-paridad.sh`; la Fase 2, corrida
+futura separada, les enseñará a leer `_ACTIVE` + frontmatter y el render
+legacy morirá): el hook per-repo `hooks/crisol-enforcer.sh` (PreToolUse
+Edit|Write|MultiEdit, montado por `adoptar-crisol.sh` en repos adoptados) y el
+gate global `hooks/crisol_gate.py` (en `~/.claude/hooks/`, lo instala
+`scripts/instalar-gate.sh`, aplica en TODOS los repos). **Sin fila
+`estado: ACTIVE` con `tier` + `creado` + `target` (valor real) proyectada
+para el branch actual, todo cambio de código fuente queda bloqueado (exit
+2)** — codear sin declarar DÓNDE corre = verificar a ciegas. Docs/.md quedan
+exentos.
 
 **Piso TARGET global (repos NO adoptados):** el gate global da una red de
 seguridad incluso fuera del Crisol. En cualquier repo git que NO adoptó el Crisol,
@@ -472,10 +496,13 @@ la entrada (incluso fast-path) debe llevar `MIGRATION_STRATEGY` — sin él →
 
 ### Matriz de veredictos (catálogo canónico de reglas)
 
-Cada corrida registra una **matriz de veredictos** machine-checkable en su
-entrada del RUN-LEDGER (formato de línea: lo posee `templates/run-ledger.md`;
-delimitadores `<!-- VEREDICTOS:BEGIN/END -->`, campo `runState`, línea
-`- [V] <ID> · <PASS|FAIL|N/A> · <quién> · <evidencia>`). Abajo el **catálogo
+Cada corrida registra una **matriz de veredictos** machine-checkable como
+COLUMNAS de su fila (ADR 0016): campo `runState: wip|closing` + lista
+`veredictos: [{regla, veredicto, quien, evidencia}]` en el frontmatter del
+run. `scripts/proyectar.py` la renderiza al bloque legacy que el gate parsea
+(delimitadores `<!-- VEREDICTOS:BEGIN/END -->`, línea
+`- [V] <ID> · <PASS|FAIL|N/A> · <quién> · <evidencia>` — formato: lo posee
+`templates/run-ledger.md`). Abajo el **catálogo
 canónico de IDs** — referencia documental, NO estructura ejecutable: la
 cobertura es **dinámica**, la matriz solo lista las reglas cuyo TRIGGER se cumple
 para el diff de la corrida. **Ausencia de una regla con trigger activo = FAIL**

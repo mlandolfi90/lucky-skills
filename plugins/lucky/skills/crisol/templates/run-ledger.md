@@ -1,6 +1,49 @@
-# RUN-LEDGER — historial de corridas del Crisol
+# Registros de corrida — fila (fuente) + proyección (contrato del gate)
 
-> ADR 0010 (self-awareness) aplicado al meta-proceso. Lo mantiene el team-lead.
+## La FILA — fuente de verdad (ADR 0016)
+
+Una corrida = un archivo `docs/refactor/_crisol/runs/<YYYY-MM-DD-slug>.md`:
+
+```
+---
+id: <YYYY-MM-DD-slug>        # = nombre de archivo → clave primaria; jamás se reusa
+schema: corrida/1            # tipo/versión del formato
+tipo: corrida
+estado: ACTIVE               # ACTIVE → CLOSED | ESCALATED (inmutable al cerrar)
+creado: <YYYY-MM-DD>
+branch: <branch>
+titulo: "<descripción corta>"
+tier: "<completo|fast-path> (<justificación>)"
+target: "<paas:<proyecto>/<app>@<env> | docker-local | pc-local> (<contexto>)"
+model: "<alias> (uniforme) | default (frontera=X · alto=Y · económico=Z)"
+ley: "<vX.Y.Z (verificada | local, sin verificar)>"
+iteraciones: "<n>/3"
+runState: wip                # wip | closing (closing SOLO en el commit de cierre)
+veredictos: []               # [{regla: <ID §5>, veredicto: PASS|FAIL|N/A, quien: <rol>, evidencia: <archivo:línea|conteo>}]
+refs: [adr:NNNN, bitacora:XXX-nnn]   # FKs tipadas <tabla>:<id>
+cierre: "<YYYY-MM-DD HH:MM · commit <sha>>"   # al cerrar
+---
+- ORIGEN: <de dónde nace la corrida>
+- Alcance: <qué se toca y por qué>
+- MIGRATION_STRATEGY: <estrategia | N/A>     (obligatorio si el diff trae DDL)
+- RETRO: <una línea sobre la fricción del PROCESO, al cerrar (blameless)>
+```
+
+Reglas: mutar la fila (veredicto, `runState`, cierre) exige regenerar las
+proyecciones en el MISMO paso (`python scripts/proyectar.py`) y commitear
+juntas. `RUN-LEDGER.md` y `_ACTIVE` son GENERADOS — editarlos a mano = drift
+que el lint delata. Historia previa: `runs/_archivo-hasta-2026-07.md`
+(congelada verbatim).
+
+---
+
+## La PROYECCIÓN — el contrato que los guardianes parsean (render de proyectar.py)
+
+> ADR 0010 (self-awareness) aplicado al meta-proceso. Este formato legacy ya NO
+> se escribe a mano: lo EMITE `scripts/proyectar.py` desde las filas (paridad
+> probada por `tests/test-paridad.sh`). Sigue siendo contrato mientras dure la
+> Fase 1 (los guardianes leen la proyección); la Fase 2 los enseñará a leer
+> frontmatter y este render morirá.
 > El hook `crisol-enforcer` LEE el ledger real (`docs/refactor/_crisol/RUN-LEDGER.md`):
 > sin una entrada `STATUS: ACTIVE` cuyo **branch aparezca en el encabezado**
 > `### <branch> — …` y que sea el branch git actual, todo cambio de código fuente
