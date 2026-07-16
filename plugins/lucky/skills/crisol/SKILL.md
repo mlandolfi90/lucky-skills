@@ -28,6 +28,7 @@ el gatillo matchea; el bloque lo regenera `scripts/proyectar.py`):
 | # | gatillo (si tu situación matchea → abrí SOLO esa rama) | rama |
 |---|---|---|
 | 001 | el artefacto del deploy es una IMAGEN (Dockerfile, multi-stage) y hay que satisfacer la REGLA 0 | ramas/001-builds-de-imagen-ci.md |
+| 002 | el diff incluye DDL destructivo (ALTER, DROP, CREATE TABLE) o cualquier migración de schema | ramas/002-migraciones-ddl.md |
 <!-- RAMAS:END -->
 
 ---
@@ -83,13 +84,8 @@ Respondé el checklist. **Cualquier "SÍ" → Tier Completo.** Todos "NO" → Fa
   paralelo). Los WIP-commits no cuentan como cierre — ver §Versionado.
 - **Gate de crédito técnico:** si el cambio toca arquitectura y NO deposita
   ADR (`docs/decisions/NNNN-titulo.md`)/annotation/IMPACT-MATRIX → `FAIL`.
-- **Migraciones de schema:** si el cambio incluye DDL destructivo (ALTER, DROP,
-  tabla nueva), el Planificador registra `MIGRATION_STRATEGY: reversible |
-  irreversible + estrategia` en el RUN-LEDGER. Sin ese campo → `REJECT`
-  automático. Rollback por tag NO des-migra datos: ante migración irreversible
-  decide el humano. Tras su decisión: fix-forward → corrida nueva; revertir DB
-  → la ejecuta el humano (código acompañante = corrida nueva); rollback solo de
-  código → re-deploy del tag estable anterior.
+- **Migraciones de schema (DDL)** → regla completa en la rama
+  `002-migraciones-ddl` (bloque RAMAS): `MIGRATION_STRATEGY` o `REJECT`.
 - **Fuente de verdad:** **dev es la mesa caliente** — ahí se prueba e itera en
   vivo, sin culpa. Pero **testing y producción NO se tocan a mano**: son
   resultado de una promoción. Si algo falla ahí → se vuelve a dev, se corrige,
@@ -182,10 +178,11 @@ Respondé el checklist. **Cualquier "SÍ" → Tier Completo.** Todos "NO" → Fa
 
 En tier completo, las reglas de **juicio/híbridas** las dictamina un roster de
 `<concern>-verifier` **frescos** (subagente nuevo, contexto limpio: no verifican
-su propio trabajo, INDEPENDENCIA §2). **Sus definiciones CANÓNICAS viven en
-`plugins/lucky/agents/crisol-*.md` (ADR 0018): el líder spawnea por nombre y el
-prompt SE LEE tal cual — solo completa los placeholders de input ({REPO},
-{DIFF_RANGE}, {PLAN_REF}…). Redactar el mandato a mano = temperatura = deriva.** **Input = SOLO el diff** (+ los meta-docs
+su propio trabajo, INDEPENDENCIA §2). **Definiciones CANÓNICAS en
+`plugins/lucky/agents/crisol-*.md` (ADR 0018): el prompt SE LEE tal cual —
+solo se completan los placeholders; el `delega:` lo resuelve el LÍDER al
+spawnear (no anidan); ante divergencia con la tabla, el `dictamina:` del
+archivo canónico MANDA (fuente única).** **Input = SOLO el diff** (+ los meta-docs
 que cada uno declare); **output = veredicto binario** (`PASS`/`FAIL`/`N/A`) +
 `archivo:línea` **a la matriz de veredictos** (§5). Cada verificador cubre UNA
 preocupación (atomicidad del rol). **REFERENCIAN** las reglas por nombre+sección

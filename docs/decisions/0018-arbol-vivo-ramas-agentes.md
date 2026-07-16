@@ -49,9 +49,14 @@ injection — la defensa robusta es provenance + endoso humano, no detección.
    agente/1`, `estado LIVE|SUPERSEDED`, `dictamina:` reglas §5, `delega:`
    sub-agentes) + cuerpo = **el prompt canónico**. El líder spawnea por
    nombre y el prompt SE LEE, no se redacta — misma directiva en cada
-   corrida, cero temperatura en el mandato. Evolución = archivo nuevo que
+   corrida, cero temperatura en el mandato. **El `delega:` lo resuelve el
+   ORQUESTADOR (líder) al spawnear** — los subagentes no anidan; agregar un
+   sub-verificador = una línea en `delega:` del archivo. Ante divergencia
+   entre la tabla del roster (tronco) y el archivo canónico, el `dictamina:`
+   del archivo MANDA (fuente única). Evolución = archivo nuevo que
    supersede (como los ADRs). Viajan sellados con la familia (la forja los
-   re-sella); su hash en registry.json queda como deuda declarada.
+   re-sella, junto con las ramas — ley que rutea al contexto viaja sellada);
+   su hash en registry.json queda como deuda declarada.
 5. **El tronco solo adelgaza o queda igual**: con el mecanismo vivo, contenido
    condicional del tronco (reglas que aplican solo a ciertos diffs) se extrae
    a ramas con gatillo; el techo de 400 (citación, ADR 0008) empuja en esa
