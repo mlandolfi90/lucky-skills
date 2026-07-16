@@ -2536,6 +2536,21 @@
 - Veredictos: forja exit 0; leak-scan LIMPIO · bitacora-lint coherente · registry v1.41.0. Cleanup del nit diferido del flip v1.39.0: template muerto removido con la disciplina de ADR (anotar 0005, no dejar ref colgando).
 - Cierre: 2026-07-12 · `forjar-release.sh v1.41.0` · commit de release + tag anotado v1.41.0 · push a origin/main + tags · **GitHub Release publicado (`gh release create`, title + notas)**.
 
+### main — 2026-07-16 (v2.1.0 — escalera T1: skills diagnostico (peldaño 0) + microfix (peldaño 1) + cableado)
+- STATUS: ACTIVE
+- Tier: completo (toca registros.yaml y adoptar-crisol.sh + establece el patrón escalera en la ley)
+- Fecha: 2026-07-16
+- TARGET: pc-local (Git-Bash del operador — forja la familia de skills; directiva de sesión del operador, debate 2026-07-16)
+- MODEL: fable (uniforme — Compuerta respondida por el operador en esta sesión)
+- LEY: v2.0.0 (verificada contra remoto tras el release)
+- ORIGEN: el operador aclaró que el goal del play cubría TODO el diseño aprobado del debate, no solo el cimiento — el backlog aprobado (docs/IDEAS.md + ADR 0016 §Consecuencias) se ejecuta en tranches T1..T4, corridas chicas encadenadas.
+- Alcance: [T1a] skill nueva `diagnostico` — peldaño 0 de la escalera, evaluador PASIVO read-only: reproduce, localiza (bitácora por síntoma + arquitectura por capa), hipotetiza, emite fila con zona sospechada + escalón/tope recomendado; invocable en CUALQUIER entorno (cero escritura al sistema observado). [T1b] skill nueva `microfix` — peldaño 1: sonda de UN comportamiento en UN punto; pregunta el tope si no viene indicado; TARGET obligatorio (env legal varía por peldaño/caso); veredicto favorable/no-favorable; escala a hotfix SIN saltos llevándose refs; en Fase 1 abre corrida fast-path mínima para satisfacer el gate (puente documentado; el peldaño propio del gate llega con Fase 2). [T1c] cableado en skill hotfix (peldaño 2: recibe refs del microfix). [T1d] tablas `diagnostico` y `microfix` en registros.yaml + siembra lazy en adoptar-crisol.sh. Sin cambios de comportamiento en skills existentes salvo el cableado aditivo.
+- MIGRATION_STRATEGY: N/A (sin DDL)
+<!-- VEREDICTOS:BEGIN -->
+- runState: wip
+<!-- VEREDICTOS:END -->
+- Iteraciones: 1/3
+
 ### main — 2026-07-16 (v2.0.0 — refactor árbol/registros: ledger por corrida + manifiesto + proyecciones)
 - STATUS: CLOSED
 - Tier: completo (multi-archivo de código + cambia el patrón del sistema documental — la ley que viaja a la flota)
