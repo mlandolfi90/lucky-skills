@@ -2534,3 +2534,18 @@
 - Iteraciones: 1/1 (fast-path docs-only, sin re-trabajo)
 - Veredictos: forja exit 0; leak-scan LIMPIO · bitacora-lint coherente · registry v1.41.0. Cleanup del nit diferido del flip v1.39.0: template muerto removido con la disciplina de ADR (anotar 0005, no dejar ref colgando).
 - Cierre: 2026-07-12 · `forjar-release.sh v1.41.0` · commit de release + tag anotado v1.41.0 · push a origin/main + tags · **GitHub Release publicado (`gh release create`, title + notas)**.
+
+### main — 2026-07-16 (v2.0.0 — refactor árbol/registros: ledger por corrida + manifiesto + proyecciones)
+- STATUS: ACTIVE
+- Tier: completo (multi-archivo de código + cambia el patrón del sistema documental — la ley que viaja a la flota)
+- Fecha: 2026-07-16
+- TARGET: pc-local (Git-Bash del operador — forja la familia de skills; directiva del operador, debate 2026-07-16)
+- MODEL: fable (uniforme — Compuerta del Paso 0 respondida por el operador en el debate)
+- LEY: v1.41.0 (verificada contra remoto en esta sesión)
+- ORIGEN: debate operador↔agente 2026-07-16 (capturas en docs/IDEAS.md) + concejo de diseño (3 diseños · 3 jueces → ganador git-nativo-mínimo con injertos) + concejo 4-criterios (12 mejoras). PLAY del operador: "aplicar la refactorización por pasos atómicos, terminar sin mi intervención, commits atómicos para rollback, tag final con título y notas".
+- Alcance: migración aprobada (Punto 5 del debate), commits atómicos C1..C8: [C1] ADR 0016; [C2] docs/registros.yaml + .gitattributes + scripts/registros-lint.py; [C3] congelar monolito → runs/_archivo-hasta-2026-07.md + runs/2026-07-16-refactor-arbol-registros.md + scripts/proyectar.py (RUN-LEDGER.md pasa a PROYECCIÓN legacy en el MISMO path — cero cambios en guardianes) + _ACTIVE + prueba de paridad; [C4] skill crisol abre corridas como registros (prosa); [C5] huérfanos → planes/ con frontmatter estado; [C6] forja sella corridas CLOSED (sha256 LF) + adoptar-crisol siembra manifiesto write-if-absent; [C7] roster de verificadores frescos; [C8] cierre + forja v2.0.0 + tag anotado + GitHub Release. FASE 2 del gate (guardianes leen frontmatter) = corrida FUTURA separada (decisión del debate: jamás juntas).
+- MIGRATION_STRATEGY: N/A (sin DDL; migración de archivos reversible por commit atómico)
+<!-- VEREDICTOS:BEGIN -->
+- runState: wip
+<!-- VEREDICTOS:END -->
+- Iteraciones: 1/3
