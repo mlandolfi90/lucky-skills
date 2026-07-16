@@ -221,6 +221,66 @@ def proyectar_ramas(repo: Path, check: bool) -> tuple[bool, list[str]]:
     return cambio, errores
 
 
+def _filas_con(dirpath: Path, glob: str, campo: str, valores: set[str]):
+    """[(id, extra)] de filas cuyo `campo` ∈ valores. Determinista (orden por nombre)."""
+    out = []
+    if not dirpath.is_dir():
+        return out
+    for p in sorted(dirpath.glob(glob)):
+        if p.name.startswith("_archivo") or p.name in ("INDEX.md", "INDICE.md"):
+            continue
+        fm, _ = _fila(p)
+        if fm and str(fm.get(campo, "")).upper() in valores:
+            out.append((str(fm.get("id", p.stem)), fm))
+    return out
+
+
+def proyectar_tablero(repo: Path, check: bool) -> bool:
+    """docs/TABLERO.md — la bandeja del operador (ADR 0019 §3): qué está
+    abierto y qué espera SU juicio. Determinista: estados, no edades."""
+    out = [MARCADOR, "", "# TABLERO — qué está abierto y qué espera tu juicio", ""]
+
+    def seccion(titulo, items, render):
+        out.append(f"## {titulo} ({len(items)})")
+        if items:
+            out.extend(render(i, fm) for i, fm in items)
+        else:
+            out.append("- (nada)")
+        out.append("")
+
+    base = repo / "docs"
+    seccion("⚖ Decisiones PROPUESTAS — esperan tu veredicto",
+            _filas_con(base / "decisions", "[0-9]*.md", "estado", {"PROPUESTA"}),
+            lambda i, fm: f"- decision:{i}")
+    ramas_q, ramas_duda = [], []
+    skills_dir = repo / "plugins" / "lucky" / "skills"
+    if skills_dir.is_dir():
+        for rd in sorted(skills_dir.glob("*/ramas")):
+            for i, fm in _filas_con(rd, "[0-9]*.md", "canal", {"PROPUESTA"}):
+                if str(fm.get("estado", "")).upper() != "SUPERSEDIDA":
+                    ramas_q.append((f"{rd.parent.name}/{i}", fm))
+            ramas_duda += [(f"{rd.parent.name}/{i}", fm)
+                           for i, fm in _filas_con(rd, "[0-9]*.md", "estado", {"EN_DUDA"})]
+    seccion("🌱 Ramas en CUARENTENA — esperan tu endoso (canal propuesta)",
+            ramas_q, lambda i, fm: f"- rama:{i} · gatillo: {fm.get('gatillo', '')}")
+    seccion("⚠ Ramas EN_DUDA — una corrida las contradijo (frescura)",
+            ramas_duda, lambda i, fm: f"- rama:{i}")
+    seccion("🔥 Corridas ACTIVE",
+            _filas_con(base / "refactor" / "_crisol" / "runs", "*.md", "estado", {"ACTIVE"}),
+            lambda i, fm: f"- corrida:{i} · {fm.get('titulo', '')}")
+    seccion("🩹 Hotfixes abiertos",
+            _filas_con(base / "hotfixs", "Bug-*.md", "estado", {"ACTIVE"}),
+            lambda i, fm: f"- hotfix:{i}")
+    seccion("🔬 Microfixes abiertos",
+            _filas_con(base / "microfixes", "*.md", "estado", {"ACTIVE"}),
+            lambda i, fm: f"- microfix:{i} · {fm.get('comportamiento', '')}")
+    seccion("🔍 Diagnósticos ABIERTOS",
+            _filas_con(base / "diagnosticos", "*.md", "estado", {"ABIERTO"}),
+            lambda i, fm: f"- diagnostico:{i} · {fm.get('sintoma', '')}")
+
+    return _escribir(repo / "docs" / "TABLERO.md", "\n".join(out) + "\n", check)
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--repo", default=".")
@@ -232,8 +292,9 @@ def main() -> int:
     cambio_l, errores = proyectar_crisol(repo, args.check)
     cambio_d = proyectar_decisiones(repo, args.check)
     cambio_r, err_r = proyectar_ramas(repo, args.check)
+    cambio_t = proyectar_tablero(repo, args.check)
     errores.extend(err_r)
-    cambio_d = cambio_d or cambio_r
+    cambio_d = cambio_d or cambio_r or cambio_t
 
     for e in errores:
         print(f"XX {e}")

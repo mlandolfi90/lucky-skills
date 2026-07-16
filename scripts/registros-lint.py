@@ -97,6 +97,14 @@ def main() -> int:
 
     declara("docs/registros.yaml")
     declara(str(sellos_path.relative_to(repo)))
+    tablero = cfg.get("tablero")
+    if tablero:
+        declara(str(tablero))
+        tp = repo / str(tablero)
+        if tp.is_file():
+            head = "\n".join(tp.read_text(encoding="utf-8-sig", errors="replace").splitlines()[:3])
+            if MARCADOR_GENERADO not in head:
+                f(f"proyeccion {tablero} SIN marcador `{MARCADOR_GENERADO}` (¿editada a mano?)")
     for rel in (cfg.get("narrativa") or []) + (cfg.get("config") or []):
         declara(str(rel))
 

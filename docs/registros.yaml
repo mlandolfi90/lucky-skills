@@ -11,6 +11,7 @@
 schema: lucky-registros/1
 backend: fs
 sellos: docs/refactor/_crisol/sellos.json
+tablero: docs/TABLERO.md   # proyección global (ADR 0019): la bandeja del operador
 
 tablas:
   corrida:
