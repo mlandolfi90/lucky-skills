@@ -258,6 +258,18 @@ intentó") y continuá la numeración; sin operador: cierre honesto, `Bug-`
 preservado, fuente revertida a BASE. (El protocolo de huérfanas del Crisol
 no aplica acá: un hotfix no tiene techo 3 ni COLLISION-MAP.)
 
+## Peldaño 2 de la escalera (ADR 0016 — aditivo, no cambia el flujo)
+
+El hotfix es el peldaño **2** de `diagnostico → microfix → hotfix → crisol`:
+- Puede nacer **por escalada** de un microfix que reveló profundidad: hereda
+  el contexto vía `refs: [microfix:<id>, diagnostico:<id>]` en su `Bug-` —
+  la cadena queda trazada de punta a punta.
+- **Sin saltos:** al hotfix se llega desde el 1 (o directo si el operador fija
+  el tope acá); del hotfix se sale al 3 — el cierre con UNA corrida Crisol
+  que esta skill YA exige es exactamente ese peldaño.
+- **TARGET por peldaño:** la mesa caliente del hotfix es dev (como siempre);
+  el env legal lo fija el caso y queda declarado en el `Bug-`.
+
 ---
 
 **Fuente de verdad: `github.com/mlandolfi90/lucky-skills` · esta copia = tag

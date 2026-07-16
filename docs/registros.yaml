@@ -64,6 +64,24 @@ tablas:
       - docs/hotfixs/INDICE.md
     visibilidad: taller
 
+  diagnostico:              # peldaño 0 de la escalera (read-only al mundo)
+    path: docs/diagnosticos/
+    patron: "????-??-??-*.md"
+    duenio: skill:diagnostico
+    lazy: true
+    estados: [ABIERTO, RESPONDIDO, DESCARTADO]
+    terminales: [RESPONDIDO, DESCARTADO]
+    visibilidad: taller
+
+  microfix:                 # peldaño 1 de la escalera (sonda: 1 comportamiento, 1 punto)
+    path: docs/microfixes/
+    patron: "????-??-??-*.md"
+    duenio: skill:microfix
+    lazy: true
+    estados: [ACTIVE, FAVORABLE, NO_FAVORABLE, ESCALADO]
+    terminales: [FAVORABLE, NO_FAVORABLE, ESCALADO]
+    visibilidad: taller
+
   concejo:
     path: docs/concejos/
     patron: "????-??-??-*.md"

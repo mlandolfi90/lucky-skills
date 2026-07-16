@@ -128,6 +128,22 @@ tablas:
     estados: [CERRADO]
     terminales: [CERRADO]
     visibilidad: taller
+  diagnostico:
+    path: docs/diagnosticos/
+    patron: "????-??-??-*.md"
+    duenio: skill:diagnostico
+    lazy: true
+    estados: [ABIERTO, RESPONDIDO, DESCARTADO]
+    terminales: [RESPONDIDO, DESCARTADO]
+    visibilidad: taller
+  microfix:
+    path: docs/microfixes/
+    patron: "????-??-??-*.md"
+    duenio: skill:microfix
+    lazy: true
+    estados: [ACTIVE, FAVORABLE, NO_FAVORABLE, ESCALADO]
+    terminales: [FAVORABLE, NO_FAVORABLE, ESCALADO]
+    visibilidad: taller
 
 narrativa:
   - README.md
