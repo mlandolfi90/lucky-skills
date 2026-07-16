@@ -4,6 +4,28 @@ Notas de release de la familia de skills Lucky. El historial completo del **proc
 (corridas del Crisol, RETROs) vive en `docs/refactor/_crisol/RUN-LEDGER.md`; los tags
 inmutables, en `git tag`. Formato: más nuevo arriba.
 
+## v2.2.0 — 2026-07-16 — El Árbol Vivo: ramas con cuarentena y guardianes canónicos (ADR 0018)
+
+- **Mecanismo de RAMAS**: cada skill puede tener `ramas/NNN-slug.md`; el bloque
+  `<!-- RAMAS:BEGIN/END -->` del tronco lo regenera `scripts/proyectar.py`
+  (blockinfile, byte-determinista). El agente carga el tronco siempre y abre
+  SOLO la rama cuyo gatillo matchea. **CUARENTENA**: toda rama nace
+  `canal: propuesta` y NO rutea hasta el endoso del operador (defensa
+  anti-envenenamiento); rama extraída del tronco nace `estable` (mover no es
+  proponer). `test-ramas.sh` 8/8.
+- **Primeras 2 ramas reales** (el tronco de crisol pierde 12 líneas
+  normativas): `001-builds-de-imagen-ci` (gatillo: artefacto imagen) y
+  `002-migraciones-ddl` (gatillo: DDL destructivo).
+- **6 guardianes canónicos** en `plugins/lucky/agents/`: quality-auditor,
+  design-verifier, leak-verifier, scope-verifier, conformidad-verifier y
+  steward — frontmatter harness + columnas de fila (`dictamina:`, `delega:`) +
+  cuerpo = prompt canónico con placeholders. **El rol se LEE, no se redacta**
+  (cero temperatura en el mandato); `delega:` lo resuelve el orquestador;
+  el `dictamina:` del archivo MANDA. Viajan sellados (forja amplía SEALED a
+  agents/ y ramas/).
+- Corrida tier completo, 2/3 iteraciones; el roster canónico se estrenó
+  auditando la corrida que lo deposita.
+
 ## v2.1.0 — 2026-07-16 — La Escalera: peldaños 0-3, entrada default y escalada sin saltos (ADR 0017)
 
 - **Skill nueva `diagnostico`** (peldaño 0): evaluador pasivo read-only — reproduce,
