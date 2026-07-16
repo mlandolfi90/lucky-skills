@@ -1,6 +1,7 @@
 {
   "schema": "lucky-sellos/1",
   "sellos": {
+    "corrida:2026-07-16-escalera-diagnostico-microfix": "405f6fbb58f34502f7dcd08eabba5cea341ba5ccce385eb88bcd6612006d5e8d",
     "corrida:2026-07-16-refactor-arbol-registros": "ec2bc64cb145f7f768dec5fb857aad5a608cbd629c1a9e1115a90685e54d9ffd"
   }
 }

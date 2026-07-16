@@ -4,6 +4,29 @@ Notas de release de la familia de skills Lucky. El historial completo del **proc
 (corridas del Crisol, RETROs) vive en `docs/refactor/_crisol/RUN-LEDGER.md`; los tags
 inmutables, en `git tag`. Formato: más nuevo arriba.
 
+## v2.1.0 — 2026-07-16 — La Escalera: peldaños 0-3, entrada default y escalada sin saltos (ADR 0017)
+
+- **Skill nueva `diagnostico`** (peldaño 0): evaluador pasivo read-only — reproduce,
+  localiza (bitácora por síntoma + arquitectura por capa), hipotetiza con
+  evidencia-o-N/D y recomienda escalón/tope. Legal en CUALQUIER entorno,
+  incluso producción (cero mutación). Su fila (`docs/diagnosticos/`) alimenta
+  los peldaños siguientes vía refs.
+- **Skill nueva `microfix`** (peldaño 1): sonda de UN comportamiento tocando UN
+  punto. **Entrada default de toda corrección**: sin tope indicado, el flujo
+  PREGUNTA "¿hasta qué escalón llega esto?" antes de tocar código. TARGET por
+  peldaño (dev default; pc-local solo pedido explícito; **producción jamás se
+  sondea**). Sonda sin residuo; escala a hotfix con refs — sin saltos
+  (excepción única 1→3 si la solución resulta conocida y toca contrato).
+- **hotfix = peldaño 2** (sección aditiva, flujo intacto): nace por escalada
+  heredando `refs: [microfix, diagnostico]`; su cierre con UNA corrida ya era
+  el peldaño 3.
+- Tablas `diagnostico`/`microfix` en `registros.yaml` + siembra en la adopción.
+- Fix de adopción: el ledger sembrado se proyecta (marcador GENERADO — lint
+  verde desde el día 0); un ledger legacy pre-2.0 JAMÁS se pisa (retrofit =
+  `/migrar`, backlog).
+- Corrida tier completo, 3/3 iteraciones (2 FAIL del roster corregidos y
+  re-verificados por frescos: ADR 0017 depositado; adopción proyectada).
+
 ## v2.0.0 — 2026-07-16 — El Árbol: todo documento es una fila, la ley crece por agregado (ADR 0016)
 
 **Major: cambia la ARQUITECTURA DOCUMENTAL del sistema (el comportamiento de las

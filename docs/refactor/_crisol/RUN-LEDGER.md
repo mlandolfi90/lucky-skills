@@ -2537,7 +2537,7 @@
 - Cierre: 2026-07-12 · `forjar-release.sh v1.41.0` · commit de release + tag anotado v1.41.0 · push a origin/main + tags · **GitHub Release publicado (`gh release create`, title + notas)**.
 
 ### main — 2026-07-16 (v2.1.0 — escalera T1: skills diagnostico (peldaño 0) + microfix (peldaño 1) + cableado)
-- STATUS: ACTIVE
+- STATUS: CLOSED
 - Tier: completo (toca registros.yaml y adoptar-crisol.sh + establece el patrón escalera en la ley)
 - Fecha: 2026-07-16
 - TARGET: pc-local (Git-Bash del operador — forja la familia de skills; directiva de sesión del operador, debate 2026-07-16)
@@ -2548,10 +2548,39 @@
 - MIGRATION_STRATEGY: N/A (DDL solo aditivo en registros.yaml: 2 tablas lazy sin datos, trivialmente reversible por commit; sin DDL destructivo)
 - ITER-2: FAIL de CREDITO del scope-verifier (iter 1) → depositado ADR 0017 "Escalera de calidad: peldaños 0-3" (entrada default, tope preguntado, sin saltos + excepción 1→3, TARGET por peldaño, puente de gate Fase 1→2, tablas) + esta línea de MIGRATION_STRATEGY reescrita por su observación menor. Re-verificación fresca: CREDITO PASS.
 - ITER-3: FAIL de TEST_COVERAGE del quality-auditor (hallazgo PRE-EXISTENTE de v2.0.0, no regresión: el ledger sembrado por la adopción no llevaba marcador GENERADO → lint exit 1 en repo recién adoptado) → adoptar-crisol.sh proyecta el ledger SOLO cuando esta corrida lo sembró (jamás pisa un legacy — eso es /migrar); sandbox re-probado: toy lint exit 0. + nit del re-verificador: las 3 skills apuntan ahora a ADR 0017.
+- RETRO: las 3 iteraciones se gastaron en artefactos de PROCESO (ADR faltante, siembra sin proyectar), no en las skills — el Planificador debería traer checklist de crédito + ensayo de adopción ANTES del roster; y el FAIL pre-existente demuestra que el roster fresco audita el terreno completo, no solo el diff (valioso: lo caza el primero que pasa).
 <!-- VEREDICTOS:BEGIN -->
-- runState: wip
+- runState: closing
+- [V] TARGET · PASS · líder · pc-local, directiva de sesión del operador
+- [V] MODEL · PASS · líder · fable (uniforme)
+- [V] REGLA0 · PASS · quality-auditor · iter1: enforcer 110-0 · paridad 10-0 · lint 0 · drift 0 · forja-dry v2.1.0 exit 0; iter3: regresión re-corrida 110-0 y 10-0
+- [V] TEST_COVERAGE · PASS · quality-auditor-iter3 · sandbox nuevo lint verde día 0 + 2da adopción no-op sha256 idéntico + ledger legacy INTACTO byte a byte + regresión completa
+- [V] INDEPENDENCIA · PASS · líder · 4 verificadores frescos iter1 + 2 re-verificadores frescos iter2/3
+- [V] SCOPE_CREEP · PASS · scope-verifier · 9 archivos del diff mapean 1:1 a T1a..T1d; fidelidad a la espec verificada punto por punto
+- [V] CREDITO · PASS · scope-verifier-iter2 · FAIL iter1 → ADR 0017 deposita las 6 normas de la escalera; frontmatter y refs válidos; INDEX regenerado
+- [V] PARKING · PASS · scope-verifier · agente localizador + Fase 2 + T2..T4 con hogar declarado
+- [V] MIGRATION · N/A · gate · DDL solo aditivo (2 tablas lazy sin datos, reversible)
+- [V] ZERO_LEAK · PASS · leak-verifier · leak-scan exit 0 + 9 archivos y 3 commits a mano: cero secretos/paths-con-usuario
+- [V] OPEN_CLOSED · PASS · design-verifier · 282+/1− todo por agregado; única deleción = proyección regenerada; hotfix ganó sección aditiva sin tocar flujo
+- [V] ATOMICIDAD · PASS · design-verifier · troncos nuevos 97/102 líneas; hotfix 279; fronteras entre peldaños mecánicas (regla del segundo lugar)
+- [V] COSTURA · PASS · design-verifier · peldaño futuro = carpeta+tabla+heredoc, forja auto-enumera; puente de gate marcado transitorio con muerte en Fase 2
+- [V] LISKOV · N/A · design-verifier · sin jerarquía de subtipos; contrato fila (columnas obligatorias) cumplido por ambos schemas
+- [V] INTERFACE_SEGREGATION · PASS · design-verifier · tools por rol: diagnostico SIN Write/Edit (peldaño pasivo); microfix con ellas (su rol es tocar)
+- [V] CASOS_LEGALES · PASS · design-verifier · única edición a estable = sección aditiva en hotfix, declarada en el plan y sancionada por ADR 0017
+- [V] CONFORMIDAD · N/A · líder · sin código hexagonal en el diff — trigger no aplica
+- [V] TARGET_ENV · N/A · líder · TARGET local sin @env
+- [V] RESPONSIVE · N/A · líder · sin UI
+- [V] FUENTE_VERDAD · N/A · líder · no toca testing/prod
+- [V] TECHO_ITER · PASS · líder · convergió en 3/3 — dentro del techo, sin ESCALATED
+- [V] PIN_TOTAL · N/A · gate · sin dependencias nuevas en T1
+- [V] SELLOS · PASS · forja · pre-flight 30 archivos con 1 ancla (incluye 2 skills nuevas + ADR 0017); re-sello uniforme a v2.1.0
+- [V] FORJA · PASS · forja · forjar-release.sh v2.1.0 exit 0 completo
+- [V] TAG_GATE · PASS · líder · tag anotado v2.1.0 tras CLOSED + matriz verde
+- [V] CIERRE_TRAS_PASS · PASS · líder · cierre tras matriz completa verde (2 FAIL corregidos y re-verificados por frescos)
+- [V] BUMP_REASON · N/A · gate · sin bump de pins
 <!-- VEREDICTOS:END -->
 - Iteraciones: 3/3
+- Cierre: 2026-07-16 · commit de cierre + tag anotado v2.1.0 + GitHub Release
 
 ### main — 2026-07-16 (v2.0.0 — refactor árbol/registros: ledger por corrida + manifiesto + proyecciones)
 - STATUS: CLOSED
