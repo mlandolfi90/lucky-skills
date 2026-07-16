@@ -1,3 +1,12 @@
+---
+id: PLAN-i18n-costura
+schema: plan/1
+tipo: plan
+estado: VIGENTE
+creado: 2026-06-24
+refs: []
+nota: "plan aprobado SIN ejecutar (espera decisión de MLL); la deuda lateral de CRLF que halló la saldó .gitattributes"
+---
 # PLAN quirúrgico — integración de i18n / selector-de-idioma a las skills
 
 > **Modo:** Crisol PLAN-ONLY (no se implementa nada acá). Pedido por MLL: *"planificá bien

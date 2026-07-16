@@ -1,3 +1,12 @@
+---
+id: CUMPLIMIENTO-2026-07-09
+schema: auditoria/1
+tipo: auditoria
+estado: CERRADA
+creado: 2026-07-09
+refs: []
+nota: "batería piloto de cumplimiento (9 casos: brujula/idea/ley × 3 presiones)"
+---
 # CUMPLIMIENTO — reporte de corrida 2026-07-09
 
 - Corrida: líder de sesión (primera corrida real de la skill) · modelo subagentes: claude-fable-5 (uniforme, heredado — fidelidad de auditoría: el modelo con el que se opera de verdad) · casos: 9

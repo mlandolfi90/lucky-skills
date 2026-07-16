@@ -1,3 +1,12 @@
+---
+id: PLAN-atomicidad-gate
+schema: plan/1
+tipo: plan
+estado: CUMPLIDO
+creado: 2026-06-28
+refs: [adr:0008]
+nota: "materializado por ADR 0008 (atomicidad: citación por tamaño) — el scan y la citación viven en el gate/enforcer"
+---
 # PLAN quirúrgico — cerrar el hueco de ATOMICIDAD (SRP) en el Crisol
 
 > **Modo:** PLAN-ONLY. No se tocó la ley. Pedido por MLL: *"¿el Crisol respeta

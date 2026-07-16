@@ -1,3 +1,12 @@
+---
+id: PLAN-solid
+schema: plan/1
+tipo: plan
+estado: CUMPLIDO
+creado: 2026-06-25
+refs: [adr:0007]
+nota: "materializado por ADR 0007 (SOLID completo: Liskov + ISP + auditoría retroactiva)"
+---
 # SOLID en el Crisol — plan de integración + auditoría retroactiva (+ demo real)
 
 > **Modo:** investigación PLAN-ONLY (no se implementó nada). Pedido por MLL: *"investiga cómo
