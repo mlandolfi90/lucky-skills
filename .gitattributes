@@ -25,3 +25,12 @@
 *.ico      binary
 *.woff     binary
 *.woff2    binary
+
+# ADR 0016 — proyecciones GENERADAS (scripts/proyectar.py): no editar a mano;
+# colapsadas en los diffs de GitHub. El sellado sha256 va sobre bytes LF (ya
+# forzado arriba por `* text=auto eol=lf`).
+docs/refactor/_crisol/RUN-LEDGER.md linguist-generated=true
+docs/refactor/_crisol/_ACTIVE       linguist-generated=true text eol=lf
+docs/decisions/INDEX.md             linguist-generated=true
+docs/hotfixs/INDICE.md              linguist-generated=true
+*.yaml text eol=lf

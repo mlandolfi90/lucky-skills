@@ -1,0 +1,114 @@
+# registros.yaml — el mapa del sistema de escritura (DDL declarativo; ADR 0016)
+#
+# Carpeta = tabla · archivo = fila · frontmatter = columnas · cuerpo = payload.
+# Lo valida scripts/registros-lint.py (fail-closed en la forja). Reglas:
+#   - un DUEÑO por tabla (nadie escribe la tabla ajena)
+#   - fila nueva = archivo nuevo; inmutable en estado terminal (solo transición
+#     de estado / superseded_by); corregir = fila nueva que supersede
+#   - proyecciones GENERADAS por scripts/proyectar.py — jamás editar a mano
+#   - tabla sellado:true → fila terminal lleva sha256 (LF) en sellos.json
+#   - backend = dueño único de escritura por repo (fs | db); el otro solo refleja
+schema: lucky-registros/1
+backend: fs
+sellos: docs/refactor/_crisol/sellos.json
+
+tablas:
+  corrida:
+    path: docs/refactor/_crisol/runs/
+    patron: "????-??-??-*.md"
+    duenio: skill:crisol
+    estados: [ACTIVE, CLOSED, ESCALATED]
+    terminales: [CLOSED, ESCALATED]
+    sellado: true
+    archivo_historico: docs/refactor/_crisol/runs/_archivo-hasta-2026-07.md
+    proyecciones:
+      - docs/refactor/_crisol/RUN-LEDGER.md
+      - docs/refactor/_crisol/_ACTIVE
+    visibilidad: taller
+
+  decision:
+    path: docs/decisions/
+    patron: "[0-9][0-9][0-9][0-9]-*.md"
+    duenio: corrida+humano
+    estados: [PROPUESTA, ACEPTADA, RECHAZADA, SUPERSEDIDA]
+    terminales: [RECHAZADA, SUPERSEDIDA]
+    frontmatter_desde: 16   # 0001..0015 legacy exentos: no se reescribe historia
+    proyecciones:
+      - docs/decisions/INDEX.md
+    visibilidad: taller
+
+  plan:
+    path: docs/refactor/_crisol/planes/
+    patron: "*.md"
+    duenio: skill:crisol
+    tipos: [plan, auditoria]
+    estados: [BORRADOR, VIGENTE, CUMPLIDO, SUPERSEDIDO, CERRADA]
+    terminales: [CUMPLIDO, SUPERSEDIDO, CERRADA]
+    visibilidad: taller
+
+  idea:
+    path: docs/IDEAS.md
+    forma: linea
+    append_only: true
+    duenio: skill:idea
+    visibilidad: taller
+
+  hotfix:
+    path: docs/hotfixs/
+    patron: "Bug-*.md"
+    duenio: skill:hotfix
+    lazy: true              # la carpeta nace al primer uso
+    estados: [ACTIVE, CLOSED, ABANDONADO]
+    terminales: [CLOSED, ABANDONADO]
+    proyecciones:
+      - docs/hotfixs/INDICE.md
+    visibilidad: taller
+
+  concejo:
+    path: docs/concejos/
+    patron: "????-??-??-*.md"
+    duenio: lider-orquestador
+    lazy: true
+    estados: [CERRADO]
+    terminales: [CERRADO]
+    visibilidad: taller
+
+  feature:
+    path: docs/features/
+    patron: "*.md"
+    duenio: skill:feature
+    lazy: true
+    estados: [PROPUESTA, EN-DISENIO, EN-CONSTRUCCION, VIVA, DESCARTADA]
+    terminales: [DESCARTADA]
+    visibilidad: taller
+
+  rama:
+    path: plugins/lucky/skills/*/ramas/
+    patron: "[0-9][0-9][0-9]-*.md"
+    duenio: forja+corrida
+    lazy: true
+    estados: [PROPUESTA, LIVE, EN_DUDA, SUPERSEDIDA]
+    terminales: [SUPERSEDIDA]
+    visibilidad: producto
+
+  agente:
+    path: plugins/lucky/agents/
+    patron: "*.md"
+    duenio: corrida
+    lazy: true
+    estados: [LIVE, SUPERSEDED]
+    terminales: [SUPERSEDED]
+    visibilidad: producto
+
+# Docs vivos, editables en el lugar (NO son registros; sin frontmatter exigido)
+narrativa:
+  - README.md
+  - CHANGELOG.md
+  - CLAUDE.md
+  - docs/GUIA-SKILLS.md
+  - docs/ModeloDesarrollo.md
+
+# Configuración viva (NO registros)
+config:
+  - docs/registros.yaml
+  - docs/refactor/_crisol/atomicidad.conf
