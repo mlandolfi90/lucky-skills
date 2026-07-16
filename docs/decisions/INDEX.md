@@ -20,3 +20,4 @@
 | 0014 | [Hotfix: anti-círculo (whack-a-mole) + colapso del vault al catálogo `hotfixs/`](0014-hotfix-anti-circulo-colapso-hotfixs.md) | ACEPTADA·legado |  |
 | 0015 | [La bitácora local es un ESPEJO del saber central (saber = fuente de verdad)](0015-bitacora-espejo-saber-fuente-unica.md) | ACEPTADA·legado |  |
 | 0016 | [Sistema de registros: la ley como árbol que crece y todo documento como fila](0016-sistema-registros-arbol.md) | ACEPTADA |  |
+| 0017 | [Escalera de calidad: peldaños 0–3, entrada default y escalada sin saltos](0017-escalera-de-calidad.md) | ACEPTADA |  |
