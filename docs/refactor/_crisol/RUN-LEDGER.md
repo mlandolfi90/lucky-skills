@@ -2583,7 +2583,7 @@
 - Cierre: 2026-07-16 · commit de cierre + tag anotado v2.1.0 + GitHub Release
 
 ### main — 2026-07-16 (v2.3.0 — T3: gobierno observable — concejos, decisiones convocables, tablero, telemetría, frescura)
-- STATUS: ACTIVE
+- STATUS: CLOSED
 - Tier: completo (toca proyectar.py + hooks.json del plugin + establece patrones de gobierno)
 - Fecha: 2026-07-16
 - TARGET: pc-local (Git-Bash del operador — forja la familia; directiva de sesión del operador)
@@ -2594,10 +2594,40 @@
 - MIGRATION_STRATEGY: N/A (sin DDL destructivo; el tablero es proyección nueva declarada)
 - ITER-2: observaciones del design-verifier corregidas al instante — (1) test-tablero.sh entregado (9/9: marcador, ACTIVE listada/CLOSED no, decisión PROPUESTA, cuarentena, EN_DUDA, cross-check no-ruteo, idempotencia); (2) regex de telemetría ANCLADA a lucky/skills/ (un path de usuario con forma parecida jamás se loguea — probado: priv 0 eventos, ley 1 evento); (3) reconciliar la letra de ADR 0018 §2 con la vía endoso-por-decisión → parkeado.
 - ITER-3: FAIL de SCOPE_CREEP del scope-verifier — (a) test-tablero.sh: ya entregado en iter-2 (9/9); (b) la regeneración del bloque RAMAS de crisol/SKILL.md (línea 003) estaba en el working tree SIN commitear (violación de la regla transaccional registro+proyección-mismo-commit) → commiteada acá. Lección directa a la regla que esta misma migración instauró: el gate del futuro (Fase 2) debería verificar working-tree-limpio-de-proyecciones en el commit, no solo el drift.
+- RETRO: la regla transaccional registro+proyección-mismo-commit se violó DOS veces en la sesión (T3 apertura y rama 003) y ambas las cazaron guardianes distintos — la disciplina no alcanza: la Fase 2 del gate debe verificar working-tree-limpio-de-proyecciones en el commit (parkeado). El bug heredoc-consume-stdin del hook casi viaja a la flota: probar hooks con stdin REAL antes de cablear, siempre.
 <!-- VEREDICTOS:BEGIN -->
-- runState: wip
+- runState: closing
+- [V] TARGET · PASS · líder · pc-local, directiva de sesión
+- [V] MODEL · PASS · líder · fable (uniforme)
+- [V] REGLA0 · PASS · quality-auditor · 145 asserts (110+10+8+8+9) + 17 funcionales telemetría + sandbox cuarentena, exits reales, HEAD final en worktree prístino
+- [V] TEST_COVERAGE · PASS · quality-auditor · 5 suites + lints + forja dry + funcional TABLERO/TELEMETRÍA/hooks.json
+- [V] INDEPENDENCIA · PASS · líder · 3 frescos iter-1; remedios re-verificados por quality-auditor (agente distinto) en worktree prístino
+- [V] SCOPE_CREEP · PASS · quality-auditor · FAIL iter-1 (test faltante + proyección sin commitear) → iter-2 test-tablero 9/9 + iter-3 bloque commiteado; --check exit 0 en prístino de babe861; cero sobrantes
+- [V] CREDITO · PASS · scope-verifier · ADR 0019 en el commit de apertura; refs recíprocas ambas direcciones verificadas
+- [V] PARKING · PASS · scope-verifier · deudas con hogar (brújula→tablero; telemetría multi-repo; letra 0018§2 parkeada en IDEAS)
+- [V] FIDELIDAD_ESPEC · PASS · scope-verifier · tablero=bandeja de juicio; concejos solo-próximos sin rescate; convocables ciclo completo; telemetría local probada; frescura depositada
+- [V] MIGRATION · N/A · gate · sin DDL
+- [V] ZERO_LEAK · PASS · leak-verifier · leak-scan exit 0; JSONL en vivo = {tipo,skill,rama,session[:16],ts} sin paths ni contenido; Read fuera de la ley NO registra; off-switch y fail-open probados
+- [V] OPEN_CLOSED · PASS · design-verifier · todo agregado; main() solo ganó la llamada (costura prevista)
+- [V] ATOMICIDAD · PASS · design-verifier · proyectar.py 315<400 una responsabilidad; telemetria-uso.py 43L; separación .sh/.py forzada por restricción real documentada
+- [V] COSTURA · PASS · design-verifier · sección nueva = una llamada seccion(); proyección nueva = función + llamada; elif de eventos = altitud correcta
+- [V] LISKOV · N/A · design-verifier · sin jerarquías
+- [V] INTERFACE_SEGREGATION · N/A · design-verifier · sin contratos multi-cliente; cada consumidor lee solo sus claves
+- [V] CASOS_LEGALES · PASS · design-verifier · rama 003 estable por endoso registrado en ADR 0019 ACEPTADA — espíritu de cuarentena satisfecho; reconciliación de letra parkeada
+- [V] PIN_TOTAL · PASS · design-verifier · stdlib puro, sin red, sin pip
+- [V] CONFORMIDAD · N/A · líder · tooling sin capas
+- [V] TARGET_ENV · N/A · líder · local sin @env
+- [V] RESPONSIVE · N/A · líder · sin UI
+- [V] FUENTE_VERDAD · N/A · líder · no toca testing/prod
+- [V] TECHO_ITER · PASS · líder · convergió en 3/3 — dentro del techo
+- [V] SELLOS · PASS · forja · pre-flight 42 archivos 1 ancla (rama 003 incluida); re-sello uniforme v2.3.0
+- [V] FORJA · PASS · forja · forjar-release.sh v2.3.0 exit 0
+- [V] TAG_GATE · PASS · líder · tag anotado v2.3.0 tras CLOSED + matriz verde
+- [V] CIERRE_TRAS_PASS · PASS · líder · cierre tras roster verde + remedios re-verificados
+- [V] BUMP_REASON · N/A · gate · sin bumps
 <!-- VEREDICTOS:END -->
 - Iteraciones: 3/3
+- Cierre: 2026-07-16 · commit de cierre + tag anotado v2.3.0 + GitHub Release
 
 ### main — 2026-07-16 (v2.2.0 — T2: mecanismo de ramas con cuarentena + guardianes canónicos)
 - STATUS: CLOSED

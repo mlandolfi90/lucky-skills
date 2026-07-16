@@ -4,6 +4,28 @@ Notas de release de la familia de skills Lucky. El historial completo del **proc
 (corridas del Crisol, RETROs) vive en `docs/refactor/_crisol/RUN-LEDGER.md`; los tags
 inmutables, en `git tag`. Formato: más nuevo arriba.
 
+## v2.3.0 — 2026-07-16 — Gobierno Observable: tablero, telemetría, concejos y decisiones convocables (ADR 0019)
+
+- **`docs/TABLERO.md`** — proyección nueva: la bandeja del operador. Decisiones
+  PROPUESTAS, ramas en cuarentena (esperan endoso), ramas EN_DUDA (frescura),
+  corridas/hotfixes/microfixes/diagnósticos abiertos. Determinista (sin reloj).
+  `test-tablero.sh` 9/9.
+- **Telemetría de uso** (hook PostToolUse del plugin, fail-open total): carga de
+  troncos/ramas/skills → JSONL local en `$XDG_DATA_HOME/lucky/telemetria/`
+  (taller: jamás repo ni red; off-switch `LUCKY_TELEMETRIA=off`). Regex ANCLADA
+  a la ley (un path de usuario parecido jamás se loguea). Alimenta la poda de
+  ley muerta.
+- **Decisiones convocables** (rama `crisol/003`): el juicio del operador deja
+  de vivir en el chat — fila `decision` PROPUESTA → veredicto → reflejado;
+  deprecación = SUPERSEDIDA, jamás borrar.
+- **Concejos archivados** (ADR 0019 §1): anatomía canónica de la fila
+  `concejo`; el orquestador archiva todo veredicto de panel — rige para los
+  próximos (directiva del operador: sin rescate retroactivo).
+- **Frescura** (ADR §5): corrida que contradice una rama → `EN_DUDA` → tablero.
+- Corrida tier completo, 3/3 iteraciones — dos guardianes distintos cazaron la
+  misma violación transaccional (proyección sin commitear); lección parkeada
+  para la Fase 2 del gate.
+
 ## v2.2.0 — 2026-07-16 — El Árbol Vivo: ramas con cuarentena y guardianes canónicos (ADR 0018)
 
 - **Mecanismo de RAMAS**: cada skill puede tener `ramas/NNN-slug.md`; el bloque

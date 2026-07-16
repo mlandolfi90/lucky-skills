@@ -11,8 +11,8 @@
 ## ⚠ Ramas EN_DUDA — una corrida las contradijo (frescura) (0)
 - (nada)
 
-## 🔥 Corridas ACTIVE (1)
-- corrida:2026-07-16-gobierno-observable · v2.3.0 — T3: gobierno observable — concejos, decisiones convocables, tablero, telemetría, frescura
+## 🔥 Corridas ACTIVE (0)
+- (nada)
 
 ## 🩹 Hotfixes abiertos (0)
 - (nada)
