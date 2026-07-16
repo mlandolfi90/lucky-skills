@@ -18,12 +18,15 @@ try:
     tool = (data.get("tool_name") or "").strip()
     evento = None
     if tool == "Read":
+        # Anclado a la ley de lucky (repo `plugins/lucky/skills/` o cache del
+        # plugin `.../lucky/skills/`): un path de usuario con forma parecida
+        # JAMÁS se loguea (privacidad — hallazgo del design-verifier T3).
         fp = str((data.get("tool_input") or {}).get("file_path", "")).replace("\\", "/")
-        m = re.search(r"skills/([^/]+)/ramas/(\d{3}-[^/]+)\.md$", fp)
+        m = re.search(r"lucky/skills/([^/]+)/ramas/(\d{3}-[^/]+)\.md$", fp)
         if m:
             evento = {"tipo": "rama", "skill": m.group(1), "rama": m.group(2)}
         else:
-            m = re.search(r"skills/([^/]+)/SKILL\.md$", fp)
+            m = re.search(r"lucky/skills/([^/]+)/SKILL\.md$", fp)
             if m:
                 evento = {"tipo": "tronco", "skill": m.group(1)}
     elif tool == "Skill":
