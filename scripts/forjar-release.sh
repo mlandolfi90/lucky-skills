@@ -385,28 +385,10 @@ else
 fi
 line
 
-# ── 4c. sistema de registros (ADR 0016): lint + no-drift de proyecciones ─────
-REGISTROS_LINT="$SCRIPT_DIR/registros-lint.py"
-PROYECTAR="$SCRIPT_DIR/proyectar.py"
-if [ -f "$REGISTROS_LINT" ]; then
-  info "corriendo registros-lint (manifiesto <-> realidad)..."
-  if "$PYBIN" "$REGISTROS_LINT" --repo "$REPO_ROOT"; then
-    ok "registros coherentes (0 huerfanos, frontmatter valido, sellos integros)"
-  else
-    die "registros-lint encontro HALLAZGOS. Release ABORTADO — el manifiesto y la realidad divergen."
-  fi
-fi
-if [ -f "$PROYECTAR" ]; then
-  info "verificando proyecciones (sin drift filas <-> RUN-LEDGER/_ACTIVE/INDEX)..."
-  if "$PYBIN" "$PROYECTAR" --repo "$REPO_ROOT" --check; then
-    ok "proyecciones byte-identicas a sus filas"
-  else
-    die "DRIFT de proyecciones. Regenera con 'python scripts/proyectar.py' y commitea junto a las filas."
-  fi
-fi
-line
-
-# ── 4d. sellar corridas en estado terminal (sha256 LF -> sellos.json) ─────────
+# ── 4c. sellar corridas en estado terminal (sha256 LF -> sellos.json) ─────────
+# ORDEN: sellar ANTES del lint — el lint exige que toda fila terminal tenga
+# sello; si el sellador corriera despues, la corrida recien cerrada haria
+# abortar su propio release (hallado al ensayar el cierre de la corrida 0016).
 # Patron Flyway: la historia cerrada queda sellada; editar una corrida CLOSED
 # rompe el sello y el lint lo delata (metrica M8). Sello existente que no
 # matchea = historia editada -> ABORTA. Sello nuevo = se agrega (idempotente).
@@ -453,6 +435,27 @@ with open(sellos_p, "w", encoding="utf-8", newline="\n") as f:
 print(f"  OK sellos.json: {len(doc['sellos'])} sello(s), {nuevos} nuevo(s)")
 PY
     ok "corridas terminales selladas ($SELLOS_JSON)"
+  fi
+fi
+line
+
+# ── 4d. sistema de registros (ADR 0016): lint + no-drift de proyecciones ─────
+REGISTROS_LINT="$SCRIPT_DIR/registros-lint.py"
+PROYECTAR="$SCRIPT_DIR/proyectar.py"
+if [ -f "$REGISTROS_LINT" ]; then
+  info "corriendo registros-lint (manifiesto <-> realidad)..."
+  if "$PYBIN" "$REGISTROS_LINT" --repo "$REPO_ROOT"; then
+    ok "registros coherentes (0 huerfanos, frontmatter valido, sellos integros)"
+  else
+    die "registros-lint encontro HALLAZGOS. Release ABORTADO — el manifiesto y la realidad divergen."
+  fi
+fi
+if [ -f "$PROYECTAR" ]; then
+  info "verificando proyecciones (sin drift filas <-> RUN-LEDGER/_ACTIVE/INDEX)..."
+  if "$PYBIN" "$PROYECTAR" --repo "$REPO_ROOT" --check; then
+    ok "proyecciones byte-identicas a sus filas"
+  else
+    die "DRIFT de proyecciones. Regenera con 'python scripts/proyectar.py' y commitea junto a las filas."
   fi
 fi
 line
