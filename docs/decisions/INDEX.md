@@ -23,3 +23,4 @@
 | 0017 | [Escalera de calidad: peldaños 0–3, entrada default y escalada sin saltos](0017-escalera-de-calidad.md) | ACEPTADA |  |
 | 0018 | [El árbol vivo: ramas con cuarentena y guardianes canónicos](0018-arbol-vivo-ramas-agentes.md) | ACEPTADA |  |
 | 0019 | [Gobierno observable: concejos, decisiones convocables, tablero, telemetría y frescura](0019-gobierno-observable.md) | ACEPTADA |  |
+| 0020 | [Ecosistema: features de primera clase, Manualizador, /migrar, evals y métricas](0020-ecosistema-features-migrar.md) | ACEPTADA |  |
