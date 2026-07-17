@@ -2,7 +2,7 @@
 id: 2026-07-16-leak-scan-ruta-windows-muerta
 schema: diagnostico/1
 tipo: diagnostico
-estado: ABIERTO
+estado: RESPONDIDO
 creado: 2026-07-16
 sintoma: "leak-scan.sh sale 0 (LIMPIO) sobre un archivo que contiene una ruta absoluta Windows de otro usuario — la regla RUTA-ABSOLUTA no la caza"
 reproduccion: "en repo temporal, con el script REAL (no retipeado): archivo con ruta Windows de un usuario ficticio (backslashes SIMPLES) → bash scripts/leak-scan.sh → exit 0. El mismo archivo con una ruta /home/<otro>/ → exit 1."
@@ -14,7 +14,7 @@ bitacora_match: null
 escalon_recomendado: microfix
 tope_sugerido: microfix
 target_observado: "pc-local (Git-Bash) — el gate corre acá y en la forja"
-refs: [corrida:2026-07-16-equipo-doc-v1, corrida:2026-07-16-equipo-doc-v1-fix]
+refs: [corrida:2026-07-16-equipo-doc-v1, corrida:2026-07-16-equipo-doc-v1-fix, microfix:2026-07-16-leak-scan-ruta-windows]
 ---
 # leak-scan: la rama de rutas Windows no caza nada
 
@@ -66,3 +66,17 @@ La regla 3 no tiene válvula para el ejemplo declarado — la regla 4 sí la tie
 "filtro un valor" convierte cada postmortem en un bloqueo. Es la lección v1.8.0
 que el propio scanner declara **en prosa, en su cabecera, sin mecanizar**.
 Decidir si eso entra al microfix o es corrida aparte: del operador.
+
+---
+
+## RESPONDIDO — 2026-07-16
+
+Saldado por `microfix:2026-07-16-leak-scan-ruta-windows` (veredicto FAVORABLE).
+Ambas hipótesis quedaron CONFIRMADAS. El escalón recomendado fue el correcto: un
+punto, una línea, sin escalar.
+
+La sonda halló además lo que el diagnóstico no vio: el defecto de fondo no era
+solo el escape, sino la **asimetría** — la rama Windows usaba clase negada
+mientras sus dos hermanas usaban clase positiva. Por eso arreglar solo el escape
+habría convertido el gate en un bloqueador permanente de la forja (el riesgo que
+este diagnóstico sí anticipó). La clase positiva salda las dos cosas de una.
