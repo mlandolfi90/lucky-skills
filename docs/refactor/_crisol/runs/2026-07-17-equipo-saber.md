@@ -2,7 +2,7 @@
 id: 2026-07-17-equipo-saber
 schema: corrida/1
 tipo: corrida
-estado: ACTIVE
+estado: CLOSED
 creado: 2026-07-17
 branch: main
 titulo: "El saber tiene equipo — agente destilador + skill saber"

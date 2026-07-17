@@ -3252,7 +3252,7 @@
 - Cierre: 2026-07-17 · commit de cierre + forja v2.6.0 (sella las 2 corridas terminales) + tag anotado + GitHub Release
 
 ### main — 2026-07-17 (El saber tiene equipo — agente destilador + skill saber)
-- STATUS: ACTIVE
+- STATUS: CLOSED
 - Tier: completo (2 artefactos canónicos nuevos + cableado en la ley del crisol = contrato; >1 archivo; establece patrón: el ciclo de vida del conocimiento tiene dueño)
 - Fecha: 2026-07-17
 - TARGET: pc-local (la forja; directiva durable del operador para lucky-skills)
