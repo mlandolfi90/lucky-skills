@@ -11,8 +11,8 @@
 ## ⚠ Ramas EN_DUDA — una corrida las contradijo (frescura) (0)
 - (nada)
 
-## 🔥 Corridas ACTIVE (0)
-- (nada)
+## 🔥 Corridas ACTIVE (1)
+- corrida:2026-07-16-equipo-doc-v1 · Equipo de documentación v1 — lector-cero gatea el pase a VIVA
 
 ## 🩹 Hotfixes abiertos (0)
 - (nada)

@@ -24,3 +24,4 @@
 | 0018 | [El árbol vivo: ramas con cuarentena y guardianes canónicos](0018-arbol-vivo-ramas-agentes.md) | ACEPTADA |  |
 | 0019 | [Gobierno observable: concejos, decisiones convocables, tablero, telemetría y frescura](0019-gobierno-observable.md) | ACEPTADA |  |
 | 0020 | [Ecosistema: features de primera clase, Manualizador, /migrar, evals y métricas](0020-ecosistema-features-migrar.md) | ACEPTADA |  |
+| 0021 | [El gate de doc exige que el manual SIRVA, no solo que exista](0021-gate-de-doc-que-sirve.md) | ACEPTADA |  |
