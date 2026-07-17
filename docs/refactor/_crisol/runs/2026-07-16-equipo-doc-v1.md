@@ -10,9 +10,16 @@ tier: "completo (>1 archivo de código; establece patrón: primer verificador de
 target: "pc-local (la forja: skills/agentes/scripts corren en esta PC — directiva explícita del operador)"
 model: "fable (uniforme)"
 ley: "v2.4.0 (verificada — git ls-remote: máximo remoto == sello local)"
-iteraciones: "2/3"
+iteraciones: "3/3 (convergió: APPROVE ×3)"
 runState: wip
-veredictos: []
+veredictos:
+  - {regla: TARGET, veredicto: PASS, quien: líder, evidencia: "pc-local (la forja; directiva explícita del operador)"}
+  - {regla: MODEL, veredicto: PASS, quien: líder, evidencia: "fable (uniforme)"}
+  - {regla: OPEN_CLOSED, veredicto: PASS, quien: steward, evidencia: "shift-left iter3: A 2 filas nuevas + 2 líneas de transición · B rama nueva, 5 ediciones con caso nombrado · C AGREGA sin caso legal (PIN 4)"}
+  - {regla: ATOMICIDAD, veredicto: PASS, quien: steward, evidencia: "shift-left iter3: ~70/~110/2 · tronco 100 + rama 70 · lint 227→330, brujula 72→122; todos vs T=400"}
+  - {regla: COSTURA, veredicto: PASS, quien: steward, evidencia: "shift-left iter3: usa costuras existentes (0018 §1 ramas, §4 supersede); sin seam especulativo — 2ª corrida gana la costura al 2º cliente"}
+  - {regla: CASOS_LEGALES, veredicto: PASS, quien: steward, evidencia: "shift-left iter3: (a) bug real SKILL.md:12 sin Agent vs :66 ordena spawn; (c) pagado con ADR 0021; (b) re-etiquetado a AGREGA en C"}
+  - {regla: CREDITO, veredicto: PASS, quien: steward, evidencia: "shift-left iter3: ADR 0021 depositado al abrir y citado por § en los 3 carriles; ninguno construye verificador-frescura (§8)"}
 refs: [concejo:2026-07-16-equipo-doc, adr:0018, adr:0019, adr:0020, adr:0021, plan:PLAN-equipo-doc-contratos]
 ---
 - ORIGEN: el operador preguntó por qué el manualizador es UN agente y no un
@@ -56,5 +63,12 @@ refs: [concejo:2026-07-16-equipo-doc, adr:0018, adr:0019, adr:0020, adr:0021, pl
   del sidecar apagaba el gate. [DRIFT-001] materializado dos veces — el mismo
   falso-verde que el PIN 1 mató en la FORMA del campo, reaparecido en la
   ALCANZABILIDAD del chequeo.
+- ITER 3 — Steward: APPROVE ×3. Convergió. B saldó el sello ancla (footer
+  byte-idéntico a crisol/ramas/003, medido n=1 con el regex real del script) y
+  reemplazó la cláusula falsa por lo que `leak-scan.sh:27-31` HACE. C partió
+  `_lint_cobertura` / `_lint_gate_doc` con call-sites independientes: ningún
+  `return` del sidecar puede volver a apagar el gate, y el skip único es por
+  ausencia de SUJETO (`docs/features/` lazy), no de chequeo. Sets disjuntos →
+  A · B · C escriben en paralelo.
 - MIGRATION_STRATEGY: N/A (sin DDL)
 - RETRO: <pendiente al cierre>

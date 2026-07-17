@@ -2630,12 +2630,26 @@
   del sidecar apagaba el gate. [DRIFT-001] materializado dos veces — el mismo
   falso-verde que el PIN 1 mató en la FORMA del campo, reaparecido en la
   ALCANZABILIDAD del chequeo.
+- ITER 3 — Steward: APPROVE ×3. Convergió. B saldó el sello ancla (footer
+  byte-idéntico a crisol/ramas/003, medido n=1 con el regex real del script) y
+  reemplazó la cláusula falsa por lo que `leak-scan.sh:27-31` HACE. C partió
+  `_lint_cobertura` / `_lint_gate_doc` con call-sites independientes: ningún
+  `return` del sidecar puede volver a apagar el gate, y el skip único es por
+  ausencia de SUJETO (`docs/features/` lazy), no de chequeo. Sets disjuntos →
+  A · B · C escriben en paralelo.
 - MIGRATION_STRATEGY: N/A (sin DDL)
 - RETRO: <pendiente al cierre>
 <!-- VEREDICTOS:BEGIN -->
 - runState: wip
+- [V] TARGET · PASS · líder · pc-local (la forja; directiva explícita del operador)
+- [V] MODEL · PASS · líder · fable (uniforme)
+- [V] OPEN_CLOSED · PASS · steward · shift-left iter3: A 2 filas nuevas + 2 líneas de transición · B rama nueva, 5 ediciones con caso nombrado · C AGREGA sin caso legal (PIN 4)
+- [V] ATOMICIDAD · PASS · steward · shift-left iter3: ~70/~110/2 · tronco 100 + rama 70 · lint 227→330, brujula 72→122; todos vs T=400
+- [V] COSTURA · PASS · steward · shift-left iter3: usa costuras existentes (0018 §1 ramas, §4 supersede); sin seam especulativo — 2ª corrida gana la costura al 2º cliente
+- [V] CASOS_LEGALES · PASS · steward · shift-left iter3: (a) bug real SKILL.md:12 sin Agent vs :66 ordena spawn; (c) pagado con ADR 0021; (b) re-etiquetado a AGREGA en C
+- [V] CREDITO · PASS · steward · shift-left iter3: ADR 0021 depositado al abrir y citado por § en los 3 carriles; ninguno construye verificador-frescura (§8)
 <!-- VEREDICTOS:END -->
-- Iteraciones: 2/3
+- Iteraciones: 3/3 (convergió: APPROVE ×3)
 
 ### main — 2026-07-16 (v2.1.0 — escalera T1: skills diagnostico (peldaño 0) + microfix (peldaño 1) + cableado)
 - STATUS: CLOSED
