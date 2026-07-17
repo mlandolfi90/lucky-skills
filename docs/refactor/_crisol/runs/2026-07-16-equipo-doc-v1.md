@@ -19,7 +19,25 @@ veredictos:
   - {regla: ATOMICIDAD, veredicto: PASS, quien: steward, evidencia: "shift-left iter3: ~70/~110/2 · tronco 100 + rama 70 · lint 227→330, brujula 72→122; todos vs T=400"}
   - {regla: COSTURA, veredicto: PASS, quien: steward, evidencia: "shift-left iter3: usa costuras existentes (0018 §1 ramas, §4 supersede); sin seam especulativo — 2ª corrida gana la costura al 2º cliente"}
   - {regla: CASOS_LEGALES, veredicto: PASS, quien: steward, evidencia: "shift-left iter3: (a) bug real SKILL.md:12 sin Agent vs :66 ordena spawn; (c) pagado con ADR 0021; (b) re-etiquetado a AGREGA en C"}
-  - {regla: CREDITO, veredicto: PASS, quien: steward, evidencia: "shift-left iter3: ADR 0021 depositado al abrir y citado por § en los 3 carriles; ninguno construye verificador-frescura (§8)"}
+  - {regla: CREDITO, veredicto: PASS, quien: scope-verifier, evidencia: "ADR 0021 ACEPTADA en b1ddcac, decision/1 válido, refs recíprocas ambas direcciones; 8/8 puntos materializados; tabla decision no es sellado:true → sin entrada en sellos.json (correcto)"}
+  - {regla: REGLA0, veredicto: PASS, quien: quality-auditor, evidencia: "pc-local: lint exit 0 + proyectar --check drift 0 + 13/13 suites + 9 pruebas NEGATIVAS que mordieron + 1 control positivo verde"}
+  - {regla: TEST_COVERAGE, veredicto: PASS, quien: quality-auditor, evidencia: "bitacora(4) cargar(1) crisol(6) ley(1) management(1) = 13/13; gate de doc y sidecar sin suite automatizada → cubiertos por prueba negativa manual (brecha declarada)"}
+  - {regla: ZERO_LEAK, veredicto: PASS, quien: leak-verifier, evidencia: "leak-scan --staged exit 0 + árbol completo exit 0 + 20 artefactos a mano + barrido independiente de 182 archivos"}
+  - {regla: INDEPENDENCIA, veredicto: PASS, quien: líder, evidencia: "4 verificadores FRESCOS (quality/leak/design/scope), input = solo el diff staged; el líder no verificó su propio trabajo — de hecho el ingeniero B le cazó al líder el ADR sin sello"}
+  - {regla: SCOPE_CREEP, veredicto: PASS, quien: scope-verifier, evidencia: "10/10 archivos mapean 1:1 a los 7 ítems; cero huérfanos/faltantes; grep verificador-frescura = 0 hits en agents/skills/scripts (FUERA DE ALCANCE respetado: el 'vamos con 1' se honró)"}
+  - {regla: PARKING, veredicto: PASS, quien: scope-verifier, evidencia: "verificador-frescura → ADR 0021 §8 + Consecuencias; paridad prosa↔script de las otras 2 señales → Consecuencias:138-141. Ambas con captura viva"}
+  - {regla: OPEN_CLOSED, veredicto: PASS, quien: design-verifier, evidencia: "3 archivos nuevos + 2 funciones + 2 call-sites + bloque nuevo; ediciones a estable con caso legal declarado (manualizador.md:15,19 transición · feature:12 bug (a) · feature regla 2 contrato (c))"}
+  - {regla: ATOMICIDAD, veredicto: PASS, quien: design-verifier, evidencia: "una responsabilidad por unidad; CITACIÓN por tamaño: registros-lint.py quedó en 423 > T=400 → resuelto por NOMBRE (larga-legítima, no responsabilidad múltiple); el shift-left había proyectado 330"}
+  - {regla: COSTURA, veredicto: PASS, quien: design-verifier, evidencia: "el contrato del sidecar tiene DOS consumidores REALES ya implementados (awk brujula.sh + PyYAML lint), no uno hipotético; PIN 4 difiere la costura al 2º cliente"}
+  - {regla: LISKOV, veredicto: PASS, quien: design-verifier, evidencia: "lector-cero y manualizador-2 llenan agente/1 con el mismo shape que sus 6 hermanos; el líder los spawnea por nombre sin enterarse"}
+  - {regla: INTERFACE_SEGREGATION, veredicto: PASS, quien: design-verifier, evidencia: "lector-cero SIN Bash/Write/Edit (juzga) vs manualizador-2 CON (escribe piezas+sidecar, necesita git rev-parse); cada contrato expone solo lo que su cliente usa"}
+  - {regla: PIN_TOTAL, veredicto: "N/A", quien: design-verifier, evidencia: "el diff no toca manifiestos de deps; subprocess es stdlib y git es toolchain de ambiente, no paquete pineable"}
+  - {regla: MIGRATION, veredicto: "N/A", quien: gate, evidencia: "sin DDL"}
+  - {regla: CONFORMIDAD, veredicto: "N/A", quien: líder, evidencia: "tooling sin capas (precedente: mismas corridas previas de la forja)"}
+  - {regla: TARGET_ENV, veredicto: "N/A", quien: líder, evidencia: "pc-local sin @env"}
+  - {regla: RESPONSIVE, veredicto: "N/A", quien: líder, evidencia: "sin UI"}
+  - {regla: FUENTE_VERDAD, veredicto: "N/A", quien: líder, evidencia: "no toca testing/prod"}
+  - {regla: TECHO_ITER, veredicto: FAIL, quien: líder, evidencia: "3/3 consumidas (REJECT·REJECT·APPROVE) y la verificación de la iter 3 cerró en FAIL de scope → el ciclo siguiente sería el 4º. Techo alcanzado: se DETIENE, decide el operador"}
 refs: [concejo:2026-07-16-equipo-doc, adr:0018, adr:0019, adr:0020, adr:0021, plan:PLAN-equipo-doc-contratos]
 ---
 - ORIGEN: el operador preguntó por qué el manualizador es UN agente y no un
@@ -70,5 +88,50 @@ refs: [concejo:2026-07-16-equipo-doc, adr:0018, adr:0019, adr:0020, adr:0021, pl
   `return` del sidecar puede volver a apagar el gate, y el skip único es por
   ausencia de SUJETO (`docs/features/` lazy), no de chequeo. Sets disjuntos →
   A · B · C escriben en paralelo.
+- VERIFICACIÓN (iter 3) — roster fresco: quality PASS · leak PASS · design PASS ·
+  **scope FAIL**. El quality-auditor NO se conformó con el verde: declaró que el
+  verde base era VACUO (`docs/features/` y `docs/manual/` no existen → ambas
+  funciones nuevas pegan su early-return por ausencia de sujeto), y ejerció 9
+  pruebas NEGATIVAS + 1 control positivo. El gate DISCRIMINA: rojo con `VIVA`
+  sin doc, rojo con `doc_veredicto: PASA` PLANO (el falso-verde estructural que
+  el PIN 1 predijo), rojo con `PENDIENTE`, VERDE con la fila correcta. También
+  cazó un falso-verde PROPIO (su clone traía el lint viejo porque el diff está
+  staged, no commiteado) y lo corrigió antes de reportar.
+- DIVERGENCIA EXACTA (techo alcanzado — decide el operador):
+  `plugins/lucky/skills/feature/ramas/001-gate-de-doc.md:24` cita
+  `manualizador.md:41` como la línea donde el prompt SUPERSEDED escribe `doc:`.
+  Contra HEAD era CORRECTA; contra el árbol staged es FALSA: el carril A insertó
+  `superseded_by:` (+1 línea) y corrió la cita a `:42`. Verificado por el líder:
+  `:41` hoy dice "cross-references; jamás re-estructures…" y `:42` es la regla 5.
+  Es el costo exacto del paralelismo con sets disjuntos donde B cita por NÚMERO
+  DE LÍNEA un archivo que A está editando — la colisión que el COLLISION-MAP no
+  ve porque no es de archivo, es de referencia.
+  Por qué es FAIL y no benevolencia (el scope-verifier lo argumentó y el líder lo
+  ratifica): la iter 2 rechazó a ESTE MISMO carril por ESTE MISMO defecto (prosa
+  que describe falso el contrato de `leak-scan.sh`). La rama es `canal: estable`
+  y LIVE — ley que RUTEA — y esa cita es la única evidencia que sostiene la regla
+  load-bearing del PIN 3 ("el nombre del llamador es el único de-ruteo"). Un
+  mantenedor que la verifique abre `:41`, ve otra cosa, y desarma la regla.
+  FIX conocido y de UNA línea: `001-gate-de-doc.md:24` → `manualizador.md:42`.
+  (Arrastre menor, artefacto de taller ya commiteado y fuera de este diff:
+  `PLAN-equipo-doc-contratos.md:90` repite la cita `:41`.)
+- HALLAZGOS NO BLOQUEANTES cosechados por el roster (para el operador; sin hogar
+  todavía — el líder NO los captura por su cuenta estando en techo):
+  1. **Defecto REAL en `scripts/leak-scan.sh:61`** (regla RUTA-ABSOLUTA): la rama
+     Windows del regex está MUERTA por doble-escape (`C:\\\\Users\\\\` en ERE
+     exige DOS backslashes literales) → un path Windows real NO matchea. Probado
+     end-to-end con el script real: `C:\Users\alguien\x.md` → exit 0 (pasa en
+     verde); `/home/otro/y.md` → exit 1. Hoy solo se atrapa de rebote por la
+     regla 2 (nombre del operador hardcodeado); un path de OTRO usuario se
+     filtraría en silencio. Fix: `\\` en vez de `\\\\`. El PASS de ZERO_LEAK de
+     esta corrida NO depende de ese regex: el leak-verifier lo suplió con un
+     barrido independiente en Python sobre 182 archivos.
+  2. `registros-lint.py` quedó en 423 líneas > T=400 → los guardianes emitirán el
+     nudge no-bloqueante en cada edit futuro. `main()` (169L) aún lleva los
+     chequeos 1-5 inline mientras el 6 y 7 ya están compuestos.
+  3. Asimetría de matcher: el lint descubre piezas con `rglob` (ve untracked), la
+     brújula con `git ls-files` (solo trackeado). Dirección fail-closed (el lint
+     muerde más), por eso no es FAIL.
+  4. `registros-lint.py:25` declara "Dependencia: PyYAML" y ya shell-outea a git.
 - MIGRATION_STRATEGY: N/A (sin DDL)
-- RETRO: <pendiente al cierre>
+- RETRO: <pendiente — la corrida no cerró: techo alcanzado con FAIL de scope>

@@ -15,6 +15,12 @@ limpio, exit 1 con hallazgos listados. Verifica:
      es proyeccion/archivo declarado, narrativa, config o sellos.
   5. Sellos (tabla sellado:true): fila en estado terminal → sha256 (bytes LF)
      presente y correcto en sellos.json; entrada de sellos sin archivo → drift.
+  6. Cobertura del manual (ADR 0021 §5): sidecar docs/manual/_cobertura.yaml en
+     FORMA CRUDA (contrato de awk), piezas mapeadas, globs vivos, cursor sha40
+     existente y ancestro.
+  7. Gate de doc (ADR 0021 §2): toda fila feature VIVA lleva `doc:` existente y
+     `doc_veredicto.estado: PASA`. Chequeo INDEPENDIENTE del 6: son subsistemas
+     distintos y el 6 es lazy — atarlos apagaba el gate donde no hay manual.
 
 Dependencia: PyYAML (probado 6.0.1). Corre en la maquina de la forja; los repos
 de la flota consumen el manifiesto como dato, no corren este lint.
@@ -27,6 +33,7 @@ import fnmatch
 import hashlib
 import json
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -40,6 +47,17 @@ if hasattr(sys.stdout, "reconfigure"):
 
 MARCADOR_GENERADO = "GENERADO por scripts/proyectar.py"
 _FRONT_RE = re.compile(r"\A---\s*\n(.*?)\n---\s*\n", re.DOTALL)
+_COBERTURA = "docs/manual/_cobertura.yaml"
+_SHA40_RE = re.compile(r"^[0-9a-f]{40}$")
+# FORMA CRUDA del sidecar = el contrato de awk (brujula.sh). El lint es A
+# PROPOSITO mas estricto que el awk (indentacion exacta): rechazar de mas es
+# ruidoso y se corrige; aceptar de mas es un falso-verde silencioso.
+_C_BLOQUE = (
+    ("doc", re.compile(r"^  - doc: (\S+)$")),
+    ("cubre", re.compile(r"^    cubre: \[([^\]]*)\]$")),
+    ("deps", re.compile(r"^    deps: \[([^\]]*)\]$")),
+    ("verificado_en", re.compile(r"^    verificado_en: (\S+)$")),
+)
 
 
 def _sha256_lf(p: Path) -> str:
@@ -53,6 +71,181 @@ def _frontmatter(p: Path):
         return None
     data = yaml.safe_load(m.group(1))
     return data if isinstance(data, dict) else None
+
+
+def _git(repo: Path, *args: str) -> tuple[int, str]:
+    """git capturado. FALSO-VERDE-004: se devuelve el returncode DESNUDO; el
+    formateo lo hace el llamador. Sin git -> 127 (el llamador falla, no skipea)."""
+    try:
+        p = subprocess.run(
+            ["git", "-C", str(repo), *args],
+            capture_output=True, text=True, encoding="utf-8", errors="replace",
+        )
+    except OSError:
+        return 127, ""
+    return p.returncode, p.stdout
+
+
+def _lint_cobertura(repo: Path, f) -> None:
+    """(6) Sidecar de cobertura del manual. UNA responsabilidad: el sidecar.
+
+    Subsistema con DOS parsers (awk en brujula.sh, PyYAML aca) cuyo contrato es
+    la FORMA CRUDA del texto, no solo que PyYAML parsee. ADR 0021 §5.
+
+    NO contiene el gate de doc: ese vive en _lint_gate_doc() y main() lo llama
+    APARTE. Todo `return` de aca abajo (lazy, forma rota, sin git) pertenece al
+    subsistema sidecar y NO puede apagar el gate. Quien vuelva a meter el gate
+    adentro de esta funcion reabre el falso-verde de [DRIFT-001]: ver el
+    docstring de _lint_gate_doc().
+    """
+    manual = repo / "docs" / "manual"
+    side = repo / _COBERTURA
+    piezas = sorted(
+        str(p.relative_to(repo)).replace("\\", "/")
+        for p in manual.rglob("*.md")
+        if not p.name.startswith("_")
+    ) if manual.is_dir() else []
+
+    if not side.is_file():
+        # (i) DRIFT-001: hay sujeto y no hay mapa -> BLOQUEA, jamas skip silencioso.
+        if piezas:
+            f(f"cobertura: {len(piezas)} pieza(s) en docs/manual/ y no existe {_COBERTURA} "
+              f"(la 1ra escritura del manualizador-2 crea la cabecera; ADR 0021 §5)")
+        return  # lazy legitimo DEL SIDECAR: sin manual y sin mapa no hay que cubrir
+
+    # ── (v) FORMA CRUDA — el chequeo que sostiene el doble parser ────────────
+    # PyYAML acepta block-style y awk NO: block-style pasaria el YAML y el awk
+    # malparsearia EN SILENCIO -> la brujula leeria basura y la senial mentiria.
+    # Si el revisor recorta chequeos, este NO se recorta.
+    lineas = side.read_text(encoding="utf-8-sig", errors="replace").splitlines()
+    if "piezas:" not in lineas:
+        f(f"cobertura: {_COBERTURA} sin linea `piezas:` al margen (forma rigida; ADR 0021 §5)")
+        return
+    i_piezas = lineas.index("piezas:")
+    cab = [x for x in lineas[:i_piezas] if x.strip() and not x.lstrip().startswith("#")]
+    if cab != ["schema: lucky-cobertura/1"]:
+        f(f"cobertura: {_COBERTURA} sin la cabecera exacta `schema: lucky-cobertura/1` antes de "
+          f"`piezas:` (la escribe la PRIMERA escritura del manualizador-2; ADR 0021 §5)")
+        return
+
+    cuerpo = lineas[i_piezas + 1:]
+    while cuerpo and not cuerpo[-1].strip():
+        cuerpo.pop()
+    if not cuerpo:
+        f(f"cobertura: {_COBERTURA} existe con `piezas:` vacio — el sidecar es LAZY: "
+          f"nace CON su primera pieza, no antes (ADR 0021 §5)")
+        return
+    if len(cuerpo) % 4 != 0:
+        f(f"cobertura: {_COBERTURA} tiene {len(cuerpo)} linea(s) bajo `piezas:`, no multiplo de 4 "
+          f"(4 claves por pieza, una por linea, sin comentarios dentro de `piezas:`)")
+        return
+
+    entradas: list[str] = []
+    for k in range(0, len(cuerpo), 4):
+        vals: list[str] = []
+        for (clave, rx), linea in zip(_C_BLOQUE, cuerpo[k:k + 4]):
+            m = rx.match(linea)
+            if not m:
+                f(f"cobertura: {_COBERTURA} pieza #{k // 4 + 1}: se esperaba `{clave}:` en forma "
+                  f"rigida (4 claves en ESTE orden, una por linea; cubre/deps flow-style [a, b] "
+                  f"en UNA linea) y hay: {linea.strip()!r}")
+                return
+            vals.append(m.group(1))
+        doc, cubre_s, deps_s, sha = vals
+
+        if doc in entradas:
+            f(f"cobertura: {_COBERTURA} declara {doc} dos veces")
+        entradas.append(doc)
+        # (i-bis) espejo de (i): entrada cuyo doc: no existe = mapa que miente.
+        if not (repo / doc).is_file():
+            f(f"cobertura: {_COBERTURA} declara {doc} y el archivo no existe")
+
+        # ── (ii) globs vivos, con el MATCHER DE GIT ─────────────────────────
+        # NO pathlib.glob: la brujula matchea con pathspec de git. Dos matchers
+        # distintos = un glob que pasa el lint y esta muerto en la brujula ->
+        # el lint certificaria un mapa roto, el peor modo de falla del §5.
+        paths = [x.strip() for x in f"{cubre_s},{deps_s}".split(",") if x.strip()]
+        if not paths:
+            f(f"cobertura: {_COBERTURA} {doc}: cubre/deps vacios — pieza sin paths no tiene senial")
+        for x in paths:
+            if re.search(r"\s", x):
+                f(f"cobertura: {_COBERTURA} {doc}: path {x!r} lleva espacios — awk (brujula.sh) "
+                  f"separa por espacio y lo malparsearia")
+                continue
+            rc, out = _git(repo, "ls-files", "--", x)
+            if rc != 0:
+                # Aborta el SIDECAR, no el lint: el gate de doc corre igual desde
+                # main(). Sin git no se aprueba a ciegas lo que no se pudo mirar.
+                f("cobertura: sin git no se puede verificar el sidecar (el lint NO aprueba a ciegas)")
+                return
+            if not out.strip():
+                f(f"cobertura: {_COBERTURA} {doc} declara `{x}` y no matchea ningun archivo (glob muerto)")
+
+        # ── (iii) cursor: formato + existe + ancestro ───────────────────────
+        if not _SHA40_RE.match(sha):
+            f(f"cobertura: {_COBERTURA} {doc}: verificado_en `{sha}` no es sha40 [0-9a-f]{{40}}")
+            continue
+        rc, _out = _git(repo, "cat-file", "-e", f"{sha}^{{commit}}")
+        if rc != 0:
+            f(f"cobertura: {_COBERTURA} {doc}: verificado_en {sha[:7]} no existe en la historia — "
+              f"`rev-list {sha[:7]}..HEAD` falla y la brujula imprimiria N/D PARA SIEMPRE")
+            continue
+        rc, _out = _git(repo, "merge-base", "--is-ancestor", sha, "HEAD")
+        if rc != 0:
+            f(f"cobertura: {_COBERTURA} {doc}: verificado_en {sha[:7]} no es ancestro de HEAD — "
+              f"el conteo de commits saldria inflado")
+
+    # (i) toda pieza de docs/manual/ tiene entrada. Solo docs/manual/: el sidecar
+    # ACEPTA doc: docs/sistema/... (opt-in del manualizador) pero no se EXIGE
+    # (ADR 0021 §4: la mayoria de las features son audiencia: dev). Gap declarado.
+    for p in piezas:
+        if p not in entradas:
+            f(f"cobertura: pieza {p} sin entrada en {_COBERTURA} (mapa incompleto = detector ciego)")
+
+
+def _lint_gate_doc(repo: Path, f) -> None:
+    """(7) Gate de doc de la fila feature VIVA (ADR 0021 §2).
+
+    FUNCION SEPARADA DE _lint_cobertura, Y LA SEPARACION ES EL MECANISMO DEL
+    GATE, NO COSMETICA. Mientras este bloque vivia dentro de _lint_cobertura, el
+    `return` del caso lazy del sidecar corria ANTES: sin docs/manual/ (el caso
+    DOMINANTE de esta forja — ADR 0021 §4 `audiencia: dev`, doc en docs/sistema/)
+    una feature VIVA sin doc_veredicto.estado PASA salia EN VERDE. El chequeo
+    existia y no mordia: [DRIFT-001] materializado. NO se vuelve a fusionar, y
+    NINGUN estado del sidecar puede saltear esta funcion.
+
+    UNICO skip legal: ausencia de SUJETO (la tabla feature no existe todavia),
+    jamas ausencia de chequeo.
+
+    La columna la ESCRIBE el carril B (registros.yaml:98 `duenio: skill:feature`)
+    y su forma pineada es un MAPA ANIDADO:
+      doc_veredicto: {estado: PENDIENTE, ronda: 0, ref: null}
+    Se lee `doc_veredicto.estado`, JAMAS `doc_veredicto: PASA` plano: validar el
+    campo plano seria un falso-verde estructural — el lint aprobaria un campo que
+    nadie escribe y una feature VIVA sin PASA pasaria. El guard isinstance(dict)
+    es esa mordida.
+    """
+    feats = repo / "docs" / "features"
+    if not feats.is_dir():
+        return  # ausencia de SUJETO: la tabla feature nace al primer uso
+    for fila in sorted(feats.glob("*.md")):
+        fm = _frontmatter(fila)
+        if not isinstance(fm, dict) or str(fm.get("estado", "")) != "VIVA":
+            continue  # 'sin frontmatter' ya lo reporta el loop de tablas: sin doble voz
+        rel = str(fila.relative_to(repo)).replace("\\", "/")
+        doc = str(fm.get("doc") or "")
+        if not doc:
+            f(f"gate de doc: {rel} esta VIVA sin `doc:` (regla dura 2; ADR 0021 §2)")
+        elif not (repo / doc).is_file():
+            f(f"gate de doc: {rel} esta VIVA y su `doc: {doc}` no existe")
+        dv = fm.get("doc_veredicto")
+        if not isinstance(dv, dict):
+            f(f"gate de doc: {rel} esta VIVA y `doc_veredicto` no es el mapa "
+              f"{{estado, ronda, ref}} que pinea la tabla feature (ausente o forma plana = "
+              f"falso-verde; ADR 0021 §2)")
+        elif str(dv.get("estado", "")) != "PASA":
+            f(f"gate de doc: {rel} esta VIVA con doc_veredicto.estado `{dv.get('estado')}` != PASA "
+              f"(VIVA lo exige; ADR 0021 §2)")
 
 
 def main() -> int:
@@ -201,6 +394,9 @@ def main() -> int:
             d = repo / str(t.get("path", "")).rstrip("/")
             if not any(d.glob(f"{fid}.md")) if d.is_dir() else True:
                 f(f"sello COLGADO: {clave} en sellos.json sin archivo correspondiente")
+
+    _lint_cobertura(repo, f)
+    _lint_gate_doc(repo, f)
 
     # ── huerfanos bajo docs/ (M3) ────────────────────────────────────────────
     docs = repo / "docs"

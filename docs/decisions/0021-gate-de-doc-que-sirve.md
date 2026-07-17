@@ -144,3 +144,8 @@ verificador-frescura diferido). Esta fila es ese endoso, convocado como decisió
   **verificador de registro** — y su `DOC_SIRVE` tiene fuente única en el gate de
   doc de la skill `feature`, NO en el catálogo §5 del crisol (cuya matriz es la
   corrida, no la fila feature).
+
+---
+
+**Fuente de verdad: `github.com/mlandolfi90/lucky-skills` · esta copia = tag
+`v2.4.0` (cache local, NO la ley).**

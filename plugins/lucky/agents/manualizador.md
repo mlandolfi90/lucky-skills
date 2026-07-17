@@ -12,10 +12,11 @@ tools: Read, Grep, Glob, Bash, Write, Edit
 id: manualizador
 schema: agente/1
 tipo: agente
-estado: LIVE
+estado: SUPERSEDED
 creado: 2026-07-16
 dictamina: []
 delega: []
+superseded_by: agente:manualizador-2
 refs: [adr:0020]
 ---
 

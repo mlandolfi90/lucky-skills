@@ -44,6 +44,21 @@ tal cual" aplica a las 3 deterministas.
    (`git ls-remote --tags`, **`sort -V`**) → imprimí `ley atrasada: <local> <
    <remoto> → corré /ley`. La brújula NO actualiza: la corrida de `/ley` la
    decide el humano. Sin red → omitir la señal (no bloquea).
+   **Manual posiblemente desactualizado (no-normativo, solo SEÑAL — ADR 0021 §5):**
+   a diferencia de las otras dos señales, ésta **ya la imprimió el script**. La
+   computa `brujula.sh` con `git rev-list --count <verificado_en>..HEAD --
+   <cubre+deps>` sobre `docs/manual/_cobertura.yaml`, excluyendo los commits de
+   mantenimiento `crisol <T>-close:` (re-estampan el sello en toda la familia; sin
+   ese filtro la primera forja marcaría viejo a todo doc recién escrito). **El
+   agente NO la recomputa, NO la reinterpreta y NO la completa:** recomputar es
+   meterle temperatura a una garantía de "salida tal cual" — el motivo exacto por
+   el que el ADR la puso en el script y no en esta prosa. Se muestra tal cual,
+   junto al resto del snapshot. Qué significa: "código tocado después de la última
+   verificación del doc" — **NO** drift semántico (por eso dice *posiblemente*: el
+   operador calibra confianza, no obedece). `manual sin mapa de cobertura: N
+   pieza(s)` es fail-closed HABLADO (hay manual y no hay mapa; el silencio se
+   leería como salud); `cobertura: N/D` es la REGLA DE ORO sobre un sidecar
+   ilegible. Sin `docs/manual/` con piezas → el script omite la señal (no bloquea).
 2. **Deploy** — `docker ps` y, si hay compose en el repo, `docker compose ps`.
 3. **Decisiones** — último ADR en `docs/decisions/` + estado del Crisol. Si hay
    entrada `ACTIVE` y commits `wip: crisol iter N` recientes → reporta

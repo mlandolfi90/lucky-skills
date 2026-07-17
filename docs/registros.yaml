@@ -133,3 +133,4 @@ narrativa:
 config:
   - docs/registros.yaml
   - docs/refactor/_crisol/atomicidad.conf
+  - docs/manual/_cobertura.yaml   # sidecar de cobertura del manual (ADR 0021 §5); dueño de escritura: agente manualizador-2
