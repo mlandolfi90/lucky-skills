@@ -10,10 +10,10 @@ tier: "completo (>1 archivo de código; establece patrón: primer verificador de
 target: "pc-local (la forja: skills/agentes/scripts corren en esta PC — directiva explícita del operador)"
 model: "fable (uniforme)"
 ley: "v2.4.0 (verificada — git ls-remote: máximo remoto == sello local)"
-iteraciones: "0/3"
+iteraciones: "1/3"
 runState: wip
 veredictos: []
-refs: [concejo:2026-07-16-equipo-doc, adr:0018, adr:0019, adr:0020, adr:0021]
+refs: [concejo:2026-07-16-equipo-doc, adr:0018, adr:0019, adr:0020, adr:0021, plan:PLAN-equipo-doc-contratos]
 ---
 - ORIGEN: el operador preguntó por qué el manualizador es UN agente y no un
   equipito. Debate de diseño → concejo de 5 jueces frescos
@@ -37,5 +37,12 @@ refs: [concejo:2026-07-16-equipo-doc, adr:0018, adr:0019, adr:0020, adr:0021]
 - WORKTREE: 1 untracked al abrir — `plugins/lucky/.orphaned_at` (marcador del
   harness de plugins: un epoch en ms, no es trabajo del repo ni basura de
   crash). Decisión: se deja INTACTO y se declara; no entra en ningún commit.
+- ITER 1 — Steward: REJECT ×3. Los sets de archivos eran DISJUNTOS (cero
+  colisión física); la colisión fue 100% CONTRACTUAL y formaba un CICLO (A
+  necesita el formato de C · B el nombre de A · C la forma de B). Ningún orden
+  de carriles resuelve un ciclo → FASE PIN: los 3 contratos se fijan en UN
+  artefacto (`plan:PLAN-equipo-doc-contratos`) y cada carril los cita. Sin
+  código escrito en esta iteración (el REJECT cayó sobre los planes, que es el
+  punto donde debe caer: shift-left).
 - MIGRATION_STRATEGY: N/A (sin DDL)
 - RETRO: <pendiente al cierre>
