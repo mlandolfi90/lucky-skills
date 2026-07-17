@@ -2,7 +2,7 @@
 id: 2026-07-16-equipo-doc-v1
 schema: corrida/1
 tipo: corrida
-estado: ACTIVE
+estado: ESCALATED
 creado: 2026-07-16
 branch: main
 titulo: "Equipo de documentación v1 — lector-cero gatea el pase a VIVA"
@@ -11,7 +11,8 @@ target: "pc-local (la forja: skills/agentes/scripts corren en esta PC — direct
 model: "fable (uniforme)"
 ley: "v2.4.0 (verificada — git ls-remote: máximo remoto == sello local)"
 iteraciones: "3/3 (convergió: APPROVE ×3)"
-runState: wip
+runState: closing
+cierre: "2026-07-16 · ESCALATED por techo (3/3) · el trabajo vive en los WIP-commits e60f7de·555391e·d761033·96d5ab8 · sucede: corrida:2026-07-16-equipo-doc-v1-fix"
 veredictos:
   - {regla: TARGET, veredicto: PASS, quien: líder, evidencia: "pc-local (la forja; directiva explícita del operador)"}
   - {regla: MODEL, veredicto: PASS, quien: líder, evidencia: "fable (uniforme)"}
@@ -134,4 +135,21 @@ refs: [concejo:2026-07-16-equipo-doc, adr:0018, adr:0019, adr:0020, adr:0021, pl
      muerde más), por eso no es FAIL.
   4. `registros-lint.py:25` declara "Dependencia: PyYAML" y ya shell-outea a git.
 - MIGRATION_STRATEGY: N/A (sin DDL)
-- RETRO: <pendiente — la corrida no cerró: techo alcanzado con FAIL de scope>
+- ESCALACIÓN: techo 3/3 con FAIL de scope. Presentada al operador con los 3
+  caminos; eligió (1) — cerrar ESCALATED y saldar por corrida fix-forward. El
+  fix NO se aplicó acá: aplicarlo hubiera sido el workaround exacto que el techo
+  prohíbe. Sucesora: `corrida:2026-07-16-equipo-doc-v1-fix` (fast-path).
+  Ningún trabajo se pierde: los 10 archivos viven en los WIP-commits.
+- RETRO (blameless): el techo se gastó ANTES de escribir una línea de código —
+  2 de 3 iteraciones se fueron en el ciclo de contratos entre carriles paralelos,
+  que el COLLISION-MAP no ve porque no es colisión de ARCHIVOS sino de
+  REFERENCIAS. El proceso funcionó (los 3 REJECT eran correctos y cazaron
+  falsos-verdes reales antes de producción), pero el presupuesto de iteraciones
+  se consumió en coordinación, no en el problema. Dos aprendizajes con nombre:
+  (a) la FASE PIN debería ser el paso 0 de todo tier completo con >1 carril —
+  fijar los contratos cross-carril ANTES de mandar a planificar, en vez de
+  descubrir el ciclo con el primer REJECT; (b) citar código por NÚMERO DE LÍNEA
+  entre carriles paralelos es intrínsecamente frágil: el vecino inserta una línea
+  y tu ley queda mintiendo. Citar por ancla de texto (la regla, el nombre) o
+  aceptar el riesgo explícitamente. Ambos son candidatos a entrada de bitácora y
+  a corrida futura sobre la propia skill (§6, disparador kaizen).
