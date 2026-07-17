@@ -58,7 +58,7 @@ for f in "${FILES[@]}"; do
   fi
 
   # ── 3) Rutas absolutas reales de la maquina del operador. ──────────────────
-  if grep -nE 'C:\\\\Users\\\\[^\\\\"]+|/home/[A-Za-z0-9_.-]+/|/Users/[A-Za-z0-9_.-]+/' "$f" 2>/dev/null \
+  if grep -nE 'C:\\Users\\[A-Za-z0-9][A-Za-z0-9_.-]*|/home/[A-Za-z0-9_.-]+/|/Users/[A-Za-z0-9_.-]+/' "$f" 2>/dev/null \
       | grep -q .; then
     hit "RUTA-ABSOLUTA" "$f"
   fi

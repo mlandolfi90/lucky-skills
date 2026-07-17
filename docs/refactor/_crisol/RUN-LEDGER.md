@@ -2935,6 +2935,53 @@
 - Iteraciones: 3/3
 - Cierre: 2026-07-16 · commit de cierre + tag anotado v2.3.0 + GitHub Release
 
+### main — 2026-07-16 (Puente de gate del microfix leak-scan (regla 6 de la escalera))
+- STATUS: CLOSED
+- Tier: fast-path (1 archivo, 1 línea, solución conocida del diagnóstico; no toca contratos)
+- Fecha: 2026-07-16
+- TARGET: pc-local (el gate corre acá; directiva explícita del operador)
+- MODEL: fable (uniforme)
+- LEY: v2.5.0 (recién forjada en esta sesión)
+- ORIGEN: **puente de gate**, no corrida propia. La regla 6 de la skill
+  `microfix` lo manda: la sonda toca código en un repo adoptado y el gate
+  (Fase 1) exige una fila `ACTIVE` proyectada al RUN-LEDGER para desbloquear la
+  edición. Los guardianes todavía no saben leer peldaños de la escalera; cuando
+  la Fase 2 se lo enseñe, este puente muere y el microfix será su propio permiso.
+  **El juicio real vive en la fila del microfix** — acá solo está el permiso.
+- Alcance: exactamente el del microfix — `scripts/leak-scan.sh:61`, una línea.
+  Nada más entra.
+- MIGRATION_STRATEGY: N/A (sin DDL)
+- RETRO (blameless): el puente hizo lo suyo — la sonda pudo tocar código sin
+  inventar una corrida completa para 1 línea. Lo que el puente NO evita: hay que
+  abrir DOS filas (microfix + corrida) para un cambio de una línea, y el juicio
+  vive en una mientras el permiso vive en la otra. Es el costo declarado de la
+  Fase 1 del gate, y la Fase 2 (guardianes que leen peldaños) lo borra. Segunda
+  vez en el día que el escapado del shell engaña a un verificador: los casos de
+  prueba de patrones se escriben por Python, nunca retipeando en bash.
+<!-- VEREDICTOS:BEGIN -->
+- runState: closing
+- [V] TARGET · PASS · líder · pc-local (el gate corre acá; directiva explícita del operador)
+- [V] MODEL · PASS · líder · fable (uniforme) — sin subagentes: sonda de 1 línea
+- [V] REGLA0 · PASS · líder · batería 5/5 en repo temporal + prueba A/B sobre el mismo archivo: script v2.5.0 exit 0 (leak en verde) vs sonda exit 1 (bloquea); repo real exit 0. Casos escritos por Python: el shell come backslashes
+- [V] TEST_COVERAGE · PASS · líder · prueba negativa manual 5/5 + A/B; leak-scan no tiene suite propia en el repo (brecha ya declarada en la corrida equipo-doc-v1)
+- [V] ZERO_LEAK · PASS · líder · leak-scan (arreglado) sobre el repo real: exit 0 LIMPIO. Los casos de prueba vivieron en repo temporal descartado; cero rutas reales en los artefactos
+- [V] SCOPE_CREEP · PASS · líder · 1 línea (leak-scan.sh:61), exactamente el punto del diagnóstico; las 2 líneas de doc del radio de explosión NO se tocaron (la clase positiva las deja fuera)
+- [V] PARKING · PASS · líder · la formalización de la lección v1.8.0 se SEÑALA en la fila del microfix como juicio del operador; no se implementa acá
+- [V] CIERRE_TRAS_PASS · PASS · líder · commit tras veredicto FAVORABLE verificado
+- [V] TECHO_ITER · PASS · líder · 1/3
+- [V] OPEN_CLOSED · PASS · líder · caso legal (a) BUG: la rama Windows del ERE no matchea nada — se toca directo, OCP protege comportamiento correcto, no defectos
+- [V] ATOMICIDAD · PASS · líder · 1 línea; leak-scan.sh 105 líneas vs T=400
+- [V] MIGRATION · N/A · gate · sin DDL
+- [V] CONFORMIDAD · N/A · líder · tooling sin capas
+- [V] TARGET_ENV · N/A · líder · pc-local sin @env
+- [V] RESPONSIVE · N/A · líder · sin UI
+- [V] FUENTE_VERDAD · N/A · líder · no toca testing/prod
+- [V] PIN_TOTAL · N/A · líder · no toca dependencias
+- [V] INDEPENDENCIA · N/A · líder · fast-path/puente sin subagentes; la independencia la aporta la prueba A/B contra el script de v2.5.0 (artefacto real, no prosa)
+<!-- VEREDICTOS:END -->
+- Iteraciones: 1/3 (convergió: solución conocida del diagnóstico)
+- Cierre: 2026-07-16 · commit del toque · el juicio vive en microfix:2026-07-16-leak-scan-ruta-windows
+
 ### main — 2026-07-16 (v2.2.0 — T2: mecanismo de ramas con cuarentena + guardianes canónicos)
 - STATUS: CLOSED
 - Tier: completo (toca proyectar.py/forja + establece los patrones rama y agente-canónico en la ley)
