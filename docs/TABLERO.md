@@ -11,8 +11,8 @@
 ## ⚠ Ramas EN_DUDA — una corrida las contradijo (frescura) (0)
 - (nada)
 
-## 🔥 Corridas ACTIVE (0)
-- (nada)
+## 🔥 Corridas ACTIVE (1)
+- corrida:2026-07-17-equipo-saber · El saber tiene equipo — agente destilador + skill saber
 
 ## 🩹 Hotfixes abiertos (0)
 - (nada)
