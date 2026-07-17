@@ -2618,12 +2618,24 @@
   artefacto (`plan:PLAN-equipo-doc-contratos`) y cada carril los cita. Sin
   código escrito en esta iteración (el REJECT cayó sobre los planes, que es el
   punto donde debe caer: shift-left).
+- ITER 2 — Steward: A APPROVE · B REJECT · C REJECT (defectos PROPIOS, ya no
+  contractuales: el PIN disolvió el ciclo). B: la rama nueva nacía SIN sello
+  ancla → `forjar-release.sh` habría abortado la forja; y su prosa describía
+  FALSO el contrato de `leak-scan.sh` (:26 vs :27-31) — ley sellada que miente
+  sobre el código invita a que un mantenedor futuro desarme el `git add` y el
+  falso-verde vuelva. C: el gate de doc quedaba INALCANZABLE — el `return` del
+  caso lazy corría ANTES del chequeo (iv), y como `docs/manual/` hoy no existe,
+  una feature VIVA sin `doc_veredicto.estado: PASA` pasaba el lint EN VERDE.
+  Causa raíz de ATOMICIDAD (dos responsabilidades en una función): la laziness
+  del sidecar apagaba el gate. [DRIFT-001] materializado dos veces — el mismo
+  falso-verde que el PIN 1 mató en la FORMA del campo, reaparecido en la
+  ALCANZABILIDAD del chequeo.
 - MIGRATION_STRATEGY: N/A (sin DDL)
 - RETRO: <pendiente al cierre>
 <!-- VEREDICTOS:BEGIN -->
 - runState: wip
 <!-- VEREDICTOS:END -->
-- Iteraciones: 1/3
+- Iteraciones: 2/3
 
 ### main — 2026-07-16 (v2.1.0 — escalera T1: skills diagnostico (peldaño 0) + microfix (peldaño 1) + cableado)
 - STATUS: CLOSED
