@@ -20,6 +20,6 @@
 ## 🔬 Microfixes abiertos (0)
 - (nada)
 
-## 🔍 Diagnósticos ABIERTOS (0)
-- (nada)
+## 🔍 Diagnósticos ABIERTOS (1)
+- diagnostico:2026-07-16-leak-scan-ruta-windows-muerta · leak-scan.sh sale 0 (LIMPIO) sobre un archivo que contiene una ruta absoluta Windows de otro usuario — la regla RUTA-ABSOLUTA no la caza
 
