@@ -6,7 +6,7 @@ estado: ACEPTADA
 creado: 2026-07-17
 supersede: null
 superseded_by: null
-refs: [corrida:2026-07-17-el-verde-significa-algo, adr:0016, adr:0017, adr:0018, bitacora:DRIFT-007]
+refs: [corrida:2026-07-17-el-verde-significa-algo, adr:0016, adr:0017, adr:0018, bitacora:DRIFT-007, bitacora:FALSO-VERDE-004]
 ---
 
 # 0022 — El verde significa algo: runner ajeno + RED_GREEN
@@ -116,4 +116,4 @@ su ciclo, no su cadena de verificación.
 ---
 
 **Fuente de verdad: `github.com/mlandolfi90/lucky-skills` · esta copia = tag
-`v2.5.0` (cache local, NO la ley).**
+`v2.6.0` (cache local, NO la ley).**

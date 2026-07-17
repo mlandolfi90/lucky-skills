@@ -9,10 +9,11 @@ tools: Read, Grep, Glob, Bash
 id: crisol-quality-auditor
 schema: agente/1
 tipo: agente
-estado: LIVE
+estado: SUPERSEDED
 creado: 2026-07-16
 dictamina: [REGLA0, TEST_COVERAGE]
 delega: []
+superseded_by: agente:crisol-quality-auditor-2
 refs: [adr:0018]
 ---
 
@@ -42,4 +43,4 @@ VEREDICTO: PASS o FAIL (binario — FAIL si CUALQUIER suite falla)
 
 ---
 **Fuente: `github.com/mlandolfi90/lucky-skills` · esta copia = tag
-`v2.5.0` (cache local, NO la ley).**
+`v2.6.0` (cache local, NO la ley).**

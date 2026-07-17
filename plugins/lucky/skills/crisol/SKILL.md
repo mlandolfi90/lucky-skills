@@ -68,6 +68,26 @@ Respondé el checklist. **Cualquier "SÍ" → Tier Completo.** Todos "NO" → Fa
   puede re-deployarse en rollback).
   - **Builds de imagen** → regla completa en la rama `001-builds-de-imagen-ci`
     (bloque RAMAS, abajo): el gate-test va horneado en el CI, no en el VPS.
+- **El verde significa algo (`RED_GREEN`, ADR 0022):** todo test que sostiene un
+  `PASS` fue **VISTO fallar** antes de existir el código que lo hace pasar; todo
+  test de regresión probó su rojo **revirtiendo el fix**. Un test que nunca se vio
+  fallar no prueba nada: puede estar afirmando `true == true` con nombre de feature.
+  **Sujeto:** los tests que ESTE diff crea o modifica, resueltos POR NOMBRE (mismo
+  idioma que la citación de ATOMICIDAD); lo que el diff no toca NO se juzga — la
+  regla es prospectiva, jamás retroactiva.
+  **El rojo se PRUEBA, no se declara** (REGLA 0: no se confía en reporte ajeno): lo
+  re-prueba el `quality-auditor-2` ÉL MISMO **en el `TARGET:`**, en worktree
+  descartable, quitando la causa del verde y exigiendo rojo del MISMO test — (a)
+  código que el diff agrega/arregla → se **revierte**; (b) código pre-existente que
+  el test caracteriza → se **muta**. Verde en AMBOS estados → el test no prueba nada
+  → `FAIL` por nombre.
+  **Evidencia = A/B con exit codes reales**, no prosa: por test citado, rojo
+  (`exit ≠ 0`, con el aserto que gritó) sin el código · verde (`exit 0`) con el
+  código. Precedente: `microfix:2026-07-16-leak-scan-ruta-windows` — mismo archivo,
+  script viejo exit 0 vs sonda exit 1.
+  **Fail-closed:** *"no pude probar el rojo"* → `FAIL`, jamás `N/A`; `N/A` SOLO si el
+  diff no toca tests. Rojo por la razón equivocada (fixture rota, import mal escrito)
+  = verde disfrazado → no cuenta.
 - **Independencia operacional:** Arquitecto y Verificador reciben SOLO artefactos
   reales (diff, salida de tests propia) — **nunca** la prosa del paso previo.
   En fast-path el Verificador corre en un **contexto nuevo** (subagente fresco):
@@ -197,13 +217,13 @@ copia acá.
 | `leak-verifier` | `ZERO_LEAK` (§2 «Sin secretos») | **SIEMPRE** (incl. fast-path) | meta-docs: ledger · ADR · COLLISION-MAP · `IDEAS.md` · mensaje de commit. Puede invocar `scripts/leak-scan.sh` |
 | `conformidad-verifier` | `CONFORMIDAD` (§2 «Conformidad estructural») | **solo si** `Glob` halla la skill `arquitectura` | reusa `conformidad-checklist.md` de esa skill TAL CUAL (fuente única, NO duplicar) |
 | `responsive-verifier` | `RESPONSIVE` (§2 «Responsive obligatorio») | **solo si** la corrida toca UI | reusa `auditor-checklist.md` §A2 |
-| `deploy-verifier` | `TARGET_ENV` (catálogo §5 — enunciado allá, fuente única) | **solo si** el TARGET es `paas:…@<env>` (acota spawns, como conformidad/responsive) | `@env` del ledger + lectura API read-only del `<paas>` (afirma `recurso.env == @env`). Para `local@<env>` la disciplina la absorbe el `quality-auditor` genérico vía `auditor-checklist.md` §D2 — sin subagente propio |
+| `deploy-verifier` | `TARGET_ENV` (catálogo §5 — enunciado allá, fuente única) | **solo si** el TARGET es `paas:…@<env>` (acota spawns, como conformidad/responsive) | `@env` del ledger + lectura API read-only del `<paas>` (afirma `recurso.env == @env`). Para `local@<env>` la disciplina la absorbe el `quality-auditor-2` genérico vía `auditor-checklist.md` §D2 — sin subagente propio |
 
 Triggers condicionales OBLIGATORIOS para acotar spawns: `leak-verifier` SIEMPRE;
 `design-verifier` solo si hay código; `conformidad-verifier`/`responsive-verifier`
 solo si el `Glob`/UI lo amerita; `deploy-verifier` solo si el TARGET es
 `paas:…@<env>` (en `local@<env>` la disciplina de `TARGET_ENV` la absorbe el
-`quality-auditor` vía §D2). Cada uno escribe su línea `[V]` en la matriz
+`quality-auditor-2` vía §D2). Cada uno escribe su línea `[V]` en la matriz
 (formato: `templates/run-ledger.md`); las celdas que no dictamina quedan para los
 demás guardianes (el `gate` para las reglas mecánicas, el Steward para las de
 plan — ver §3-6 y §4).
@@ -309,7 +329,7 @@ plan — ver §3-6 y §4).
 5. **Verificador de Integración:** tras el doble-gate `PASS` de CADA carril,
    verifica el resultado **combinado**. Recién ahí → commit.
 6. **Roster de verificadores de juicio:** en tier completo, además del
-   `quality-auditor` genérico (REGLA 0 + `auditor-checklist.md`), el líder
+   `quality-auditor-2` genérico (REGLA 0 + `auditor-checklist.md`), el líder
    spawnea el **roster aplicable** de §2 «Roster de verificadores de juicio»
    según el TRIGGER de cada uno (`leak-verifier` siempre; `design-verifier` si
    toca código; `scope-verifier` en tier completo; `conformidad-verifier`/
@@ -417,7 +437,8 @@ bitácora del paso 3 se conserva).
 5. Spawnear **engineers** en el orden del COLLISION-MAP: engineer-A → esperar su
    `PASS` de auditor → recién entonces engineer-B. Carriles sin archivos
    compartidos corren en paralelo.
-6. Cada carril → el **quality-auditor genérico** (REGLA 0 + `archaeologist` +
+6. Cada carril → el **quality-auditor-2 genérico** (REGLA 0 + `RED_GREEN` si el
+   diff crea/modifica tests + `archaeologist` +
    `templates/auditor-checklist.md`) **+ el roster aplicable de §2 «Roster de
    verificadores de juicio»** (según TRIGGER: `leak-verifier` siempre;
    `design-verifier` si toca código; `scope-verifier`; `conformidad-verifier`/
@@ -520,6 +541,7 @@ IDs en MAYÚSCULA_GUION_BAJO, sin abreviar (`OPEN_CLOSED`, no `OCP`):
 | `MODEL` | El ledger declara MODEL (alias uniforme o `default`); lo fija la Compuerta del Paso 0 | siempre | M |
 | `TARGET_ENV` | El env del recurso desplegado == el `@env` declarado en el TARGET (consistencia declarado↔real, NUNCA impone dev) | `paas:…@<env>` → DURO (deploy-verifier, API read-only); `docker-local@<env>`/`pc-local@<env>` → DISCIPLINA (compose-project/puerto/dir; mismatch → FAIL; sin evidencia → N/A); local-sin-env / no-`paas:` → N/A | H |
 | `TEST_COVERAGE` | Cobertura registrada; `NONE` bloquea tag estable | siempre | M |
+| `RED_GREEN` | Todo test que sostiene un PASS fue VISTO fallar antes del código que lo hace pasar; el rojo se PRUEBA (A/B con exit codes), no se declara | si el diff crea o modifica tests | J |
 | `INDEPENDENCIA` | Steward/Verificador reciben solo artefactos reales, no prosa previa | tier completo / fast-path | H |
 | `SCOPE_CREEP` | El Ingeniero hace SOLO lo aprobado por el Steward | siempre | J |
 | `PARKING` | Ideas fuera de scope → `docs/IDEAS.md` al instante | si surge idea fuera de scope | J |
@@ -553,7 +575,7 @@ triggers, para que ningún carril derive el vocabulario.
 ## 6. La ley se gobierna a sí misma
 
 **Fuente de verdad: `github.com/mlandolfi90/lucky-skills` · esta copia = tag
-`v2.5.0` (cache local, NO la ley).** **Ley viva:** al invocar la skill, si la
+`v2.6.0` (cache local, NO la ley).** **Ley viva:** al invocar la skill, si la
 sesión tiene red: `git ls-remote --tags
 https://github.com/mlandolfi90/lucky-skills.git` — si existe un tag mayor al de
 esta copia, descargar y seguir LA DEL REPO

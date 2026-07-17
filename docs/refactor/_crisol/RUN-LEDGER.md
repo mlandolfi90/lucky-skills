@@ -3153,16 +3153,100 @@
   3. Las suites resuelven el intérprete con `command -v python || command -v
      python3` — el anti-patrón exacto de [DRIFT-007]. En el runner se ataca con un
      venv que provee AMBOS nombres en un solo prefijo, sin tocar los `.sh`.
+- ITER 2 — roster fresco: quality-auditor-2 PASS (su ESTRENO: verificó la corrida
+  que lo creó) · leak PASS · design PASS · **scope FAIL**. El scope cazó *creep de
+  JURISDICCIÓN*: el bloque "DISCIPLINA DE EXIT CODE" del prompt canónico nuevo
+  traía TRES viñetas y solo el `<PY>` (DRIFT-007) tenía pasaporte; las otras dos
+  se colaron por esa puerta. Su argumento: *"la coartada temática no alcanza —
+  «el verde significa algo» es el TEMA de la corrida, no su Alcance, y el Alcance
+  dice CERRADO"*. Fue honesto en las dos direcciones: declaró el atenuante
+  (restatean prevención ya vinculante, archivo nuevo, sin ID ni celda; riesgo
+  bajo) y ofreció el remedio en vez de solo condenar.
+  **Steward R2 dictaminó por viñeta**: RATIFICA `FALSO-VERDE-004` (instrumental:
+  el enunciado aprobado exige *"exit codes REALES"*, y los dos defectos son el
+  MISMO — el exit que decide no es el del sujeto: 127/49 del shell vs el de
+  `tail`; sin ella el lado B del A/B lee `exit 0` y emitiría FAIL contra un test
+  que SÍ probaba su rojo). **SACA `DRIFT-001`**: no es instrumental (el A/B cierra
+  sin ella), su hogar es REGLA 0, y su promoción "a regla del Verificador" es un
+  **NEXT ABIERTO** (`DRIFT-001.md:22`) que esta corrida estaría respondiendo por
+  efecto colateral, sin ADR y sin el operador — precedente del movimiento
+  correcto: `TEST_COVERAGE: NONE` (ADR 0022 §3 + PIN 3). Su cierre, que vale como
+  doctrina: *"si «restatea una prevención ya vinculante» bastara como pasaporte,
+  toda entrada de la bitácora sería injertable en todo prompt canónico de toda
+  corrida cuyo TEMA roce — y «Alcance (CERRADO)» dejaría de significar algo. En
+  una corrida titulada «el verde significa algo», dejar que CERRADO no signifique
+  nada es la ironía que no vamos a firmar"*. Aplicado: 3 líneas borradas + NEXT
+  parkeado en `docs/IDEAS.md` con el argumento adentro.
+- ITER 2b — **el líder auditó su árbol, no su entrega** (error del líder, sin
+  atenuante). Tras aplicar la supresión, el scope-verifier FRESCO volvió a dar
+  FAIL: el borrado y el parking existían en el working tree y **nunca se
+  stagearon**. Contra `--cached` —que es lo que un commit shippea— la viñeta
+  seguía y el parking no estaba. Commitear así habría shippeado el creep Y
+  perdido la captura: el peor de los dos mundos, en la corrida que vino a matar
+  los falsos-verdes. Es la MISMA clase de defecto que el diff bajo juicio
+  combate: verificar el sujeto equivocado. Saldado con `git add` + verificación
+  contra el ÍNDICE (`git show :<archivo>`), no contra el disco.
+  Se aplicó además su observación no-bloqueante: `adr:0022` suma
+  `bitacora:FALSO-VERDE-004` a sus `refs` — quedó citada normativamente en el
+  prompt canónico por la ratificación del Steward, y CREDITO exige que el ADR
+  refleje lo implementado. La fila `decision` en `ACEPTADA` NO es terminal
+  (`registros.yaml`: terminales = [RECHAZADA, SUPERSEDIDA]) → la corrección en el
+  lugar es legal.
 - MIGRATION_STRATEGY: N/A (sin DDL)
-- RETRO: <pendiente al cierre>
+- RETRO (blameless): la corrida salió BIEN por lo que aprendió de la anterior y
+  MAL por lo mismo que ataca — y las dos mitades enseñan.
+  **Lo que funcionó:** la FASE PIN antes de planificar (lección del RETRO de
+  `corrida:2026-07-16-equipo-doc-v1`) hizo converger el plan a la PRIMERA. Aquella
+  gastó 2 de 3 iteraciones en un ciclo de contratos y murió ESCALATED; ésta no
+  tuvo un solo REJECT de plan. Una lección de RETRO se pagó sola en 24 horas: eso
+  es lo que hace que escribir RETROs valga.
+  **Lo que falló, dos veces, y las dos son la MISMA falla:** verificar el sujeto
+  equivocado. (1) El prompt canónico nuevo se llevó puestas dos prevenciones de
+  bitácora por la puerta que el Steward abrió para UNA — creep de jurisdicción,
+  con la coartada del TEMA. (2) El LÍDER borró la viñeta y escribió el parking en
+  su árbol, verificó con grep sobre el DISCO, y reportó "hecho": nunca stageó.
+  Contra `--cached` —lo que un commit shippea— el creep seguía y la captura no
+  existía. Es exactamente el defecto que el diff bajo juicio combate: el `| tail`
+  que devuelve su propio exit code en vez del del test; el `command -v` que
+  bendice un stub que no corre; el líder que audita su árbol y no su entrega.
+  Tres capas distintas, un solo error.
+  **Por qué se cazó:** porque el verificador es FRESCO y no le cree al líder. Un
+  roster que fuera el mismo que hizo el trabajo habría dado verde a las dos.
+  **Lección con nombre, para la bitácora:** *verificá el ARTEFACTO QUE VIAJA, no
+  el que tenés a mano* — el índice y no el disco, el exit del sujeto y no el del
+  formateador, el intérprete que CORRE y no el que está en PATH. Candidata a
+  entrada (síntoma observable: "el verificador reporta que la remediación no está,
+  y al mirar el árbol SÍ está"), y candidata a ascenso: el CI que nace hoy mata la
+  variante del disco-vs-índice sin pedirle disciplina a nadie.
 <!-- VEREDICTOS:BEGIN -->
-- runState: wip
+- runState: closing
 - [V] TARGET · PASS · líder · pc-local (la forja; directiva explícita del operador). Bootstrap declarado: esta corrida CONSTRUYE el runner ajeno
 - [V] MODEL · PASS · líder · fable (uniforme)
 - [V] OPEN_CLOSED · PASS · steward · shift-left: A = 1 archivo NUEVO (.github/ no existía), 0 editados · B = fila nueva (quality-auditor-2) + 2 líneas de transición + agregado puro al catálogo §5
 - [V] ATOMICIDAD · PASS · steward · shift-left: ci.yml ~190L · quality-auditor-2 ~75L, ambos < T=400. SKILL.md 592→613 ya estaba citado: resuelto POR NOMBRE (tronco de ley, larga-legítima)
 - [V] COSTURA · PASS · steward · shift-left: cero generalidad especulativa — sin matriz de OS, sin pull_request, sin redgreen-verifier nuevo. El único punto de extensión es el glob (PIN 1, con evidencia)
 - [V] CASOS_LEGALES · PASS · steward · shift-left: A = AGREGA sin caso legal · B = (c) contrato pagado con ADR 0022 + transición de estado (única mutación legal de fila terminal), precedente manualizador-2
-- [V] CREDITO · PASS · steward · shift-left: ADR 0022 ACEPTADA y depositada al abrir; PIN 4 exime a A de ADR propio; ninguno reabre el 0022
+- [V] CREDITO · PASS · scope-verifier · ADR 0022 sellado, frontmatter válido, refleja lo implementado 3/3, refs recíprocas ambas direcciones; el patrón normativo NO vive solo en prosa: ID en §5 + enunciado en §2 + hogar en dictamina:. Supersede legal (ADR 0018 §4)
+- [V] REGLA0 · PASS · quality-auditor-2 · 13/13 suites corridas por él en pc-local (TARGET declarado) + lint con EXACTAMENTE el hallazgo esperado (justificado en forjar-release.sh:395-402) + proyectar --check rc=0 + leak-scan rc=0. Su ESTRENO: verificó la corrida que lo creó
+- [V] TEST_COVERAGE · PASS · quality-auditor-2 · 13 runners: bitacora(4) cargar(1) crisol(6) ley(1) management(1) — no es NONE
+- [V] RED_GREEN · N/A · quality-auditor-2 · el diff no crea ni modifica tests (1 .yml + 3 .md). Citación VACÍA verificada por él con git diff --name-only filtrado: 0 matches. N/A legítimo por la cláusula del propio enunciado; NO forzado a PASS
+- [V] ZERO_LEAK · PASS · leak-verifier · leak-scan rc=0 + barrido propio calibrado contra control positivo (mordió 5/5 shapes reales, calló ante <REDACTED> y placeholders). ci.yml: permissions contents:read, cero secrets, cero pull_request_target, checkout pineado a SHA
+- [V] INDEPENDENCIA · PASS · líder · 4 verificadores FRESCOS + 2 Stewards frescos. El roster cazó al LÍDER dos veces: el creep de jurisdicción y el auditar-el-árbol-y-no-la-entrega
+- [V] SCOPE_CREEP · PASS · scope-verifier · iter 3: 8 archivos staged mapeados 1:1 al Alcance; remedio verificado EN EL ÍNDICE (viñeta DRIFT-001 fuera, entera, sin jirón); 3 chequeos nuevos con ojo fresco, limpios. Los 2 [DRIFT-001] que sobreviven están en ci.yml como justificación de diseño del carril A, no como regla inyectada en un prompt
+- [V] PARKING · PASS · scope-verifier · el NEXT sacado por el Steward tiene captura VIVA en el índice, con la doctrina adentro y destinatario 'decisión del operador'. TEST_COVERAGE: NONE parkeado en ADR 0022 §3
+- [V] LISKOV · PASS · design-verifier · quality-auditor-2 implementa agente/1 y sustituye al viejo: mismo shape, mismos placeholders, dictamina: es SUPERSET → preserva postcondiciones. El llamador no se entera: los 4 de-ruteos migraron, cero refs vivas al nombre viejo
+- [V] INTERFACE_SEGREGATION · PASS · design-verifier · la fila RED_GREEN en §5 no fuerza a ningún guardián a depender de lo que no usa: la segregación por cliente la da el dictamina: de cada agente — solo el -2 la lista
+- [V] PIN_TOTAL · PASS · design-verifier · checkout pineado a COMMIT en las 3 apariciones, RE-RESUELTO por él (git ls-remote → 9c091bb…, sin línea ^{} = tag liviano) + pyyaml==6.0.1 exacto, versión que declara el propio registros-lint.py
+- [V] TECHO_ITER · PASS · líder · convergió en 3/3, la última. Iter 1 la ganó el PIN; iter 2 la perdió el creep de jurisdicción; iter 2b la perdió el líder
+- [V] CIERRE_TRAS_PASS · PASS · líder · commit de cierre tras PASS de los 4 verificadores frescos + el dictamen del Steward R2 aplicado y re-verificado
+- [V] MIGRATION · N/A · gate · sin DDL
+- [V] CONFORMIDAD · N/A · líder · tooling sin capas
+- [V] TARGET_ENV · N/A · líder · pc-local sin @env
+- [V] RESPONSIVE · N/A · líder · sin UI
+- [V] FUENTE_VERDAD · N/A · líder · no toca testing/prod
+- [V] SELLOS · PASS · forja · re-sello uniforme a v2.6.0 por forjar-release.sh; pre-flight del universo SEALED
+- [V] FORJA · PASS · forja · sellos+registry+sellado de las 2 corridas terminales en UNA pasada — nada a mano
+- [V] TAG_GATE · PASS · líder · v2.6.0 nace tras esta corrida CLOSED con PASS
 <!-- VEREDICTOS:END -->
-- Iteraciones: 1/3 (convergió a la PRIMERA — el PIN antes de planificar hizo su trabajo: la corrida anterior gastó 2 de 3 en el ciclo de contratos)
+- Iteraciones: 3/3 (plan APPROVE a la 1ª por el PIN · iter 2 = FAIL de scope por creep de jurisdicción · iter 2b = FAIL del líder por auditar el árbol y no la entrega)
+- Cierre: 2026-07-17 · commit de cierre + forja v2.6.0 (sella las 2 corridas terminales) + tag anotado + GitHub Release

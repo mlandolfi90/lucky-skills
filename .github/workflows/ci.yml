@@ -1,0 +1,202 @@
+# CI — el TARGET ajeno que la REGLA 0 ya exigía (ADR 0022, punto 1).
+#
+# NO es un guardián del Crisol: no dictamina IDs del catálogo §5, no escribe
+# líneas [V], no toca la matriz de veredictos. Es el suelo donde la REGLA 0 se
+# para (crisol/SKILL.md §2 «Anti-romper (REGLA 0)»: "el Verificador corre los
+# tests ÉL MISMO, EN el `TARGET:` declarado... Jamás en la PC local").
+#
+# Linux DELIBERADO (ADR 0022): el operador trabaja en Windows/Git-Bash. Un runner
+# en su mismo OS no compra nada — la familia de bugs que ya mordió DOS veces
+# (bitacora:DRIFT-007: exit 127 `command not found` en Linux, exit 49 por el stub
+# de Microsoft Store en Windows) es exactamente la que solo aparece cruzando de OS.
+# La línea de PREVENCIÓN de DRIFT-007 pide, textual: "la corrida que lo toque
+# corre la suite en Linux fiel (REGLA 0 multi-OS)". Esto es ese Linux fiel.
+name: CI
+
+# ADR 0022: "corriendo en `ubuntu-latest` en cada push". Solo `main`: la ley es
+# trunk-based (crisol/SKILL.md §Versionado: "Trunk-based: una sola rama `main`"),
+# y el filtro de branch además evita la corrida duplicada del push de tag que la
+# forja crea sobre un commit YA verificado.
+# NO se agrega `pull_request` ni `workflow_dispatch`: no hay PRs en un repo
+# trunk-based de una sola rama, y COSTURA (§2 Diseño) llama deuda a la
+# generalidad especulativa — entran el día que haya evidencia de variación.
+on:
+  push:
+    branches: [main]
+
+# El CI solo LEE (PIN 4: no es guardián, no escribe nada en el repo).
+permissions:
+  contents: read
+
+jobs:
+  # ── suites ─────────────────────────────────────────────────────────────────
+  suites:
+    name: suites (glob plugins/lucky/skills/*/tests/test-*.sh)
+    runs-on: ubuntu-latest
+    steps:
+      # PIN_TOTAL (§2 «Pin total»): "Prohibido floating (`latest`, `main`, `*`,
+      # rangos abiertos) en lo que CONSUMIMOS". `actions/checkout@v7` ES floating:
+      # GitHub mueve el tag mayor. Se pinea al COMMIT exacto. Verificable:
+      #   git ls-remote https://github.com/actions/checkout.git refs/tags/v7.0.0
+      #   -> 9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0   (tag liviano == commit)
+      # Sin `fetch-depth`: las suites arman sus propios sandboxes con `git init`
+      # y no leen la historia de ESTE repo; el clon por defecto alcanza.
+      - name: checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: python (venv) — sonda de intérprete
+        shell: bash
+        run: |
+          set -uo pipefail
+          # [DRIFT-007] SONDA del intérprete, jamás `command -v`: existir != correr.
+          BOOT=""
+          for PY in python3 python; do "$PY" -c "" >/dev/null 2>&1 && { BOOT="$PY"; break; }; done
+          [ -n "$BOOT" ] || { echo "XX ningún intérprete python CORRE en este runner"; exit 1; }
+          # venv: (a) esquiva PEP 668 (system python externally-managed) y
+          # (b) provee `python` Y `python3` en un solo prefijo — la línea con la
+          # que las suites resuelven el intérprete
+          #   PYBIN="$(command -v python || command -v python3 || echo python)"
+          # (test-paridad.sh, test-ramas.sh, test-tablero.sh, test-ruteo.sh,
+          # test-enforcer.sh) cae SIEMPRE acá. Sin eso, pip podría dejar PyYAML en
+          # un intérprete y las suites elegir otro -> "XX falta PyYAML" = rojo FALSO.
+          "$BOOT" -m venv "$RUNNER_TEMP/venv"
+          echo "$RUNNER_TEMP/venv/bin" >> "$GITHUB_PATH"
+
+      - name: PyYAML (pin exacto)
+        shell: bash
+        run: |
+          set -uo pipefail
+          # PIN_TOTAL: versión exacta, jamás rango abierto. 6.0.1 es la que
+          # declara el propio scripts/registros-lint.py ("Dependencia: PyYAML
+          # (probado 6.0.1)").
+          python -m pip install --disable-pip-version-check --no-input pyyaml==6.0.1
+          # $? DESNUDO: la prueba de que quedó EN el intérprete que las suites eligen.
+          python -c "import yaml, sys; print('PyYAML', yaml.__version__, sys.executable)"
+
+      - name: correr TODAS las suites (glob, no lista)
+        shell: bash
+        env:
+          # Sin esto, test-paridad.sh apunta a "$HOME/.claude/hooks/crisol_gate.py"
+          # y hace:  [ -f "$GATE" ] || { echo "SKIP: no hay gate en $GATE"; exit 0; }
+          # En un runner limpio el gate NO está instalado -> VERDE SIN CORRER NADA:
+          # el falso-verde exacto que esta corrida vino a matar. Se apunta a la copia
+          # VERSIONADA del repo, que es el uso que el propio test-enforcer.sh declara:
+          # "para testear la copia versionada del repo ANTES de desplegarla".
+          CRISOL_GATE_OVERRIDE: ${{ github.workspace }}/plugins/lucky/skills/crisol/hooks/crisol_gate.py
+          # §2: perfil `estricto` (default de la ley); explícito para que un env
+          # heredado jamás afloje el guardián bajo prueba.
+          CRISOL_GATE_PROFILE: estricto
+        run: |
+          set -uo pipefail
+          # -e OFF A PROPÓSITO: el loop tiene que juntar TODAS las suites rojas.
+          # Morir en la primera escondería a las otras doce.
+          set +e
+
+          # PIN 1 (LEY) — descubrimiento por GLOB, jamás por lista: "un test que el
+          # CI no corre es un test que no existe".
+          shopt -s nullglob
+          SUITES=(plugins/lucky/skills/*/tests/test-*.sh)
+          shopt -u nullglob
+
+          # PIN 1, COROLARIO — glob vacío = JOB ROJO. `nullglob` es lo que lo hace
+          # verdad: SIN él, un patrón sin match sobrevive LITERAL y el array mide 1
+          # -> el conteo mentiría y este `if` no mordería nunca.
+          if [ "${#SUITES[@]}" -eq 0 ]; then
+            echo "XX el glob 'plugins/lucky/skills/*/tests/test-*.sh' no matcheó NINGUNA suite."
+            echo "   Un glob vacío en verde es el falso-verde que este CI vino a matar."
+            exit 1
+          fi
+          echo "== ${#SUITES[@]} suite(s) descubiertas por glob =="
+
+          rojas=0
+          for s in "${SUITES[@]}"; do
+            echo "::group::$s"
+            # [FALSO-VERDE-004] El que DECIDE corre SIN pipe: se captura la salida,
+            # se lee $? DESNUDO, y el formateo va DESPUÉS. Un `| tail` acá pegaría
+            # el exit del tail y enmascararía el FAIL.
+            OUT="$(bash "$s" 2>&1)"
+            RC=$?
+            printf '%s\n' "$OUT"
+            echo "::endgroup::"
+            if [ "$RC" -eq 0 ]; then
+              echo "PASS  rc=0  $s"
+            else
+              echo "FAIL  rc=$RC  $s"
+              rojas=$((rojas + 1))
+            fi
+          done
+
+          echo
+          echo "== suites: ${#SUITES[@]} corrida(s) · $rojas roja(s) =="
+          [ "$rojas" -eq 0 ]
+
+  # ── registros ──────────────────────────────────────────────────────────────
+  registros:
+    name: registros (lint + gate de drift de proyecciones)
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout (historia COMPLETA)
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          # fetch-depth: 0 NO es lujo. scripts/registros-lint.py, bloque
+          # «(iii) cursor: formato + existe + ancestro», corre:
+          #     git cat-file -e <sha40>^{commit}
+          #     git merge-base --is-ancestor <sha40> HEAD
+          # sobre docs/manual/_cobertura.yaml. Con el clon shallow (depth 1) esos
+          # dos fallan por falta de historia y el lint reporta hallazgos FALSOS.
+          # Hoy el chequeo duerme (no existe docs/manual/), así que un shallow
+          # pasaría en verde y despertaría rojo el día que nazca el manual: eso es
+          # [DRIFT-001] — un check obligatorio apagado en silencio. Costo real del
+          # clon completo: 207 commits / 13M de .git.
+          fetch-depth: 0
+
+      - name: python (venv) — sonda de intérprete
+        shell: bash
+        run: |
+          set -uo pipefail
+          # [DRIFT-007] SONDA del intérprete, jamás `command -v`: existir != correr.
+          BOOT=""
+          for PY in python3 python; do "$PY" -c "" >/dev/null 2>&1 && { BOOT="$PY"; break; }; done
+          [ -n "$BOOT" ] || { echo "XX ningún intérprete python CORRE en este runner"; exit 1; }
+          "$BOOT" -m venv "$RUNNER_TEMP/venv"
+          echo "$RUNNER_TEMP/venv/bin" >> "$GITHUB_PATH"
+
+      - name: PyYAML (pin exacto)
+        shell: bash
+        run: |
+          set -uo pipefail
+          python -m pip install --disable-pip-version-check --no-input pyyaml==6.0.1
+          python -c "import yaml, sys; print('PyYAML', yaml.__version__, sys.executable)"
+
+      # BLOQUEANTE, sin `continue-on-error`: [DRIFT-001] — "un check OBLIGATORIO
+      # jamás va detrás de un `if` que lo apaga en silencio: fail-closed".
+      # [FALSO-VERDE-004]: el que DECIDE corre SIN pipe.
+      - name: registros-lint (manifiesto <-> realidad)
+        shell: bash
+        run: python scripts/registros-lint.py --repo .
+
+      # ADR 0022: convierte "proyecciones GENERADAS — jamás editar a mano"
+      # (registros.yaml) de pedido en HECHO. --check no escribe: exit 1 si alguna
+      # proyección difiere de sus filas.
+      - name: proyectar --check (gate de drift)
+        shell: bash
+        run: python scripts/proyectar.py --repo . --check
+
+  # ── leak ───────────────────────────────────────────────────────────────────
+  leak:
+    name: leak-scan (cada push, no solo la forja)
+    runs-on: ubuntu-latest
+    steps:
+      # Sin `fetch-depth`: leak-scan.sh recorre `git ls-files` (árbol versionado),
+      # no la historia. El clon por defecto alcanza.
+      - name: checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      # ADR 0022: el scanner pasa a correr en CADA push, no solo en la forja.
+      # Motivo concreto y con nombre: su rama Windows estuvo muerta un tiempo
+      # indeterminado y la cazó un verificador fresco, no el gate
+      # (diagnostico:2026-07-16-leak-scan-ruta-windows-muerta).
+      # Bash del runner: usa `mapfile` (bash 4+) — ubuntu-latest lo tiene.
+      - name: leak-scan
+        shell: bash
+        run: bash scripts/leak-scan.sh
