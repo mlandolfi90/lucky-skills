@@ -21,8 +21,8 @@ condiciones de `VIVA`) vive allá, siempre en contexto.
 harness descubre `plugins/lucky/agents/*.md` **por directorio y no lee
 `estado:`** → el nombre del llamador es el ÚNICO de-ruteo existente. Spawnear
 `manualizador` correría el prompt SUPERSEDED, que sigue escribiendo `doc:`
-(`manualizador.md:41`) — justo lo que el ADR 0021 §2 prohíbe, y el supersede
-quedaría decorativo.
+(su regla 5, `manualizador.md:42`) — justo lo que el ADR 0021 §2 prohíbe, y el
+supersede quedaría decorativo.
 
 ## El bucle
 
@@ -79,4 +79,4 @@ quedaría decorativo.
 
 ---
 **Fuente: `github.com/mlandolfi90/lucky-skills` · esta copia = tag
-`v2.4.0` (cache local, NO la ley).**
+`v2.5.0` (cache local, NO la ley).**

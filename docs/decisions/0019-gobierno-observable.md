@@ -69,4 +69,4 @@ falsa — STALE 2026: los agentes no detectan solos el saber viciado).
 ---
 
 **Fuente de verdad: `github.com/mlandolfi90/lucky-skills` · esta copia = tag
-`v2.4.0` (cache local, NO la ley).**
+`v2.5.0` (cache local, NO la ley).**

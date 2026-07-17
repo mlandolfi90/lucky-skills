@@ -87,7 +87,7 @@ Invariantes del contrato (los tres carriles los tratan como ley):
   descubre `plugins/lucky/agents/*.md` **por directorio y no lee `estado:`** → el
   **nombre del llamador es el ÚNICO de-ruteo existente**. Con el nombre viejo, el
   supersede es decorativo: correría el prompt viejo, que sigue escribiendo `doc:`
-  (`manualizador.md:41`) — justo lo que el ADR 0021 §2 prohíbe.
+  (su regla 5, `manualizador.md:42`) — justo lo que el ADR 0021 §2 prohíbe.
 - `lector-cero` nace con `dictamina: [DOC_SIRVE]` y **`tools: Read, Grep, Glob`
   (sin `Bash`)**: es el mecanismo de la enmienda E1 / ADR 0021 §1, no una
   omisión. Quien agregue `Bash` reabre E1 sin ADR.

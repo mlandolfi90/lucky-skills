@@ -119,12 +119,13 @@ refs: [concejo:2026-07-16-equipo-doc, adr:0018, adr:0019, adr:0020, adr:0021, pl
 - HALLAZGOS NO BLOQUEANTES cosechados por el roster (para el operador; sin hogar
   todavía — el líder NO los captura por su cuenta estando en techo):
   1. **Defecto REAL en `scripts/leak-scan.sh:61`** (regla RUTA-ABSOLUTA): la rama
-     Windows del regex está MUERTA por doble-escape (`C:\\\\Users\\\\` en ERE
-     exige DOS backslashes literales) → un path Windows real NO matchea. Probado
-     end-to-end con el script real: `C:\Users\alguien\x.md` → exit 0 (pasa en
-     verde); `/home/otro/y.md` → exit 1. Hoy solo se atrapa de rebote por la
+     Windows del regex está MUERTA por doble-escape (el ERE exige DOS backslashes
+     literales donde un path real trae UNO) → un path Windows real NO matchea.
+     Probado end-to-end con el script real: un path `C:` + `Users` + `<usuario>`
+     con backslashes simples → exit 0 (pasa en verde); un path `/home/<otro>/`
+     → exit 1. Hoy solo se atrapa de rebote por la
      regla 2 (nombre del operador hardcodeado); un path de OTRO usuario se
-     filtraría en silencio. Fix: `\\` en vez de `\\\\`. El PASS de ZERO_LEAK de
+     filtraría en silencio. Fix: usar UN nivel de escape menos. El PASS de ZERO_LEAK de
      esta corrida NO depende de ese regex: el leak-verifier lo suplió con un
      barrido independiente en Python sobre 182 archivos.
   2. `registros-lint.py` quedó en 423 líneas > T=400 → los guardianes emitirán el
