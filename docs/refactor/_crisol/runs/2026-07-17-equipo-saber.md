@@ -10,11 +10,16 @@ tier: "completo (2 artefactos canónicos nuevos + cableado en la ley del crisol 
 target: "pc-local (la forja; directiva durable del operador para lucky-skills)"
 model: "opus (uniforme — fijado por el operador en el /goal: 'utiliza agentes opus pero tu el lider utiliza fable 5'; el líder corre en fable, fuera de la compuerta)"
 ley: "v2.6.0 (verificada — git ls-remote: máximo remoto == sello local)"
-iteraciones: "0/3"
+iteraciones: "1/3 (en curso — plan APPROVE a la 1ª: la FASE PIN volvió a pagar)"
 runState: wip
 veredictos:
   - {regla: TARGET, veredicto: PASS, quien: líder, evidencia: "pc-local (directiva durable del operador para este repo; la corrida crea .md + tests shell que corren acá y en el CI)"}
   - {regla: MODEL, veredicto: PASS, quien: líder, evidencia: "opus (uniforme) — dictado por el operador en el /goal 2026-07-17"}
+  - {regla: OPEN_CLOSED, veredicto: PASS, quien: steward, evidencia: "shift-left: A/B/C AGREGAN archivos nuevos; D = edición mínima ~8 líneas del bloque Destilación §4 paso 8 como caso (c) pagado con ADR 0023; E = puntero aditivo. Ninguna unidad estable se muta para extenderla"}
+  - {regla: ATOMICIDAD, veredicto: PASS, quien: steward, evidencia: "shift-left: destilador = 1 responsabilidad (destila, read-only, sin MCP: juicio separado del acto = una garganta de escritura); saber COMPONE subcomandos de responsabilidad única"}
+  - {regla: COSTURA, veredicto: PASS, quien: steward, evidencia: "shift-left: extensión donde el sistema varía (eje aprender, espejo del manualizador); cero especulación — poda/ascenso GUIADOS v1, telemetría diferida, cero ID de matriz, inbox no-enumerable declarado como deuda en vez de construir maquinaria"}
+  - {regla: CASOS_LEGALES, veredicto: PASS, quien: steward, evidencia: "shift-left: único toque a estable es D (crisol §4 paso 8) = caso (c) contrato + ADR 0023; E aditivo puro; A/B/C AGREGAN. Etiquetas del plan correctas"}
+  - {regla: CREDITO, veredicto: PASS, quien: steward, evidencia: "shift-left: ADR 0023 depositado (ACEPTADA) y referenciado por A, D y E; el plan ordena incorporarle el límite del inbox no-enumerable como deuda declarada"}
 refs: [adr:0023, adr:0021, adr:0020, adr:0018, adr:0005]
 ---
 - ORIGEN: pregunta del operador — *"tenemos lucky-saber pero ¿tenemos

@@ -3301,5 +3301,10 @@
 - runState: wip
 - [V] TARGET · PASS · líder · pc-local (directiva durable del operador para este repo; la corrida crea .md + tests shell que corren acá y en el CI)
 - [V] MODEL · PASS · líder · opus (uniforme) — dictado por el operador en el /goal 2026-07-17
+- [V] OPEN_CLOSED · PASS · steward · shift-left: A/B/C AGREGAN archivos nuevos; D = edición mínima ~8 líneas del bloque Destilación §4 paso 8 como caso (c) pagado con ADR 0023; E = puntero aditivo. Ninguna unidad estable se muta para extenderla
+- [V] ATOMICIDAD · PASS · steward · shift-left: destilador = 1 responsabilidad (destila, read-only, sin MCP: juicio separado del acto = una garganta de escritura); saber COMPONE subcomandos de responsabilidad única
+- [V] COSTURA · PASS · steward · shift-left: extensión donde el sistema varía (eje aprender, espejo del manualizador); cero especulación — poda/ascenso GUIADOS v1, telemetría diferida, cero ID de matriz, inbox no-enumerable declarado como deuda en vez de construir maquinaria
+- [V] CASOS_LEGALES · PASS · steward · shift-left: único toque a estable es D (crisol §4 paso 8) = caso (c) contrato + ADR 0023; E aditivo puro; A/B/C AGREGAN. Etiquetas del plan correctas
+- [V] CREDITO · PASS · steward · shift-left: ADR 0023 depositado (ACEPTADA) y referenciado por A, D y E; el plan ordena incorporarle el límite del inbox no-enumerable como deuda declarada
 <!-- VEREDICTOS:END -->
-- Iteraciones: 0/3
+- Iteraciones: 1/3 (en curso — plan APPROVE a la 1ª: la FASE PIN volvió a pagar)
