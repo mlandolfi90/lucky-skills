@@ -2,7 +2,7 @@
 id: 2026-07-17-el-verde-significa-algo
 schema: corrida/1
 tipo: corrida
-estado: ACTIVE
+estado: CLOSED
 creado: 2026-07-17
 branch: main
 titulo: "El verde significa algo — CI en runner ajeno + RED_GREEN"

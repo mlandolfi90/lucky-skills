@@ -3073,7 +3073,7 @@
 - Cierre: 2026-07-16 · commit de cierre + tag anotado v2.0.0 + GitHub Release (título y notas)
 
 ### main — 2026-07-17 (El verde significa algo — CI en runner ajeno + RED_GREEN)
-- STATUS: ACTIVE
+- STATUS: CLOSED
 - Tier: completo (ID nuevo en el catálogo §5 = contrato; >1 archivo; establece patrón: el primer verificador que NO es un LLM)
 - Fecha: 2026-07-17
 - TARGET: pc-local (donde el líder y el roster verifican). NOTA de bootstrap: esta corrida CONSTRUYE el runner ajeno, así que su propia evidencia de CI se observa en GitHub Actions tras el push de respaldo — el runner no existe hasta que se pushea.
