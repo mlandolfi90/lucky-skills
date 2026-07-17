@@ -4,6 +4,56 @@ Notas de release de la familia de skills Lucky. El historial completo del **proc
 (corridas del Crisol, RETROs) vive en `docs/refactor/_crisol/RUN-LEDGER.md`; los tags
 inmutables, en `git tag`. Formato: más nuevo arriba.
 
+## v2.7.0 — 2026-07-17 — El saber tiene equipo: destilador + skill saber (ADR 0023)
+
+- **Agente `destilador`**: el espejo del manualizador para el eje APRENDER —
+  destila los artefactos de una corrida (fila, RETRO, postmortems) en
+  **borradores de ficha** con el shape de `saber_proponer_ficha`, o
+  `NADA COSECHABLE`. Read-only por construcción (sin Write/Edit/MCP): el juicio
+  es suyo, el acto de proponer es del flujo que lo spawnea.
+- **Skill `saber`**: administra el ciclo del conocimiento central que nadie
+  administraba — `/saber` (estado), `/saber revisar` (bandeja → merge con
+  endoso **POR FICHA**, jamás batch), `/saber promover`/`podar` (GUIADOS v1:
+  sin tool MCP por diseño), `/saber destilar` (spawn del destilador →
+  `saber_gate_check` dry-run → propuesta al inbox, jamás main). Bandeja local
+  en `docs/IDEAS.md` (límite real documentado: ninguna tool MCP enumera las
+  ramas `mcp-inbox/*` pendientes — el branch es el único handle).
+- **crisol §4 paso 8**: el chequeo de destilación se registra SIEMPRE al cierre
+  (`BITACORA:` refs o `N/A (sin disparador)`) — el gatillo dejó de depender de
+  la memoria del líder. Sin gate nuevo, sin ID de matriz (jidoka intacto).
+- Corrida `2026-07-17-equipo-saber`: **1/3** (primera de la serie en no quemar
+  iteraciones — FASE PIN + arqueología previa), roster 4/4 PASS a la primera,
+  RED_GREEN probado A/B (7/7 asserts), suite nueva `test-saber.sh` descubierta
+  sola por el glob del CI.
+
+## v2.6.0 — 2026-07-17 — El verde significa algo: CI en runner ajeno + RED_GREEN (ADR 0022)
+
+*(entrada escrita retroactivamente en el cierre de v2.7.0 — el cierre de
+v2.6.0 no actualizó el CHANGELOG)*
+
+- **CI en GitHub Actions** (`ubuntu-latest`, cada push): suites descubiertas
+  por glob (glob vacío = rojo), `registros-lint`, `proyectar --check` (gate de
+  drift de proyecciones) y `leak-scan`. El runner **ES el TARGET ajeno que la
+  REGLA 0 exigía** — el primer verificador de la forja que no es un LLM. No es
+  guardián: no dictamina IDs ni escribe líneas de matriz.
+- **`RED_GREEN`** (ID nuevo del catálogo §5, clase J): todo test que sostiene
+  un PASS fue **VISTO fallar** antes; el rojo se PRUEBA con A/B de exit codes
+  en worktree descartable, jamás se declara. Hogar: `dictamina:` del
+  `crisol-quality-auditor-2` (supersede legal del auditor, ADR 0018 §4).
+
+## v2.5.0 — 2026-07-16 — El manual que SIRVE: lector-cero + gate de doc (ADR 0021)
+
+*(entrada escrita retroactivamente en el cierre de v2.7.0)*
+
+- **Agente `lector-cero`**: juez FRESCO que dictamina `DOC_SIRVE` — el manual
+  vale si el usuario logra hacer la cosa, no si el archivo existe. Juzga por
+  LECTURA (sin Bash), con ceguera calibrada (ve el contrato observable).
+- **`manualizador-2`** supersede al `manualizador` (deja de escribir `doc:`;
+  esa columna la escribe `/feature` tras el `PASA`). Bucle autor↔lector máx 2
+  rondas, desempate convocado como decisión.
+- `doc_veredicto:` con diente de lint; frescura por **cursor SHA** en el
+  sidecar `_cobertura.yaml` (jamás por mtime/fechas); `audiencia: user|dev`.
+
 ## v2.4.0 — 2026-07-16 — Ecosistema: features, Manualizador, /migrar, evals y métricas (ADR 0020)
 
 **Cierre del programa del debate 2026-07-16 (5 releases en la sesión: v2.0.0 → v2.4.0).**
