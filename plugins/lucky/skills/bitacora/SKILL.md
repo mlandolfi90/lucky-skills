@@ -168,6 +168,9 @@ Dos modos, cada uno con su DESTINO — no confundirlos:
 
 ## Mantener (mecánico, no por disciplina)
 
+- **Administración del ciclo central** (bandeja inbox → merge → CANDIDATE→LIVE →
+  poda/ascenso) y la destilación al cierre de corrida: skill **`saber`** (ADR
+  0023) — esta skill LEE y captura; aquélla administra.
 - **Espejo:** el catálogo VIVE en el saber; acá se REGENERA el espejo con
   `python scripts/bitacora-espejo.py` (des-scopea desde `lucky-saber`) y se forja
   un release para propagarlo a la flota. Poda, ascenso y la promoción CANDIDATE→LIVE
@@ -226,7 +229,7 @@ Dos modos, cada uno con su DESTINO — no confundirlos:
 ---
 
 **Fuente de verdad: `github.com/mlandolfi90/lucky-skills` · esta copia = tag
-`v2.6.0` (cache local, NO la ley).** Ley viva: con red, si el repo tiene un tag
+`v2.7.0` (cache local, NO la ley).** Ley viva: con red, si el repo tiene un tag
 mayor (`git ls-remote --tags
 https://github.com/mlandolfi90/lucky-skills.git`), seguir la del repo e informar
 al humano.

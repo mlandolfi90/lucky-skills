@@ -459,13 +459,19 @@ bitácora del paso 3 se conserva).
    línea sobre la fricción del PROCESO (blameless: se registra la falla, no el
    culpable). En el resumen de cierre, listar las ideas capturadas en
    `docs/IDEAS.md` durante la corrida.
-   **Destilación (Bitácora, Capa 4 — ADR 0005; opcional, NO bloqueante):** si la
-   corrida tuvo un **gap que costó >30min**, un **grep que re-derivó algo ya
-   sabido**, o un **drift hallado**, destilá UNA entrada experiencial con la skill
-   `bitacora` (`estado: CANDIDATE`; el humano la promueve a `LIVE`) y registrala en
-   el campo `BITACORA:` del ledger. Es `.md` → exento del gate; el Crisol **AVISA,
-   no exige** (meter el playbook como obligatorio pelearía con el jidoka). La
-   brújula la SEÑALARÁ (puntero); el Planificador la consultará por síntoma (Paso 3) en sesiones futuras.
+   **Destilación (Bitácora, Capa 4 — ADR 0005; el chequeo SIEMPRE, el spawn solo
+   con disparador — ADR 0023):** al cerrar, evaluá los **disparadores objetivos**
+   (los de la skill `bitacora` §Capturar: **gap que costó >30min** · **grep que
+   re-derivó algo ya sabido** · **drift hallado** · **costo agudo**) y registrá
+   SIEMPRE el resultado en el campo `BITACORA:` del ledger — las refs de lo
+   propuesto, o `N/A (sin disparador)`. Un cierre sin el campo se ve en la fila.
+   Disparador con **sí** → spawneá al agente canónico `destilador` vía `/saber
+   destilar`: él devuelve borradores; el flujo los propone al inbox del saber
+   (rama `mcp-inbox/*`, **jamás main**); mergear/promover queda en el humano
+   (ficha por ficha). Es `.md` → exento del gate; el Crisol **AVISA, no exige**
+   (meter el playbook como obligatorio pelearía con el jidoka, sin gate nuevo, sin
+   ID de matriz). La brújula la SEÑALARÁ (puntero); el Planificador la consultará
+   por síntoma (Paso 3) en sesiones futuras.
    El gate de cobertura es la **RED final**,
    no el primer detector: cada regla se verifica TEMPRANO (paso 4 las de plan,
    paso 6 las del diff); si algo cae recién en esta red ya se desperdició una
@@ -575,7 +581,7 @@ triggers, para que ningún carril derive el vocabulario.
 ## 6. La ley se gobierna a sí misma
 
 **Fuente de verdad: `github.com/mlandolfi90/lucky-skills` · esta copia = tag
-`v2.6.0` (cache local, NO la ley).** **Ley viva:** al invocar la skill, si la
+`v2.7.0` (cache local, NO la ley).** **Ley viva:** al invocar la skill, si la
 sesión tiene red: `git ls-remote --tags
 https://github.com/mlandolfi90/lucky-skills.git` — si existe un tag mayor al de
 esta copia, descargar y seguir LA DEL REPO

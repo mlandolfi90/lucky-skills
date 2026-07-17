@@ -79,4 +79,4 @@ VEREDICTO: PASS o FAIL (binario — FAIL si CUALQUIER suite falla)
 
 ---
 **Fuente: `github.com/mlandolfi90/lucky-skills` · esta copia = tag
-`v2.6.0` (cache local, NO la ley).**
+`v2.7.0` (cache local, NO la ley).**

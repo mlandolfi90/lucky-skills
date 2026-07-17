@@ -74,8 +74,10 @@ el operador (*"tu no vas a cosechar nada que yo no entienda y autorice"*,
    - `/saber podar` — presenta candidatos a poda/ascenso (los criterios de
      bitacora §Mantener); decide el operador.
    - `/saber destilar <refs>` — spawnea al `destilador`, recibe borradores,
-     propone al inbox con `saber_proponer_ficha` (nunca main) y reporta qué
-     propuso.
+     **valida cada uno con `saber_gate_check` (dry-run: lint + leak-scan, cero
+     side effects)** y propone los que pasan al inbox con `saber_proponer_ficha`
+     (nunca main); parkea cada propuesta con su branch y reporta qué propuso y
+     qué no (con el porqué del gate).
    - **Fail-open sin MCP**: borradores a `/idea` (parking local); la skill
      nunca bloquea ni pierde una lección por falta de connector.
 3. **El gatillo deja de depender de memoria** — crisol §4 paso 8: el chequeo de
@@ -101,6 +103,18 @@ el operador (*"tu no vas a cosechar nada que yo no entienda y autorice"*,
   del observador sigue siendo territorio de `/bitacora cosechar`
   (FRECUENCIA/INTENSIDAD). Complementarios, sin superposición — dos insumos,
   dos puertas, la misma bandeja.
+- **Límite de la superficie MCP (arqueología 2026-07-17)**: NINGUNA tool MCP
+  enumera las ramas `mcp-inbox/*` pendientes — el `branch` que devuelve
+  `saber_proponer_ficha` es el ÚNICO handle para mergearla. Por eso la skill
+  `saber` persiste cada propuesta como **línea de parking en `docs/IDEAS.md`**
+  (la bandeja local que lee `/saber revisar`): una propuesta cuyo branch no se
+  parkeó es invisible vía MCP y se declara como tal, no se inventa. Además,
+  `saber_gate_check` da la validación **dry-run** (lint + leak-scan sin
+  commitear) previa a `saber_proponer_ficha`. Y ni la promoción CANDIDATE→LIVE
+  ni la poda tienen tool que las ejecute **por diseño** (`saber_mergear` nunca
+  promueve a LIVE; el MCP nunca escribe `usos`/`estado`/`scope`) → `/saber
+  promover` y `/saber podar` son **subcomandos GUIADOS v1**: la skill presenta y
+  registra el endoso; el acto lo ejecuta el operador en `lucky-saber`.
 - **Deuda declarada**: (a) poda/ascenso quedan como procedimiento guiado v1 (la
   skill los presenta; no hay automatización); (b) telemetría del destilador
   (borradores endosados vs descartados — insumo de recalibración, como en ADR
@@ -119,4 +133,4 @@ el operador (*"tu no vas a cosechar nada que yo no entienda y autorice"*,
 ---
 
 **Fuente de verdad: `github.com/mlandolfi90/lucky-skills` · esta copia = tag
-`v2.6.0` (cache local, NO la ley).**
+`v2.7.0` (cache local, NO la ley).**
