@@ -75,9 +75,18 @@ al espejo local (que es READ-ONLY, generado):
 
 1. **Con el MCP:** destilá el patrón (un síntoma observable = una acción) y
    proponelo con `saber_proponer_ficha(sintoma, tipo, causa_raiz, accion,
-   anti_accion, prevencion, scope=…)`. Nace `CANDIDATE` en una rama `mcp-inbox/*`
-   — **nunca toca main**; el humano la mergea (`saber_mergear` o por PR). Sospecha
-   débil, sin evidencia dura → `saber_senal(sospecha, contexto)`.
+   anti_accion, prevencion, scope=…, dedup_key=…)`. Nace `CANDIDATE` en una rama
+   `mcp-inbox/*` — **nunca toca main**; el humano la mergea (`saber_mergear` o por
+   PR). Sospecha débil, sin evidencia dura → `saber_senal(sospecha, contexto)`.
+   - **`dedup_key` SIEMPRE explícito y estable — kebab-case de la LECCIÓN, no de tu
+     redacción** (ej. `git-commit-m-backticks-usar-heredoc`, no la frase del
+     síntoma). El default lo deriva del TEXTO, y el saber deduplica por fingerprint
+     LITERAL: dos sesiones que aprenden lo MISMO con palabras distintas generan dos
+     claves → la misma lección entra dos veces. Una clave estable de la lección hace
+     que la re-propuesta choque como `dedup` y no ensucie el catálogo (que RECICLA,
+     no acumula). Es la capa de PREVENCIÓN; el gate de endoso (`saber_mergear`) tiene
+     además una capa de DETECCIÓN que avisa casi-duplicados por similitud (ADR 0004
+     de lucky-tool-saber) — pero prevenir es más barato que curar.
 2. **Sin el MCP (offline):** anotá el patrón a **`/idea`** (parking local) como
    "síntoma → acción" y proponelo al saber después, desde una sesión con el
    connector. **El espejo local NO se edita a mano.**
@@ -211,6 +220,10 @@ Dos modos, cada uno con su DESTINO — no confundirlos:
   2026-07-02: "¿de qué sirve guardar algo que no está confirmado que funcione?".
 - **Indexá por SÍNTOMA observable, no por tema.** Si no podés escribir el síntoma
   como algo que un agente OBSERVA literalmente, no es un patrón → va a `/idea`.
+- **`dedup_key` estable, SIEMPRE (kebab-case de la LECCIÓN, no de la redacción).**
+  El default sale del texto y el saber deduplica por fingerprint literal → dos
+  redacciones de la misma lección = duplicado. Una clave explícita de la lección lo
+  previene en origen (ver §Capturar). No lo dejes al default.
 - **Señales débiles (near-miss log, `SENALES.md`):** la SOSPECHA de patrón sin
   evidencia no entra al INDEX ni se tira — se acumula en `SENALES.md` con
   contador (`visto: N` + fecha + contexto de 1 línea). La frecuencia del
