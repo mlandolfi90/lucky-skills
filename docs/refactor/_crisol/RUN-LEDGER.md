@@ -3344,7 +3344,7 @@
 - Cierre: 2026-07-17 · commit de cierre + forja v2.7.0 + tag anotado + GitHub Release; estado CLOSED en commit de docs posterior (mecánica de DOS commits, hallazgo 2026-07-17)
 
 ### main — 2026-07-17 (Regla dura: dedup_key estable (kebab-case de la lección) en la skill bitacora)
-- STATUS: ACTIVE
+- STATUS: CLOSED
 - Tier: fast-path (1 skill .md, prosa aditiva; sin código, sin contrato, sin tests tocados)
 - Fecha: 2026-07-17
 - TARGET: pc-local (la forja; directiva durable del operador para lucky-skills)
@@ -3355,7 +3355,22 @@
 - RELACIÓN CON EL FEATURE: PREVENCIÓN (esta regla, en origen) + DETECCIÓN (el aviso de casi-duplicado en saber_mergear, ADR 0004). El texto lo cruza explícitamente ("prevenir es más barato que curar").
 - NOTA-RELEASE (importante): la propagación de una skill a las sesiones es por TAG (Ley viva = último tag). Este cambio va a main; para que llegue a las sesiones y quede el SELLO consistente hace falta un release (forjar-release.sh re-sella TODA la familia). Dado que el operador está forjando lucky-skills ACTIVAMENTE hoy (v2.4→2.5→2.6→2.7 en el día), el re-sello + tag se DIFIERE a su próximo release para no pisar una forja en curso — NO se forja un vX.Y.Z en paralelo desde esta corrida. El próximo `forjar-release.sh` del operador recogerá este contenido y re-sellará bitacora automáticamente.
 - MIGRATION_STRATEGY: N/A
+- RETRO: el commit de apertura absorbió la skill porque quedó staged del leak-scan previo → apertura y trabajo cayeron juntos en 191dddf. En fast-path .md (exento del gate) no bloquea, pero la higiene pide stagear selectivo. Nada que reabrir. Y el punto de proceso importante: para que esta regla LLEGUE a las sesiones falta el release (las skills se cargan por tag) — se dejó para el próximo forjar-release.sh del operador, que re-sella toda la familia, en vez de forjar un tag en paralelo a su forja activa de hoy.
 <!-- VEREDICTOS:BEGIN -->
-- runState: wip
+- runState: closing
+- [V] TARGET · PASS · lider · pc-local (directiva durable del operador para lucky-skills — la forja corre local)
+- [V] MODEL · PASS · lider · opus (uniforme) — la sesión corre en opus
+- [V] REGLA0 · PASS · lider · en pc-local (TARGET): leak-scan --staged LIMPIO + registros-lint 0 hallazgos + proyectar --check al día + test-ruteo 16 troncos/4 ramas exit 0. Prosa .md: sin suite propia; la sanidad de ruteo confirma que el árbol sigue navegable
+- [V] TEST_COVERAGE · N/A · lider · cambio de PROSA en una skill; no crea ni modifica tests
+- [V] ZERO_LEAK · PASS · lider · leak-scan.sh --staged (la MISMA herramienta del leak-verifier) LIMPIO + revisión de las 16 líneas: dedup_key/kebab-case/ejemplos (git-commit-backticks), cero valores sensibles. Fast-path de prosa → gate mecánico proporcionado en vez de subagente
+- [V] OPEN_CLOSED · PASS · lider · aditivo puro: se AGREGA una instrucción en §Capturar + un recordatorio en §Reglas duras; ninguna regla existente se edita ni borra
+- [V] SCOPE_CREEP · PASS · lider · 1 archivo (bitacora/SKILL.md); no se forjó tag ni se tocó otra skill — el re-sello se diferió deliberadamente
+- [V] CIERRE_TRAS_PASS · PASS · gate · cierre tras gates verdes
+- [V] MIGRATION · N/A · gate · sin DDL
+- [V] RESPONSIVE · N/A · gate · no toca UI
+- [V] CONFORMIDAD · N/A · gate · no toca código hexagonal
+- [V] SELLOS · N/A · gate · la corrida NO habilita release (re-sello diferido al operador)
+- [V] TAG_GATE · N/A · gate · no se crea tag en esta corrida
 <!-- VEREDICTOS:END -->
-- Iteraciones: 0/3
+- Iteraciones: 1/3
+- Cierre: 2026-07-17 · commits 191dddf (apertura+skill) + este (cierre). Re-sello/tag DIFERIDO al próximo release del operador.
