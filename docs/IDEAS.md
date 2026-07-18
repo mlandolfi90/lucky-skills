@@ -226,3 +226,6 @@
 - 2026-07-17 · saber: propuesta pendiente mcp-inbox/7f79acbb69e72c7d (CAND-af35e80b411b) · el TEMA de la corrida no es su Alcance: pasaporte instrumental por viñeta · endosar con /saber revisar
 - 2026-07-17 · saber: refuerzo (no ficha nueva): CAND-6b15ab5f60b1 (FASE PIN) sumó evidencia — plan APPROVE a la 1ª en DOS corridas seguidas (el-verde, equipo-saber); candidato a subir usos al promover · /saber promover
 - 2026-07-17 · saber: ENMIENDA a la propuesta CAND-656b78f9f331 (mordida en vivo, CI rojo run 29611559429): el commit de transición a CLOSED debe llevar TAMBIÉN el sello sha256 de la fila en sellos.json (el snippet de la forja §4c es standalone e idempotente) — sin él, registros-lint muerde en el CI: "sello FALTANTE: corrida CLOSED no figura en sellos.json". El cierre son dos commits y el segundo lleva el sello · corrida equipo-saber
+- 2026-07-18 · saber: mergeada mcp-inbox/1cfc23a112e436d4 (CAND-656b78f9f331) · ahora CANDIDATE en main · promoción a LIVE = acto del operador en lucky-saber
+- 2026-07-18 · saber: mergeada mcp-inbox/3c7209ea14ca51e9 (CAND-51bb77172c08) · ahora CANDIDATE en main · el merge NO exhibió aviso de similitud (aunque estaba marcada posible-dup)
+- 2026-07-18 · saber: mergeada mcp-inbox/7f79acbb69e72c7d (CAND-af35e80b411b) · ahora CANDIDATE en main · saber_head=73d7d995d3f9
