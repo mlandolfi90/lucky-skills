@@ -71,6 +71,20 @@ refs: []
    `intentos:` con su ref — la feature es memoria, no solo estado.
 5. **La construcción va por la escalera/crisol**: esta skill REGISTRA y traza;
    el código de la feature entra por corridas normales que la citan en `refs:`.
+6. **Piso de rondas al nacer (compuerta de entendimiento)**: el nacimiento no
+   debe convertirse en molienda de preguntas. Llevá la cuenta de las rondas
+   (ronda = una tanda de ida-y-vuelta con el operador) ANTES de escribir la
+   fila `PROPUESTA`. Al abrir la ronda 3 sin intención cerrada (sin poder
+   redactar la `<funcionalidad>` ni fijar `audiencia:`), NO preguntes una
+   cuarta: emití la salida tipada — «Van 3 rondas y la intención de fondo
+   sigue abierta. Suele ser señal de que falta acordar el QUÉ, no el detalle.
+   ¿Damos un paso atrás? Dejo lo juntado parkeado en una línea de idea y lo
+   retomamos cuando el fondo cierre — sin perder nada.» Con esa salida la
+   feature NO nace: lo juntado va a `docs/IDEAS.md` (con las respuestas ya
+   dadas resumidas), de donde la Regla 1 la promoverá intacta el día que el
+   QUÉ cierre. El piso es **techo de preguntas, jamás piso de fila**: con
+   intención clara a la ronda 1 se escribe la fila y listo — contar rondas
+   NUNCA habilita arrancar con intención a medias.
 
 ## Flujo
 
