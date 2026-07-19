@@ -3385,6 +3385,23 @@
 Corrida abierta. Trabajo por piezas F1..F6, un ingeniero opus por pieza, el
 líder verifica y commitea entre pieza y pieza. Matriz al cierre.
 <!-- VEREDICTOS:BEGIN -->
-- runState: wip
+- runState: closing
+- [V] TARGET · PASS · lider · pc-local (directiva durable del operador para lucky-skills)
+- [V] MODEL · PASS · lider · opus en los 6 ingenieros + 6 desarrolladores previos (orden del operador); líder fable
+- [V] REGLA0 · PASS · lider · en pc-local (TARGET): 17/17 suites exit 0 (batería completa corrida por el líder; test-lint 72s, lenta pero verde) + registros-lint 0 + proyectar --check byte-idéntico + leak-scan LIMPIO
+- [V] TEST_COVERAGE · PASS · lider · la corrida AGREGA 3 suites: test-pin-scan (crisol), test-racionalizaciones (cumplimiento, PRIMERA de esa skill), test-superficie-index (bitacora) — 14→17 runners
+- [V] RED_GREEN · PASS · lider · los 3 tests nuevos vieron el rojo: pin-scan cazó diseno:41 y :68 ANTES del fix (reportado por el ingeniero F1); superficie-index falló contra sandbox con header mutado (A0 permanente); racionalizaciones verifica ids reales (A2 habría fallado con id inexistente). pin-scan y superficie-index llevan el red-proof DENTRO del test (el detector se prueba a sí mismo)
+- [V] ZERO_LEAK · PASS · lider · leak-scan --staged LIMPIO en cada commit F1..F6 + árbol completo LIMPIO al cierre; escenarios y ADRs sin valores sensibles
+- [V] OPEN_CLOSED · PASS · lider · F1/F2/F3 editan prosa de ley bajo caso legal (c) contrato pagado con ADR 0024/0025 (F2, F3) o precisión de regla existente sin ID nuevo (F1: PIN_TOTAL agudizada); F4/F5/F6 aditivos puros (escenarios, tests, regla dura nueva)
+- [V] SCOPE_CREEP · PASS · lider · 6 piezas = exactamente las 6 endosadas ('aplica cada uno por uno'); la variante cara de F5 (fila SUPERFICIE_CONSUMIDOR) NO se hizo (descartada como generalidad especulativa); el ID SUPUESTOS NO se creó (decisión ADR 0025)
+- [V] CREDITO · PASS · lider · ADR 0024 (DESAPARECE) y ADR 0025 (supuestos) ACEPTADAS con refs recíprocas a esta corrida; F1 precisa regla existente (sin ADR, correcto); enmienda a la receta [DECIDIDO 2026-07-06] registrada en IDEAS.md
+- [V] PIN_TOTAL · PASS · lider · la corrida no agrega dependencias; al contrario, cierra el floating de diseno:41/:68 y deja test-pin-scan de guardia (árbol limpio: A1 PASS)
+- [V] CIERRE_TRAS_PASS · PASS · gate · cierre tras 17/17 + gates verdes
+- [V] MIGRATION · N/A · gate · sin DDL
+- [V] RESPONSIVE · N/A · gate · no toca UI
+- [V] CONFORMIDAD · N/A · gate · no toca código hexagonal
+- [V] SELLOS · N/A · gate · la corrida NO habilita release (re-sello diferido al operador)
+- [V] TAG_GATE · N/A · gate · no se crea tag
 <!-- VEREDICTOS:END -->
-- Iteraciones: 1/3
+- Iteraciones: 1/3 (6 piezas F1..F6, ninguna rebotó; única corrección en caliente: test-pin-scan se auto-detectaba al entrar al árbol → auto-exclusión de sus fixtures)
+- Cierre: 2026-07-18 · commits 5e9560f (apertura) + 1760bf7 (F1) + 14f33d3 (F2) + 827472f (F3) + 4d879c8 (F4) + 74187d9 (F5) + 8041970 (F6) + cierre. Re-sello/tag DIFERIDO al próximo forjar-release.sh del operador.
