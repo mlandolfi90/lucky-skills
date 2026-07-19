@@ -48,6 +48,12 @@
 | Log a path fijo | la app abre/rota su propio archivo de log | F-5 | `REJECT` |
 | Rebuild para promover | se recompila código distinto del que pasó testing | F-3 (se promueve lo que se probó) | `REJECT` |
 
+## Refactor / costura
+
+| Anti-patrón | Síntoma | Por qué rompe | Veredicto |
+|---|---|---|---|
+| Reubicar en vez de borrar | el "refactor de costura" (caso legal b) parte o mueve código, pero el diff de resta no borra ninguna rama, modo, capa ni acoplamiento (`DESAPARECE` ausente o el nombre sigue en el árbol) | verde antes/después prueba no-romper, no simplificar; es relocalización, no costura — borrar antes que pulir | `FAIL` (`COSTURA` — Crisol §2/§5) |
+
 > Excepción legal (igual que Crisol §2): tocar lo estable vale SOLO si es (a)
 > bug, (b) refactor de costura en corrida propia, o (c) cambio de contrato con
 > ADR + tier completo. Fuera de esos 3 casos, los veredictos de arriba mandan.

@@ -29,7 +29,11 @@ Dictaminá las reglas de Diseño de la ley (crisol SKILL.md §2):
    NOMBRE (larga-legítima → N/A · responsabilidad múltiple → FAIL). ¿Una
    responsabilidad por unidad, deps por parámetro, cero estado global nuevo?
 3. COSTURA: ¿el punto de extensión quedó donde el sistema varía? ¿Hay
-   generalidad especulativa (abstracción sin segunda implementación real)?
+   generalidad especulativa (abstracción sin segunda implementación real)? Si el
+   diff toca estable bajo el caso legal (b): exigí `DESAPARECE: <nombre>` en
+   plan/ledger y resolvelo contra el diff de resta — el nombre borrado en `-` Y
+   ausente del árbol. Ausente/vacío/aún-presente → FAIL `COSTURA`
+   (relocalización).
 4. LISKOV: si el diff implementa una abstracción existente — ¿sustituye sin
    que el llamador se entere? Si no aplica → N/A con razón.
 5. INTERFACE_SEGREGATION: si el diff crea/amplía un contrato multi-cliente —

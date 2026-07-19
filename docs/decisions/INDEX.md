@@ -27,3 +27,4 @@
 | 0021 | [El gate de doc exige que el manual SIRVA, no solo que exista](0021-gate-de-doc-que-sirve.md) | ACEPTADA |  |
 | 0022 | [El verde significa algo: runner ajeno + RED_GREEN](0022-el-verde-significa-algo.md) | ACEPTADA |  |
 | 0023 | [El saber tiene equipo: agente destilador + skill saber](0023-el-saber-tiene-equipo.md) | ACEPTADA |  |
+| 0024 | [El refactor de costura declara qué DESAPARECE](0024-el-refactor-declara-que-desaparece.md) | ACEPTADA |  |

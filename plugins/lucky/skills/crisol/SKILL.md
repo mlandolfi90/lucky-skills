@@ -179,7 +179,16 @@ Respondé el checklist. **Cualquier "SÍ" → Tier Completo.** Todos "NO" → Fa
   directo, OCP protege comportamiento correcto, no defectos; (b) falta la
   costura → **dos corridas Crisol separadas** (cada una con su entrada `ACTIVE`
   y su techo propio): primero el refactor que abre la costura con comportamiento
-  idéntico (verde antes y después), después la extensión entra por la costura;
+  idéntico (verde antes y después) **y que declara POR NOMBRE lo que DESAPARECE**
+  — la rama, modo, capa, acoplamiento o duplicación que elimina
+  (`DESAPARECE: <nombre>` en el plan/ledger). El `design-verifier` lo resuelve
+  contra el **diff de resta**: el nombre declarado debe estar en líneas borradas
+  (`-`) Y no seguir existiendo en el árbol post-diff. `DESAPARECE` ausente, o
+  nombre que sigue en el árbol (se movió, no se borró) → no es refactor de
+  costura, es RELOCALIZACIÓN → `FAIL` (`COSTURA`): verde antes/después prueba que
+  no rompiste, no que simplificaste. (Renombre disfrazado —borrar `A`, re-crear
+  `B` idéntico— queda al juicio OCP/generalidad del verifier, sin conteo de
+  conceptos.) Después la extensión entra por la costura;
   (c) cambia el contrato → tier completo + ADR.
 - Son **invariantes del diff**, no jerga de framework: valen igual en C (punteros
   a función), C++ (interfaces), desktop Windows, web o scripts. No chocan con
