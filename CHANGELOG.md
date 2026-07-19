@@ -4,6 +4,26 @@ Notas de release de la familia de skills Lucky. El historial completo del **proc
 (corridas del Crisol, RETROs) vive en `docs/refactor/_crisol/RUN-LEDGER.md`; los tags
 inmutables, en `git tag`. Formato: más nuevo arriba.
 
+## v2.9.0 — 2026-07-19 — Versionado de artefactos: lectura del proceso (ADR 0026)
+
+Corrida `2026-07-19-versionado-artefactos` (CLOSED, 1/3, sello `184d560cf0d5`).
+Decisión del operador, spec optimizada por análisis multi-agente contra el repo real.
+
+- **La versión de un artefacto deja de ser semver**: cuatro segmentos ACUMULADOS
+  `generacion.corridas.hotfixes.microfixes` — `1.13.4.27` se lee "13 corridas,
+  4 hotfixes, 27 microfixes, desde siempre". Sin reset a la derecha.
+- **Rama `crisol/ramas/004-versionado-artefactos`** (canal estable, gatillo "¿qué
+  versión le pongo?"): LA definición única — disparadores por segmento, fuentes de
+  verdad derivables (runs/ CLOSED · hotfixs/ CLOSED · microfixes/ FAVORABLE),
+  ambigüedades cerradas (ESCALATED no cuenta; nace 0.0.0.0; rige hacia adelante),
+  mapeo por ecosistema y deslindes vs TAG_GATE/SELLOS/PIN_TOTAL.
+- **hotfix §4 → puntero+expresión** (la semántica vive en la 004) y **§Cerrar sin
+  decremento cosmético**: la beta ya no se cae al cerrar — el contador queda donde
+  la última entrega lo dejó; solo desaparece el stamp humano `-bN` de la UI.
+- Estreno en vivo de las tres reglas de v2.8.0: los supuestos del plan cazaron un
+  precedente mal citado (Steward), DESAPARECE ejercitó su frontera
+  extracción≠costura, y las proyecciones viajaron con la apertura.
+
 ## v2.8.0 — 2026-07-18 — Cosecha agent-skills: 6 piezas (ADR 0024, 0025)
 
 Corrida `2026-07-18-cosecha-agent-skills` (CLOSED, 1/3, sello `de2f1ca106bb`). Origen:

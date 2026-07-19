@@ -74,4 +74,4 @@ Dos cosas la volvían urgente:
 ---
 
 **Fuente de verdad: `github.com/mlandolfi90/lucky-skills` · esta copia = tag
-`v2.8.0` (cache local, NO la ley).**
+`v2.9.0` (cache local, NO la ley).**
