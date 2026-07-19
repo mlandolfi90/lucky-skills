@@ -3417,6 +3417,29 @@ Corrida abierta. Plan del líder (con supuestos, regla nueva de F3) → Steward
 fresco (opus) → Ingeniero (opus) → roster fresco (opus) → cierre en dos
 commits + sello.
 <!-- VEREDICTOS:BEGIN -->
-- runState: wip
+- runState: closing
+- [V] TARGET · PASS · lider · pc-local (directiva durable del operador; el qa2 verificó AHÍ sin degradar)
+- [V] MODEL · PASS · lider · opus en steward/ingeniero/roster (el operador pidió 'opus 4.6'; el disponible es opus 4.8 y se le informó) — líder fable
+- [V] OPEN_CLOSED · PASS · steward+design-verifier · A/B archivos NUEVOS; C = extracción-a-rama (ADR 0018 §5) y D = corrección acoplada acreditada por ADR 0026 — casos legales declarados en el plan y confirmados sobre el diff
+- [V] ATOMICIDAD · PASS · steward+design-verifier · rama 004 = LA definición · ADR 0026 = LA decisión · hotfix §4 = puntero+expresión; la semántica no se duplica
+- [V] COSTURA · PASS · steward+design-verifier · rama con gatillo propio donde el sistema varía; extracción-a-rama correcta contra 0018 §5 (NO caso (b): exigir DESAPARECE habría sido error — la definición reaparece por diseño); cero maquinaria especulativa (diente diferido declarado)
+- [V] CASOS_LEGALES · PASS · steward · C y D nombrados en el plan con su marco legal ANTES de tocar código (corrección inline 3 del Steward, zanjada)
+- [V] CREDITO · PASS · scope-verifier · ADR 0026 ACEPTADA, frontmatter válido, refs recíprocas corrida↔ADR↔rama trazables; INDEX regenerado
+- [V] SCOPE_CREEP · PASS · scope-verifier · 10 archivos, mapa 1:1 a los actos A-E + housekeeping; fidelidad a la spec punto por punto (acumulados sin reset PROBADO por el ejemplo: con reset sería 2.0.0.0, quedó 2.13.4.27)
+- [V] PARKING · PASS · scope-verifier · los dos diferidos (mapeo semver-de-3, diente mecánico) capturados como deuda declarada en rama 004 y ADR
+- [V] REGLA0 · PASS · quality-auditor-2 · 17/17 suites exit 0 corridas por ÉL en pc-local + registros-lint 0 + proyectar --check byte-idéntico; intérprete sondado (python3 no existe → python)
+- [V] TEST_COVERAGE · PASS · quality-auditor-2 · prosa normativa; el único artefacto con contrato ejecutable (frontmatter rama 004) cubierto por proyectar --check + test-ramas.sh (8/8)
+- [V] RED_GREEN · N/A · lider · la corrida no crea ni modifica tests (decisión de la spec: disciplina, no maquinaria prematura)
+- [V] ZERO_LEAK · PASS · leak-verifier · leak-scan exit=0 + 10 archivos y 3 commits a mano: 0 leaks (matches = URL pública del repo y números del esquema que parecen IPs y no lo son)
+- [V] PIN_TOTAL · N/A · design-verifier · diff 100% .md sin dependencias; test-pin-scan corrido por él: 3/3, árbol sin floating
+- [V] LISKOV · N/A · design-verifier · sin implementación de abstracción
+- [V] INTERFACE_SEGREGATION · N/A · design-verifier · sin contrato multi-cliente nuevo
+- [V] CIERRE_TRAS_PASS · PASS · gate · cierre tras 4/4 roster + gates verdes
+- [V] MIGRATION · N/A · gate · sin DDL
+- [V] RESPONSIVE · N/A · gate · no toca UI
+- [V] CONFORMIDAD · N/A · gate · no toca código hexagonal
+- [V] SELLOS · N/A · gate · no habilita release; sellos v2.8.0 intactos (verificado por qa2)
+- [V] TAG_GATE · N/A · gate · no se crea tag (git tag --points-at HEAD vacío, verificado por scope)
 <!-- VEREDICTOS:END -->
-- Iteraciones: 1/3
+- Iteraciones: 1/3 (Steward APPROVE 1ª con 4 correcciones inline zanjadas; roster fresco 4/4 PASS 1ª — tercera corrida consecutiva sin quemar iteración)
+- Cierre: 2026-07-19 · commits c081c40 (apertura+proyecciones juntas — lección del RETRO aplicada) + a7f2479 (plan+supuestos) + c3ba40d (ADR 0026 + rama 004 + hotfix §4/§Cerrar) + cierre en dos commits. Re-sello/tag DIFERIDOS al próximo forjar-release.sh.
