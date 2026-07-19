@@ -3405,3 +3405,18 @@ líder verifica y commitea entre pieza y pieza. Matriz al cierre.
 <!-- VEREDICTOS:END -->
 - Iteraciones: 1/3 (6 piezas F1..F6, ninguna rebotó; única corrección en caliente: test-pin-scan se auto-detectaba al entrar al árbol → auto-exclusión de sus fixtures)
 - Cierre: 2026-07-18 · commits 5e9560f (apertura) + 1760bf7 (F1) + 14f33d3 (F2) + 827472f (F3) + 4d879c8 (F4) + 74187d9 (F5) + 8041970 (F6) + cierre. Re-sello/tag DIFERIDO al próximo forjar-release.sh del operador.
+
+### main — 2026-07-19 (Versionado de artefactos como lectura del proceso — generacion.corridas.hotfixes.microfixes (ADR 0026 + rama 004))
+- STATUS: ACTIVE
+- Tier: completo (cambia contrato: hotfix §4 deja de definir el contador y el paso de cierre pierde el 'sin sufijo beta'; norma nueva transversal a la flota → ADR + rama; >1 archivo)
+- Fecha: 2026-07-19
+- TARGET: pc-local (la forja; directiva durable del operador para lucky-skills)
+- MODEL: opus (subagentes; orden del operador — pidió 'opus 4.6', el disponible en el harness es opus 4.8) — líder fable
+- LEY: v2.8.0 (sello local == último tag, forjado hoy)
+Corrida abierta. Plan del líder (con supuestos, regla nueva de F3) → Steward
+fresco (opus) → Ingeniero (opus) → roster fresco (opus) → cierre en dos
+commits + sello.
+<!-- VEREDICTOS:BEGIN -->
+- runState: wip
+<!-- VEREDICTOS:END -->
+- Iteraciones: 1/3
