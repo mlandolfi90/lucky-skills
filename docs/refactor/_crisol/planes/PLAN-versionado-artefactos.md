@@ -2,7 +2,7 @@
 id: PLAN-versionado-artefactos
 schema: plan/1
 tipo: plan
-estado: EJECUTADO
+estado: CUMPLIDO
 creado: 2026-07-19
 refs: [corrida:2026-07-19-versionado-artefactos, adr:0018, adr:0014, adr:0016, adr:0024, adr:0025, adr:0026]
 nota: "Un solo carril (rama 004 y hotfix §4 comparten el contrato del 4to segmento: partirlo sería el REJECT de 'dos planes sobre el mismo contrato'). Primer plan bajo la regla de supuestos (ADR 0025, estrenada acá)."

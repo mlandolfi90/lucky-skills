@@ -3407,7 +3407,7 @@ líder verifica y commitea entre pieza y pieza. Matriz al cierre.
 - Cierre: 2026-07-18 · commits 5e9560f (apertura) + 1760bf7 (F1) + 14f33d3 (F2) + 827472f (F3) + 4d879c8 (F4) + 74187d9 (F5) + 8041970 (F6) + cierre. Re-sello/tag DIFERIDO al próximo forjar-release.sh del operador.
 
 ### main — 2026-07-19 (Versionado de artefactos como lectura del proceso — generacion.corridas.hotfixes.microfixes (ADR 0026 + rama 004))
-- STATUS: ACTIVE
+- STATUS: CLOSED
 - Tier: completo (cambia contrato: hotfix §4 deja de definir el contador y el paso de cierre pierde el 'sin sufijo beta'; norma nueva transversal a la flota → ADR + rama; >1 archivo)
 - Fecha: 2026-07-19
 - TARGET: pc-local (la forja; directiva durable del operador para lucky-skills)
@@ -3417,7 +3417,7 @@ Corrida abierta. Plan del líder (con supuestos, regla nueva de F3) → Steward
 fresco (opus) → Ingeniero (opus) → roster fresco (opus) → cierre en dos
 commits + sello.
 <!-- VEREDICTOS:BEGIN -->
-- runState: closing
+- runState: closed
 - [V] TARGET · PASS · lider · pc-local (directiva durable del operador; el qa2 verificó AHÍ sin degradar)
 - [V] MODEL · PASS · lider · opus en steward/ingeniero/roster (el operador pidió 'opus 4.6'; el disponible es opus 4.8 y se le informó) — líder fable
 - [V] OPEN_CLOSED · PASS · steward+design-verifier · A/B archivos NUEVOS; C = extracción-a-rama (ADR 0018 §5) y D = corrección acoplada acreditada por ADR 0026 — casos legales declarados en el plan y confirmados sobre el diff
