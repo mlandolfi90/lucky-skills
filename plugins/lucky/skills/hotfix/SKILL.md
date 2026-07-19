@@ -90,12 +90,17 @@ cruzado contra el entorno real (FALSO-VERDE-003). Ciego: el operador es el
 único instrumento de runtime — vos enumerás los caminos por código, él prueba
 cada uno.
 
-**4. Versionado del artefacto:** fijá la gramática REAL del artefacto y la
-etiqueta del stamp — extensiones de navegador: cuarto segmento entero
-(`X.Y.Z.N`; el manifest no admite sufijos); semver/npm: `X.Y.Z-b.N`;
-PEP 440: `X.Y.ZbN`. El stamp VISIBLE (UI/log/consola) siempre muestra la
-etiqueta humana `vX.Y.Z-bN` — el operador confirma en segundos qué versión
-prueba.
+**4. Versionado del artefacto:** la SEMÁNTICA del número la define la rama
+crisol `004-versionado-artefactos` (los 4 segmentos
+`generacion.corridas.hotfixes.microfixes`, acumulados) — no se re-define acá.
+La beta es una **entrega-para-probar**: mueve el CUARTO segmento y lo CONTINÚA
+desde donde el artefacto venía (NO arranca en 1 por abrir el hotfix — es el
+contador del artefacto, no del hotfix). Lo único que aterriza este carril es
+**cómo se EXPRESA** ese número en cada ecosistema (la semántica vive en la rama
+004; esto es solo la gramática): extensiones de navegador cuarto segmento entero
+(`X.Y.Z.N`; el manifest no admite sufijos); semver/npm `X.Y.Z-b.N`; PEP 440
+`X.Y.ZbN`. El stamp VISIBLE (UI/log/consola) siempre muestra la etiqueta humana
+`vX.Y.Z-bN` — el operador confirma en segundos qué versión prueba.
 
 **5. Mapeá los controles y decí quién MANDA** — *solo si el síntoma es de
 ESTADO* (algo que "sigue activo/encendido/abierto" y que se prende o apaga
@@ -229,7 +234,12 @@ como respaldo; jamás rewrite):
    la SOLUCIÓN — si da completo, el cierre lleva Steward/COLLISION-MAP
    (sin esto el carril sería un bypass fast-path para diffs grandes).
 5. Matriz completa + `runState: closing` DENTRO del bloque VEREDICTOS +
-   commit de cierre. Versión final SIN sufijo beta. Marcá el estado del
+   commit de cierre. **La beta NO se cae al cerrar** (rama crisol
+   `004-versionado-artefactos`): bajo contadores acumulados el 4to segmento
+   queda donde la última entrega lo dejó — lo que marca el cierre es la fila
+   del `Bug-` en CLOSED + la corrida de formalización, no un decremento
+   cosmético del string. Lo único que desaparece de la UI es el stamp humano
+   `-bN` (era etiqueta de prueba, no parte del contador). Marcá el estado del
    `Bug-` como resuelta (pendiente confirmación del humano para
    resuelta+verificada) y actualizá su fila en `INDICE.md`.
 

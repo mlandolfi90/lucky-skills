@@ -30,6 +30,7 @@ el gatillo matchea; el bloque lo regenera `scripts/proyectar.py`):
 | 001 | el artefacto del deploy es una IMAGEN (Dockerfile, multi-stage) y hay que satisfacer la REGLA 0 | ramas/001-builds-de-imagen-ci.md |
 | 002 | el diff incluye DDL destructivo (ALTER, DROP, CREATE TABLE) o cualquier migración de schema | ramas/002-migraciones-ddl.md |
 | 003 | el flujo necesita un JUICIO del operador (elección de diseño, trade-off, aprobación) que hoy quedaría solo en el chat | ramas/003-decisiones-convocables.md |
+| 004 | el operador o un agente pregunta qué versión ponerle a una entrega/artefacto de producto, o hay que stampear una beta/entrega para probar | ramas/004-versionado-artefactos.md |
 <!-- RAMAS:END -->
 
 ---

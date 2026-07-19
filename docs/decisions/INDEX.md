@@ -29,3 +29,4 @@
 | 0023 | [El saber tiene equipo: agente destilador + skill saber](0023-el-saber-tiene-equipo.md) | ACEPTADA |  |
 | 0024 | [El refactor de costura declara qué DESAPARECE](0024-el-refactor-declara-que-desaparece.md) | ACEPTADA |  |
 | 0025 | [Supuestos declarados del plan](0025-supuestos-declarados-del-plan.md) | ACEPTADA |  |
+| 0026 | [La versión de un artefacto es lectura del proceso](0026-versionado-lectura-del-proceso.md) | ACEPTADA |  |
