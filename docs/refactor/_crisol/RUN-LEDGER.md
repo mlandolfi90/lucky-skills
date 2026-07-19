@@ -3374,3 +3374,17 @@
 <!-- VEREDICTOS:END -->
 - Iteraciones: 1/3
 - Cierre: 2026-07-17 · commits 191dddf (apertura+skill) + este (cierre). Re-sello/tag DIFERIDO al próximo release del operador.
+
+### main — 2026-07-18 (Cosecha agent-skills: 6 piezas endosadas (pin de ejecución, DESAPARECE, supuestos, escenarios de endoso, superficie INDEX, piso de rondas))
+- STATUS: ACTIVE
+- Tier: fast-path en serie (6 piezas chicas endosadas ítem por ítem por el operador; cada pieza = commit atómico F1..F6; las que agudizan semántica de la ley — F2 DESAPARECE, F3 supuestos — pagan con ADR 0024/0025)
+- Fecha: 2026-07-18
+- TARGET: pc-local (la forja; directiva durable del operador para lucky-skills)
+- MODEL: opus (ingenieros; orden del operador 'usa agentes opus') — líder fable
+- LEY: v2.7.0 (sello local == último tag)
+Corrida abierta. Trabajo por piezas F1..F6, un ingeniero opus por pieza, el
+líder verifica y commitea entre pieza y pieza. Matriz al cierre.
+<!-- VEREDICTOS:BEGIN -->
+- runState: wip
+<!-- VEREDICTOS:END -->
+- Iteraciones: 1/3
