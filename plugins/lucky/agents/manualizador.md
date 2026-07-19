@@ -44,4 +44,4 @@ REGLAS:
 
 ---
 **Fuente: `github.com/mlandolfi90/lucky-skills` · esta copia = tag
-`v2.7.0` (cache local, NO la ley).**
+`v2.8.0` (cache local, NO la ley).**

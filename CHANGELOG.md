@@ -4,6 +4,33 @@ Notas de release de la familia de skills Lucky. El historial completo del **proc
 (corridas del Crisol, RETROs) vive en `docs/refactor/_crisol/RUN-LEDGER.md`; los tags
 inmutables, en `git tag`. Formato: más nuevo arriba.
 
+## v2.8.0 — 2026-07-18 — Cosecha agent-skills: 6 piezas (ADR 0024, 0025)
+
+Corrida `2026-07-18-cosecha-agent-skills` (CLOSED, 1/3, sello `de2f1ca106bb`). Origen:
+análisis multi-agente de `addyosmani/agent-skills` (91 candidatos, 83 colisionaron con
+lo que la ley ya tenía); sobrevivieron 6, endosados ítem por ítem por el operador.
+
+- **Pin de identidad ≠ pin de ejecución** (crisol §Pin total + fila `PIN_TOTAL`):
+  `npx <pkg>` pelado = floating aunque el input esté pineado. Fix en `diseno`
+  (runner pineado al tag del submodule) — enmienda a la receta [DECIDIDO 2026-07-06].
+  Guardia nueva: `crisol/tests/test-pin-scan.sh` (RED visto: cazó `diseno:41` y `:68`).
+- **`DESAPARECE:`** (ADR 0024): el refactor de costura del caso legal (b) declara por
+  nombre qué elimina; resolución mecánica contra el diff de resta. Nada borrado =
+  relocalización = FAIL `COSTURA`. Anti-patrón "reubicar en vez de borrar".
+- **Supuestos del plan** (ADR 0025): tope duro 5, solo load-bearing, solo tier
+  completo; el Steward puede REJECT (falso demostrable / >5 ruido); colisión de
+  PREMISAS sumada al COLLISION-MAP. Sin fila de matriz a propósito.
+- **Fábrica de escenarios**: `cumplimiento/escenarios/endoso.md` (delegación y
+  silencio NO son sí; "dale" rioplatense SÍ) + tabla de racionalizaciones en
+  GUIA-SKILLS + `test-racionalizaciones.sh` (costura fila→escenario con exit code).
+- **Superficie del INDEX**: `bitacora/tests/test-superficie-index.sh` congela header
+  y aridad del INDEX real (el `awk $8` del hook viaja a la flota por autoUpdate).
+- **Piso de rondas** (feature, regla dura 6): a la 3ª ronda sin intención cerrada,
+  repliegue tipado y parkeo a `/idea` — techo de preguntas, jamás piso de fila.
+
+Suites 14→17 runners. Este release también recoge y re-sella la regla `dedup_key`
+de bitacora (corrida `regla-dedup-key-estable`, diferida en v2.7.0).
+
 ## v2.7.0 — 2026-07-17 — El saber tiene equipo: destilador + skill saber (ADR 0023)
 
 - **Agente `destilador`**: el espejo del manualizador para el eje APRENDER —

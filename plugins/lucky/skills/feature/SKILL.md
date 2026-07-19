@@ -99,6 +99,6 @@ refs: []
 
 ---
 **Fuente: `github.com/mlandolfi90/lucky-skills` · esta copia = tag
-`v2.7.0` (cache local, NO la ley).** Ley viva: con red, si el repo tiene tag
+`v2.8.0` (cache local, NO la ley).** Ley viva: con red, si el repo tiene tag
 mayor, seguir la del repo. Caso skill nueva: si el tag mayor no incluye
 `feature/`, tratar como sin-red y registrar `LEY: <tag> (local, skill nueva)`.
