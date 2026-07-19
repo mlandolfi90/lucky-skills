@@ -286,6 +286,17 @@ plan — ver §3-6 y §4).
 - **Fork = propiedad nuestra:** si forkeamos y modificamos un upstream, lo
   mantenemos NOSOTROS. El fork vive en **nuestro** repo (fuente de verdad), no como
   dependencia viva del upstream.
+- **Pin de IDENTIDAD ≠ pin de EJECUCIÓN.** El pin fija **qué entra** (el artefacto
+  exacto), no cómo se ejecuta. Correr un binario que un *runner* resuelve al
+  vuelo (`npx <pkg>`, `pipx run`, `uvx`, `curl … | sh`) es **floating aunque el
+  input esté pineado**: el ejecutable llega flotando de un registro ajeno por
+  otra puerta que el pin no mira. (Precedente: `npx ecc-agentshield` rechazado
+  por esto — CHANGELOG v1.32.0.)
+- **Forma sancionada (una de dos):** (a) ejecutar DESDE el artefacto pineado
+  (el binario que vive en el submodule/vendor fijado), o (b) runner pineado a
+  versión inmutable — `npx <pkg>@X.Y.Z` como piso, digest si el ecosistema lo
+  permite, y la versión del runner COINCIDE con la del artefacto que cablea.
+  `npx <pkg>` **pelado = FAIL**, se cace donde se cace (skills, scripts, hooks, CI).
 - **Copia propia de lo crítico:** mantener mirror/vendor de aquello que un
   takedown o un cambio ajeno nos rompería. Si nos puede tumbar, lo tenemos nosotros.
 - **Cambio de pin = corrida Crisol.** Bump de parche/seguridad que no toca
@@ -568,7 +579,7 @@ IDs en MAYÚSCULA_GUION_BAJO, sin abreviar (`OPEN_CLOSED`, no `OCP`):
 | `SELLOS` | Release re-sella TODAS las skills al tag nuevo; 1 sello por skill, todas == tag | si la corrida habilita release | M |
 | `FORJA` | Sellos+registry+firma los hace `forjar-release.sh` en una pasada | si la corrida habilita release | M |
 | `TAG_GATE` | Tag estable `vX.Y.Z` nace SOLO tras corrida PASS cerrada | si se crea tag estable | M |
-| `PIN_TOTAL` | Toda dependencia externa pineada a versión/digest exacto (sin floating) | si el diff toca dependencias | H |
+| `PIN_TOTAL` | Toda dependencia externa pineada a versión/digest exacto, INCLUIDO el ejecutable que un runner resuelve al vuelo (`npx`/`pipx`/`uvx`/`curl|sh` pelado = floating) | si el diff toca dependencias o ejecuta binarios de terceros | H |
 | `BUMP_REASON` | Bump de pin registra `BUMP_REASON: <vieja> → <nueva>` en el ledger | si el diff bumpea un pin | M |
 
 (Clase: **M** mecánica = gate determinista · **J** juicio = rol-LLM ·

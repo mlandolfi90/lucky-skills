@@ -38,13 +38,15 @@ jamás inventa una marca).
    git submodule add https://github.com/pbakaus/impeccable .impeccable
    TAG=$(git -C .impeccable tag --sort=-v:refname | head -1)
    git -C .impeccable checkout "$TAG"
-   npx impeccable link --source=.impeccable --providers=claude
+   # runner pineado al MISMO tag del submodule (pin de ejecución, no solo de identidad)
+   npx --yes "impeccable@${TAG#v}" link --source=.impeccable --providers=claude
    ```
    Agregá el bloque `.gitignore` que impeccable documenta (config.local,
    caches, previews) y dejá trackeados `.impeccable/config.json`,
    `.impeccable/design.json` y la skill en `.claude/`. Commiteá el submodule
    pineado + el link en un commit propio (`chore: impeccable @ <tag> pineado`).
-   PROHIBIDO: `npx impeccable install` a secas o `submodule update --remote`
+   PROHIBIDO: `npx impeccable install` a secas, `npx impeccable link` pelado
+   (runner sin versión = floating de ejecución) o `submodule update --remote`
    sin re-pin (floating de tercero — viola `PIN_TOTAL`).
 3. **Cablear la marca (si hay kit).** Buscá tokens del brand kit en el repo:
    build de Style Dictionary (`tokens/` + config, o el output CSS/JSON que el
@@ -65,7 +67,7 @@ jamás inventa una marca).
 Update = **re-pin explícito**: `git -C .impeccable fetch --tags` → checkout
 del tag nuevo → commit del submodule → corrida Crisol **fast-path** con
 `BUMP_REASON: <tag-viejo> → <tag-nuevo>` en el ledger (regla `PIN_TOTAL`/
-`BUMP_REASON` de la ley). `npx impeccable update` solo DESPUÉS del re-pin del
+`BUMP_REASON` de la ley). `npx impeccable@<tag-nuevo> update` solo DESPUÉS del re-pin del
 submodule (refresca el link, no elige la versión).
 
 ## Fronteras (fuente única — qué NO hace esta skill)
