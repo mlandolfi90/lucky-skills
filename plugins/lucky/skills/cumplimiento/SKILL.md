@@ -80,7 +80,9 @@ sobrevive al prompt adverso) · el reporte es evidencia, no catálogo.
 
 `escenarios/brujula.md` (no inferir sin fuente) · `escenarios/idea.md` (capturar
 sin descarrilar) · `escenarios/ley.md` (fail-closed en el update) ·
-`escenarios/hotfix.md` (permiso + un cambio por ciclo + detenerse al veredicto).
+`escenarios/hotfix.md` (permiso + un cambio por ciclo + detenerse al veredicto) ·
+`escenarios/supuestos.md` (load-bearing + tope duro + línea literal) ·
+`escenarios/endoso.md` (portón transversal: delegación ≠ endoso, prohibido batch, silencio ≠ convergencia).
 Agregar una skill nueva a la batería = escribir su `escenarios/<skill>.md` con
 ese formato (corrida Crisol normal).
 

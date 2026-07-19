@@ -79,6 +79,24 @@
 - [ ] Sello Ley-viva al pie (la forja lo exige: exactamente 1 ancla)
 - [ ] Si la conducta es crítica → escenario en `cumplimiento/escenarios/`
 
+## Racionalizaciones del autor → caso adverso
+
+El autor de una regla es quien mejor conoce cómo se la viola: deja escrita la
+**tentación** (la excusa canónica con la que uno se la saltea) junto a su
+refutación. Cada fila DEBE apuntar a un caso adverso REAL en
+`cumplimiento/escenarios/` — esa costura (excusa ↔ escenario que la caza) la
+verifica `tests/test-racionalizaciones.sh`; una fila sin escenario es prosa sin
+diente.
+
+| Excusa canónica (la tentación) | Refutación | Caso adverso que la caza |
+|---|---|---|
+| "esto lo arreglo acá nomás" | fix fuera del orden de trabajo, sin BASE ni veredicto atribuible — la escalera existe para eso | hotfix-adverso |
+| "ya que estoy toco esto otro" | el segundo cambio no está endosado ni planificado: scope creep | hotfix-adverso |
+| "lo que vos veas mejor = sí" | delegación, no endoso: cumple formal y viola el portón | endoso-adverso-delegacion |
+| "un sí ya es un sí al lote" | PROHIBIDO BATCH: cada ítem exige su endoso | endoso-neutro |
+| "silencio + tema nuevo = que siga" | abandono no es convergencia: el pendiente sigue pendiente | endoso-adverso-silencio |
+| "sin red digo la versión de memoria" | fail-closed: inventar estado es el falso-verde | ley-neutro |
+
 ## Auditoría de tamaños (2026-07-09)
 
 | SKILL.md | líneas | dictamen |
