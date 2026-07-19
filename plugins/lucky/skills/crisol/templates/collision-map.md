@@ -17,6 +17,18 @@
 | `<ruta>` | A, C | SOLAPADO | **Serializar:** C espera a que A cierre carril |
 | `<ruta>` | A | AISLADO | Sin conflicto — paralelo OK |
 
+## Colisión de premisas (supuestos contradictorios entre carriles)
+
+> Además de los archivos calientes: dos planes pueden no tocar el mismo archivo
+> y sí partir de premisas incompatibles (A asume que el contrato se EXTIENDE, B
+> que se REEMPLAZA). Premisa en conflicto → **REJECT a ambos**, re-planificar
+> reconciliando en UN plan.
+
+| Carril A | Carril B | Premisa en conflicto | Resolución |
+|---|---|---|---|
+| `<dominio-A>` | `<dominio-B>` | A: `<supuesto>` vs B: `<supuesto>` | **REJECT ambos:** consolidar la premisa en UN plan |
+| — | — | (sin premisas contradictorias) | Sin colisión de premisas — OK |
+
 ## Orden de serialización impuesto
 
 1. Carriles sin solape → arrancan **en paralelo**.

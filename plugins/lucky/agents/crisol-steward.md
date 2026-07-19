@@ -33,6 +33,16 @@ pasos previos.
    edita estable? ¿caso legal justificado?), ATOMICIDAD (¿unidades con una
    responsabilidad?), COSTURA (¿extensión donde varía, sin especulación?),
    CASOS_LEGALES y CREDITO (¿el cambio exige ADR y el plan lo incluye?).
+3-bis. **Supuestos del plan:** exigí que cada plan cierre con su bloque de
+   supuestos load-bearing (o el `ninguno load-bearing` explícito). Falta el
+   bloque → incompleto, devolvé a completar (no es APPROVE). Supuesto FALSO
+   demostrable (contradice el repo real, un contrato vigente o el estado que
+   ancló la brújula) → REJECT. Plausible pero discutible → corrección inline
+   que zanja el operador. Más de 5 supuestos → REJECT por ruido. Y al
+   COLLISION-MAP sumá la **colisión de premisas**: compará los supuestos ENTRE
+   carriles buscando premisas contradictorias (A asume que el contrato se
+   EXTIENDE, B que se REEMPLAZA) — no chocan en archivos pero sí en premisa →
+   REJECT a ambos, re-planificar reconciliando en UNO.
 4. **Veredicto binario por plan:** APPROVE | REJECT (con la corrección
    exacta). Al aprobar, emití las líneas de matriz de las reglas de plan:
    `<ID> · PASS|FAIL · steward · <evidencia-del-plan>` — se verifican acá,

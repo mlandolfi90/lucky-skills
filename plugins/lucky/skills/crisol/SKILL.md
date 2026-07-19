@@ -446,6 +446,18 @@ bitácora del paso 3 se conserva).
    Sin match → seguí. NO se vuelca el índice entero (pull, no pre-carga; el síntoma es el filtro,
    no hay "dominios"). Luego spawnear **archaeologists** (paralelo; su modelo lo fija la
    Compuerta del Paso 0 — con `default`, tarea mecánica → tier-económico) → plan(es) accionable(s).
+
+   **Supuestos del plan (cierre obligatorio en tier completo, TOPE DURO = 5).**
+   Cada plan accionable cierra con una lista numerada de supuestos: SOLO los
+   *load-bearing* — los que, si fueran falsos, CAMBIARÍAN el plan (otro alcance,
+   otra costura, otro contrato). Formato: `N. <supuesto> — <de dónde sale>`. Lo
+   que da igual verdadero o falso NO va (ruido que el operador saltea). Más de 5
+   → quedarse con los 5 de mayor palanca: un plan con 12 supuestos no entendió el
+   problema. Cierra con la línea literal **«corregime ahora o sigo con esto»**.
+   Sin supuestos que muevan la aguja → `Supuestos: ninguno load-bearing`
+   (explícito, nunca vacío). Es shift-left sobre `SCOPE_CREEP`: la premisa mal
+   entendida se caza acá, no en la verificación quemando una iteración del techo.
+   En fast-path NO aplica (no hay Steward que lo reciba).
 4. Pasar TODOS los planes al **Architecture Steward** → COLLISION-MAP
    (`templates/collision-map.md`) + `APPROVE/REJECT`. REJECT → volver a 3 (cuenta iteración).
    **Shift-left:** el Steward ya juzga las reglas de PLAN sobre el plan
@@ -454,6 +466,15 @@ bitácora del paso 3 se conserva).
    `<ID> · PASS|FAIL · steward · <evidencia-del-plan>`. Verificarlas en el plan
    (el punto más temprano donde son decidibles) evita que recién al cierre se
    descubra un FAIL ya gastando una iteración.
+   El Steward también **recibe los supuestos**: plan sin bloque (ni el `ninguno
+   load-bearing` explícito) = incompleto → devolver a completar, no es `APPROVE`.
+   Supuesto **falso demostrable** (contradice repo real, contrato vigente o estado
+   anclado por la brújula) → `REJECT` (cuenta iteración). Plausible pero discutible
+   → corrección inline que zanja el operador en el «corregime ahora». Más de 5 →
+   `REJECT` por ruido. Y al COLLISION-MAP: además de archivos calientes, comparar
+   supuestos ENTRE carriles buscando **premisas contradictorias** (A asume que el
+   contrato se EXTIENDE, B que se REEMPLAZA) — no chocan en archivos pero sí en
+   premisa → `REJECT` a ambos, re-planificar reconciliando en UNO.
 5. Spawnear **engineers** en el orden del COLLISION-MAP: engineer-A → esperar su
    `PASS` de auditor → recién entonces engineer-B. Carriles sin archivos
    compartidos corren en paralelo.

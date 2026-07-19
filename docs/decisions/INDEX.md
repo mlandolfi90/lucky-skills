@@ -28,3 +28,4 @@
 | 0022 | [El verde significa algo: runner ajeno + RED_GREEN](0022-el-verde-significa-algo.md) | ACEPTADA |  |
 | 0023 | [El saber tiene equipo: agente destilador + skill saber](0023-el-saber-tiene-equipo.md) | ACEPTADA |  |
 | 0024 | [El refactor de costura declara qué DESAPARECE](0024-el-refactor-declara-que-desaparece.md) | ACEPTADA |  |
+| 0025 | [Supuestos declarados del plan](0025-supuestos-declarados-del-plan.md) | ACEPTADA |  |
