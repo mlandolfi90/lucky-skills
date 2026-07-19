@@ -2,7 +2,7 @@
 id: 2026-07-18-cosecha-agent-skills
 schema: corrida/1
 tipo: corrida
-estado: ACTIVE
+estado: CLOSED
 creado: 2026-07-18
 branch: main
 titulo: "Cosecha agent-skills: 6 piezas endosadas (pin de ejecución, DESAPARECE, supuestos, escenarios de endoso, superficie INDEX, piso de rondas)"
@@ -11,7 +11,7 @@ target: "pc-local (la forja; directiva durable del operador para lucky-skills)"
 model: "opus (ingenieros; orden del operador 'usa agentes opus') — líder fable"
 ley: "v2.7.0 (sello local == último tag)"
 iteraciones: "1/3 (6 piezas F1..F6, ninguna rebotó; única corrección en caliente: test-pin-scan se auto-detectaba al entrar al árbol → auto-exclusión de sus fixtures)"
-runState: closing
+runState: closed
 cierre: "2026-07-18 · commits 5e9560f (apertura) + 1760bf7 (F1) + 14f33d3 (F2) + 827472f (F3) + 4d879c8 (F4) + 74187d9 (F5) + 8041970 (F6) + cierre. Re-sello/tag DIFERIDO al próximo forjar-release.sh del operador."
 veredictos:
   - {regla: TARGET, veredicto: PASS, quien: lider, evidencia: "pc-local (directiva durable del operador para lucky-skills)"}

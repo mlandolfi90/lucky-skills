@@ -3376,7 +3376,7 @@
 - Cierre: 2026-07-17 · commits 191dddf (apertura+skill) + este (cierre). Re-sello/tag DIFERIDO al próximo release del operador.
 
 ### main — 2026-07-18 (Cosecha agent-skills: 6 piezas endosadas (pin de ejecución, DESAPARECE, supuestos, escenarios de endoso, superficie INDEX, piso de rondas))
-- STATUS: ACTIVE
+- STATUS: CLOSED
 - Tier: fast-path en serie (6 piezas chicas endosadas ítem por ítem por el operador; cada pieza = commit atómico F1..F6; las que agudizan semántica de la ley — F2 DESAPARECE, F3 supuestos — pagan con ADR 0024/0025)
 - Fecha: 2026-07-18
 - TARGET: pc-local (la forja; directiva durable del operador para lucky-skills)
@@ -3385,7 +3385,7 @@
 Corrida abierta. Trabajo por piezas F1..F6, un ingeniero opus por pieza, el
 líder verifica y commitea entre pieza y pieza. Matriz al cierre.
 <!-- VEREDICTOS:BEGIN -->
-- runState: closing
+- runState: closed
 - [V] TARGET · PASS · lider · pc-local (directiva durable del operador para lucky-skills)
 - [V] MODEL · PASS · lider · opus en los 6 ingenieros + 6 desarrolladores previos (orden del operador); líder fable
 - [V] REGLA0 · PASS · lider · en pc-local (TARGET): 17/17 suites exit 0 (batería completa corrida por el líder; test-lint 72s, lenta pero verde) + registros-lint 0 + proyectar --check byte-idéntico + leak-scan LIMPIO

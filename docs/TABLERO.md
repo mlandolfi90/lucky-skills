@@ -11,8 +11,8 @@
 ## ⚠ Ramas EN_DUDA — una corrida las contradijo (frescura) (0)
 - (nada)
 
-## 🔥 Corridas ACTIVE (1)
-- corrida:2026-07-18-cosecha-agent-skills · Cosecha agent-skills: 6 piezas endosadas (pin de ejecución, DESAPARECE, supuestos, escenarios de endoso, superficie INDEX, piso de rondas)
+## 🔥 Corridas ACTIVE (0)
+- (nada)
 
 ## 🩹 Hotfixes abiertos (0)
 - (nada)

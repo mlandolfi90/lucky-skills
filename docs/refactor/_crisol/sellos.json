@@ -11,6 +11,7 @@
     "corrida:2026-07-16-refactor-arbol-registros": "ec2bc64cb145f7f768dec5fb857aad5a608cbd629c1a9e1115a90685e54d9ffd",
     "corrida:2026-07-17-el-verde-significa-algo": "94fdb7262812324bbb865d6b608a350db7466be70c6fb50875b6119ba961bf6c",
     "corrida:2026-07-17-equipo-saber": "f50eea55a2346b93d40f854a3d9043e67a4c5131b1a2112c7d0fe8edf1f5dddc",
-    "corrida:2026-07-17-regla-dedup-key-estable": "cd48e612f8c34eb7b74513af9d291536604de20e6ff749ee3f3df1f940a1e1e7"
+    "corrida:2026-07-17-regla-dedup-key-estable": "cd48e612f8c34eb7b74513af9d291536604de20e6ff749ee3f3df1f940a1e1e7",
+    "corrida:2026-07-18-cosecha-agent-skills": "de2f1ca106bb0fc4dce1eea2fd04df90d17ca955e0a28a3bb6a22114d2fa7640"
   }
 }
