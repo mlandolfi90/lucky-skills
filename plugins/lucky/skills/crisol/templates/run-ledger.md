@@ -68,6 +68,7 @@ que el lint delata. Historia previa: `runs/_archivo-hasta-2026-07.md`
 - TEST_COVERAGE: <cobertura | NONE>
 - Escalación: <none | detalle a MLL>
 - BITACORA: <id(s) de entrada(s) destilada(s) a la Capa 4 | N/A>   (opcional, NO bloqueante; crisol §4 paso 8, Destilación)
+- CITAS_SABER: <id(s) de ficha(s) citada(s) como causa | N/A>   (opcional, NO bloqueante; crisol §4 paso 8, cita causal)
 - RETRO: <una línea sobre la fricción del PROCESO, al cerrar (blameless)>
 - Cierre: <YYYY-MM-DD HH:MM> <commit-sha>
 ```

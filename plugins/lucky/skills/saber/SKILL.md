@@ -6,7 +6,8 @@ description: >-
   inbox → merge con endoso, promoción CANDIDATE→LIVE y poda guiadas, y destilar
   al CIERRE de una corrida (spawnea al agente `destilador`). Disparar cuando el
   operador diga "/saber", "revisá la bandeja del saber", "promové/podá una
-  ficha", "destilá el cierre", o al cerrar una corrida con disparador objetivo.
+  ficha", "destilá el cierre", "citá las fichas que funcionaron", o al cerrar una
+  corrida con disparador objetivo.
   NO disparar para consultar un patrón por síntoma (eso es la skill `bitacora`)
   ni para capturar una idea a futuro (eso es /idea). Administra el ciclo; no
   consulta ni redacta el catálogo.
@@ -141,6 +142,34 @@ El acto de aprender al cerrar una corrida CON disparador objetivo:
 **Sin MCP en la sesión** → los borradores del destilador van **ÍNTEGROS a
 `/idea`** (parking local, "síntoma → acción" + evidencia), para proponerlos al
 saber desde una sesión con el connector. Nunca se pierden, nunca bloquean.
+
+## `/saber citar <refs>` — el REFUERZO del cierre de corrida (crisol §4 paso 8)
+
+El **gemelo** de `/saber destilar` en el gatillo del cierre: la destilación
+cablea la CAPTURA (¿qué ficha NUEVA nace?), esto cablea el REFUERZO (¿qué ficha
+EXISTENTE funcionó de verdad?). Registra la **cita causal ALEGADA** — un *claim*,
+no una promoción: alimenta el contador de citas causales, **jamás mueve `usos`**
+(el ascenso CANDIDATE→LIVE sigue siendo endoso humano, ficha por ficha):
+
+1. **Reuní las fichas que ESTA sesión consultó** — las que el agente miró con
+   `saber_buscar`/`saber_ficha` en el hilo, más las que un **verificador canónico
+   aplicó como doctrina** (ej. el `quality-auditor` aplica `FALSO-VERDE-004`/
+   `DRIFT-007` al correr REGLA 0). No hay tool de "consultas de esta sesión": el
+   insumo es el hilo del agente + las fichas que los roles nombran en su prompt.
+2. **POR FICHA**, presentá al humano cuál PARECE haber funcionado y esperá su
+   **confirmación** (principio de endoso: el humano decide qué es verdad; el LLM
+   no se auto-adjudica que la ficha funcionó). Jamás batch.
+3. **Registrá las confirmadas** con `saber_telemetria(eventos=[{event_id,
+   entry_id, run_ledger_ref, stale?}])` — `run_ledger_ref` = la **RUTA de la fila
+   de ESTA corrida** (`docs/refactor/_crisol/runs/<id>.md`, el ancla de evidencia
+   que el humano cotejará); `event_id` = `<corrida-id>:<entry_id>` (clave de
+   idempotencia — un retry no duplica la cita). Cuenta como ALEGADO, no como uso.
+4. **Reportá** qué citas quedaron alegadas (para el campo `CITAS_SABER:` del
+   cierre, crisol §4 paso 8) o `N/A (no se consultó saber en esta corrida)`
+   explícito.
+5. **Sin MCP** → fail-open: dejá las citas anotadas vía el flujo /idea (`saber:
+   cita causal pendiente <entry_id> · ref <corrida>`) para reportarlas desde una
+   sesión con el connector. Nunca se pierden, nunca bloquean el cierre.
 
 ---
 

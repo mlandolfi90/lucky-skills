@@ -514,6 +514,17 @@ bitácora del paso 3 se conserva).
    (meter el playbook como obligatorio pelearía con el jidoka, sin gate nuevo, sin
    ID de matriz). La brújula la SEÑALARÁ (puntero); el Planificador la consultará
    por síntoma (Paso 3) en sesiones futuras.
+   **Refuerzo (cita causal — ADR 0027; espejo de la Destilación):** al cerrar,
+   registrá SIEMPRE el campo `CITAS_SABER:` del ledger — las citas causales
+   alegadas de las fichas EXISTENTES que ayudaron de verdad (vía `/saber citar`,
+   con el ref de ESTA corrida como `run_ledger_ref`), o `N/A (no se consultó
+   saber)`. Es el gemelo de `BITACORA:`: la destilación cablea la CAPTURA (ficha
+   nueva), esto el REFUERZO (qué ficha vieja funcionó). Un cierre sin el campo se
+   ve en la fila (misma visibilidad que BITACORA). El Crisol **AVISA, no exige
+   gate**: sin ID de matriz (mismo jidoka que la destilación — un gate
+   probabilístico daría falso FAIL en corridas que no consultan saber). El
+   **cómo** lo define `/saber citar` (no se re-enuncia acá): la cita cuenta como
+   ALEGADO, jamás mueve `usos` (la promoción sigue siendo endoso humano).
    El gate de cobertura es la **RED final**,
    no el primer detector: cada regla se verifica TEMPRANO (paso 4 las de plan,
    paso 6 las del diff); si algo cae recién en esta red ya se desperdició una

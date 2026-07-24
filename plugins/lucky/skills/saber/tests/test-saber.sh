@@ -14,6 +14,7 @@ DEST="$REPO_ROOT/plugins/lucky/agents/destilador.md"
 SABER="$REPO_ROOT/plugins/lucky/skills/saber/SKILL.md"
 CRISOL="$REPO_ROOT/plugins/lucky/skills/crisol/SKILL.md"
 BITACORA="$REPO_ROOT/plugins/lucky/skills/bitacora/SKILL.md"
+TEMPLATE="$REPO_ROOT/plugins/lucky/skills/crisol/templates/run-ledger.md"
 
 PYBIN="$(command -v python || command -v python3 || true)"
 [ -n "$PYBIN" ] || { echo "XX test-saber: falta Python (python|python3) — test NO corrido = NO verde"; exit 1; }
@@ -132,6 +133,33 @@ if [ -f "$BITACORA" ]; then
   if grep -qF 'skill **`saber`**' "$BITACORA"; then ok; else ko "A5 bitacora/SKILL.md sin puntero a la skill 'saber'"; fi
 else
   ko "A5 bitacora/SKILL.md ausente"
+fi
+
+# ── A7: /saber citar existe en saber + menciona saber_telemetria y run_ledger_ref ─
+# El REFUERZO del loop causal (ADR 0027): el subcomando existe y nombra su vehículo
+# (saber_telemetria) y el ancla de evidencia (run_ledger_ref = fila de corrida).
+if [ -f "$SABER" ]; then
+  a7=1
+  grep -qF '/saber citar' "$SABER" || a7=0
+  grep -qF 'saber_telemetria' "$SABER" || a7=0
+  grep -qF 'run_ledger_ref' "$SABER" || a7=0
+  if [ "$a7" -eq 1 ]; then ok; else ko "A7 saber: falta '/saber citar' o 'saber_telemetria' o 'run_ledger_ref' (loop causal sin cablear)"; fi
+else
+  ko "A7 saber/SKILL.md ausente"
+fi
+
+# ── A8: crisol nombra CITAS_SABER (espejo de BITACORA en §4 paso 8) ──────────────
+if [ -f "$CRISOL" ]; then
+  if grep -qF 'CITAS_SABER' "$CRISOL"; then ok; else ko "A8 crisol: falta 'CITAS_SABER' en el cierre (espejo del REFUERZO sin cablear)"; fi
+else
+  ko "A8 crisol/SKILL.md ausente"
+fi
+
+# ── A9: el template run-ledger lista CITAS_SABER (junto a BITACORA) ──────────────
+if [ -f "$TEMPLATE" ]; then
+  if grep -qF 'CITAS_SABER' "$TEMPLATE"; then ok; else ko "A9 template run-ledger.md sin 'CITAS_SABER'"; fi
+else
+  ko "A9 crisol/templates/run-ledger.md ausente"
 fi
 
 echo "────────"

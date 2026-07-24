@@ -30,3 +30,4 @@
 | 0024 | [El refactor de costura declara qué DESAPARECE](0024-el-refactor-declara-que-desaparece.md) | ACEPTADA |  |
 | 0025 | [Supuestos declarados del plan](0025-supuestos-declarados-del-plan.md) | ACEPTADA |  |
 | 0026 | [La versión de un artefacto es lectura del proceso](0026-versionado-lectura-del-proceso.md) | ACEPTADA |  |
+| 0027 | [Cerrar el loop causal del saber](0027-cerrar-el-loop-causal-del-saber.md) | ACEPTADA |  |
