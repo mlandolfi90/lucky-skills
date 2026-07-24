@@ -85,19 +85,53 @@ server y pinee estos 7 contratos (su lane; yo no los puedo definir):
 Además: los shapes de los tools nuevos del ritual (`saber_destilar_proponer`, `saber_historial`,
 campos nuevos de `saber_telemetria`) — mantener la doctrina FLEXIBLE hasta el pin.
 
-## Supuestos del plan (ADR 0025 — tope 5). OJO: 1-3 son DECISIONES PENDIENTES de Hackaton, no asunciones firmes.
+## FASE PIN — RESUELTA (Hackaton CLOSED su server, commit 77f6138, e2e verde; contrato definitivo)
 
-1. **CANDIDATE + `mcp-inbox/*` se eliminan** del flujo saber (captura→LIVE directo); `/saber
-   promover`+`/saber revisar` sobreviven solo como override. — **Pendiente de confirmación de Hackaton (FASE PIN #2).**
-2. **El server gana escritura de estado (`archivado`) + restaurar**, habilitando la poda
-   reversible; `/saber podar` deja de ser guiado-a-mano. — **Pendiente (FASE PIN #3).** Sin esto Fase 2 no cierra.
-3. **La captura directa exige evidencia en el server** (o todo pasa por el destilador), para no
-   perder la capa de evidencia pre-LIVE. — **Pendiente (FASE PIN #4).**
-4. **`/saber destilar` se reserva a la CURADURÍA;** la captura-al-cierre se reubica bajo otro
-   gatillo. — Decisión de lucky-skills (mía), firme.
-5. **`/saber citar` (ADR 0027) queda congelada**, solo cambia su semántica a historial; el coalesce
-   del rename se mantiene solo para CANDIDATE legacy. — Firme (mío), depende de #1 para el legacy.
+CONTRATO DEL SERVER (modelo b), lo que consumen las skills:
+1. **Captura→LIVE directo:** `saber_proponer_ficha(sintoma,tipo,causa_raiz,accion,anti_accion,
+   prevencion,scope='global',titulo=None,dedup_key='')` — MISMO nombre, semántica NUEVA: ya no va a
+   inbox-CANDIDATE, captura y SIRVE LIVE en main (vía `capturar_directo`, reusa la máquina de
+   `mergear`). ACK 'capturada'. `dedup_key` VESTIGIAL (idempotencia por contenido). **CANDIDATE se
+   ELIMINA para fichas.** id de captura directa = `CAP-<content_key>`.
+2. **`saber_historial(entry_id, limite=50)`** (NUEVO) → historial de evidencia por cita
+   (ts·veredicto·sesion·run_ledger_ref·contexto). 0 citas = `SERVIDA SIN PROBAR`.
+3. **`saber_destilar_proponer(scopes, modo='ambos'|'fusiones'|'poda', umbral_sintoma=0.60,
+   umbral_causa_accion=0.80, dias_poda=30, k_vecinos=5, max_pares=50)`** (NUEVO) → {fusiones:[pares
+   causa+acción lado-a-lado + 2 scores, `veredicto_sugerido` SIEMPRE 'REVISAR'], podables:[evidencia
+   -cero: 0 citas + usos=0 + edad≥~30d], meta}. **READ-ONLY, PROPONE**; discriminante causa-raíz+
+   acción; default NO-fusionar. NO auto-poda.
+4. **`saber_telemetria`:** el dict de evento suma `contexto?` y `veredicto?` OPCIONALES (tokens
+   {funciono,parcial,no_funciono}, default funciono). `run_ledger_ref` sigue obligatorio.
+5. `saber_refs`/`saber_metricas`/`saber_mergear`: byte-idénticos (`mergear` queda para ideas/
+   señales + override humano/legacy).
+- `endosar.py` (lucky-saber, fuera del MCP) COEXISTE como override manual humano.
+- **Trade de seguridad honesto (ADR 0008 de Hackaton):** la captura fresca se sirve SIN PROBAR
+  (2-latch); el colchón es la señal de citas + la poda de evidencia-cero. Su revisión adversarial
+  lo dio SAFE (ningún vector corrompe guía LIVE existente sin gate).
+- **Nota operativa:** el cache de descripciones del gateway litellm sigue VIEJO — las 2 tools nuevas
+  (`saber_historial`, `saber_destilar_proponer`) no aparecen aún en las sesiones (se refresca con
+  list_changed). El RUNTIME ya sirve el comportamiento nuevo. La skill se escribe correcta ya; las
+  tools se vuelven invocables cuando el cache refresque.
 
-**Estado del plan:** DISEÑO COMPLETO, INGENIERÍA EN ESPERA del pin de Hackaton. Cuando su corrida
-server cierre, resuelvo los supuestos 1-3 con sus contratos reales, escribo el ADR Fase 2 + el
-rewrite de la skill con los shapes pineados, verifico (roster), cierro, y forjo UN release. No antes.
+## Supuestos del plan (ADR 0025 — tope 5) — todos FIRMES tras el pin
+
+1. **CANDIDATE + `mcp-inbox/*` se eliminan** del flujo saber-ficha; `/saber promover` y `/saber
+   revisar` mueren como pasos del ciclo, sobreviven solo como override (endosar.py) + `mergear`
+   para ideas/señales/legacy. — **RESUELTO (pin: CANDIDATE eliminado, id `CAP-`).**
+2. **La poda la propone `saber_destilar_proponer` (read-only), el humano confirma;** reversible.
+   `/saber podar` deja de ser guiado-a-mano puro: invoca esa tool. — **RESUELTO (pin #3).**
+3. **La captura directa NO exige evidencia server-side** — se sirve `SERVIDA SIN PROBAR`; el colchón
+   es la señal de citas + la poda. El ADR documenta el trade honesto. — **RESUELTO (pin: trade de
+   2-latch, revisado SAFE por Hackaton).**
+4. **`/saber destilar` se reserva a la CURADURÍA;** la captura-al-cierre (destilador, crisol §4 paso
+   8) se reubica bajo gatillo propio, ahora hacia LIVE directo. — Firme (mío).
+5. **`/saber citar` (ADR 0027) congelada en mecánica**, cambia su ROL a historial (alimenta
+   `saber_historial`); el coalesce del rename queda MOOT para nacidas-LIVE, se mantiene solo para
+   CAND- legacy en vuelo. — Firme.
+
+**Estado del plan:** FASE PIN RESUELTA. Ingeniería habilitada: ADR 0028 (Fase 2) superseding los
+puntos de gate de 0023/0027/0015 + rewrite de saber/SKILL.md + ritual `/saber destilar` curaduría +
+touches de doctrina (crisol/bitacora/escenario-endoso) + drift dedup_key→entry_id + tests → roster →
+cierre → forja v2.11.0 (ambas condiciones cumplidas: GO directo del operador + pin de Hackaton).
+
+**Corregime ahora o sigo con esto.**
