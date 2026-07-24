@@ -11,8 +11,8 @@
 ## ⚠ Ramas EN_DUDA — una corrida las contradijo (frescura) (0)
 - (nada)
 
-## 🔥 Corridas ACTIVE (1)
-- corrida:2026-07-24-saber-fase2-promocion-inmediata · Saber Fase 2 — promoción inmediata (captura→LIVE); el juicio humano se MUEVE a curaduría-posterior (/saber destilar); deroga 'contar ≠ ungir' y 'promoción la endosa el humano'
+## 🔥 Corridas ACTIVE (0)
+- (nada)
 
 ## 🩹 Hotfixes abiertos (0)
 - (nada)

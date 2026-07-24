@@ -2,7 +2,7 @@
 id: 2026-07-24-saber-fase2-promocion-inmediata
 schema: corrida/1
 tipo: corrida
-estado: ACTIVE
+estado: CLOSED
 creado: 2026-07-24
 branch: main
 titulo: "Saber Fase 2 — promoción inmediata (captura→LIVE); el juicio humano se MUEVE a curaduría-posterior (/saber destilar); deroga 'contar ≠ ungir' y 'promoción la endosa el humano'"
@@ -11,7 +11,7 @@ target: "pc-local (la forja; directiva durable del operador para lucky-skills)"
 model: "opus (líder opus-4.8 + subagentes) — goal 'terminar sin intervención'; GO DIRECTO del operador ('dale gooo', 2026-07-24)"
 ley: "v2.10.2 (sello local == último tag)"
 iteraciones: "1/3 (Steward APPROVE 1ª + 4 correcciones inline aplicadas; roster fresco 4/4 PASS 1ª; una incoherencia intra-archivo de bitacora reconciliada post-roster antes de cerrar)"
-runState: closing
+runState: closed
 refs: [adr:0028, adr:0023, adr:0027, adr:0015, adr:0024]
 cierre: "2026-07-24 · commits apertura + plan + Steward-inline + rewrite (b60b873) + coherencia bitacora (8f64c23) + cierre en dos commits. Forja v2.11.0 habilitada (GO directo del operador + pin de Hackaton, ambos cumplidos)."
 citas_saber: "N/A — corrida de LEY (no de código de app); el roster aplicó FALSO-VERDE-004/DRIFT-007 al verificar (citables por el lane saberes bajo el contrato nuevo, no desde acá)."

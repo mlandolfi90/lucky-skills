@@ -2,7 +2,7 @@
 id: PLAN-saber-fase2-promocion-inmediata
 schema: plan/1
 tipo: plan
-estado: VIGENTE
+estado: CUMPLIDO
 creado: 2026-07-24
 refs: [corrida:2026-07-24-saber-fase2-promocion-inmediata, adr:0023, adr:0027, adr:0015, adr:0018]
 nota: "FASE PIN INCOMPLETA a propósito: el contrato cross-lane (server del saber, lane Hackaton) NO está pineado todavía — su corrida ni está abierta. La INGENIERÍA queda EN ESPERA de ese pin. Este plan captura el diseño y la frontera para no hacer trabajo dependiente antes de que la dependencia decida (lección forjar-tras-contrato-de-sesion-dependiente)."

@@ -3574,7 +3574,7 @@ fresco del delta.
 - Cierre: 2026-07-24 · fast-path; verificador fresco PASS. Habilita forja v2.10.2 (pin final, deuda ADR 0027 cerrada).
 
 ### main — 2026-07-24 (Saber Fase 2 — promoción inmediata (captura→LIVE); el juicio humano se MUEVE a curaduría-posterior (/saber destilar); deroga 'contar ≠ ungir' y 'promoción la endosa el humano')
-- STATUS: ACTIVE
+- STATUS: CLOSED
 - Tier: completo (DEROGA un invariante central de la ley — endoso humano por-ficha pre-LIVE; ADR de cambio de invariante; toca saber/SKILL.md + posiblemente crisol/bitacora; norma nueva transversal)
 - Fecha: 2026-07-24
 - TARGET: pc-local (la forja; directiva durable del operador para lucky-skills)
@@ -3585,7 +3585,7 @@ gate-pre-LIVE a curaduría-posterior (destilación). Arqueología (mapear los in
 se derogan + la infra de destilación a extender) → plan con supuestos → Steward → Ingeniero
 → roster → cierre. Forja DIFERIDA al pin del server de Hackaton.
 <!-- VEREDICTOS:BEGIN -->
-- runState: closing
+- runState: closed
 - [V] TARGET · PASS · quality-auditor-2 · pc-local (verificó AHÍ, intérprete python sondado)
 - [V] MODEL · PASS · lider · opus en steward/ingeniero/roster; líder opus-4.8; GO directo del operador
 - [V] OPEN_CLOSED · PASS · design-verifier · edit a estable bajo ADR 0028 (cambio de invariante); 0028 deroga POR-PUNTO vía refs (supersede:null), 0023/0027/0015 byte-intactos (git diff vacío)
