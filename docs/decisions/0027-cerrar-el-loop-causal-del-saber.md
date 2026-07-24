@@ -141,4 +141,4 @@ que el refuerzo vuelva a la ficha para que el sistema sepa cuál merece vivir.
 ---
 
 **Fuente de verdad: `github.com/mlandolfi90/lucky-skills` · esta copia = tag
-`v2.10.0` (cache local, NO la ley).**
+`v2.10.1` (cache local, NO la ley).**

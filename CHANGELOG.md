@@ -4,6 +4,20 @@ Notas de release de la familia de skills Lucky. El historial completo del **proc
 (corridas del Crisol, RETROs) vive en `docs/refactor/_crisol/RUN-LEDGER.md`; los tags
 inmutables, en `git tag`. Formato: más nuevo arriba.
 
+## v2.10.1 — 2026-07-24 — Fix del anchor de /saber citar (corrida loop-causal-content-key)
+
+Corrida `2026-07-24-loop-causal-content-key` (CLOSED, 2/3, sello `665770680f3f`). Corrección
+load-bearing de Skills Hackaton (3 lecturas independientes del código del server): el
+`dedup_key` que v2.10.0 nombraba como ancla de la cita **no existe a nivel de ficha** — no se
+persiste ni lo sirve `saber_ficha`. El contrato correcto y más simple: `/saber citar` **pasa el
+`entry_id`** (el id-display GAP-nnn/CAND-xxx) y **el server lo resuelve a su clave estable
+`content_key`** (`sha256(síntoma·acción)`) y **coalesce las citas a través del rename
+CANDIDATE→LIVE** — el consumidor no maneja ninguna clave estable. `/saber citar`, el ADR 0027 y
+el test A10 quedaron alineados a ese contrato. El pin del field exacto donde `saber_ficha`
+expondrá `content_key` + la convención del `sesion` sigue pendiente de la corrida server de
+Hackaton. RETRO honesto: v2.10.0 se forjó antes del contrato final del server → esta re-forja; y
+el fresh-eyes gate cazó (iter1 FAIL) que el ADR quedaba auto-contradictorio antes de cerrar.
+
 ## v2.10.0 — 2026-07-24 — Cerrar el loop causal del saber: /saber citar + CITAS_SABER (ADR 0027)
 
 Corridas `2026-07-24-cierre-loop-causal-saber` (CLOSED, 2/3, sello `e582f3feb1a4`) +
