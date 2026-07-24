@@ -3456,6 +3456,29 @@ sesión de RAG (que midió el problema). Plan del líder (con supuestos, ADR 002
 → Steward fresco (opus) → Ingeniero (opus) → roster fresco (opus) → dogfood de
 la cita causal sobre el propio cierre → cierre en dos commits + sello.
 <!-- VEREDICTOS:BEGIN -->
-- runState: wip
+- runState: closing
+- [V] TARGET · PASS · quality-auditor-2 · pc-local (el qa2 verificó AHÍ, intérprete sondado python real no stub)
+- [V] MODEL · PASS · lider · opus en steward/ingenieros/roster; líder opus-4.8 (el operador cambió de modelo mid-corrida) — goal 'dejar funcional'
+- [V] OPEN_CLOSED · PASS · design-verifier · iter1: bloque CITAS_SABER se INSERTA sin reescribir BITACORA (crisol:517); iter2: el lint es check #8 nuevo sin tocar 1-7 (registros-lint:383-393). Adición pura; ADR 0027 nuevo
+- [V] ATOMICIDAD · PASS · design-verifier · una responsabilidad por unidad: ADR=decisión, /saber citar=el cómo, campo=enganche, lint=guardia. Split 'una define, otra apunta' DRY
+- [V] COSTURA · PASS · design-verifier · espejo del mecanismo BITACORA/destilación (probado); REFUERZO se AGREGA junto a CAPTURA. Nada se borra → DESAPARECE (ADR 0024) NO aplica, confirmado
+- [V] CASOS_LEGALES · PASS · steward · el único edit a estable (§4 paso 8) es extensión acreditada por ADR 0027; el resto AGREGA
+- [V] CREDITO · PASS · scope-verifier · ADR 0027 ACEPTADA, frontmatter válido, refs recíprocas corrida↔ADR; INDEX regenerado
+- [V] SCOPE_CREEP · PASS · scope-verifier · iter1+iter2: mapa a actos A/B/C/D/F/G; acto E (firing en vivo) fuera de alcance por límite del operador; CERO llamada saber_* y CERO escritura al repo saberes, verificado por grep del diff en ambas iteraciones
+- [V] PARKING · PASS · scope-verifier · diferidos declarados: firing en vivo + promoción CANDIDATE→LIVE = lane saberes (RAG↔Hackaton); rastro server-side por sesión = lane saberes; re-sello/tag = operador
+- [V] REGLA0 · PASS · quality-auditor-2 · iter1: 17/17 suites + 2 gates exit 0 en pc-local; iter2: test-saber 12/12 + registros-lint 0 + el lint nuevo probado en 4 sub-casos (reporta CLOSED≥2026-07-24 sin campo, N/A satisface, no-retroactivo <2026-07-24, limpio al borrar temp)
+- [V] TEST_COVERAGE · PASS · quality-auditor-2 · test-saber suma A7-A11 (10→12 PASS); la corrida AGREGA cobertura estructural del mecanismo + del lint
+- [V] RED_GREEN · PASS · lider · iter1: 3 asserts vistos en rojo antes de B/C/D; iter2: A10/A11 en rojo (10→12) + el lint en rojo con un temp CLOSED 2026-07-24 sin campo → verde al agregar N/A y al borrar el temp
+- [V] ZERO_LEAK · PASS · leak-verifier · iter1 leak-scan exit 0 + iter2 delta leak-scan exit 0; cero secretos (la única mención de dominio es el slug del propio repo)
+- [V] PIN_TOTAL · N/A · design-verifier · sin deps; test-pin-scan corrido por él 3/3, árbol sin floating
+- [V] LISKOV · N/A · design-verifier · prosa normativa, sin implementación de abstracción
+- [V] INTERFACE_SEGREGATION · N/A · design-verifier · sin contrato multi-cliente nuevo
+- [V] CIERRE_TRAS_PASS · PASS · gate · cierre tras roster 4/4 (iter1) + delta-verify (iter2) verdes
+- [V] MIGRATION · N/A · gate · sin DDL
+- [V] RESPONSIVE · N/A · gate · no toca UI
+- [V] CONFORMIDAD · N/A · gate · no toca código hexagonal
+- [V] SELLOS · N/A · gate · no habilita release; sellos v2.9.0 intactos (verificado)
+- [V] TAG_GATE · N/A · gate · no se crea tag en esta corrida
 <!-- VEREDICTOS:END -->
-- Iteraciones: 1/3
+- Iteraciones: 2/3 (iter1: roster fresco 4/4 PASS sobre el mecanismo base; iter2: delta-verify PASS del contrato lockeado por las 3 sesiones — la coordinación cross-sesión surfaceó lo que iter1 no tenía)
+- Cierre: 2026-07-24 · commits b1db1df (apertura) + a0ce2b3/dfd5896 (plan+enmienda) + ac64fe8 (iter1 mecanismo) + eb4f47b (iter2 contrato lockeado) + cierre en dos commits. Re-sello/tag DIFERIDOS al operador (publicar la ley es su acto).
