@@ -21,6 +21,9 @@ limpio, exit 1 con hallazgos listados. Verifica:
   7. Gate de doc (ADR 0021 §2): toda fila feature VIVA lleva `doc:` existente y
      `doc_veredicto.estado: PASA`. Chequeo INDEPENDIENTE del 6: son subsistemas
      distintos y el 6 es lazy — atarlos apagaba el gate donde no hay manual.
+  8. Cita causal no-retroactiva (ADR 0027): fila `corrida` en CLOSED con
+     `creado >= 2026-07-24` lleva el campo `citas_saber:` PRESENTE (`N/A` vale —
+     presencia, no contenido). No enrojece las corridas históricas ni las ACTIVE.
 
 Dependencia: PyYAML (probado 6.0.1). Corre en la maquina de la forja; los repos
 de la flota consumen el manifiesto como dato, no corren este lint.
@@ -377,6 +380,17 @@ def main() -> int:
                         f(f"sello FALTANTE: {clave} esta {estado} pero no figura en sellos.json")
                     elif got != _sha256_lf(fila):
                         f(f"sello ROTO: {clave} — el archivo cambio tras sellarse (M8)")
+                # (8) Cita causal no-retroactiva (ADR 0027): corridas CLOSED nuevas
+                # exigen el campo `citas_saber:` PRESENTE (N/A vale — presencia, no
+                # contenido). Comparacion de strings ISO YYYY-MM-DD; `creado` parseado
+                # por YAML como date igual serializa a YYYY-MM-DD via str(). No toca
+                # corridas ACTIVE ni las creadas antes del 2026-07-24.
+                if nombre == "corrida" and estado == "CLOSED" \
+                        and str(fm.get("creado", "")) >= "2026-07-24" \
+                        and "citas_saber" not in fm:
+                    f(f"cita causal: {rel} esta CLOSED (creado >= 2026-07-24) sin el campo "
+                      f"`citas_saber:` — el loop de refuerzo del saber no se cerro "
+                      f"(crisol §4 paso 8; ADR 0027)")
 
         # proyecciones: marcador GENERADO obligatorio
         for pr in proyecciones:

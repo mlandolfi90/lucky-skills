@@ -54,18 +54,36 @@ que el refuerzo vuelva a la ficha para que el sistema sepa cuál merece vivir.
    nuevo reúne las fichas que la sesión consultó, las presenta al humano **ficha
    por ficha** para que confirme cuál funcionó (principio de endoso: el LLM no se
    auto-adjudica que la ficha ayudó), y registra las confirmadas con
-   `saber_telemetria`, atándolas al `run_ledger_ref` de la corrida (la fila
-   `docs/refactor/_crisol/runs/<id>.md`, el ancla de evidencia que el humano
-   cotejará). El crisol §4 y el template solo APUNTAN a `/saber citar` — una
-   define, las demás referencian (fuente única).
+   `saber_telemetria`. **La cita se ancla al `dedup_key` (identidad ESTABLE de la
+   ficha), NO al `entry_id`:** `saber_telemetria` clava contra el `entry_id`, que
+   la promoción CANDIDATE→LIVE **renombra** (CAND-xxx→GAP-nnn) → una cita anclada
+   al `entry_id` quedaría huérfana tras el ascenso; el `dedup_key` sobrevive el
+   rename. El `run_ledger_ref` es el **slug-id kebab de la corrida** (el campo
+   `id:` de la fila, ej. `2026-07-24-cierre-loop-causal-saber`), **NO la ruta ni
+   la cabecera humana del ledger**: el server sólo valida la FORMA del ref
+   (`^[A-Za-z0-9][A-Za-z0-9._/#:@-]{0,160}$` — sin espacios, em-dash ni
+   paréntesis) y un ref malformado **rebota con `InputError` silencioso** (causa
+   raíz probable del contador en 0; `lucky-tool-saber/saber/telemetry.py:28`). El
+   crisol §4 y el template solo APUNTAN a `/saber citar` — una define, las demás
+   referencian (fuente única).
 
-4. **NO se crea un ID de matriz con FAIL.** Una corrida puede legítimamente no
-   consultar ninguna ficha; un gate probabilístico daría un **falso FAIL** en esos
-   cierres honestos. El diente es el **campo obligatorio-de-juicio** (presente
-   siempre, visible en la fila), no una celda machine-checkable — el mismo jidoka
-   que gobierna `BITACORA:` (ADR 0023 §3: sin gate nuevo, sin ID nuevo; la dureza
-   es la huella). Si RETROs futuros muestran cierres con `CITAS_SABER:` mentiroso,
-   esa evidencia abre SU corrida (disparador kaizen), no un gate prematuro.
+4. **NO se crea un ID de matriz con FAIL de CONTENIDO, PERO sí un lint de
+   PRESENCIA no-retroactivo.** Un gate de matriz probabilístico sobre el CONTENIDO
+   de la cita daría un **falso FAIL** en corridas que legítimamente no consultan
+   saber — eso se descarta. Lo que SÍ se adopta (**pivote** respecto de la paridad
+   estricta con `BITACORA:`) es un chequeo de **PRESENCIA** del campo
+   `citas_saber:` en `registros-lint.py`: exigido SÓLO en corridas
+   `estado: CLOSED` con `creado >= 2026-07-24` (no-retroactivo — no enrojece las
+   históricas), y `N/A` cuenta como presente (**presencia, no contenido** → sin
+   falso FAIL). El pivote se justifica por la **asimetría captura/refuerzo**
+   (citar da crédito a una ficha AJENA — menos gratificante que destilar una
+   propia → el hábito necesita más fuerza que la que le bastó a `BITACORA:`) y
+   porque la **auto-promoción LEE esta señal** (el conteo de citas informa el
+   ascenso; una señal que alimenta una decisión automática merece cinturón +
+   tirantes). El diente queda: **cinturón** (campo obligatorio-de-juicio, visible
+   en la fila, mismo jidoka que `BITACORA:`) **+ tirantes** (el lint de presencia).
+   Si RETROs futuros muestran cierres con `CITAS_SABER:` mentiroso, esa evidencia
+   abre SU corrida (disparador kaizen), no un gate de contenido prematuro.
 
 ## Consecuencias
 
@@ -76,8 +94,14 @@ que el refuerzo vuelva a la ficha para que el sistema sepa cuál merece vivir.
 - **`crisol/SKILL.md` §4 paso 8** agrega el ESPEJO inmediatamente después del
   bloque de Destilación/BITACORA: el campo `CITAS_SABER:` se registra SIEMPRE, con
   puntero a `/saber citar` para el cómo. El Crisol AVISA, no exige gate.
-- **`crisol/templates/run-ledger.md`** lista `CITAS_SABER:` junto a `BITACORA:`
-  (opcional-de-formato, NO bloqueante).
+- **`crisol/templates/run-ledger.md`** lista `CITAS_SABER:` junto a `BITACORA:` en
+  la proyección, y agrega `citas_saber:` como clave de frontmatter de la FILA
+  (espejo de `bitacora:`).
+- **`scripts/registros-lint.py` gana un lint de PRESENCIA no-retroactivo** del
+  campo `citas_saber:` (fila `corrida` en `CLOSED` con `creado >= 2026-07-24`;
+  `N/A` vale). Es el **tirante** del pivote de la Decisión §4: la CAPTURA/
+  `BITACORA:` no lo tiene y fluye igual, pero el REFUERZO necesita más fuerza
+  (asimetría + la señal que la auto-promoción lee).
 - **Alcance de ESTA corrida = el MECANISMO, no la primera cita.** Se shipea la
   definición en `lucky-skills` (subcomando + campo + template + test estructural).
   La **primera cita causal EN VIVO** y la promoción CANDIDATE→LIVE que la
@@ -86,9 +110,10 @@ que el refuerzo vuelva a la ficha para que el sistema sepa cuál merece vivir.
   campo `CITAS_SABER:` de esta corrida se cierra honesto: mecanismo shipeado acá;
   primera cita en vivo = lane saberes.
 - **Considerado y descartado a propósito**:
-  - Un ID de matriz `CITAS_SABER` con FAIL — daría falso-positivo en corridas que
-    no consultan saber; el jidoka lo prohíbe (paralelo exacto a ADR 0023, "un ID
-    de matriz DESTILACION").
+  - Un ID de matriz `CITAS_SABER` con FAIL de CONTENIDO — daría falso-positivo en
+    corridas que no consultan saber; el jidoka lo prohíbe (paralelo exacto a ADR
+    0023, "un ID de matriz DESTILACION"). Distinto del **lint de PRESENCIA** del
+    §4, que SÍ se adopta: presencia ≠ contenido (`N/A` pasa → sin falso FAIL).
   - Que `/saber citar` mueva `usos` directo — violaría la propiedad humana sobre
     la promoción; la cita es ALEGADO, no ascenso.
   - Disparar `saber_telemetria` en esta corrida como prueba conductual — fuera de

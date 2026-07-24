@@ -162,6 +162,24 @@ else
   ko "A9 crisol/templates/run-ledger.md ausente"
 fi
 
+# ── A10: /saber citar ancla al dedup_key (ADR 0027 G2) ───────────────────────────
+# saber_telemetria clava contra entry_id, que la promocion RENOMBRA (CAND-xxx→GAP-nnn);
+# la cita se ancla al dedup_key ESTABLE o queda huerfana tras el ascenso.
+if [ -f "$SABER" ]; then
+  if grep -qF 'dedup_key' "$SABER"; then ok; else ko "A10 saber: /saber citar no menciona 'dedup_key' (ancla inestable → cita huerfana tras la promocion; ADR 0027 G2)"; fi
+else
+  ko "A10 saber/SKILL.md ausente"
+fi
+
+# ── A11: /saber citar documenta la restriccion del run_ledger_ref (ADR 0027 G1) ──
+# Causa raiz del contador en 0: un ref con la cabecera humana (espacios/em-dash/parentesis)
+# rebota con InputError SILENCIOSO (telemetry.py:28). La doctrina del ref debe estar escrita.
+if [ -f "$SABER" ]; then
+  if grep -qEi 'espacios|InputError' "$SABER"; then ok; else ko "A11 saber: /saber citar no documenta la restriccion del ref (ni 'espacios' ni 'InputError' — falta la doctrina de la causa raiz; ADR 0027 G1)"; fi
+else
+  ko "A11 saber/SKILL.md ausente"
+fi
+
 echo "────────"
 echo "RESULTADO: $pass PASS · $fail FAIL"
 [ "$fail" -eq 0 ] || exit 1

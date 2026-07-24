@@ -22,6 +22,7 @@ runState: wip                # wip | closing (closing SOLO en el commit de cierr
 veredictos: []               # [{regla: <ID §5>, veredicto: PASS|FAIL|N/A, quien: <rol>, evidencia: <archivo:línea|conteo>}]
 refs: [adr:NNNN, bitacora:XXX-nnn]   # FKs tipadas <tabla>:<id>
 cierre: "<YYYY-MM-DD HH:MM · commit <sha>>"   # al cerrar
+citas_saber: "<dedup_key(s) | N/A>"   # citas causales alegadas (dedup_key(s) | N/A); obligatorio en CLOSED >= 2026-07-24 (registros-lint)
 ---
 - ORIGEN: <de dónde nace la corrida>
 - Alcance: <qué se toca y por qué>

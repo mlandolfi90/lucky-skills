@@ -156,20 +156,55 @@ no una promoción: alimenta el contador de citas causales, **jamás mueve `usos`
    aplicó como doctrina** (ej. el `quality-auditor` aplica `FALSO-VERDE-004`/
    `DRIFT-007` al correr REGLA 0). No hay tool de "consultas de esta sesión": el
    insumo es el hilo del agente + las fichas que los roles nombran en su prompt.
+   **Degradación por compactación (declarada, NO silenciosa):** el "el agente
+   recuerda qué consultó" se **ROMPE** con la compactación de contexto — un hilo
+   largo pierde las consultas tempranas. Mientras NO exista un rastro server-side
+   por sesión (lo shipea el lane del saber/Hackaton), no dependas de la memoria en
+   silencio: presentá las fichas que PUEDAS reconstruir, **pedile EXPLÍCITO al
+   humano que agregue las que se hayan olvidado**, y **declará la limitación**
+   ("memoria de sesión posiblemente incompleta por compactación"). Cuando el
+   rastro server-side exista, `/saber citar` lo lee y esta degradación desaparece.
 2. **POR FICHA**, presentá al humano cuál PARECE haber funcionado y esperá su
    **confirmación** (principio de endoso: el humano decide qué es verdad; el LLM
    no se auto-adjudica que la ficha funcionó). Jamás batch.
-3. **Registrá las confirmadas** con `saber_telemetria(eventos=[{event_id,
-   entry_id, run_ledger_ref, stale?}])` — `run_ledger_ref` = la **RUTA de la fila
-   de ESTA corrida** (`docs/refactor/_crisol/runs/<id>.md`, el ancla de evidencia
-   que el humano cotejará); `event_id` = `<corrida-id>:<entry_id>` (clave de
-   idempotencia — un retry no duplica la cita). Cuenta como ALEGADO, no como uso.
-4. **Reportá** qué citas quedaron alegadas (para el campo `CITAS_SABER:` del
-   cierre, crisol §4 paso 8) o `N/A (no se consultó saber en esta corrida)`
-   explícito.
+3. **Anclá al `dedup_key` estable, NO al `entry_id`.** Por cada ficha confirmada,
+   ANTES de registrar: `saber_ficha(<ID>)` → leé su **`dedup_key`** (la identidad
+   ESTABLE de la ficha). Ese `dedup_key` es lo que va al campo `CITAS_SABER:` del
+   cierre y lo que ancla la cita. **Razón:** `saber_telemetria` clava la cita
+   contra el `entry_id`, que la **promoción RENOMBRA** (CAND-xxx→GAP-nnn) → una
+   cita anclada al `entry_id` quedaría **huérfana** tras el ascenso; el `dedup_key`
+   sobrevive el rename. Registrá con `saber_telemetria(...)` — **anclá al
+   `dedup_key` estable según el contrato del saber** (Hackaton está estabilizando
+   el server a clavar por `dedup_key`; **NO hardcodees el shape exacto del arg** —
+   que la skill sobreviva el cambio de shape). Los campos estables del evento:
+   - `run_ledger_ref` = el **slug-id kebab de ESTA corrida** (el campo `id:` de la
+     fila, ej. `2026-07-24-cierre-loop-causal-saber`) — string idéntico byte a byte
+     al que el consumo aguas abajo lee. **NO la ruta de la fila, NO la cabecera
+     humana del ledger.**
+   - `event_id` = `cita:<corrida-slug>:<dedup_key>` — clave de idempotencia (ambas
+     partes estables; **un solo id-de-corrida en todo el loop**; un retry no
+     duplica la cita).
+   - `sesion` = el mismo **slug-id de la corrida** (para el cruce server-side con
+     el tick de consulta).
+   Cuenta como ALEGADO, no como uso.
+
+   > **DOCTRINA DURA — la FORMA del `run_ledger_ref` (causa raíz probable de las
+   > citas en 0).** El ref DEBE matchear
+   > `^[A-Za-z0-9][A-Za-z0-9._/#:@-]{0,160}$` — **NO espacios, NO em-dash (—), NO
+   > paréntesis.** El servidor **no coteja** el ref contra nada: sólo valida su
+   > FORMA. Un ref con la cabecera humana del ledger (que trae espacios, em-dash o
+   > paréntesis) **rebota con `InputError` SILENCIOSO** — la cita se pierde sin
+   > avisar. Es la causa raíz probable de que las citas causales estén en 0. El
+   > slug-id kebab es regex-safe por construcción (PK, ADR 0016). Fuente:
+   > `lucky-tool-saber/saber/telemetry.py:28` (`_REF_RE`).
+4. **Reportá** qué citas quedaron alegadas — los `dedup_key` para el campo
+   `CITAS_SABER:` del cierre (crisol §4 paso 8) — o `N/A (no se consultó saber en
+   esta corrida)` explícito. La **PRESENCIA** del campo la exige `registros-lint`
+   en corridas nuevas (CLOSED con `creado >= 2026-07-24`; no-retroactivo, `N/A`
+   vale — es presencia, no contenido).
 5. **Sin MCP** → fail-open: dejá las citas anotadas vía el flujo /idea (`saber:
-   cita causal pendiente <entry_id> · ref <corrida>`) para reportarlas desde una
-   sesión con el connector. Nunca se pierden, nunca bloquean el cierre.
+   cita causal pendiente <dedup_key> · ref <corrida-slug>`) para reportarlas desde
+   una sesión con el connector. Nunca se pierden, nunca bloquean el cierre.
 
 ---
 
