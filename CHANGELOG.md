@@ -4,6 +4,41 @@ Notas de release de la familia de skills Lucky. El historial completo del **proc
 (corridas del Crisol, RETROs) vive en `docs/refactor/_crisol/RUN-LEDGER.md`; los tags
 inmutables, en `git tag`. Formato: más nuevo arriba.
 
+## v2.10.0 — 2026-07-24 — Cerrar el loop causal del saber: /saber citar + CITAS_SABER (ADR 0027)
+
+Corridas `2026-07-24-cierre-loop-causal-saber` (CLOSED, 2/3, sello `e582f3feb1a4`) +
+`2026-07-24-loop-causal-fino` (CLOSED, sello `71a2bea2f922`). Encargo cross-sesión: la
+sesión de RAG midió que de ~50 fichas del saber las consultas fluyen pero las **citas
+causales están en 0 salvo DRIFT-001** — el loop consulta→refuerzo no cierra
+(`saber_telemetria` existe, nadie lo llama). Trabajado entre 3 sesiones (lucky-skills + RAG +
+Skills Hackaton) con límites de lane explícitos del operador.
+
+**Decisiones y sus porqué (para revisión — detalle completo en ADR 0027 + los RETRO):**
+- **El insight (ADR 0027):** el cierre del Crisol tenía DOS ejes del saber y solo uno cableado.
+  CAPTURA (destilación → `BITACORA:`) andaba; REFUERZO (qué ficha existente funcionó) no tenía
+  enganche. Se cabló el ESPEJO: campo `CITAS_SABER:` obligatorio al cierre, mismo jidoka que
+  BITACORA — **campo-de-juicio, NO gate de matriz con FAIL** (por qué: una corrida puede no
+  consultar ninguna ficha; un gate probabilístico daría falso FAIL).
+- **`/saber citar`** — gemelo de `/saber destilar`. Registra la cita como ALEGADO; **jamás
+  mueve `usos`** (la promoción sigue siendo del saber/humano).
+- **Ref = slug-id kebab de la corrida** (por qué: Hackaton leyó `telemetry.py:28` — el
+  validador rebota espacios/em-dash con `InputError` **silencioso**, causa raíz probable del cero).
+- **La cita ancla al id ESTABLE de la ficha, no al `entry_id`** (por qué: la promoción renombra
+  CAND→GAP y huerfanaría la cita). **Deuda de contrato declarada:** hoy el server no expone ese
+  id estable (`saber_ficha` no lo trae); la skill queda FLEXIBLE ("anclá al id estable según el
+  contrato del saber") y el pin exacto llega cuando la corrida server de Hackaton lo exponga.
+- **Lint de presencia no-retroactivo** (`registros-lint`, corridas CLOSED `creado >= 2026-07-24`;
+  `N/A` satisface): por qué, la asimetría captura/refuerzo (citar da crédito ajeno, menos
+  gratificante) + el operador movió a auto-promoción por métrica que LEE esta señal → cinturón
+  (campo jidoka) + tirantes (lint).
+- **Límite de lane (operador):** cero escritura al repo saberes, verificado por grep en las 3
+  iteraciones. El firing en vivo, la promoción CANDIDATE→LIVE y el rastro server-side por sesión
+  son del canal RAG↔Hackaton.
+- **El valor cross-sesión:** la coordinación de 3 sesiones cazó DOS bugs de contrato que una
+  sesión sola habría shipeado (el regex silencioso, y que `saber_ficha` no expone el id estable
+  ni el `sesion` puede ser el slug de la corrida). RED→GREEN visto en los 5 asserts nuevos de
+  `test-saber.sh` (10→12) y en el lint (rojo con un temp CLOSED sin campo).
+
 ## v2.9.0 — 2026-07-19 — Versionado de artefactos: lectura del proceso (ADR 0026)
 
 Corrida `2026-07-19-versionado-artefactos` (CLOSED, 1/3, sello `184d560cf0d5`).
