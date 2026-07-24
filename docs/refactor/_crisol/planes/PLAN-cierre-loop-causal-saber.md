@@ -55,13 +55,14 @@ destilación. Puntero a `/saber citar` para el cómo (no se re-define acá).
 bloque de proyección, junto a `BITACORA:` (mismo estilo: opcional-de-formato, NO bloqueante,
 crisol §4 paso 8).
 
-**E. Dogfood (prueba viva RED→GREEN conductual)** — al cierre de ESTA corrida, ejecutar
-`/saber citar` de verdad: el roster aplica fichas reales del saber al verificar (el
-quality-auditor aplica `FALSO-VERDE-004` = capturar exit code antes del pipe, y `DRIFT-007` =
-sondar el intérprete). Con endoso del operador, registrar esas citas con `saber_telemetria` y
-el ref de esta corrida. Es la PRIMERA cita causal cableada por el mecanismo nuevo — el loop
-cierra sobre su propio cierre. Si el operador juzga que ninguna ficha funcionó de verdad →
-`N/A` honesto, sin inventar.
+**E. Primera cita en vivo — FUERA DE ESTE ALCANCE (límite del operador, 2026-07-24).** El
+operador delimitó que "lo de saberes" (escribir al saber, promover CANDIDATE→LIVE) lo maneja
+el canal RAG↔Skills Hackaton, NO esta corrida. Por eso esta corrida SÓLO shipea el MECANISMO
+en `lucky-skills` (define `/saber citar` y el campo `CITAS_SABER:`); **no dispara
+`saber_telemetria` ni toca el repo `lucky-saber`**. La primera cita causal EN VIVO y la
+promoción son del lane saberes. El campo `CITAS_SABER:` de ESTA corrida se cierra honesto:
+`mecanismo shipeado acá; primera cita en vivo = lane saberes (RAG↔Hackaton)`. La prueba
+RED→GREEN de esta corrida es ESTRUCTURAL (acto F), no conductual — sin escritura al saber.
 
 **F. Test estructural** — extender `saber/tests/test-saber.sh` (o assert nuevo): (1) el
 subcomando `/saber citar` existe en `saber/SKILL.md` con mención a `saber_telemetria` y
@@ -93,10 +94,14 @@ al operador). Cero secretos.
    `docs/refactor/_crisol/runs/<id>.md` es el ancla de evidencia que el humano cotejará. Si
    fuera falso (el MCP espera otro formato), el ingeniero ajusta el string del ref sin cambiar
    el diseño. — Fundamento: el ledger de la corrida ES el RUN-LEDGER que la tool nombra.
-5. **El dogfood cita fichas que GENUINAMENTE ayudaron** — el roster aplica `FALSO-VERDE-004`/
-   `DRIFT-007` al correr REGLA 0 (están en su prompt canónico como doctrina). Si el operador
-   juzga que no funcionaron de verdad → `N/A` honesto. — Fundamento: el prompt del
-   quality-auditor referencia esas fichas explícitamente; aplicarlas al verificar es uso real,
-   no inventado.
+5. **El mecanismo se shipea completo en `lucky-skills` sin escribir al saber** — `/saber
+   citar` DEFINE la llamada a `saber_telemetria` (contrato, args, ref), pero el ACTO de
+   dispararla es del consumidor (una sesión con el connector + endoso humano), no de esta
+   corrida. Shipear la definición YA cierra el hueco declarado ("no hay campo que pregunte");
+   el firing en vivo es del lane saberes (RAG↔Hackaton). Si fuera falso (definir sin poder
+   disparar nunca deja el loop abierto), haría falta que el lane saberes lo consuma — que es
+   justo su encargo. — Fundamento: límite del operador 2026-07-24 ("cuidado con lo de
+   saberes"); el eje CAPTURA/BITACORA ya prueba que shipear el campo-de-juicio basta para que
+   el hábito arranque.
 
 **Corregime ahora o sigo con esto.**
