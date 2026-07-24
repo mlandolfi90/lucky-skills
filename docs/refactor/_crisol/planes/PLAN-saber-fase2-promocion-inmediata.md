@@ -135,3 +135,19 @@ touches de doctrina (crisol/bitacora/escenario-endoso) + drift dedup_key→entry
 cierre → forja v2.11.0 (ambas condiciones cumplidas: GO directo del operador + pin de Hackaton).
 
 **Corregime ahora o sigo con esto.**
+
+## Correcciones del Steward (APPROVE con inline) — aplicadas
+
+1. **Supersesión por `refs:`, JAMÁS whole-ADR.** ADR 0028 linkea 0023/0027/0015 por `refs:` y
+   documenta la derogación POR-PUNTO en su cuerpo. Los viejos quedan `estado: ACEPTADA` byte-intactos
+   (respeta ADR 0016 §4, registros inmutables). NUNCA `supersede:[...]` ni flip a SUPERSEDED-entero
+   (el INDEX los leería muertos enteros, contradiciendo lo que se CONSERVA de cada uno).
+2. **`DESAPARECE:` en el ledger de la corrida** (ADR 0024): declarar los modos que se BORRAN para
+   que el design-verifier lo resuelva como eliminación real, no reubicación → `DESAPARECE: estado
+   CANDIDATE (fichas) · /saber promover (paso de ciclo) · /saber revisar (puerta de entrada) · gate
+   "PROHIBIDO BATCH" pre-LIVE · flujo mcp-inbox para fichas`.
+3. **Techo 400 líneas (ADR 0016 §5):** saber/SKILL.md = 255 hoy. Si el rewrite + ritual lo revientan,
+   el ritual de curaduría se EXTRAE a rama propia (`saber/ramas/NNN-curaduria.md`), no engorda el
+   tronco. El ingeniero mide al cerrar.
+4. **Drift `dedup_key→entry_id`** confirmado real (crisol:518-519, template:25,72): se foldea el fix;
+   cuidado de NO re-introducir `dedup_key` en la prosa vecina al tocar crisol §4 paso 8.
