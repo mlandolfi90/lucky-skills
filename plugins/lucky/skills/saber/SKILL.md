@@ -189,12 +189,17 @@ no una promoción: alimenta el contador de citas causales, **jamás mueve `usos`
      determinista (**un solo id-de-corrida en todo el loop**; un retry no duplica).
    - `sesion` = el **session_id del cliente MCP** — **NO el slug de la corrida**:
      las consultas (`saber_buscar`) ocurren ANTES de que la corrida tenga id, así
-     que el `sesion` debe ser estable TODA la sesión para cruzar con el tick de
-     consulta server-side. La corrida server de Hackaton define cómo fluye el `sesion`.
-   - **Ref estable para auditar en `CITAS_SABER:`** — cuando Hackaton **exponga el
-     `content_key` vía `saber_ficha`**, registrá ESE (sobrevive el rename); hasta
-     entonces, el `entry_id`. **NUNCA hardcodees el shape del arg** — que la skill
-     sobreviva el cambio; el ejemplo exacto se pinea cuando la corrida server cierre.
+     que el `sesion` debe ser estable TODA la sesión. **Mismo string en la consulta
+     y en la cita** (el server lo guarda verbatim; `saber_consultas(sesion)` lee por
+     ese string).
+   - **Ref para auditar en `CITAS_SABER:` = el `entry_id`.** `saber_ficha` **NO
+     expone** el `content_key` (quedó fuera de scope y no hace falta): el server
+     resuelve el `entry_id`→`content_key` (`content_key_for`) internamente antes de
+     registrar y coalesce el rename — el consumidor **siempre pasa el `entry_id`** y
+     nunca maneja clave estable. Registrás el `entry_id` en `CITAS_SABER:`.
+   **Ejemplo de evento** (contrato confirmado vivo, corrida server de Hackaton CLOSED):
+   `saber_telemetria(eventos=[{event_id: "cita:<slug>:<entry_id>", entry_id: "<GAP-nnn>",
+   run_ledger_ref: "<slug-kebab>"}], sesion="<mcp-session-id>")`.
    Cuenta como ALEGADO, no como uso.
 
    > **DOCTRINA DURA — la FORMA del `run_ledger_ref` (causa raíz probable de las
@@ -206,10 +211,9 @@ no una promoción: alimenta el contador de citas causales, **jamás mueve `usos`
    > avisar. Es la causa raíz probable de que las citas causales estén en 0. El
    > slug-id kebab es regex-safe por construcción (PK, ADR 0016). Fuente:
    > `lucky-tool-saber/saber/telemetry.py:28` (`_REF_RE`).
-4. **Reportá** qué citas quedaron alegadas — los `entry_id` citados (o el
-   `content_key` cuando `saber_ficha` lo exponga) para el campo `CITAS_SABER:` del
-   cierre (crisol §4 paso 8) — o `N/A (no se consultó saber en esta corrida)`
-   explícito. La **PRESENCIA** del campo la exige `registros-lint` en corridas
+4. **Reportá** qué citas quedaron alegadas — los `entry_id` citados para el campo
+   `CITAS_SABER:` del cierre (crisol §4 paso 8) — o `N/A (no se consultó saber en
+   esta corrida)` explícito. La **PRESENCIA** del campo la exige `registros-lint` en corridas
    nuevas (CLOSED con `creado >= 2026-07-24`; no-retroactivo, `N/A` vale — es
    presencia, no contenido).
 5. **Sin MCP** → fail-open: dejá las citas anotadas vía el flujo /idea (`saber:

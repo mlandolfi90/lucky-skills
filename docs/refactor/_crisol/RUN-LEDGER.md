@@ -3553,6 +3553,22 @@ Fast-path bajo goal 'terminar sin intervención'. Pin del contrato final tras el
 de la corrida server de Hackaton. Verificación: REGLA 0 (test-saber) + leak + verificador
 fresco del delta.
 <!-- VEREDICTOS:BEGIN -->
-- runState: wip
+- runState: closing
+- [V] TARGET · PASS · lider · pc-local (directiva durable)
+- [V] MODEL · PASS · lider · opus-4.8 líder + verificador
+- [V] REGLA0 · PASS · verificador · test-saber 12/12 + registros-lint 0, corridos por el verificador en pc-local
+- [V] TEST_COVERAGE · PASS · verificador · test-saber sigue 12/12
+- [V] OPEN_CLOSED · PASS · verificador · pin de prosa acotado (saber §/saber citar + ADR 0027 §Consecuencias); +27/-17; sello v2.10.1 intacto
+- [V] SCOPE_CREEP · PASS · verificador · solo saber/SKILL.md + ADR 0027 (declarados); cero llamada saber_*, cero escritura al repo saberes
+- [V] FIDELIDAD · PASS · verificador · línea stale (content_key vía saber_ficha) reemplazada por el contrato final; ejemplo de evento + sesion pineados; grep 'expon' = solo 'NO expone'; ADR deuda CERRADA con evidencia e2e
+- [V] COHERENCIA · PASS · verificador · skill↔ADR dicen el MISMO contrato final (pasá entry_id → server resuelve content_key → coalesce; saber_ficha no expone; sesion = mcp session id)
+- [V] ZERO_LEAK · PASS · verificador · leak-scan exit 0; cero secretos
+- [V] CIERRE_TRAS_PASS · PASS · gate · cierre tras verificador PASS
+- [V] MIGRATION · N/A · gate · sin DDL
+- [V] RESPONSIVE · N/A · gate · no UI
+- [V] CONFORMIDAD · N/A · gate · no código hexagonal
+- [V] SELLOS · N/A · gate · el operador forja v2.10.2 aparte
+- [V] TAG_GATE · N/A · gate · no crea tag en esta corrida
 <!-- VEREDICTOS:END -->
-- Iteraciones: 1/3
+- Iteraciones: 1/3 (verificador fresco PASS a la 1ª — pin de prosa)
+- Cierre: 2026-07-24 · fast-path; verificador fresco PASS. Habilita forja v2.10.2 (pin final, deuda ADR 0027 cerrada).

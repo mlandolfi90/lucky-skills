@@ -102,13 +102,19 @@ que el refuerzo vuelva a la ficha para que el sistema sepa cuál merece vivir.
   correcto y más simple: **`/saber citar` pasa el `entry_id`** (el id-display
   GAP-nnn/CAND-xxx) y **el server lo resuelve a su clave estable `content_key`**
   (`sha256(síntoma·acción)`, recomputable al servir) y **coalesce las citas a través
-  del rename CANDIDATE→LIVE** — el consumidor no maneja ninguna clave estable. Deuda de
-  contrato aún pendiente (pin): el **field donde `saber_ficha` expondrá el `content_key`**
-  (para un ref auditable en `CITAS_SABER:`) y la **convención del `sesion`** (el
-  session_id del cliente MCP, estable toda la sesión — el slug de corrida no sirve porque
-  las consultas ocurren antes de que la corrida tenga id) los define la corrida server de
-  Hackaton (`lucky-tool-saber`). `/saber citar` queda FLEXIBLE (no hardcodea el shape); el
-  ejemplo exacto se pinea en un micro-update cuando esa corrida cierre.
+  del rename CANDIDATE→LIVE** — el consumidor no maneja ninguna clave estable.
+- **Deuda de contrato CERRADA (corrida `2026-07-24-loop-causal-pin-final`; la corrida
+  server de Hackaton `lucky-tool-saber` CLOSED, deploy live, e2e verde:
+  `metrics(GAP-024)=11=metrics(CAND-af1f29893a9a)` — las consultas varadas bajo el id
+  muerto coalescieron bajo el promovido).** Shapes finales: (1) `saber_ficha` **NO**
+  expone `content_key` — quedó fuera de scope y **no hace falta**: el server resuelve el
+  `entry_id`→`content_key` (`content_key_for`) internamente antes de `record_causal`; el
+  consumidor **siempre pasa el `entry_id`** y registra ESE en `CITAS_SABER:`. (2) El param
+  se llama `sesion` (en `saber_buscar`/`saber_ficha`/`saber_telemetria`), valor = el
+  **session_id del cliente MCP**, mismo string en la consulta y en la cita (el server lo
+  guarda verbatim; `saber_consultas(sesion)` lee por ese string). `/saber citar` (v2.10.2)
+  pinea el ejemplo de evento exacto. RAG probó el mecanismo VIVO bajo v2.10.1: las citas de
+  `FALSO-VERDE-004` y `DRIFT-007` pasaron de `citas_causales` 0→1 con este contrato.
 - **`crisol/SKILL.md` §4 paso 8** agrega el ESPEJO inmediatamente después del
   bloque de Destilación/BITACORA: el campo `CITAS_SABER:` se registra SIEMPRE, con
   puntero a `/saber citar` para el cómo. El Crisol AVISA, no exige gate.

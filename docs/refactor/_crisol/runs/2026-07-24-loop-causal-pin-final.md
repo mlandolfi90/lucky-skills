@@ -10,8 +10,28 @@ tier: "fast-path (pin de prosa en 1 skill + cierre de la nota de deuda del ADR; 
 target: "pc-local (la forja; directiva durable del operador para lucky-skills)"
 model: "opus (líder opus-4.8 + verificación) — goal 'terminar sin intervención + documentar los porqué'"
 ley: "v2.10.1 (sello local == último tag)"
-iteraciones: "1/3"
-runState: wip
+iteraciones: "1/3 (verificador fresco PASS a la 1ª — pin de prosa)"
+runState: closing
+cierre: "2026-07-24 · fast-path; verificador fresco PASS. Habilita forja v2.10.2 (pin final, deuda ADR 0027 cerrada)."
+citas_saber: "N/A — pin de contrato/prosa; no se consultó ni citó ninguna ficha del saber."
+veredictos:
+  - {regla: TARGET, veredicto: PASS, quien: lider, evidencia: "pc-local (directiva durable)"}
+  - {regla: MODEL, veredicto: PASS, quien: lider, evidencia: "opus-4.8 líder + verificador"}
+  - {regla: REGLA0, veredicto: PASS, quien: verificador, evidencia: "test-saber 12/12 + registros-lint 0, corridos por el verificador en pc-local"}
+  - {regla: TEST_COVERAGE, veredicto: PASS, quien: verificador, evidencia: "test-saber sigue 12/12"}
+  - {regla: OPEN_CLOSED, veredicto: PASS, quien: verificador, evidencia: "pin de prosa acotado (saber §/saber citar + ADR 0027 §Consecuencias); +27/-17; sello v2.10.1 intacto"}
+  - {regla: SCOPE_CREEP, veredicto: PASS, quien: verificador, evidencia: "solo saber/SKILL.md + ADR 0027 (declarados); cero llamada saber_*, cero escritura al repo saberes"}
+  - {regla: FIDELIDAD, veredicto: PASS, quien: verificador, evidencia: "línea stale (content_key vía saber_ficha) reemplazada por el contrato final; ejemplo de evento + sesion pineados; grep 'expon' = solo 'NO expone'; ADR deuda CERRADA con evidencia e2e"}
+  - {regla: COHERENCIA, veredicto: PASS, quien: verificador, evidencia: "skill↔ADR dicen el MISMO contrato final (pasá entry_id → server resuelve content_key → coalesce; saber_ficha no expone; sesion = mcp session id)"}
+  - {regla: ZERO_LEAK, veredicto: PASS, quien: verificador, evidencia: "leak-scan exit 0; cero secretos"}
+  - {regla: CIERRE_TRAS_PASS, veredicto: PASS, quien: gate, evidencia: "cierre tras verificador PASS"}
+  - {regla: MIGRATION, veredicto: "N/A", quien: gate, evidencia: "sin DDL"}
+  - {regla: RESPONSIVE, veredicto: "N/A", quien: gate, evidencia: "no UI"}
+  - {regla: CONFORMIDAD, veredicto: "N/A", quien: gate, evidencia: "no código hexagonal"}
+  - {regla: SELLOS, veredicto: "N/A", quien: gate, evidencia: "el operador forja v2.10.2 aparte"}
+  - {regla: TAG_GATE, veredicto: "N/A", quien: gate, evidencia: "no crea tag en esta corrida"}
+retro: "El pin correcto EN EL MOMENTO correcto: esperé a que la corrida server de Hackaton CERRARA (su contrato final) y recién ahí pineé — un solo pin, no una re-forja por cada refinamiento intermedio. Es la aplicación literal de la lección de la re-forja anterior (forjar-tras-contrato-de-sesion-dependiente). Cierre limpio: verificador fresco PASS a la 1ª, deuda de ADR 0027 cerrada con evidencia e2e (metrics(GAP-024)=11=metrics(CAND-af1f29893a9a)), y el mecanismo YA probado vivo por RAG (2 citas 0→1). El círculo del saber quedó completo y sin puntas abiertas."
+bitacora: "N/A (pin de contrato; el hallazgo fue de Hackaton en el server, esta corrida lo consumió)."
 origen: "Skills Hackaton CERRÓ su corrida server (lucky-tool-saber CLOSED, deploy f864b1d live, e2e VERDE: metrics(GAP-024)=11=metrics(CAND-af1f29893a9a) — las 10 consultas varadas bajo el id muerto coalescieron bajo el promovido). Shapes finales: (1) saber_ficha NO expone content_key — quedó fuera de scope y NO hace falta: el server resuelve el entry_id→content_key (content_key_for) internamente antes de record_causal; el consumidor SIEMPRE pasa el entry_id y nunca maneja clave estable. (2) el param se llama `sesion` (en saber_buscar/saber_ficha/saber_telemetria), valor = session_id del cliente MCP, mismo string consulta↔cita. Esta corrida PINEA ese contrato final y CIERRA la deuda declarada en ADR 0027 (la corrida server ya cerró — es el momento del pin único, no un refinamiento intermedio)."
 alcance: "(a) saber/SKILL.md §/saber citar: reemplazar la línea stale del ref-de-auditoría ('cuando Hackaton exponga content_key vía saber_ficha') por el contrato final confirmado (saber_ficha NO lo expone ni hace falta; SIEMPRE pasás el entry_id, el server resuelve internamente; para auditar en CITAS_SABER registrás el entry_id); pinear el ejemplo de evento y el `sesion`. (b) docs/decisions/0027 §Consecuencias: CERRAR la nota de deuda (resuelta por la corrida server de Hackaton, con la evidencia e2e). Sin cambio de contrato de matriz."
 nota_release: "habilita forja v2.10.2 (el PIN ÚNICO tras el cierre de la dependencia — coherente con la lección [[forjar-tras-contrato-de-sesion-dependiente]]). Cierra la deuda de ADR 0027. RAG ya probó el mecanismo vivo bajo v2.10.1 (2 citas 0→1); este pin es de precisión de contrato/doc, no de comportamiento."
