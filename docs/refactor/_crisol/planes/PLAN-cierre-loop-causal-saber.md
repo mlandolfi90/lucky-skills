@@ -105,3 +105,42 @@ al operador). Cero secretos.
    el hábito arranque.
 
 **Corregime ahora o sigo con esto.**
+
+---
+
+## Iteración 2 — contrato lockeado por las 3 sesiones (RAG + Hackaton)
+
+La verificación cross-sesión (el valor real de la coordinación de las 3) surfaceó tres cosas
+que la iteración 1 no tenía. Roster 1 pasó 4/4 sobre el mecanismo base; esta iteración lo
+endurece con el contrato lockeado. Deltas:
+
+- **G1. Convención del `run_ledger_ref`** — pasa de "ruta de la fila" a **el slug-id kebab de
+  la corrida** (el campo `id:`, ej. `2026-07-24-cierre-loop-causal-saber`). Hackaton leyó la
+  fuente (`lucky-tool-saber/saber/telemetry.py:28`): `_REF_RE =
+  ^[A-Za-z0-9][A-Za-z0-9._/#:@-]{0,160}$` — **no admite espacios/em-dash/paréntesis y rebota
+  con InputError SILENCIOSO**. Un ref con la cabecera humana del ledger muere sin avisar — es
+  la causa raíz probable del 49/50 en cero. El slug es regex-safe, estable (PK ADR 0016) e
+  idéntico byte a byte a lo que Hackaton lee aguas abajo. La skill lo documenta como doctrina.
+- **G2. Anclaje al `dedup_key`, no al `entry_id`** — Hackaton confirmó que `saber_telemetria`
+  clava contra `entry_id`, que la promoción RENOMBRA (CAND-xxx→GAP-nnn) → la cita quedaría
+  huérfana. `/saber citar` hace `saber_ficha(<ID>)` → lee el `dedup_key` (estable) → lo
+  registra en `CITAS_SABER` y lo usa de ancla. `event_id` = `cita:<corrida-slug>:<dedup_key>`
+  (ambas partes estables; un solo id-de-corrida en todo el loop — nota de consistencia de RAG).
+  El shape exacto del arg de la tool NO se hardcodea (Hackaton está estabilizando el server a
+  clavar por dedup_key): la skill dice "anclá al dedup_key estable según el contrato del saber".
+- **G3. Lint de PRESENCIA no-retroactivo** — RAG lo pidió (asimetría: citar da crédito ajeno,
+  menos gratificante que destilar → necesita más fuerza que BITACORA; y el operador movió a
+  auto-promoción (b), que LEE esta señal). PIVOTE respecto del supuesto 3 (que votaba paridad
+  estricta con BITACORA): se adopta cinturón (campo jidoka) + tirantes (lint). `registros-lint`
+  exige el campo `citas_saber:` SOLO en corridas `estado: CLOSED` con `creado >= 2026-07-24`
+  (acepta `N/A` → sin FAIL falso; no enrojece las históricas). Se agrega `citas_saber:` como
+  clave de frontmatter (espejo de `bitacora:`) al template y a ESTA corrida al cerrar.
+- **G4. Degradación explícita por compactación** — RAG cazó que "el agente recuerda qué
+  consultó" se rompe con la compactación (le pasó hoy). Mientras no exista el rastro
+  server-side (lane Hackaton), `/saber citar` NO depende de la memoria en silencio: presenta
+  las fichas + pide al humano agregar las olvidadas, y lo DECLARA. El rastro server-side se
+  consume cuando Hackaton lo shipee.
+
+**Fuera de mi lane (declarado, lo hace Hackaton en el repo saberes):** el fix del server
+(telemetría por dedup_key + tick de sesión en la consulta) y la auto-promoción (b). Mi corrida
+solo shipea el mecanismo en `lucky-skills`.
