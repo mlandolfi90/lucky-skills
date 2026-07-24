@@ -2,12 +2,13 @@
 name: saber
 description: >-
   Saber — administra el ciclo de vida del conocimiento central (repo
-  `lucky-saber`, tools MCP `saber_*`): estado del ciclo, revisar la bandeja
-  inbox → merge con endoso, promoción CANDIDATE→LIVE y poda guiadas, y destilar
-  al CIERRE de una corrida (spawnea al agente `destilador`). Disparar cuando el
-  operador diga "/saber", "revisá la bandeja del saber", "promové/podá una
-  ficha", "destilá el cierre", "citá las fichas que funcionaron", o al cerrar una
-  corrida con disparador objetivo.
+  `lucky-saber`, tools MCP `saber_*`): estado del ciclo, la ventana de gracia de
+  la evidencia-cero, la CURADURÍA del catálogo (consolidar + fusionar
+  cuasi-duplicados + podar), citar las fichas que funcionaron, y capturar al
+  CIERRE de una corrida (spawnea al agente `destilador`, ahora hacia LIVE
+  directo). Disparar cuando el operador diga "/saber", "curá/destilá el
+  catálogo", "fusioná los duplicados del saber", "podá una ficha", "citá las
+  fichas que funcionaron", o al cerrar una corrida con disparador objetivo.
   NO disparar para consultar un patrón por síntoma (eso es la skill `bitacora`)
   ni para capturar una idea a futuro (eso es /idea). Administra el ciclo; no
   consulta ni redacta el catálogo.
@@ -18,19 +19,25 @@ allowed-tools: Read, Grep, Glob, Bash, Agent
 
 La `bitacora` **consulta** (síntoma → acción) y **captura**; el Crisol **decide**
 si está bien hacer algo. El **saber** administra el CICLO del conocimiento
-central que nadie administraba: la bandeja `mcp-inbox` → merge → CANDIDATE→LIVE →
-poda/ascenso, y la destilación al cierre de una corrida.
+central que nadie administraba: la **captura que entra LIVE directo**, la
+**CURADURÍA** humana (consolidar + fusionar cuasi-duplicados + podar la
+evidencia-cero) y el **refuerzo** por cita.
 
-**El enemigo: documentar sin aprender** — la lección que quedó guardada en un
-RETRO sellado o en el parking y NO vuelve cuando el síntoma vuelve, porque solo
-la bitácora **LIVE** se consulta por síntoma. Guardar es documentar; que el
-sistema te la devuelva sola es aprender. Esta skill cierra ese lazo sin fingir
-autoridad que no tiene: la gobernanza (qué es verdad, qué entra a main) es del
-operador, ficha por ficha.
+**Fase 2 (ADR 0028).** La ficha se sirve **al capturarse** — se elimina el estado
+`CANDIDATE` y el gate pre-LIVE. El principio "el humano decide qué es verdad" NO
+muere: se **MUEVE** del juicio pre-LIVE a la **curaduría posterior** (`/saber
+destilar`) + el override manual (`endosar.py`). Cambia el momento del juicio, no
+su existencia.
 
-**Ejes:** administra (no consulta ni redacta) · endoso POR FICHA (jamás batch) ·
-nunca finge una capacidad que el MCP no da · `docs/IDEAS.md` es la bandeja local
-(append-only) · fail-open sin MCP (nada se pierde, nada bloquea).
+**El enemigo: documentar sin aprender** — la lección que quedó guardada y NO
+vuelve cuando el síntoma vuelve. Guardar es documentar; que el sistema te la
+devuelva sola es aprender. Esta skill cierra ese lazo sin fingir autoridad que no
+tiene: el juicio (qué se fusiona, qué se poda) es del operador, en la curaduría.
+
+**Ejes:** administra (no consulta ni redacta) · el juicio humano vive en la
+**CURADURÍA batch** (cada fusión y cada poda con confirmación de ESE ítem, jamás
+auto) · nunca finge una capacidad que el MCP no da · `docs/IDEAS.md` es la bandeja
+local (append-only) · fail-open sin MCP (nada se pierde, nada bloquea).
 
 **Frontera con `bitacora` (fuente única, PIN 2):** todo lo de CONSUMIR (buscar/
 ficha por síntoma), la DOCTRINA de captura (§Capturar) y el ESPEJO local
@@ -48,108 +55,136 @@ resultado del catálogo.
 
 Reporte compacto del ciclo, sin tocar nada:
 
-1. **LIVE + CANDIDATE-en-main:** `saber_index` (default, LIVE) y
-   `saber_index(incluir_candidate=true)` — cuántas fichas vivas, cuántas
-   CANDIDATE ya mergeadas a main esperando promoción.
+1. **LIVE:** `saber_index` — cuántas fichas vivas se sirven. (Ya no hay
+   `CANDIDATE` para fichas: la captura entra LIVE directo — ADR 0028.)
 2. **Salud/uso:** `saber_metricas` — `consultas` y `citas_causales_alegadas` por
-   entrada (asesor de la promoción, no la ejecuta).
-3. **Propuestas sin mergear (bandeja local):** grep de `docs/IDEAS.md` por las
-   líneas de parking `saber: propuesta pendiente` — las fichas propuestas al
-   inbox que todavía nadie endosó.
-4. **Reportá** en un bloque: `LIVE: N · CANDIDATE-en-main: N · propuestas sin
-   mergear: N` + cualquier **discrepancia** que salte (p. ej. una propuesta
-   parkeada cuya rama ya no aparece — señal, no acción).
+   entrada. Una ficha LIVE con **0 citas + `usos`=0** y edad ≥ ~30d está en la
+   **ventana de gracia de la evidencia-cero**: candidata a poda (ver `/saber
+   podar`), NO a promoción — la promoción ya no existe.
+3. **Parking local (bandeja offline):** grep de `docs/IDEAS.md` por las líneas de
+   parking `saber:` — lo capturado/citado offline que todavía no llegó al
+   catálogo (fail-open sin MCP).
+4. **Reportá** en un bloque: `LIVE: N · evidencia-cero (~30d): N · parking local:
+   N` + cualquier **discrepancia** que salte (señal, no acción).
 
 Sin MCP → reportá solo la bandeja local del grep y declaralo ("saber MCP
 ausente: solo bandeja local").
 
-## `/saber revisar` — bandeja → merge (SOLO con el operador presente)
+## `/saber revisar` — override excepcional (NO puerta de entrada)
 
-Merge de propuestas a main del saber, **ficha por ficha, con endoso explícito**.
-Dos fuentes:
+En Fase 2 la captura entra LIVE directo: **`/saber revisar` deja de ser la puerta
+de entrada al catálogo** (el estado `CANDIDATE` se eliminó para fichas — ADR
+0028). Sobrevive SOLO como **override humano excepcional**:
 
-- **(a) Propuestas SIN mergear** — las líneas de parking de `docs/IDEAS.md`:
-  `saber: propuesta pendiente mcp-inbox/<hash> · <síntoma>`. **LÍMITE REAL
-  documentado (arqueología ADR 0023):** NINGUNA tool MCP enumera las ramas
-  `mcp-inbox/*`; el `branch` que devuelve `saber_proponer_ficha` es el ÚNICO
-  handle para mergearla. Por eso cada propuesta se persiste como línea de
-  parking: es la bandeja. Una propuesta cuyo branch se perdió (nunca se parkeó,
-  o se borró la línea) es **invisible vía MCP** — se declara como tal, no se
-  inventa.
-- **(b) CANDIDATE ya en main** — `saber_index(incluir_candidate=true)`: las que
-  ya se mergearon y esperan promoción a LIVE (eso es `/saber promover`).
+- **Corregir el catálogo a mano** — `endosar.py` (repo `lucky-saber`, fuera del
+  MCP): el override manual del humano sobre una ficha LIVE.
+- **Ideas / señales / legacy** — `saber_mergear(branch)` sigue vivo SOLO para
+  mergear ideas/señales o una `CANDIDATE` legacy en vuelo (las que quedaron antes
+  del flip). **Ficha por ficha, con endoso explícito de ESA ficha** — el portón
+  de endoso no se borra: se reserva al override, jamás se infiere del contexto ni
+  se mergea al lote.
 
-Procedimiento (fuente a):
+No es un paso del ciclo normal. Sin MCP → declaralo ("saber MCP ausente: el
+override requiere el connector, o `endosar.py` en `lucky-saber`").
 
-1. Recolectá las líneas de parking pendientes.
-2. **FICHA POR FICHA**, presentá al operador la ficha con su **evidencia** (el
-   síntoma y la ref del parking) y esperá un **endoso EXPLÍCITO** de ESA ficha.
-3. Endoso → `saber_mergear(branch)` de ESA ficha (solo anexa CANDIDATE nuevas,
-   fast-forward; nunca promueve a LIVE).
-4. Tras el merge → marcá la propuesta como saldada con una **línea nueva** vía el
-   flujo /idea: `saber: mergeada <branch>`. **`docs/IDEAS.md` es append-only:
-   JAMÁS se edita ni se borra la línea vieja** (la propuesta pendiente queda como
-   historia; la nueva la salda).
-5. **Rechazo** → se descarta anotando el porqué (línea nueva de parking:
-   `saber: descartada <branch> · <motivo>`). No se mergea.
+## `/saber promover` — DEROGADO como paso de ciclo (ADR 0028)
 
-**PROHIBIDO BATCH:** un "sí" no es un "sí al lote". Cada ficha exige su propio
-endoso; jamás infieras endoso de contexto ni mergees varias de una.
+**Ya no existe la transición `CANDIDATE→LIVE`:** la captura entra LIVE directo,
+así que no hay ficha que "promover". El acto humano de juicio se **MOVIÓ** a la
+**curaduría** (`/saber destilar`: fusión + poda con confirmación) y al **override**
+(`endosar.py`). Si alguien pide "promover una ficha", reencuadralo: o ya está LIVE
+(se sirve), o es una `CANDIDATE` legacy en vuelo (mergear vía `/saber revisar`
+override), o querés corregirla a mano (`endosar.py`). La skill JAMÁS finge una
+promoción que el modelo ya no tiene.
 
-Sin MCP → presentá las fichas parkeadas para lectura y declará que el merge
-requiere el connector ("saber MCP ausente: no se puede mergear, quedan en la
-bandeja").
+## `/saber podar` — la ÚNICA garganta de poda (propone → el humano confirma)
 
-## `/saber promover <ID>` y `/saber podar` — GUIADOS v1 (sin tool MCP)
+La poda de **salida** reemplaza al gate de **entrada** (ADR 0028): lo que a ~30d
+no juntó ni una cita ni un uso, sale. Es la **única garganta de poda** del saber
+(no se reimplementa en ningún otro lado):
 
-**Por diseño no hay tool que ejecute esto** (arqueología ADR 0023):
-`saber_mergear` nunca promueve a LIVE, y el MCP nunca escribe `usos`/`estado`/
-`scope`. Estos subcomandos son **guiados**: la skill PRESENTA y registra el
-endoso; el **ACTO lo ejecuta el operador** en el repo `lucky-saber`. La skill
-JAMÁS finge una capacidad que el MCP no da.
+1. **Proponé read-only** con `saber_destilar_proponer(modo='poda', dias_poda=30)`:
+   devuelve los **podables** — la evidencia-cero (**0 citas + `usos`=0 + edad ≥
+   ~30d**). La tool NO archiva: **PROPONE** (READ-ONLY, sin side effects).
+2. **POR FICHA**, presentá al humano el candidato con su **historial**
+   (`saber_historial(entry_id)`: ts · veredicto · sesión · run_ledger_ref ·
+   contexto; **0 citas = `SERVIDA SIN PROBAR`**) y esperá su confirmación de ESA
+   ficha. Jamás batch, jamás auto-poda.
+3. **Confirmado** → el archivar es **reversible** (`estado=archivado`, NO borrado:
+   el por-qué-se-jubiló también es conocimiento; se restaura). El MCP propone; el
+   acto de archivar lo aplica el humano vía el override (`endosar.py`,
+   `lucky-saber`) — la skill no finge un write que el MCP no da.
 
-- **`/saber promover <ID>`** (CANDIDATE→LIVE): presentá la ficha — cuerpo con
-  `saber_ficha(<ID>)`, uso con `saber_metricas(<ID>)` — y el criterio (evidencia
-  real, `usos`). Registrá el endoso del operador y **decilo claro**: "promover a
-  LIVE es un acto en `lucky-saber` (git); esta skill no lo ejecuta".
-- **`/saber podar`**: presentá los candidatos a poda/ascenso con los criterios de
-  `bitacora` §Mantener — **STALE >90 días**, **usos bajos**, **tope ~40 entradas
-  vivas**; ascenso (patrón `usos ≥ 3` o explicado en >2 RETROs → puntero a ADR/
-  skill/regla). Registrá el endoso; el acto (archivar con su razón, o ascender)
-  lo ejecuta el operador en `lucky-saber`.
+Sin MCP → presentá lo que puedas leer y declará que el cómputo de podables
+requiere el connector ("saber MCP ausente: no se pueden proponer podables").
 
-## `/saber destilar <refs>` — el gatillo del cierre de corrida (crisol §4 paso 8)
+## `/saber destilar` — el RITUAL de curaduría humana batch (Fase 2)
 
-El acto de aprender al cerrar una corrida CON disparador objetivo:
+El acto de juicio humano que **MOVIÓ acá** (ADR 0028): consolidar y limpiar el
+catálogo LIVE. Tres pasos, todos **propone → el humano confirma** (jamás auto):
+
+1. **Consolidar** — leé el catálogo LIVE (`saber_index`) y, por ficha de interés,
+   su **historial** (`saber_historial(entry_id)`: ts · veredicto · sesión ·
+   run_ledger_ref · contexto; **0 citas = `SERVIDA SIN PROBAR`**). Es la foto de
+   qué se sirve y qué probó funcionar.
+2. **Fusionar cuasi-duplicados** — `saber_destilar_proponer(modo='fusiones',
+   umbral_causa_accion=0.80)` PROPONE los pares candidatos (causa+acción lado a
+   lado + 2 scores; `veredicto_sugerido` SIEMPRE `REVISAR`). **REGLA DE FUSIÓN
+   (horneada, insumo de RAG):**
+   - **Discriminante = CAUSA-RAÍZ + ACCIÓN**, jamás el síntoma ni el vocabulario.
+     Lo que "suena" parecido casi siempre es **complementario** (vinculado por
+     `refs:`), no duplicado (12 escépticos opus: 0/12 cuasi-dups aparentes debían
+     fusionarse).
+   - **Default ante duda = NO fusionar.** La fusión es **irreversible** y destruye
+     conocimiento: en la duda, se deja separado.
+   - **El comando PROPONE, nunca fusiona solo.** El humano confirma **CADA**
+     fusión; la UX muestra **causa+acción de cada par** para juzgar por lo que
+     importa, no por cómo suena.
+3. **Podar la evidencia-cero** — vía `/saber podar` (la única garganta de poda; no
+   se reimplementa acá): propone los evidencia-cero a ~30d, el humano confirma,
+   reversible = archivar.
+
+Cadencia **barata**: sugerida al cierre de corrida o por umbral acumulado. El
+núcleo de valor es la fusión (los duplicados exactos ya los dedup el `content_key`
+en captura). Sin MCP → declaralo: la curaduría necesita el connector para
+proponer.
+
+## `/saber capturar <refs>` — la captura al CIERRE de corrida (crisol §4 paso 8)
+
+El acto de aprender al cerrar una corrida CON disparador objetivo (antes se
+llamaba `/saber destilar`; **renombrado** en Fase 2 para no colisionar con la
+curaduría):
 
 1. **Spawneá al agente `destilador`** POR NOMBRE (vía `Agent`), con:
    `{REPO}` = este repo; `{ARTEFACTOS}` = `<refs>` (fila de corrida + RETRO,
    veredictos, postmortems, diagnósticos, microfixes); `{SINTOMAS_PREVIOS}` =
-   los síntomas de `saber_index` (para que declare posibles duplicados).
+   los síntomas de `saber_index` (para que declare posibles duplicados). El
+   destilador sigue **CAPTURADOR read-only** (ADR 0023): devuelve borradores, no
+   escribe.
 2. **Recibí sus borradores** (o `NADA COSECHABLE: <por qué>` — que se **respeta**:
    no se re-spawnea al destilador para "insistir").
 3. **Por cada borrador**, validá con `saber_gate_check(...)` — **dry-run, cero
-   side effects**: dice si pasaría el gate (lint + leak-scan) o qué lo rechaza.
-4. **Los que pasan** → proponelos con `saber_proponer_ficha(...)` (→ rama
-   `mcp-inbox/*`, **JAMÁS main**). Proponer al inbox es el **ÚNICO acto sin
-   endoso** — no toca main, por construcción del MCP.
-5. **Parkeá cada propuesta** con el `branch` DEVUELTO, vía el flujo /idea:
-   `2026-… · saber: propuesta pendiente <branch> · <síntoma corto> · endosar con
-   /saber revisar`. Sin esa línea la propuesta es invisible (ver `/saber
-   revisar`, límite real).
-6. **Reportá** qué propusiste (con su branch) y qué NO (con el porqué del gate).
+   side effects**: dice si pasaría el lint + leak-scan o qué lo rechaza.
+4. **Los que pasan** → `saber_proponer_ficha(...)` — semántica Fase 2 (ADR 0028):
+   **captura y SIRVE LIVE en main directo** (ACK `capturada`, id
+   `CAP-<content_key>`), ya **no** a `mcp-inbox/*`. La captura fresca se sirve
+   `SERVIDA SIN PROBAR`: su colchón es el historial de citas + la poda de
+   evidencia-cero, no un gate pre-LIVE (trade honesto — ADR 0028).
+5. **Reportá** qué capturó LIVE (con su id `CAP-…`) y qué NO (con el porqué del
+   gate).
 
 **Sin MCP en la sesión** → los borradores del destilador van **ÍNTEGROS a
-`/idea`** (parking local, "síntoma → acción" + evidencia), para proponerlos al
-saber desde una sesión con el connector. Nunca se pierden, nunca bloquean.
+`/idea`** (parking local, "síntoma → acción" + evidencia), para capturarlos desde
+una sesión con el connector. Nunca se pierden, nunca bloquean el cierre.
 
 ## `/saber citar <refs>` — el REFUERZO del cierre de corrida (crisol §4 paso 8)
 
-El **gemelo** de `/saber destilar` en el gatillo del cierre: la destilación
-cablea la CAPTURA (¿qué ficha NUEVA nace?), esto cablea el REFUERZO (¿qué ficha
-EXISTENTE funcionó de verdad?). Registra la **cita causal ALEGADA** — un *claim*,
-no una promoción: alimenta el contador de citas causales, **jamás mueve `usos`**
-(el ascenso CANDIDATE→LIVE sigue siendo endoso humano, ficha por ficha):
+El **gemelo** de `/saber capturar` en el gatillo del cierre: la captura cablea qué
+ficha NUEVA nace, esto cablea el REFUERZO (¿qué ficha EXISTENTE funcionó de
+verdad?). En Fase 2 la cita alimenta el **HISTORIAL** de la ficha
+(`saber_historial`), no una promoción: registra la **cita causal ALEGADA** — un
+*claim*, no un ascenso. **Jamás mueve `usos` ni promueve** (no hay promoción que
+asesorar: la ficha ya se sirve LIVE — ADR 0028):
 
 1. **Reuní las fichas que ESTA sesión consultó** — las que el agente miró con
    `saber_buscar`/`saber_ficha` en el hilo, más las que un **verificador canónico
@@ -159,32 +194,32 @@ no una promoción: alimenta el contador de citas causales, **jamás mueve `usos`
    **Degradación por compactación (declarada, NO silenciosa):** el "el agente
    recuerda qué consultó" se **ROMPE** con la compactación de contexto — un hilo
    largo pierde las consultas tempranas. Mientras NO exista un rastro server-side
-   por sesión (lo shipea el lane del saber/Hackaton), no dependas de la memoria en
-   silencio: presentá las fichas que PUEDAS reconstruir, **pedile EXPLÍCITO al
-   humano que agregue las que se hayan olvidado**, y **declará la limitación**
-   ("memoria de sesión posiblemente incompleta por compactación"). Cuando el
-   rastro server-side exista, `/saber citar` lo lee y esta degradación desaparece.
+   por sesión, no dependas de la memoria en silencio: presentá las fichas que
+   PUEDAS reconstruir, **pedile EXPLÍCITO al humano que agregue las que se hayan
+   olvidado**, y **declará la limitación** ("memoria de sesión posiblemente
+   incompleta por compactación"). Cuando el rastro server-side exista, `/saber
+   citar` lo lee y esta degradación desaparece.
 2. **POR FICHA**, presentá al humano cuál PARECE haber funcionado y esperá su
-   **confirmación** (principio de endoso: el humano decide qué es verdad; el LLM
-   no se auto-adjudica que la ficha funcionó). Jamás batch.
+   **confirmación** (principio de endoso: **el humano decide qué es verdad**; el
+   LLM no se auto-adjudica que la ficha funcionó). Jamás batch.
 3. **Pasá el `entry_id` que viste — el server resuelve la identidad estable.**
    Registrá cada ficha confirmada con `saber_telemetria` pasando el **`entry_id`**
-   (el id-display que viste: `GAP-nnn` o `CAND-xxx`). **El server lo resuelve
-   internamente a su clave estable `content_key`** (`sha256(síntoma·\x00·acción)`,
-   recomputable al servir) y **coalesce las citas a través del rename
-   CANDIDATE→LIVE** (la promoción no toca síntoma/acción, así que el `content_key`
-   sobrevive). Por eso **el consumidor NO maneja ninguna clave estable**: pasás el
-   id que viste, el server hace el resto.
+   (el id-display que viste: `GAP-nnn`, `CAP-xxx` o un `CAND-xxx` legacy). **El
+   server lo resuelve internamente a su clave estable `content_key`**
+   (`sha256(síntoma·\x00·acción)`, recomputable al servir) y **coalesce las citas
+   a través del rename** (MOOT para las nacidas-LIVE; se mantiene para `CAND-`
+   legacy en vuelo). Por eso **el consumidor NO maneja ninguna clave estable**:
+   pasás el id que viste, el server hace el resto.
    **Por qué NO el `dedup_key`** (hallazgo de Hackaton, 3 lecturas del código): el
-   `dedup_key` **no se persiste en la ficha ni lo sirve `saber_ficha`** (es el kebab
-   que se pasa al PROPONER, nada más) — no hay de dónde leerlo. El único id estable
-   real es el `content_key`, y **vive en el server**: por eso el contrato es "pasá
-   el `entry_id`, el server coalesce", no "anclá vos a una clave estable".
+   `dedup_key` **no se persiste en la ficha ni lo sirve `saber_ficha`** (es el
+   kebab que se pasa al capturar, nada más) — no hay de dónde leerlo. El único id
+   estable real es el `content_key`, y **vive en el server**: por eso el contrato
+   es "pasá el `entry_id`, el server coalesce", no "anclá vos a una clave estable".
    Campos del evento:
    - `run_ledger_ref` = el **slug-id kebab de ESTA corrida** (el campo `id:` de la
-     fila, ej. `2026-07-24-cierre-loop-causal-saber`) — string idéntico byte a byte
-     al que el consumo aguas abajo lee. **NO la ruta de la fila, NO la cabecera
-     humana del ledger.** (Este campo SÍ es estable y usable hoy.)
+     fila, ej. `2026-07-24-saber-fase2-promocion-inmediata`) — string idéntico
+     byte a byte al que el consumo aguas abajo lee. **NO la ruta de la fila, NO la
+     cabecera humana del ledger.** (Este campo SÍ es estable y usable hoy.)
    - `event_id` = `cita:<corrida-slug>:<entry_id>` — clave de idempotencia
      determinista (**un solo id-de-corrida en todo el loop**; un retry no duplica).
    - `sesion` = el **session_id del cliente MCP** — **NO el slug de la corrida**:
@@ -193,14 +228,14 @@ no una promoción: alimenta el contador de citas causales, **jamás mueve `usos`
      y en la cita** (el server lo guarda verbatim; `saber_consultas(sesion)` lee por
      ese string).
    - **Ref para auditar en `CITAS_SABER:` = el `entry_id`.** `saber_ficha` **NO
-     expone** el `content_key` (quedó fuera de scope y no hace falta): el server
-     resuelve el `entry_id`→`content_key` (`content_key_for`) internamente antes de
-     registrar y coalesce el rename — el consumidor **siempre pasa el `entry_id`** y
-     nunca maneja clave estable. Registrás el `entry_id` en `CITAS_SABER:`.
+     expone** el `content_key`: el server resuelve el `entry_id`→`content_key`
+     (`content_key_for`) internamente antes de registrar — el consumidor **siempre
+     pasa el `entry_id`** y nunca maneja clave estable. Registrás el `entry_id` en
+     `CITAS_SABER:`.
    **Ejemplo de evento** (contrato confirmado vivo, corrida server de Hackaton CLOSED):
    `saber_telemetria(eventos=[{event_id: "cita:<slug>:<entry_id>", entry_id: "<GAP-nnn>",
    run_ledger_ref: "<slug-kebab>"}], sesion="<mcp-session-id>")`.
-   Cuenta como ALEGADO, no como uso.
+   Cuenta como ALEGADO e HISTORIAL, no como uso.
 
    > **DOCTRINA DURA — la FORMA del `run_ledger_ref` (causa raíz probable de las
    > citas en 0).** El ref DEBE matchear
@@ -213,9 +248,9 @@ no una promoción: alimenta el contador de citas causales, **jamás mueve `usos`
    > `lucky-tool-saber/saber/telemetry.py:28` (`_REF_RE`).
 4. **Reportá** qué citas quedaron alegadas — los `entry_id` citados para el campo
    `CITAS_SABER:` del cierre (crisol §4 paso 8) — o `N/A (no se consultó saber en
-   esta corrida)` explícito. La **PRESENCIA** del campo la exige `registros-lint` en corridas
-   nuevas (CLOSED con `creado >= 2026-07-24`; no-retroactivo, `N/A` vale — es
-   presencia, no contenido).
+   esta corrida)` explícito. La **PRESENCIA** del campo la exige `registros-lint` en
+   corridas nuevas (CLOSED con `creado >= 2026-07-24`; no-retroactivo, `N/A` vale —
+   es presencia, no contenido).
 5. **Sin MCP** → fail-open: dejá las citas anotadas vía el flujo /idea (`saber:
    cita causal pendiente <entry_id> · ref <corrida-slug>`) para reportarlas desde
    una sesión con el connector. Nunca se pierden, nunca bloquean el cierre.
@@ -224,23 +259,24 @@ no una promoción: alimenta el contador de citas causales, **jamás mueve `usos`
 
 ## Reglas duras
 
-- **Endoso POR FICHA** (directiva del operador 2026-07-17): TODO merge/promoción/
-  poda exige endoso explícito de ESA ficha. **Jamás batch** — un sí no es un sí
-  al lote; jamás se infiere endoso de contexto.
-- **Jamás fingir una capacidad que el MCP no da.** Promover y podar no tienen
-  tool: son guiados, el acto es del operador en `lucky-saber`. Enumerar
-  `mcp-inbox/*` no tiene tool: la bandeja es el parking local.
+- **El juicio humano vive en la CURADURÍA** (ADR 0028): cada **fusión** y cada
+  **poda** exige confirmación de ESE ítem — **jamás batch, jamás auto**; un sí no
+  es un sí al lote. El endoso ficha-por-ficha se **MOVIÓ** del gate pre-LIVE a la
+  curaduría posterior + el override (`endosar.py`): no murió, cambió de momento.
+- **Jamás fingir una capacidad que el MCP no da.** La fusión y la poda las
+  **PROPONE** `saber_destilar_proponer` (read-only); el acto de fusionar o
+  archivar lo confirma el humano y lo aplica el override — el MCP nunca
+  auto-fusiona ni auto-poda. Enumerar ramas legacy no tiene tool: la bandeja es el
+  parking local.
 - **El espejo local de `bitacora` NO se toca** (`INDEX.md`/`entries/`/
   `SENALES.md` son READ-ONLY generados desde el saber): una edición a mano se
   pierde en la próxima regeneración.
-- **`docs/IDEAS.md` solo por append** — se agregan líneas (propuesta pendiente,
-  mergeada, descartada); jamás se edita ni se borra una línea vieja.
+- **`docs/IDEAS.md` solo por append** — se agregan líneas (capturada, citada,
+  pendiente); jamás se edita ni se borra una línea vieja.
 - **Cero secretos en fichas y reportes** (leak): nombres de variable, nunca
   valores; `<host>`/`<REDACTED>`; rutas relativas, nunca absolutas con usuario.
 - **`NADA COSECHABLE` se respeta:** no se re-spawnea al destilador para insistir;
   una cosecha honestamente vacía es un resultado válido.
-- **El proponer al inbox no toca main** (rama `mcp-inbox/*`): por eso es el único
-  acto que el flujo dispara sin endoso. Todo lo demás espera al operador.
 
 ---
 

@@ -22,7 +22,7 @@ runState: wip                # wip | closing (closing SOLO en el commit de cierr
 veredictos: []               # [{regla: <ID §5>, veredicto: PASS|FAIL|N/A, quien: <rol>, evidencia: <archivo:línea|conteo>}]
 refs: [adr:NNNN, bitacora:XXX-nnn]   # FKs tipadas <tabla>:<id>
 cierre: "<YYYY-MM-DD HH:MM · commit <sha>>"   # al cerrar
-citas_saber: "<dedup_key(s) | N/A>"   # citas causales alegadas (dedup_key(s) | N/A); obligatorio en CLOSED >= 2026-07-24 (registros-lint)
+citas_saber: "<entry_id(s) | N/A>"   # citas causales alegadas (entry_id(s); el server resuelve a content_key | N/A); obligatorio en CLOSED >= 2026-07-24 (registros-lint)
 ---
 - ORIGEN: <de dónde nace la corrida>
 - Alcance: <qué se toca y por qué>
@@ -69,7 +69,7 @@ que el lint delata. Historia previa: `runs/_archivo-hasta-2026-07.md`
 - TEST_COVERAGE: <cobertura | NONE>
 - Escalación: <none | detalle a MLL>
 - BITACORA: <id(s) de entrada(s) destilada(s) a la Capa 4 | N/A>   (opcional, NO bloqueante; crisol §4 paso 8, Destilación)
-- CITAS_SABER: <id(s) de ficha(s) citada(s) como causa | N/A>   (opcional, NO bloqueante; crisol §4 paso 8, cita causal)
+- CITAS_SABER: <entry_id(s) de ficha(s) citada(s) como causa | N/A>   (opcional, NO bloqueante; crisol §4 paso 8, cita causal)
 - RETRO: <una línea sobre la fricción del PROCESO, al cerrar (blameless)>
 - Cierre: <YYYY-MM-DD HH:MM> <commit-sha>
 ```

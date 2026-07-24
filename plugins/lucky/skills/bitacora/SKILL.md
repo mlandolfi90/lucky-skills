@@ -75,9 +75,11 @@ al espejo local (que es READ-ONLY, generado):
 
 1. **Con el MCP:** destilá el patrón (un síntoma observable = una acción) y
    proponelo con `saber_proponer_ficha(sintoma, tipo, causa_raiz, accion,
-   anti_accion, prevencion, scope=…, dedup_key=…)`. Nace `CANDIDATE` en una rama
-   `mcp-inbox/*` — **nunca toca main**; el humano la mergea (`saber_mergear` o por
-   PR). Sospecha débil, sin evidencia dura → `saber_senal(sospecha, contexto)`.
+   anti_accion, prevencion, scope=…, dedup_key=…)`. **Captura y sirve LIVE
+   directo** (Fase 2, ADR 0028): id `CAP-<content_key>`, se sirve `SERVIDA SIN
+   PROBAR` (ya no nace `CANDIDATE` ni pasa por `mcp-inbox`; el colchón es la poda
+   de salida, ver §Mantener). Sospecha débil, sin evidencia dura →
+   `saber_senal(sospecha, contexto)`.
    - **`dedup_key` SIEMPRE explícito y estable — kebab-case de la LECCIÓN, no de tu
      redacción** (ej. `git-commit-m-backticks-usar-heredoc`, no la frase del
      síntoma). El default lo deriva del TEXTO, y el saber deduplica por fingerprint
@@ -92,10 +94,11 @@ al espejo local (que es READ-ONLY, generado):
    connector. **El espejo local NO se edita a mano.**
 3. **`scope`:** `global` (guardrail transversal) · `stack:<tec>` · `repo:<nombre>`
    — lo afina el humano al endosar.
-4. **Propiedad humana sobre la promoción (anti documentation-theater):** el agente
-   PROPONE `CANDIDATE`; **el humano** mergea a main (entra al saber) y luego lo
-   promueve a `LIVE` como acto deliberado. El LLM destila, el humano decide qué es
-   verdad; el MCP nunca escribe `usos`/`estado`/`scope`.
+4. **Propiedad humana sobre el catálogo (anti documentation-theater):** el agente
+   captura y la ficha se **sirve LIVE directo** (Fase 2, ADR 0028); el juicio
+   humano ya no es un endoso pre-LIVE sino la **curaduría posterior** (fusión +
+   poda con confirmación, en la skill `saber`). El LLM destila, **el humano decide
+   qué es verdad**; el MCP nunca auto-fusiona ni auto-poda.
 
 ## Push (hooks del plugin — ADR 0010, absorbido de ECC continuous-learning-v2)
 
@@ -177,14 +180,14 @@ Dos modos, cada uno con su DESTINO — no confundirlos:
 
 ## Mantener (mecánico, no por disciplina)
 
-- **Administración del ciclo central** (bandeja inbox → merge → CANDIDATE→LIVE →
-  poda/ascenso) y la destilación al cierre de corrida: skill **`saber`** (ADR
-  0023) — esta skill LEE y captura; aquélla administra.
+- **Administración del ciclo central** (captura LIVE directo → curaduría: fusión de
+  cuasi-duplicados + poda de salida reversible) y la captura al cierre de corrida:
+  skill **`saber`** (ADR 0023/0028) — esta skill LEE y captura; aquélla administra.
 - **Espejo:** el catálogo VIVE en el saber; acá se REGENERA el espejo con
   `python scripts/bitacora-espejo.py` (des-scopea desde `lucky-saber`) y se forja
-  un release para propagarlo a la flota. Poda, ascenso y la promoción CANDIDATE→LIVE
-  ocurren en el saber (el espejo los refleja); las verificaciones de abajo son
-  read-only sobre el espejo generado.
+  un release para propagarlo a la flota. La poda (de salida, reversible) y la
+  curaduría ocurren en el saber (el espejo los refleja); las verificaciones de
+  abajo son read-only sobre el espejo generado.
 - **STALE:** `bash scripts/bitacora-stale.sh` marca toda entrada con
   `validated_on` > 90 días o sin `validated_on`. Read-only: reporta, no borra.
   Candidato a correr desde el heartbeat (`crisol-pulso`) o el CI.
@@ -212,12 +215,13 @@ Dos modos, cada uno con su DESTINO — no confundirlos:
   desde el saber (`scripts/bitacora-espejo.py`); una edición a mano se pierde en la
   próxima regeneración. Toda captura va al saber (`saber_proponer_ficha`/`saber_senal`)
   o, offline, a `/idea`. El saber es la fuente de verdad; esta skill LEE + refleja.
-- **Sin evidencia real, NO entra.** El catálogo guarda solo lo CONFIRMADO por el
-  uso: una entrada nace de una corrida con dolor real y evidencia verificable
-  (sha/ledger/postmortem). La previsión/teoría va a `/idea` (parking) hasta que la
-  realidad la valide. `CANDIDATE` es una **transición corta** (evidencia real
-  esperando el endoso humano), no un depósito de teoría — regla del operador,
-  2026-07-02: "¿de qué sirve guardar algo que no está confirmado que funcione?".
+- **La evidencia es poda de SALIDA, no gate de entrada (Fase 2, ADR 0028).** La
+  ficha entra LIVE al capturarse (`SERVIDA SIN PROBAR`); lo que a ~30d no juntó ni
+  una cita ni un uso se **propone para archivar** (poda reversible, el humano
+  confirma). La previsión/teoría sigue yendo a `/idea` (parking) hasta tener
+  material real. Ya no hay `CANDIDATE` esperando endoso — la regla del operador,
+  2026-07-02 ("¿de qué sirve guardar algo que no está confirmado que funcione?"),
+  se reencuadra: la duda se resuelve podando a la salida, no vetando a la entrada.
 - **Indexá por SÍNTOMA observable, no por tema.** Si no podés escribir el síntoma
   como algo que un agente OBSERVA literalmente, no es un patrón → va a `/idea`.
 - **`dedup_key` estable, SIEMPRE (kebab-case de la LECCIÓN, no de la redacción).**

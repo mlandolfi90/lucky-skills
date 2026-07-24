@@ -31,3 +31,4 @@
 | 0025 | [Supuestos declarados del plan](0025-supuestos-declarados-del-plan.md) | ACEPTADA |  |
 | 0026 | [La versión de un artefacto es lectura del proceso](0026-versionado-lectura-del-proceso.md) | ACEPTADA |  |
 | 0027 | [Cerrar el loop causal del saber](0027-cerrar-el-loop-causal-del-saber.md) | ACEPTADA |  |
+| 0028 | [Saber Fase 2: promoción inmediata; el juicio humano se MUEVE a la curaduría](0028-saber-fase2-promocion-inmediata.md) | ACEPTADA |  |

@@ -180,6 +180,30 @@ else
   ko "A11 saber/SKILL.md ausente"
 fi
 
+# ── A12: la curaduria (/saber destilar) hornea la regla de fusion de RAG (ADR 0028) ──
+# Modelo Fase 2: el juicio humano se MUEVE a la curaduria. El discriminante de duplicacion
+# es CAUSA-RAIZ+ACCION (no sintoma), y el comando PROPONE — nunca fusiona solo. Robusto a
+# que el ritual viva en el tronco o extraido a una rama (techo 400, ADR 0016 §5).
+SABER_DIR="$(dirname "$SABER")"
+if [ -f "$SABER" ]; then
+  a12=1
+  grep -Rqs '/saber destilar' "$SABER" "$SABER_DIR/ramas" 2>/dev/null || a12=0
+  grep -Rqsi 'causa-ra' "$SABER" "$SABER_DIR/ramas" 2>/dev/null || a12=0
+  grep -RqsiE 'no fusiona|PROPONE' "$SABER" "$SABER_DIR/ramas" 2>/dev/null || a12=0
+  if [ "$a12" -eq 1 ]; then ok; else ko "A12 saber: /saber destilar (curaduria) no hornea la regla de fusion (falta 'causa-raiz' o 'PROPONE/no fusiona'; ADR 0028)"; fi
+else
+  ko "A12 saber/SKILL.md ausente"
+fi
+
+# ── A13: /saber capturar existe (renombre de la vieja /saber destilar; ADR 0028) ─────
+# La captura-al-cierre (spawn del destilador) se renombra a /saber capturar y sus borradores
+# van a LIVE directo; /saber destilar queda reservado a la curaduria. El nombre nuevo existe.
+if [ -f "$SABER" ]; then
+  if grep -qF '/saber capturar' "$SABER"; then ok; else ko "A13 saber: falta '/saber capturar' (renombre de la captura-al-cierre; ADR 0028)"; fi
+else
+  ko "A13 saber/SKILL.md ausente"
+fi
+
 echo "────────"
 echo "RESULTADO: $pass PASS · $fail FAIL"
 [ "$fail" -eq 0 ] || exit 1

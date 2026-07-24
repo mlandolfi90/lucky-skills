@@ -508,27 +508,29 @@ bitácora del paso 3 se conserva).
    SIEMPRE el resultado en el campo `BITACORA:` del ledger — las refs de lo
    propuesto, o `N/A (sin disparador)`. Un cierre sin el campo se ve en la fila.
    Disparador con **sí** → spawneá al agente canónico `destilador` vía `/saber
-   destilar`: él devuelve borradores; el flujo los propone al inbox del saber
-   (rama `mcp-inbox/*`, **jamás main**); mergear/promover queda en el humano
-   (ficha por ficha). Es `.md` → exento del gate; el Crisol **AVISA, no exige**
+   capturar`: él devuelve borradores (read-only); el flujo los **captura LIVE
+   directo** (`saber_proponer_ficha`, id `CAP-<content_key>`; ya **no** a
+   `mcp-inbox`). El juicio humano se **MUEVE a la curaduría** (`/saber destilar`:
+   fusión + poda con confirmación — ADR 0028). Es `.md` → exento del gate; el Crisol **AVISA, no exige**
    (meter el playbook como obligatorio pelearía con el jidoka, sin gate nuevo, sin
    ID de matriz). La brújula la SEÑALARÁ (puntero); el Planificador la consultará
    por síntoma (Paso 3) en sesiones futuras.
    **Refuerzo (cita causal — ADR 0027; espejo de la Destilación):** al cerrar,
-   registrá SIEMPRE el campo `CITAS_SABER:` del ledger — el/los **`dedup_key`**
-   (identidad estable, NO el `entry_id` que la promoción renombra) de las fichas
-   EXISTENTES que ayudaron de verdad (vía `/saber citar`, con el **slug-id de ESTA
-   corrida** como `run_ledger_ref` — regex-safe, no la cabecera humana), o
-   `N/A (no se consultó saber)`. Es el gemelo de `BITACORA:`: la destilación
-   cablea la CAPTURA (ficha nueva), esto el REFUERZO (qué ficha vieja funcionó). Un
+   registrá SIEMPRE el campo `CITAS_SABER:` del ledger — el/los **`entry_id`** de
+   las fichas EXISTENTES que ayudaron de verdad (el server los resuelve
+   internamente a su clave estable `content_key` y coalesce el rename; vía `/saber
+   citar`, con el **slug-id de ESTA corrida** como `run_ledger_ref` — regex-safe,
+   no la cabecera humana), o `N/A (no se consultó saber)`. Es el gemelo de
+   `BITACORA:`: la captura cablea la ficha nueva, esto el REFUERZO (qué ficha vieja funcionó). Un
    cierre sin el campo se ve en la fila (misma visibilidad que BITACORA). El Crisol
    **AVISA, no exige gate de contenido**: sin ID de matriz (mismo jidoka que la
    destilación — un gate probabilístico daría falso FAIL en corridas que no
    consultan saber); pero la **PRESENCIA** del campo `citas_saber:` sí la exige
    `registros-lint` en corridas nuevas (CLOSED con `creado >= 2026-07-24`;
    no-retroactivo, `N/A` vale). El **cómo** lo define `/saber citar` (no se
-   re-enuncia acá): la cita cuenta como ALEGADO, jamás mueve `usos` (la promoción
-   sigue siendo endoso humano).
+   re-enuncia acá): la cita cuenta como ALEGADO e HISTORIAL (ADR 0028), jamás mueve
+   `usos`; la promoción ya no existe como acto — la captura entra LIVE directo (el
+   juicio humano se mueve a la curaduría, `/saber destilar`).
    El gate de cobertura es la **RED final**,
    no el primer detector: cada regla se verifica TEMPRANO (paso 4 las de plan,
    paso 6 las del diff); si algo cae recién en esta red ya se desperdició una
