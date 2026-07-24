@@ -57,6 +57,13 @@ Hoy `destilar` = CAPTURAR. Fase 2 lo quiere = CURAR. Son dos fases del ciclo; no
   INVOCA `/saber podar` (única garganta de poda, extendida), jamás reimplementa.
 - **Insumo de RAG:** el núcleo de valor es la fusión de cuasi-dups (los exactos ya los dedup el
   content_key en captura); cadencia barata (sugerida al cierre de corrida o por umbral acumulado).
+- **Regla de fusión (RAG, verificada con 12 escépticos opus: 0/12 cuasi-dups aparentes debían
+  fusionarse — lo "parecido" es complementario, vinculado por `refs`). A HORNEAR en el ritual:**
+  (a) discriminante de duplicación = **CAUSA-RAÍZ + ACCIÓN**, jamás síntoma/vocabulario (lo que
+  "suena" parecido no lo es); (b) **default ante duda = NO fusionar** (la fusión es irreversible y
+  destruye conocimiento); (c) el comando **PROPONE, nunca fusiona solo** — el humano confirma cada
+  fusión; (d) la UX muestra **causa+acción de cada par candidato** para que el humano juzgue por lo
+  que importa, no por cómo suena. (Lección = ficha `CAND-d471300b18b2`.)
 
 ## FASE PIN — lo que DEBE pinear Hackaton ANTES de que yo forje (ingeniería EN ESPERA)
 
