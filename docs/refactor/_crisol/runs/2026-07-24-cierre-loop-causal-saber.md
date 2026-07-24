@@ -2,7 +2,7 @@
 id: 2026-07-24-cierre-loop-causal-saber
 schema: corrida/1
 tipo: corrida
-estado: ACTIVE
+estado: CLOSED
 creado: 2026-07-24
 branch: main
 titulo: "Cerrar el loop causal del saber — subcomando /saber citar + campo CITAS_SABER en el cierre (espejo de BITACORA)"
@@ -11,7 +11,7 @@ target: "pc-local (la forja; directiva durable del operador para lucky-skills)"
 model: "opus (líder + subagentes; el operador está en opus-4.8) — corrida en goal mode 'dejar funcional'"
 ley: "v2.9.0 (sello local == último tag)"
 iteraciones: "2/3 (iter1: roster fresco 4/4 PASS sobre el mecanismo base; iter2: delta-verify PASS del contrato lockeado por las 3 sesiones — la coordinación cross-sesión surfaceó lo que iter1 no tenía)"
-runState: closing
+runState: closed
 cierre: "2026-07-24 · commits b1db1df (apertura) + a0ce2b3/dfd5896 (plan+enmienda) + ac64fe8 (iter1 mecanismo) + eb4f47b (iter2 contrato lockeado) + cierre en dos commits. Re-sello/tag DIFERIDOS al operador (publicar la ley es su acto)."
 citas_saber: "N/A — esta corrida SHIPEA el mecanismo; NO disparó saber_telemetria (fuera de lane, ADR 0027 §Consecuencias). Fichas que el roster aplicó y serían citables por el lane saberes: FALSO-VERDE-004, DRIFT-007 (el firing en vivo es del canal RAG↔Hackaton)."
 veredictos:

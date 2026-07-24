@@ -11,8 +11,8 @@
 ## ⚠ Ramas EN_DUDA — una corrida las contradijo (frescura) (0)
 - (nada)
 
-## 🔥 Corridas ACTIVE (1)
-- corrida:2026-07-24-cierre-loop-causal-saber · Cerrar el loop causal del saber — subcomando /saber citar + campo CITAS_SABER en el cierre (espejo de BITACORA)
+## 🔥 Corridas ACTIVE (0)
+- (nada)
 
 ## 🩹 Hotfixes abiertos (0)
 - (nada)

@@ -3445,7 +3445,7 @@ commits + sello.
 - Cierre: 2026-07-19 · commits c081c40 (apertura+proyecciones juntas — lección del RETRO aplicada) + a7f2479 (plan+supuestos) + c3ba40d (ADR 0026 + rama 004 + hotfix §4/§Cerrar) + cierre en dos commits. Re-sello/tag DIFERIDOS al próximo forjar-release.sh.
 
 ### main — 2026-07-24 (Cerrar el loop causal del saber — subcomando /saber citar + campo CITAS_SABER en el cierre (espejo de BITACORA))
-- STATUS: ACTIVE
+- STATUS: CLOSED
 - Tier: completo (toca el ritual de cierre del Crisol §4 = contrato; agrega subcomando a saber + campo de cierre + campo al template; norma nueva → ADR 0027; >1 archivo)
 - Fecha: 2026-07-24
 - TARGET: pc-local (la forja; directiva durable del operador para lucky-skills)
@@ -3456,7 +3456,7 @@ sesión de RAG (que midió el problema). Plan del líder (con supuestos, ADR 002
 → Steward fresco (opus) → Ingeniero (opus) → roster fresco (opus) → dogfood de
 la cita causal sobre el propio cierre → cierre en dos commits + sello.
 <!-- VEREDICTOS:BEGIN -->
-- runState: closing
+- runState: closed
 - [V] TARGET · PASS · quality-auditor-2 · pc-local (el qa2 verificó AHÍ, intérprete sondado python real no stub)
 - [V] MODEL · PASS · lider · opus en steward/ingenieros/roster; líder opus-4.8 (el operador cambió de modelo mid-corrida) — goal 'dejar funcional'
 - [V] OPEN_CLOSED · PASS · design-verifier · iter1: bloque CITAS_SABER se INSERTA sin reescribir BITACORA (crisol:517); iter2: el lint es check #8 nuevo sin tocar 1-7 (registros-lint:383-393). Adición pura; ADR 0027 nuevo

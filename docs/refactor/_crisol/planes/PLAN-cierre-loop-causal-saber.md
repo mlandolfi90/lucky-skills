@@ -2,7 +2,7 @@
 id: PLAN-cierre-loop-causal-saber
 schema: plan/1
 tipo: plan
-estado: VIGENTE
+estado: CUMPLIDO
 creado: 2026-07-24
 refs: [corrida:2026-07-24-cierre-loop-causal-saber, adr:0023, adr:0025, adr:0027]
 nota: "Un solo carril (saber skill + cierre del crisol comparten el contrato del loop causal: partirlo sería el REJECT de 'dos planes, mismo contrato'). El diseño es ESPEJO exacto de un mecanismo probado: la destilación (BITACORA) ya cablea la CAPTURA; esto cablea el REFUERZO con el mismo patrón."
