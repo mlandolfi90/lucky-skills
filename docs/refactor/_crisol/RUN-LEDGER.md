@@ -3483,6 +3483,21 @@ la cita causal sobre el propio cierre → cierre en dos commits + sello.
 - Iteraciones: 2/3 (iter1: roster fresco 4/4 PASS sobre el mecanismo base; iter2: delta-verify PASS del contrato lockeado por las 3 sesiones — la coordinación cross-sesión surfaceó lo que iter1 no tenía)
 - Cierre: 2026-07-24 · commits b1db1df (apertura) + a0ce2b3/dfd5896 (plan+enmienda) + ac64fe8 (iter1 mecanismo) + eb4f47b (iter2 contrato lockeado) + cierre en dos commits. Re-sello/tag DIFERIDOS al operador (publicar la ley es su acto).
 
+### main — 2026-07-24 (Corrección del anchor de /saber citar: pasar entry_id, el server resuelve a content_key (el dedup_key NO existe a nivel de ficha))
+- STATUS: ACTIVE
+- Tier: fast-path (corrección de prosa en 1 skill + nota de ADR + 1 assert de test; sin código nuevo, sin contrato de matriz)
+- Fecha: 2026-07-24
+- TARGET: pc-local (la forja; directiva durable del operador para lucky-skills)
+- MODEL: opus (líder opus-4.8 + verificación) — goal 'terminar sin intervención + documentar los porqué'
+- LEY: v2.10.0 (sello local == último tag)
+Fast-path bajo goal 'terminar sin intervención'. Corrige el anchor nombrado (dedup_key
+inexistente → pasar entry_id, el server resuelve a content_key), antes de que RAG dispare
+la primera cita real. Verificación: REGLA 0 (test-saber) + leak + verificador fresco del delta.
+<!-- VEREDICTOS:BEGIN -->
+- runState: wip
+<!-- VEREDICTOS:END -->
+- Iteraciones: 1/3
+
 ### main — 2026-07-24 (Fino del loop causal: /saber citar no asume que saber_ficha expone dedup_key + sesion = session_id del cliente MCP)
 - STATUS: CLOSED
 - Tier: fast-path (prosa aditiva/correctiva en 1 skill, saber/SKILL.md; sin código nuevo, sin contrato de matriz)

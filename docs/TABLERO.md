@@ -11,8 +11,8 @@
 ## ⚠ Ramas EN_DUDA — una corrida las contradijo (frescura) (0)
 - (nada)
 
-## 🔥 Corridas ACTIVE (0)
-- (nada)
+## 🔥 Corridas ACTIVE (1)
+- corrida:2026-07-24-loop-causal-content-key · Corrección del anchor de /saber citar: pasar entry_id, el server resuelve a content_key (el dedup_key NO existe a nivel de ficha)
 
 ## 🩹 Hotfixes abiertos (0)
 - (nada)
