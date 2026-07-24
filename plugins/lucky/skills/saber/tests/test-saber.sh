@@ -162,11 +162,11 @@ else
   ko "A9 crisol/templates/run-ledger.md ausente"
 fi
 
-# ── A10: /saber citar ancla al dedup_key (ADR 0027 G2) ───────────────────────────
+# ── A10: /saber citar pasa entry_id, el server resuelve a content_key (ADR 0027) ─────
 # saber_telemetria clava contra entry_id, que la promocion RENOMBRA (CAND-xxx→GAP-nnn);
-# la cita se ancla al dedup_key ESTABLE o queda huerfana tras el ascenso.
+# el server coalesce por content_key (estable). El dedup_key NO se sirve — no es el ancla.
 if [ -f "$SABER" ]; then
-  if grep -qF 'dedup_key' "$SABER"; then ok; else ko "A10 saber: /saber citar no menciona 'dedup_key' (ancla inestable → cita huerfana tras la promocion; ADR 0027 G2)"; fi
+  if grep -qF 'content_key' "$SABER"; then ok; else ko "A10 saber: /saber citar no menciona 'content_key' (el id estable del server que sobrevive el rename; ADR 0027)"; fi
 else
   ko "A10 saber/SKILL.md ausente"
 fi

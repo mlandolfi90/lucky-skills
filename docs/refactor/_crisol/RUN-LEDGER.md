@@ -3494,9 +3494,24 @@ Fast-path bajo goal 'terminar sin intervención'. Corrige el anchor nombrado (de
 inexistente → pasar entry_id, el server resuelve a content_key), antes de que RAG dispare
 la primera cita real. Verificación: REGLA 0 (test-saber) + leak + verificador fresco del delta.
 <!-- VEREDICTOS:BEGIN -->
-- runState: wip
+- runState: closing
+- [V] TARGET · PASS · lider · pc-local (directiva durable)
+- [V] MODEL · PASS · lider · opus-4.8 líder + verificadores
+- [V] REGLA0 · PASS · verificador · test-saber 12/12 + registros-lint 0, corridos por el verificador en pc-local; A10 ahora chequea content_key
+- [V] TEST_COVERAGE · PASS · verificador · test-saber sigue 12/12; A10 actualizado al contrato correcto (content_key)
+- [V] OPEN_CLOSED · PASS · verificador · corrección de prosa acotada (saber §/saber citar paso 3-5 + ADR 0027 §Decisión pto3/§Consecuencias + assert A10); sello v2.10.0 intacto
+- [V] SCOPE_CREEP · PASS · verificador · solo saber/SKILL.md + ADR 0027 + test-saber (declarados); cero llamada saber_*, cero escritura al repo saberes
+- [V] FIDELIDAD · PASS · verificador · iter2: ADR↔skill dicen el MISMO contrato (pasá entry_id → server resuelve a content_key → coalesce rename); dedup_key solo en 'por qué NO'. iter1 había FALLADO acá
+- [V] ZERO_LEAK · PASS · verificador · leak-scan exit 0; cero secretos
+- [V] CIERRE_TRAS_PASS · PASS · gate · cierre tras re-verificación PASS
+- [V] MIGRATION · N/A · gate · sin DDL
+- [V] RESPONSIVE · N/A · gate · no UI
+- [V] CONFORMIDAD · N/A · gate · no código hexagonal
+- [V] SELLOS · N/A · gate · el operador forja v2.10.1 aparte
+- [V] TAG_GATE · N/A · gate · no crea tag en esta corrida
 <!-- VEREDICTOS:END -->
-- Iteraciones: 1/3
+- Iteraciones: 2/3 (iter1 FAIL: el verificador fresco cazó que el ADR §Decisión punto 3 seguía diciendo 'anclá al dedup_key' mientras §Consecuencias ya decía 'pasá entry_id' — ADR auto-contradictorio; iter2: corregido §Decisión punto 3, re-verificado fresco PASS)
+- Cierre: 2026-07-24 · fast-path 2/3; verificador fresco FAIL→fix→PASS. Habilita forja v2.10.1.
 
 ### main — 2026-07-24 (Fino del loop causal: /saber citar no asume que saber_ficha expone dedup_key + sesion = session_id del cliente MCP)
 - STATUS: CLOSED

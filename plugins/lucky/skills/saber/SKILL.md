@@ -167,31 +167,34 @@ no una promoción: alimenta el contador de citas causales, **jamás mueve `usos`
 2. **POR FICHA**, presentá al humano cuál PARECE haber funcionado y esperá su
    **confirmación** (principio de endoso: el humano decide qué es verdad; el LLM
    no se auto-adjudica que la ficha funcionó). Jamás batch.
-3. **Anclá la cita al ID ESTABLE de la ficha, NO al `entry_id`.** **Razón:**
-   `saber_telemetria` clava la cita contra el `entry_id`, que la **promoción
-   RENOMBRA** (CAND-xxx→GAP-nnn) → una cita anclada al `entry_id` queda
-   **huérfana** tras el ascenso; un id estable sobrevive el rename.
-   **Estado del contrato (hallazgo de Hackaton leyendo la fuente `lucky-tool-saber`):**
-   HOY `saber_ficha` **NO expone** un id estable (el `Entry` no persiste `dedup_key`),
-   y `saber_telemetria` sigue tomando `entry_id` — o sea, **hoy la cita es
-   huérfana-por-rename por limitación del server, no se puede evitar desde acá.**
-   La corrida server de Hackaton (lucky-tool-saber) va a **exponer el id estable
-   (content_signature / dedup_key persistido) vía `saber_ficha`** y **definir el
-   field-ancla en `saber_telemetria`**. Cuando ese contrato aterrice: anclá a ese
-   id estable, registralo en `CITAS_SABER:` y **pineá el ejemplo exacto acá**.
-   **NUNCA hardcodees el shape del arg** — que la skill sobreviva el cambio.
+3. **Pasá el `entry_id` que viste — el server resuelve la identidad estable.**
+   Registrá cada ficha confirmada con `saber_telemetria` pasando el **`entry_id`**
+   (el id-display que viste: `GAP-nnn` o `CAND-xxx`). **El server lo resuelve
+   internamente a su clave estable `content_key`** (`sha256(síntoma·\x00·acción)`,
+   recomputable al servir) y **coalesce las citas a través del rename
+   CANDIDATE→LIVE** (la promoción no toca síntoma/acción, así que el `content_key`
+   sobrevive). Por eso **el consumidor NO maneja ninguna clave estable**: pasás el
+   id que viste, el server hace el resto.
+   **Por qué NO el `dedup_key`** (hallazgo de Hackaton, 3 lecturas del código): el
+   `dedup_key` **no se persiste en la ficha ni lo sirve `saber_ficha`** (es el kebab
+   que se pasa al PROPONER, nada más) — no hay de dónde leerlo. El único id estable
+   real es el `content_key`, y **vive en el server**: por eso el contrato es "pasá
+   el `entry_id`, el server coalesce", no "anclá vos a una clave estable".
    Campos del evento:
    - `run_ledger_ref` = el **slug-id kebab de ESTA corrida** (el campo `id:` de la
      fila, ej. `2026-07-24-cierre-loop-causal-saber`) — string idéntico byte a byte
      al que el consumo aguas abajo lee. **NO la ruta de la fila, NO la cabecera
      humana del ledger.** (Este campo SÍ es estable y usable hoy.)
-   - `event_id` = `cita:<corrida-slug>:<id-estable-de-ficha>` — clave de idempotencia
+   - `event_id` = `cita:<corrida-slug>:<entry_id>` — clave de idempotencia
      determinista (**un solo id-de-corrida en todo el loop**; un retry no duplica).
-     El componente de ficha sigue el id estable del contrato (arriba).
    - `sesion` = el **session_id del cliente MCP** — **NO el slug de la corrida**:
      las consultas (`saber_buscar`) ocurren ANTES de que la corrida tenga id, así
      que el `sesion` debe ser estable TODA la sesión para cruzar con el tick de
-     consulta server-side. El shape exacto lo define la corrida server de Hackaton.
+     consulta server-side. La corrida server de Hackaton define cómo fluye el `sesion`.
+   - **Ref estable para auditar en `CITAS_SABER:`** — cuando Hackaton **exponga el
+     `content_key` vía `saber_ficha`**, registrá ESE (sobrevive el rename); hasta
+     entonces, el `entry_id`. **NUNCA hardcodees el shape del arg** — que la skill
+     sobreviva el cambio; el ejemplo exacto se pinea cuando la corrida server cierre.
    Cuenta como ALEGADO, no como uso.
 
    > **DOCTRINA DURA — la FORMA del `run_ledger_ref` (causa raíz probable de las
@@ -203,13 +206,14 @@ no una promoción: alimenta el contador de citas causales, **jamás mueve `usos`
    > avisar. Es la causa raíz probable de que las citas causales estén en 0. El
    > slug-id kebab es regex-safe por construcción (PK, ADR 0016). Fuente:
    > `lucky-tool-saber/saber/telemetry.py:28` (`_REF_RE`).
-4. **Reportá** qué citas quedaron alegadas — los `dedup_key` para el campo
-   `CITAS_SABER:` del cierre (crisol §4 paso 8) — o `N/A (no se consultó saber en
-   esta corrida)` explícito. La **PRESENCIA** del campo la exige `registros-lint`
-   en corridas nuevas (CLOSED con `creado >= 2026-07-24`; no-retroactivo, `N/A`
-   vale — es presencia, no contenido).
+4. **Reportá** qué citas quedaron alegadas — los `entry_id` citados (o el
+   `content_key` cuando `saber_ficha` lo exponga) para el campo `CITAS_SABER:` del
+   cierre (crisol §4 paso 8) — o `N/A (no se consultó saber en esta corrida)`
+   explícito. La **PRESENCIA** del campo la exige `registros-lint` en corridas
+   nuevas (CLOSED con `creado >= 2026-07-24`; no-retroactivo, `N/A` vale — es
+   presencia, no contenido).
 5. **Sin MCP** → fail-open: dejá las citas anotadas vía el flujo /idea (`saber:
-   cita causal pendiente <dedup_key> · ref <corrida-slug>`) para reportarlas desde
+   cita causal pendiente <entry_id> · ref <corrida-slug>`) para reportarlas desde
    una sesión con el connector. Nunca se pierden, nunca bloquean el cierre.
 
 ---

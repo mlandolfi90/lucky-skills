@@ -54,11 +54,16 @@ que el refuerzo vuelva a la ficha para que el sistema sepa cuál merece vivir.
    nuevo reúne las fichas que la sesión consultó, las presenta al humano **ficha
    por ficha** para que confirme cuál funcionó (principio de endoso: el LLM no se
    auto-adjudica que la ficha ayudó), y registra las confirmadas con
-   `saber_telemetria`. **La cita se ancla al `dedup_key` (identidad ESTABLE de la
-   ficha), NO al `entry_id`:** `saber_telemetria` clava contra el `entry_id`, que
-   la promoción CANDIDATE→LIVE **renombra** (CAND-xxx→GAP-nnn) → una cita anclada
-   al `entry_id` quedaría huérfana tras el ascenso; el `dedup_key` sobrevive el
-   rename. El `run_ledger_ref` es el **slug-id kebab de la corrida** (el campo
+   `saber_telemetria`. **La cita se registra pasando el `entry_id`; el server
+   resuelve la identidad estable** (corregido por la corrida
+   `2026-07-24-loop-causal-content-key`, 3 lecturas del código): `saber_telemetria`
+   toma el `entry_id` (el id-display `GAP-nnn`/`CAND-xxx`) y el server lo resuelve
+   internamente a su clave estable `content_key` (`sha256(síntoma·acción)`,
+   recomputable al servir), **coalesciendo las citas a través del rename
+   CANDIDATE→LIVE** (la promoción no toca síntoma/acción). El `dedup_key` **NO** es
+   el ancla — no se persiste ni lo sirve `saber_ficha`; el consumidor no maneja
+   ninguna clave estable, pasa el `entry_id` y el server hace el resto. El
+   `run_ledger_ref` es el **slug-id kebab de la corrida** (el campo
    `id:` de la fila, ej. `2026-07-24-cierre-loop-causal-saber`), **NO la ruta ni
    la cabecera humana del ledger**: el server sólo valida la FORMA del ref
    (`^[A-Za-z0-9][A-Za-z0-9._/#:@-]{0,160}$` — sin espacios, em-dash ni
@@ -91,18 +96,19 @@ que el refuerzo vuelva a la ficha para que el sistema sepa cuál merece vivir.
   `/saber destilar` en el gatillo del cierre: uno cablea la CAPTURA, el otro el
   REFUERZO. Define el contrato de `saber_telemetria` (event_id idempotente,
   run_ledger_ref, anclaje al id estable) y su fail-open a `/idea` sin MCP.
-- **Deuda de contrato declarada (pin pendiente, corrida `2026-07-24-loop-causal-fino`).**
-  El anclaje al `dedup_key` es la DECISIÓN de diseño, pero el server del saber aún no
-  la soporta: HOY `saber_ficha` **no expone** un id estable (el `Entry` no persiste
-  `dedup_key`) y `saber_telemetria` toma `entry_id` — o sea, hoy la cita es
-  huérfana-por-rename por limitación del server, no evitable desde `lucky-skills`. La
-  corrida server de Hackaton (`lucky-tool-saber`) expondrá el id estable
-  (content_signature / dedup_key persistido) vía `saber_ficha` y definirá el field-ancla
-  en `saber_telemetria`; además el `sesion` del tick de consulta será el **session_id
-  del cliente MCP** (estable toda la sesión — las consultas ocurren antes de que la
-  corrida tenga id), **no** el slug de la corrida. `/saber citar` queda escrito FLEXIBLE
-  ("anclá al id estable según el contrato del saber", sin hardcodear el shape); el
-  ejemplo exacto se pinea en un micro-update cuando Hackaton pase los dos shapes finales.
+- **Anchor corregido (corrida `2026-07-24-loop-causal-content-key`; 3 lecturas del
+  código por Hackaton+RAG).** El `dedup_key` NO es el ancla: **no se persiste en la
+  ficha ni lo sirve `saber_ficha`** (es el kebab que se pasa al PROPONER). El contrato
+  correcto y más simple: **`/saber citar` pasa el `entry_id`** (el id-display
+  GAP-nnn/CAND-xxx) y **el server lo resuelve a su clave estable `content_key`**
+  (`sha256(síntoma·acción)`, recomputable al servir) y **coalesce las citas a través
+  del rename CANDIDATE→LIVE** — el consumidor no maneja ninguna clave estable. Deuda de
+  contrato aún pendiente (pin): el **field donde `saber_ficha` expondrá el `content_key`**
+  (para un ref auditable en `CITAS_SABER:`) y la **convención del `sesion`** (el
+  session_id del cliente MCP, estable toda la sesión — el slug de corrida no sirve porque
+  las consultas ocurren antes de que la corrida tenga id) los define la corrida server de
+  Hackaton (`lucky-tool-saber`). `/saber citar` queda FLEXIBLE (no hardcodea el shape); el
+  ejemplo exacto se pinea en un micro-update cuando esa corrida cierre.
 - **`crisol/SKILL.md` §4 paso 8** agrega el ESPEJO inmediatamente después del
   bloque de Destilación/BITACORA: el campo `CITAS_SABER:` se registra SIEMPRE, con
   puntero a `/saber citar` para el cómo. El Crisol AVISA, no exige gate.
