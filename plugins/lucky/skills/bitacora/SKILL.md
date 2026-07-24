@@ -124,8 +124,10 @@ flota), ambos con off-switch por env:
   log LOCAL por máquina (rotación dura 400 líneas; cero contenido, cero rutas
   completas — zero-leak por construcción). El log es **evidencia cruda para el
   humano** (`--resumen` lo agrega): alimenta los contadores de `SENALES.md` a
-  mano; NADA entra al INDEX por esta vía (la regla "sin evidencia real, NO
-  entra" y el endoso humano quedan intactos). Apagar: `BITACORA_OBSERVAR=off`.
+  mano; NADA entra al INDEX por esta vía (el log es evidencia cruda, no una
+  ficha capturada; en Fase 2 el juicio del catálogo es la curaduría posterior
+  —fusión + poda de la evidencia-cero—, no un gate de entrada; ADR 0028).
+  Apagar: `BITACORA_OBSERVAR=off`.
 
 **Puente log↔SENALES (enmienda 2, absorbido de la escalera de frecuencia de
 ECC):** el timbre además detecta etiquetas del log con **≥2 sesiones acumuladas
@@ -136,7 +138,7 @@ endoso — el conteo sugiere, el humano formaliza.
 **Timbre de intensidad (enmienda 3 — "el costo agudo ES evidencia"):** el
 timbre también detecta etiquetas con `x ≥ BITACORA_INTENSIDAD_UMBRAL`
 (default 10) en UNA sola sesión del log y propone la **cosecha de INTENSIDAD**
-(proponer una ficha CANDIDATE al saber si hubo aprendizaje real). Sin este timbre, la
+(capturar una ficha al saber —LIVE directo, ADR 0028— si hubo aprendizaje real). Sin este timbre, la
 intensidad repetiría el gap original: acumular sin que nadie avise.
 
 Tests: `tests/test-push.sh` · `tests/test-observar.sh`.
@@ -160,8 +162,8 @@ Dos modos, cada uno con su DESTINO — no confundirlos:
 **Modo INTENSIDAD (→ `saber_proponer_ficha`, costo agudo de UNA sesión):**
 
 3. Por cada etiqueta con `x ≥ umbral` en UNA sola sesión del log
-   (`BITACORA_INTENSIDAD_UMBRAL`, default 10), ofrecé **proponer una ficha
-   CANDIDATE al saber** con `saber_proponer_ficha(...)` (offline → `/idea`).
+   (`BITACORA_INTENSIDAD_UMBRAL`, default 10), ofrecé **capturar una ficha al
+   saber** (LIVE directo, ADR 0028) con `saber_proponer_ficha(...)` (offline → `/idea`).
    **El log solo prueba QUE dolió, no QUÉ dolió:** el contenido (síntoma, causa
    raíz, acción que FUNCIONÓ) sale del postmortem/transcript o de lo que el humano
    cuente — si no hay material para el QUÉ, declaralo y NO inventes la ficha.
@@ -233,8 +235,8 @@ Dos modos, cada uno con su DESTINO — no confundirlos:
   contador (`visto: N` + fecha + contexto de 1 línea). La frecuencia del
   casi-incidente predice el incidente (hiyari-hatto / weak signals / ley de
   Heinrich). `visto ≥ 2` → investigación ACTIVA en la próxima corrida que la
-  roce: valida (→ CANDIDATE con `validated_on`) o refuta (→ se borra con el
-  porqué). SENALES **jamás se consulta para decidir una acción** — eso es
+  roce: valida (→ captura LIVE con `validated_on`, ADR 0028) o refuta (→ se
+  borra con el porqué). SENALES **jamás se consulta para decidir una acción** — eso es
   exclusivo del INDEX; cero secretos, igual que el catálogo. Regla del
   operador, 2026-07-03.
 - **Cero secretos (invariante #1):** nombres de variable, nunca valores; rutas
