@@ -4,6 +4,22 @@ Notas de release de la familia de skills Lucky. El historial completo del **proc
 (corridas del Crisol, RETROs) vive en `docs/refactor/_crisol/RUN-LEDGER.md`; los tags
 inmutables, en `git tag`. Formato: más nuevo arriba.
 
+## v2.10.2 — 2026-07-24 — Pin final del contrato del loop causal (deuda ADR 0027 cerrada)
+
+Corrida `2026-07-24-loop-causal-pin-final` (CLOSED, 1/3, sello `70e442b771e4`). Skills Hackaton
+CERRÓ su corrida server (`lucky-tool-saber`, deploy live, e2e verde: `metrics(GAP-024)=11=
+metrics(CAND-af1f29893a9a)` — las consultas varadas bajo el id muerto coalescieron bajo el
+promovido). Con su contrato final, se pinea y se CIERRA la deuda declarada en ADR 0027:
+- **`saber_ficha` NO expone `content_key`** (fuera de scope, no hace falta): el server resuelve
+  el `entry_id`→`content_key` internamente antes de registrar. El consumidor **siempre pasa el
+  `entry_id`** y nunca maneja clave estable — se corrige la línea stale de v2.10.1 que anticipaba
+  una exposición futura que no ocurre.
+- **`sesion`** = el param `sesion` = session_id del cliente MCP, mismo string en la consulta y en
+  la cita. Pineado el ejemplo de evento exacto en `/saber citar`.
+- El mecanismo ya está **probado vivo** (RAG, bajo v2.10.1: 2 citas 0→1). Este release es el pin
+  de precisión de contrato/doc que cierra el círculo — hecho en EL momento correcto (tras el
+  cierre de la corrida-dependencia, un solo pin, no una re-forja por refinamiento).
+
 ## v2.10.1 — 2026-07-24 — Fix del anchor de /saber citar (corrida loop-causal-content-key)
 
 Corrida `2026-07-24-loop-causal-content-key` (CLOSED, 2/3, sello `665770680f3f`). Corrección

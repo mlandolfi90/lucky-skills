@@ -46,4 +46,4 @@ Si FAIL: la corrección concreta. Observaciones no bloqueantes: máx 3, al final
 
 ---
 **Fuente: `github.com/mlandolfi90/lucky-skills` · esta copia = tag
-`v2.10.1` (cache local, NO la ley).**
+`v2.10.2` (cache local, NO la ley).**
