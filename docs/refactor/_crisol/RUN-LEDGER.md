@@ -3484,7 +3484,7 @@ la cita causal sobre el propio cierre → cierre en dos commits + sello.
 - Cierre: 2026-07-24 · commits b1db1df (apertura) + a0ce2b3/dfd5896 (plan+enmienda) + ac64fe8 (iter1 mecanismo) + eb4f47b (iter2 contrato lockeado) + cierre en dos commits. Re-sello/tag DIFERIDOS al operador (publicar la ley es su acto).
 
 ### main — 2026-07-24 (Corrección del anchor de /saber citar: pasar entry_id, el server resuelve a content_key (el dedup_key NO existe a nivel de ficha))
-- STATUS: ACTIVE
+- STATUS: CLOSED
 - Tier: fast-path (corrección de prosa en 1 skill + nota de ADR + 1 assert de test; sin código nuevo, sin contrato de matriz)
 - Fecha: 2026-07-24
 - TARGET: pc-local (la forja; directiva durable del operador para lucky-skills)
@@ -3494,7 +3494,7 @@ Fast-path bajo goal 'terminar sin intervención'. Corrige el anchor nombrado (de
 inexistente → pasar entry_id, el server resuelve a content_key), antes de que RAG dispare
 la primera cita real. Verificación: REGLA 0 (test-saber) + leak + verificador fresco del delta.
 <!-- VEREDICTOS:BEGIN -->
-- runState: closing
+- runState: closed
 - [V] TARGET · PASS · lider · pc-local (directiva durable)
 - [V] MODEL · PASS · lider · opus-4.8 líder + verificadores
 - [V] REGLA0 · PASS · verificador · test-saber 12/12 + registros-lint 0, corridos por el verificador en pc-local; A10 ahora chequea content_key

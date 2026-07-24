@@ -2,7 +2,7 @@
 id: 2026-07-24-loop-causal-content-key
 schema: corrida/1
 tipo: corrida
-estado: ACTIVE
+estado: CLOSED
 creado: 2026-07-24
 branch: main
 titulo: "Corrección del anchor de /saber citar: pasar entry_id, el server resuelve a content_key (el dedup_key NO existe a nivel de ficha)"
@@ -11,7 +11,7 @@ target: "pc-local (la forja; directiva durable del operador para lucky-skills)"
 model: "opus (líder opus-4.8 + verificación) — goal 'terminar sin intervención + documentar los porqué'"
 ley: "v2.10.0 (sello local == último tag)"
 iteraciones: "2/3 (iter1 FAIL: el verificador fresco cazó que el ADR §Decisión punto 3 seguía diciendo 'anclá al dedup_key' mientras §Consecuencias ya decía 'pasá entry_id' — ADR auto-contradictorio; iter2: corregido §Decisión punto 3, re-verificado fresco PASS)"
-runState: closing
+runState: closed
 cierre: "2026-07-24 · fast-path 2/3; verificador fresco FAIL→fix→PASS. Habilita forja v2.10.1."
 citas_saber: "N/A — corrección de prosa; no se consultó ni citó ninguna ficha del saber."
 veredictos:
