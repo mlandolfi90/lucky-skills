@@ -11,8 +11,8 @@
 ## ⚠ Ramas EN_DUDA — una corrida las contradijo (frescura) (0)
 - (nada)
 
-## 🔥 Corridas ACTIVE (1)
-- corrida:2026-07-24-loop-causal-fino · Fino del loop causal: /saber citar no asume que saber_ficha expone dedup_key + sesion = session_id del cliente MCP
+## 🔥 Corridas ACTIVE (0)
+- (nada)
 
 ## 🩹 Hotfixes abiertos (0)
 - (nada)

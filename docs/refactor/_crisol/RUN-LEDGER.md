@@ -3484,7 +3484,7 @@ la cita causal sobre el propio cierre → cierre en dos commits + sello.
 - Cierre: 2026-07-24 · commits b1db1df (apertura) + a0ce2b3/dfd5896 (plan+enmienda) + ac64fe8 (iter1 mecanismo) + eb4f47b (iter2 contrato lockeado) + cierre en dos commits. Re-sello/tag DIFERIDOS al operador (publicar la ley es su acto).
 
 ### main — 2026-07-24 (Fino del loop causal: /saber citar no asume que saber_ficha expone dedup_key + sesion = session_id del cliente MCP)
-- STATUS: ACTIVE
+- STATUS: CLOSED
 - Tier: fast-path (prosa aditiva/correctiva en 1 skill, saber/SKILL.md; sin código nuevo, sin contrato de matriz)
 - Fecha: 2026-07-24
 - TARGET: pc-local (la forja; directiva durable del operador para lucky-skills)
@@ -3494,7 +3494,7 @@ Fast-path bajo goal 'terminar sin intervención'. Corrige dos suposiciones de co
 que Hackaton cazó leyendo la fuente, antes de forjar. Verificación: REGLA 0 (test-saber)
 + leak + un verificador fresco del delta.
 <!-- VEREDICTOS:BEGIN -->
-- runState: closing
+- runState: closed
 - [V] TARGET · PASS · lider · pc-local (directiva durable)
 - [V] MODEL · PASS · lider · opus-4.8 líder + verificador
 - [V] REGLA0 · PASS · verificador · test-saber 12/12 + registros-lint 0, corridos por él en pc-local; A10/A11 verdes tras la corrección

@@ -2,7 +2,7 @@
 id: 2026-07-24-loop-causal-fino
 schema: corrida/1
 tipo: corrida
-estado: ACTIVE
+estado: CLOSED
 creado: 2026-07-24
 branch: main
 titulo: "Fino del loop causal: /saber citar no asume que saber_ficha expone dedup_key + sesion = session_id del cliente MCP"
@@ -11,7 +11,7 @@ target: "pc-local (la forja; directiva durable del operador para lucky-skills)"
 model: "opus (líder opus-4.8 + verificación) — goal 'terminar sin intervención + documentar los porqué'"
 ley: "v2.9.0 (sello local == último tag)"
 iteraciones: "1/3"
-runState: closing
+runState: closed
 cierre: "2026-07-24 · fast-path; verificador fresco PASS. Habilita la forja v2.10.0 (goal 'terminar sin intervención')."
 citas_saber: "N/A — fast-path de corrección de prosa; no se consultó ni citó ninguna ficha del saber."
 veredictos:

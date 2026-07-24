@@ -14,6 +14,7 @@
     "corrida:2026-07-17-regla-dedup-key-estable": "cd48e612f8c34eb7b74513af9d291536604de20e6ff749ee3f3df1f940a1e1e7",
     "corrida:2026-07-18-cosecha-agent-skills": "de2f1ca106bb0fc4dce1eea2fd04df90d17ca955e0a28a3bb6a22114d2fa7640",
     "corrida:2026-07-19-versionado-artefactos": "184d560cf0d54ee2849a877e9e619ac4231db49cc4b86ccf27b2566e8dfd149b",
-    "corrida:2026-07-24-cierre-loop-causal-saber": "e582f3feb1a476a20aa150c1ada79dd474ce3b121c823708220e65834ab6c2f3"
+    "corrida:2026-07-24-cierre-loop-causal-saber": "e582f3feb1a476a20aa150c1ada79dd474ce3b121c823708220e65834ab6c2f3",
+    "corrida:2026-07-24-loop-causal-fino": "71a2bea2f922f2e84c51bda755b8815b215fdc8e8d41154ccb9e8b7feff5d8a5"
   }
 }
