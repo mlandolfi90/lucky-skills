@@ -167,25 +167,31 @@ no una promoción: alimenta el contador de citas causales, **jamás mueve `usos`
 2. **POR FICHA**, presentá al humano cuál PARECE haber funcionado y esperá su
    **confirmación** (principio de endoso: el humano decide qué es verdad; el LLM
    no se auto-adjudica que la ficha funcionó). Jamás batch.
-3. **Anclá al `dedup_key` estable, NO al `entry_id`.** Por cada ficha confirmada,
-   ANTES de registrar: `saber_ficha(<ID>)` → leé su **`dedup_key`** (la identidad
-   ESTABLE de la ficha). Ese `dedup_key` es lo que va al campo `CITAS_SABER:` del
-   cierre y lo que ancla la cita. **Razón:** `saber_telemetria` clava la cita
-   contra el `entry_id`, que la **promoción RENOMBRA** (CAND-xxx→GAP-nnn) → una
-   cita anclada al `entry_id` quedaría **huérfana** tras el ascenso; el `dedup_key`
-   sobrevive el rename. Registrá con `saber_telemetria(...)` — **anclá al
-   `dedup_key` estable según el contrato del saber** (Hackaton está estabilizando
-   el server a clavar por `dedup_key`; **NO hardcodees el shape exacto del arg** —
-   que la skill sobreviva el cambio de shape). Los campos estables del evento:
+3. **Anclá la cita al ID ESTABLE de la ficha, NO al `entry_id`.** **Razón:**
+   `saber_telemetria` clava la cita contra el `entry_id`, que la **promoción
+   RENOMBRA** (CAND-xxx→GAP-nnn) → una cita anclada al `entry_id` queda
+   **huérfana** tras el ascenso; un id estable sobrevive el rename.
+   **Estado del contrato (hallazgo de Hackaton leyendo la fuente `lucky-tool-saber`):**
+   HOY `saber_ficha` **NO expone** un id estable (el `Entry` no persiste `dedup_key`),
+   y `saber_telemetria` sigue tomando `entry_id` — o sea, **hoy la cita es
+   huérfana-por-rename por limitación del server, no se puede evitar desde acá.**
+   La corrida server de Hackaton (lucky-tool-saber) va a **exponer el id estable
+   (content_signature / dedup_key persistido) vía `saber_ficha`** y **definir el
+   field-ancla en `saber_telemetria`**. Cuando ese contrato aterrice: anclá a ese
+   id estable, registralo en `CITAS_SABER:` y **pineá el ejemplo exacto acá**.
+   **NUNCA hardcodees el shape del arg** — que la skill sobreviva el cambio.
+   Campos del evento:
    - `run_ledger_ref` = el **slug-id kebab de ESTA corrida** (el campo `id:` de la
      fila, ej. `2026-07-24-cierre-loop-causal-saber`) — string idéntico byte a byte
      al que el consumo aguas abajo lee. **NO la ruta de la fila, NO la cabecera
-     humana del ledger.**
-   - `event_id` = `cita:<corrida-slug>:<dedup_key>` — clave de idempotencia (ambas
-     partes estables; **un solo id-de-corrida en todo el loop**; un retry no
-     duplica la cita).
-   - `sesion` = el mismo **slug-id de la corrida** (para el cruce server-side con
-     el tick de consulta).
+     humana del ledger.** (Este campo SÍ es estable y usable hoy.)
+   - `event_id` = `cita:<corrida-slug>:<id-estable-de-ficha>` — clave de idempotencia
+     determinista (**un solo id-de-corrida en todo el loop**; un retry no duplica).
+     El componente de ficha sigue el id estable del contrato (arriba).
+   - `sesion` = el **session_id del cliente MCP** — **NO el slug de la corrida**:
+     las consultas (`saber_buscar`) ocurren ANTES de que la corrida tenga id, así
+     que el `sesion` debe ser estable TODA la sesión para cruzar con el tick de
+     consulta server-side. El shape exacto lo define la corrida server de Hackaton.
    Cuenta como ALEGADO, no como uso.
 
    > **DOCTRINA DURA — la FORMA del `run_ledger_ref` (causa raíz probable de las

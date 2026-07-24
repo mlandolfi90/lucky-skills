@@ -3494,6 +3494,20 @@ Fast-path bajo goal 'terminar sin intervención'. Corrige dos suposiciones de co
 que Hackaton cazó leyendo la fuente, antes de forjar. Verificación: REGLA 0 (test-saber)
 + leak + un verificador fresco del delta.
 <!-- VEREDICTOS:BEGIN -->
-- runState: wip
+- runState: closing
+- [V] TARGET · PASS · lider · pc-local (directiva durable)
+- [V] MODEL · PASS · lider · opus-4.8 líder + verificador
+- [V] REGLA0 · PASS · verificador · test-saber 12/12 + registros-lint 0, corridos por él en pc-local; A10/A11 verdes tras la corrección
+- [V] TEST_COVERAGE · PASS · verificador · test-saber sigue 12/12; la corrección no baja cobertura
+- [V] OPEN_CLOSED · PASS · verificador · corrección de prosa acotada a §/saber citar paso 3 + bullet en ADR 0027 §Consecuencias; no reescribe; sello v2.9.0 intacto
+- [V] SCOPE_CREEP · PASS · verificador · solo saber/SKILL.md + ADR 0027 (declarados) + la fila; cero llamada saber_*, cero escritura al repo saberes
+- [V] ZERO_LEAK · PASS · verificador · leak-scan exit 0 + revisión manual; cero secretos
+- [V] CIERRE_TRAS_PASS · PASS · gate · cierre tras verificador PASS
+- [V] MIGRATION · N/A · gate · sin DDL
+- [V] RESPONSIVE · N/A · gate · no UI
+- [V] CONFORMIDAD · N/A · gate · no código hexagonal
+- [V] SELLOS · N/A · gate · no habilita release por sí; el operador forja v2.10.0 aparte
+- [V] TAG_GATE · N/A · gate · no crea tag en esta corrida
 <!-- VEREDICTOS:END -->
 - Iteraciones: 1/3
+- Cierre: 2026-07-24 · fast-path; verificador fresco PASS. Habilita la forja v2.10.0 (goal 'terminar sin intervención').

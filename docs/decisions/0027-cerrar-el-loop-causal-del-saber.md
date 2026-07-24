@@ -90,7 +90,19 @@ que el refuerzo vuelva a la ficha para que el sistema sepa cuál merece vivir.
 - **`saber/SKILL.md` gana el subcomando `/saber citar <refs>`** — gemelo de
   `/saber destilar` en el gatillo del cierre: uno cablea la CAPTURA, el otro el
   REFUERZO. Define el contrato de `saber_telemetria` (event_id idempotente,
-  entry_id, run_ledger_ref) y su fail-open a `/idea` sin MCP.
+  run_ledger_ref, anclaje al id estable) y su fail-open a `/idea` sin MCP.
+- **Deuda de contrato declarada (pin pendiente, corrida `2026-07-24-loop-causal-fino`).**
+  El anclaje al `dedup_key` es la DECISIÓN de diseño, pero el server del saber aún no
+  la soporta: HOY `saber_ficha` **no expone** un id estable (el `Entry` no persiste
+  `dedup_key`) y `saber_telemetria` toma `entry_id` — o sea, hoy la cita es
+  huérfana-por-rename por limitación del server, no evitable desde `lucky-skills`. La
+  corrida server de Hackaton (`lucky-tool-saber`) expondrá el id estable
+  (content_signature / dedup_key persistido) vía `saber_ficha` y definirá el field-ancla
+  en `saber_telemetria`; además el `sesion` del tick de consulta será el **session_id
+  del cliente MCP** (estable toda la sesión — las consultas ocurren antes de que la
+  corrida tenga id), **no** el slug de la corrida. `/saber citar` queda escrito FLEXIBLE
+  ("anclá al id estable según el contrato del saber", sin hardcodear el shape); el
+  ejemplo exacto se pinea en un micro-update cuando Hackaton pase los dos shapes finales.
 - **`crisol/SKILL.md` §4 paso 8** agrega el ESPEJO inmediatamente después del
   bloque de Destilación/BITACORA: el campo `CITAS_SABER:` se registra SIEMPRE, con
   puntero a `/saber citar` para el cómo. El Crisol AVISA, no exige gate.
