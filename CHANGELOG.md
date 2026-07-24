@@ -4,6 +4,32 @@ Notas de release de la familia de skills Lucky. El historial completo del **proc
 (corridas del Crisol, RETROs) vive en `docs/refactor/_crisol/RUN-LEDGER.md`; los tags
 inmutables, en `git tag`. Formato: más nuevo arriba.
 
+## v2.11.0 — 2026-07-24 — Saber Fase 2: promoción inmediata; el juicio humano se mueve a curaduría (ADR 0028)
+
+Corrida `2026-07-24-saber-fase2-promocion-inmediata` (CLOSED, 1/3, sello `75ce50372f79`). **GO
+directo del operador** en su chat, tras surface explícito (mío y del hub) de que este cambio
+DEROGA su invariante más enfático. NO se ejecutó por relay — lo autorizó él mismo, entendiendo las
+tensiones. Contrato del server pineado por Skills Hackaton (su corrida cerró antes de que yo forjara).
+
+**El cambio de modelo (ADR 0028):**
+- **Captura → LIVE directo.** Se elimina el estado `CANDIDATE` para fichas: `saber_proponer_ficha`
+  captura y sirve LIVE de inmediato (id `CAP-<content_key>`). Deroga "contar ≠ ungir" y "CANDIDATE→
+  LIVE solo por acto humano / endoso por ficha pre-LIVE".
+- **El principio del operador se CONSERVA, no muere.** "El humano decide qué es verdad" sigue intacto
+  — lo que cambia es el MOMENTO del juicio: de portón-antes-de-entrar a **curaduría-después**. La
+  destilación pasa a ser el acto de juicio humano.
+- **`/saber destilar` = ritual de curaduría humana batch:** consolidar + fusionar cuasi-duplicados
+  (regla de RAG horneada: discriminante causa-raíz+acción, default NO-fusionar, el comando PROPONE y
+  el humano confirma cada fusión) + podar la evidencia-cero (~30d, reversible). `/saber podar` es la
+  única garganta, invoca `saber_destilar_proponer` (read-only). La captura-al-cierre se renombra a
+  `/saber capturar`. La cita causal (`/saber citar`) pasa de gate a **historial** (`saber_historial`).
+- **Trade de seguridad declarado honesto:** la captura fresca se sirve sin probar (`SERVIDA SIN
+  PROBAR`); el colchón es la señal de citas + la poda de salida. La revisión adversarial de Hackaton
+  lo dio SAFE.
+- Supersesión por `refs` (ADR 0028 deroga puntos de 0023/0027/0015 en su cuerpo; los viejos quedan
+  byte-intactos, respetando la inmutabilidad de ADR 0016). Roster 4/4 PASS; el fresh-eyes gate cazó
+  una incoherencia intra-archivo de bitacora, reconciliada antes de cerrar.
+
 ## v2.10.2 — 2026-07-24 — Pin final del contrato del loop causal (deuda ADR 0027 cerrada)
 
 Corrida `2026-07-24-loop-causal-pin-final` (CLOSED, 1/3, sello `70e442b771e4`). Skills Hackaton

@@ -33,4 +33,4 @@ Si FAIL: archivo:línea exacto SIN transcribir el secreto.
 
 ---
 **Fuente: `github.com/mlandolfi90/lucky-skills` · esta copia = tag
-`v2.10.2` (cache local, NO la ley).**
+`v2.11.0` (cache local, NO la ley).**
