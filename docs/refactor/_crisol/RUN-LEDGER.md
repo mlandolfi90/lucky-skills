@@ -3585,6 +3585,30 @@ gate-pre-LIVE a curaduría-posterior (destilación). Arqueología (mapear los in
 se derogan + la infra de destilación a extender) → plan con supuestos → Steward → Ingeniero
 → roster → cierre. Forja DIFERIDA al pin del server de Hackaton.
 <!-- VEREDICTOS:BEGIN -->
-- runState: wip
+- runState: closing
+- [V] TARGET · PASS · quality-auditor-2 · pc-local (verificó AHÍ, intérprete python sondado)
+- [V] MODEL · PASS · lider · opus en steward/ingeniero/roster; líder opus-4.8; GO directo del operador
+- [V] OPEN_CLOSED · PASS · design-verifier · edit a estable bajo ADR 0028 (cambio de invariante); 0028 deroga POR-PUNTO vía refs (supersede:null), 0023/0027/0015 byte-intactos (git diff vacío)
+- [V] ATOMICIDAD · PASS · design-verifier · /saber destilar (curaduría) invoca /saber podar (única garganta), no reimplementa; destilador sigue capturador read-only
+- [V] COSTURA · PASS · design-verifier · renombre /saber destilar→capturar coherente (crisol §4 apunta al nuevo); curaduría se apoya en tools del server sin duplicar; DESAPARECE (los 5 modos) verificado como eliminación real por diff de resta
+- [V] CASOS_LEGALES · PASS · steward · el edit a estable (saber/crisol/bitacora) tiene caso legal nominado = ADR 0028
+- [V] PRINCIPIO_CONSERVADO · PASS · design-verifier · 'el humano decide qué es verdad' CONSERVADO (movido a curaduría, no vaciado; saber:27/203, ADR 0028 §Conservado) — no es tergiversación del endoso
+- [V] CREDITO · PASS · scope-verifier · ADR 0028 ACEPTADA, frontmatter válido, 0028→0023/0027/0015/0024 en refs; recíproca corrida→0028 foldeada en este cierre; INDEX regenerado
+- [V] SCOPE_CREEP · PASS · scope-verifier · mapa 1:1 a los actos; CERO firing de tool saber_* (solo prosa) y CERO escritura al repo saberes (verificado); residuales tier-1 parkeados en IDEAS
+- [V] PARKING · PASS · scope-verifier · 4 residuales stale tier-1 (hook + 3 punteros) parkeados como follow-up en IDEAS.md; la incoherencia intra-archivo tier-2 de bitacora se RECONCILIÓ (no se parkeó)
+- [V] REGLA0 · PASS · quality-auditor-2 · 17/17 suites exit 0 en pc-local + registros-lint 0 + proyectar --check byte-idéntico
+- [V] TEST_COVERAGE · PASS · quality-auditor-2 · test-saber 14/14: A12 (regla de fusión de RAG) + A13 (/saber capturar) nuevos
+- [V] RED_GREEN · PASS · lider · A12/A13 vistos fallar antes del rewrite (12→14 PASS, reportado por el ingeniero)
+- [V] ZERO_LEAK · PASS · leak-verifier · leak-scan exit 0 + barrido manual del diff completo: 0 hallazgos
+- [V] PIN_TOTAL · N/A · design-verifier · sin deps nuevas; test-pin-scan corrido por él 3/0, árbol sin floating
+- [V] LISKOV · N/A · design-verifier · prosa normativa
+- [V] INTERFACE_SEGREGATION · N/A · design-verifier · sin contrato multi-cliente nuevo
+- [V] CIERRE_TRAS_PASS · PASS · gate · cierre tras roster 4/4 + coherencia reconciliada
+- [V] MIGRATION · N/A · gate · sin DDL; la migración de CANDIDATE-legacy es server-side (lane Hackaton)
+- [V] RESPONSIVE · N/A · gate · no UI
+- [V] CONFORMIDAD · N/A · gate · no código hexagonal
+- [V] SELLOS · N/A · gate · re-sello en la forja v2.11.0
+- [V] TAG_GATE · N/A · gate · tag en la forja
 <!-- VEREDICTOS:END -->
-- Iteraciones: 1/3
+- Iteraciones: 1/3 (Steward APPROVE 1ª + 4 correcciones inline aplicadas; roster fresco 4/4 PASS 1ª; una incoherencia intra-archivo de bitacora reconciliada post-roster antes de cerrar)
+- Cierre: 2026-07-24 · commits apertura + plan + Steward-inline + rewrite (b60b873) + coherencia bitacora (8f64c23) + cierre en dos commits. Forja v2.11.0 habilitada (GO directo del operador + pin de Hackaton, ambos cumplidos).
