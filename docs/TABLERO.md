@@ -11,8 +11,8 @@
 ## ⚠ Ramas EN_DUDA — una corrida las contradijo (frescura) (0)
 - (nada)
 
-## 🔥 Corridas ACTIVE (1)
-- corrida:2026-07-24-loop-causal-pin-final · Pin final del contrato del loop causal: saber_ficha NO expone content_key (server resuelve entry_id internamente); sesion = param 'sesion' = mcp-session-id — deuda de ADR 0027 CERRADA
+## 🔥 Corridas ACTIVE (0)
+- (nada)
 
 ## 🩹 Hotfixes abiertos (0)
 - (nada)

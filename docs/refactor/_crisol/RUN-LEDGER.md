@@ -3543,7 +3543,7 @@ que Hackaton cazó leyendo la fuente, antes de forjar. Verificación: REGLA 0 (t
 - Cierre: 2026-07-24 · fast-path; verificador fresco PASS. Habilita la forja v2.10.0 (goal 'terminar sin intervención').
 
 ### main — 2026-07-24 (Pin final del contrato del loop causal: saber_ficha NO expone content_key (server resuelve entry_id internamente); sesion = param 'sesion' = mcp-session-id — deuda de ADR 0027 CERRADA)
-- STATUS: ACTIVE
+- STATUS: CLOSED
 - Tier: fast-path (pin de prosa en 1 skill + cierre de la nota de deuda del ADR; sin código nuevo, sin contrato de matriz)
 - Fecha: 2026-07-24
 - TARGET: pc-local (la forja; directiva durable del operador para lucky-skills)
@@ -3553,7 +3553,7 @@ Fast-path bajo goal 'terminar sin intervención'. Pin del contrato final tras el
 de la corrida server de Hackaton. Verificación: REGLA 0 (test-saber) + leak + verificador
 fresco del delta.
 <!-- VEREDICTOS:BEGIN -->
-- runState: closing
+- runState: closed
 - [V] TARGET · PASS · lider · pc-local (directiva durable)
 - [V] MODEL · PASS · lider · opus-4.8 líder + verificador
 - [V] REGLA0 · PASS · verificador · test-saber 12/12 + registros-lint 0, corridos por el verificador en pc-local

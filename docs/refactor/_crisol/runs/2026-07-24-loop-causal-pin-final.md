@@ -2,7 +2,7 @@
 id: 2026-07-24-loop-causal-pin-final
 schema: corrida/1
 tipo: corrida
-estado: ACTIVE
+estado: CLOSED
 creado: 2026-07-24
 branch: main
 titulo: "Pin final del contrato del loop causal: saber_ficha NO expone content_key (server resuelve entry_id internamente); sesion = param 'sesion' = mcp-session-id — deuda de ADR 0027 CERRADA"
@@ -11,7 +11,7 @@ target: "pc-local (la forja; directiva durable del operador para lucky-skills)"
 model: "opus (líder opus-4.8 + verificación) — goal 'terminar sin intervención + documentar los porqué'"
 ley: "v2.10.1 (sello local == último tag)"
 iteraciones: "1/3 (verificador fresco PASS a la 1ª — pin de prosa)"
-runState: closing
+runState: closed
 cierre: "2026-07-24 · fast-path; verificador fresco PASS. Habilita forja v2.10.2 (pin final, deuda ADR 0027 cerrada)."
 citas_saber: "N/A — pin de contrato/prosa; no se consultó ni citó ninguna ficha del saber."
 veredictos:
