@@ -9,7 +9,7 @@ from pathlib import Path
 
 from lifecycle_core.authorization import require_human
 from lifecycle_core.envfile import canonical_env, load_env
-from lifecycle_core.git import commit_paths, is_repository
+from lifecycle_core.git import commit_paths, git, is_repository
 from lifecycle_core.hashing import sha256_file, tree_hash
 from lifecycle_core.locking import directory_lock
 from lifecycle_core.paths import resolve_within
@@ -85,6 +85,7 @@ def apply_plan(
                 state_map_paths = _write_state_map(plan, target)
                 changed_paths.update(state_map_paths)
                 _validate_activation(plan, target)
+                vcs_visible, vcs_ignored = _vcs_visibility(target, changed_paths)
                 receipt_path.parent.mkdir(parents=True, exist_ok=True)
                 write_receipt(
                     receipt_path,
@@ -104,6 +105,8 @@ def apply_plan(
                             commit_confirmed_by if create_commit else "NOT_APPLICABLE"
                         ),
                         "APPLIED_AT": utc_now(),
+                        "VCS_VISIBLE": vcs_visible,
+                        "VCS_IGNORED": vcs_ignored,
                         "COMMIT": "REQUESTED" if create_commit else "NO",
                     },
                 )
@@ -129,6 +132,28 @@ def apply_plan(
         )
         _append_commit_result(receipt_path, commit, commit_confirmed_by)
     return receipt_path
+
+
+def _vcs_visibility(target: Path, changed_paths: set[str]) -> tuple[str, str]:
+    """Declarar qué parte de lo escrito es visible para git.
+
+    Un .gitignore del proyecto (p. ej. `*.env` en un repo de auth) puede
+    tragarse los metadatos de gobernanza en silencio: la adopción reportaba
+    ADOPTED y otro clon o el CI no veían nada. El choque es legítimo de ambos
+    lados; lo que no es legítimo es callarlo. Hallado en vivo adoptando
+    Lucky-Auth-Plane.
+    """
+    if not changed_paths:
+        return "0/0", "NONE"
+    if not is_repository(target):
+        return "NOT_APPLICABLE", "NOT_APPLICABLE"
+    ordered = sorted(changed_paths)
+    result = git(target, ("check-ignore", "--", *ordered))
+    ignored = tuple(
+        line.strip() for line in result.stdout.splitlines() if line.strip()
+    )
+    visible = len(ordered) - len(ignored)
+    return f"{visible}/{len(ordered)}", ",".join(ignored) or "NONE"
 
 
 def _prepare(plan: AdoptionPlan, staged: Path) -> None:

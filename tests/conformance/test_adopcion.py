@@ -148,6 +148,28 @@ class AdoptionTests(unittest.TestCase):
         )
         self.assertIn("# alpha v2", installed)
 
+    def test_receipt_declares_vcs_visibility_when_gitignore_swallows(self) -> None:
+        # Un .gitignore anti-secretos (*.env, state/) puede tragarse los
+        # metadatos de gobernanza en silencio; la adopción debe declararlo.
+        subprocess.run(["git", "init", "-q", str(self.target)], check=True)
+        subprocess.run(["git", "-C", str(self.target), "config",
+                        "user.email", "t@t"], check=True)
+        subprocess.run(["git", "-C", str(self.target), "config",
+                        "user.name", "t"], check=True)
+        (self.target / ".gitignore").write_text(
+            "*.env\nstate/\n", encoding="utf-8"
+        )
+        plan = self._plan(self._landing())
+        receipt = apply_plan(
+            plan,
+            confirmed_plan_hash=plan.plan_hash,
+            confirmed_by="human:test",
+        )
+        values = load_env(receipt)
+        visible, total = values["VCS_VISIBLE"].split("/")
+        self.assertLess(int(visible), int(total))
+        self.assertIn(".lifecycle/state/STATE-MAP.env", values["VCS_IGNORED"])
+
     def test_archives_replaced_and_legacy_paths(self) -> None:
         old = self.target / "skills" / "alpha"
         old.mkdir(parents=True)

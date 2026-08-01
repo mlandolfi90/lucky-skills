@@ -4,6 +4,8 @@ import argparse
 import sys
 from pathlib import Path
 
+from lifecycle_core.envfile import load_env
+
 from lifecycle_core.receipts import local_state_root
 
 from .models import AdoptionPlan
@@ -113,5 +115,12 @@ def _apply(arguments: argparse.Namespace) -> int:
     print(f"ADOPTION={current.adoption_id}")
     print("RESULT=ADOPTED" if current.has_writes else "RESULT=ALREADY_ADOPTED")
     print("WRITE_GATE=PASS")
+    values = load_env(receipt)
+    print(f"VCS_VISIBLE={values.get('VCS_VISIBLE', 'UNKNOWN')}")
+    ignored = values.get("VCS_IGNORED", "NONE")
+    if ignored not in {"NONE", "NOT_APPLICABLE"}:
+        print("WARNING=el .gitignore del proyecto oculta parte de la gobernanza")
+        for path in ignored.split(","):
+            print(f"VCS_IGNORED={path}")
     print(f"RECEIPT={receipt.resolve()}")
     return 0
