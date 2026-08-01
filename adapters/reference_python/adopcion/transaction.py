@@ -134,6 +134,78 @@ def apply_plan(
     return receipt_path
 
 
+def revalidate_state_map(
+    target: Path,
+    *,
+    confirmed_by: str,
+) -> Path:
+    """Re-corroborar el STATE-MAP con el estado actual, por decisión humana.
+
+    Un repo vivo avanza después de adoptar (commits propios, ediciones
+    legítimas): el drift que Sextante detecta es honesto, pero sin esta vía
+    el repo queda en deadlock — el STATE-MAP solo se reescribía dentro de una
+    adopción exitosa, y ninguna puede tener éxito con el STATE-MAP vencido.
+    Hallado en vivo por dos repos independientes (Auth-Plane, PizarraEvo) en
+    el camino normal «adoptar → commitear → seguir trabajando → ampliar».
+
+    No esconde drift: lo declara. Registra el salto (commit y huella, antes y
+    después) en un recibo, incrementa STATE_REVISION y conserva el resto de
+    los campos tal como estaban.
+    """
+    actor = require_human(confirmed_by, field="confirmed_by")
+    target = target.resolve(strict=True)
+    state_map = target / ".lifecycle" / "state" / "STATE-MAP.env"
+    if not state_map.is_file():
+        raise ValueError("no hay STATE-MAP que revalidar: el repo no está adoptado")
+    lock = _lock_path(target, lifecycle_existed=True)
+    lock.parent.mkdir(parents=True, exist_ok=True)
+    owner: dict[str, object] = {
+        "OPERATION": "REVALIDATE",
+        "OWNER": actor,
+        "CREATED_AT": utc_now(),
+    }
+    with directory_lock(lock, owner):
+        values = load_env(state_map)
+        previous_commit = values.get("GIT_LOCAL_COMMIT", "UNKNOWN")
+        previous_fingerprint = values.get("GIT_LOCAL_FINGERPRINT", "UNKNOWN")
+        # Danza de dos fases (como _write_state_map): primero se escriben los
+        # campos que SÍ participan de la huella (commit, revisión); después se
+        # mide; después se sella la huella medida — cuyo campo es el único
+        # excluido por la normalización autorreferencial — y se corrobora.
+        before, _ = probe_local(target, timeout_seconds=10, max_entries=50_000)
+        values["GIT_LOCAL_COMMIT"] = before.head
+        try:
+            values["STATE_REVISION"] = str(int(values.get("STATE_REVISION", "1")) + 1)
+        except ValueError:
+            values["STATE_REVISION"] = "1"
+        _replace_env(state_map, values)
+        observation, _ = probe_local(target, timeout_seconds=10, max_entries=50_000)
+        values["GIT_LOCAL_FINGERPRINT"] = observation.fingerprint
+        _replace_env(state_map, values)
+        corroborated, _ = probe_local(target, timeout_seconds=10, max_entries=50_000)
+        if corroborated.fingerprint != observation.fingerprint:
+            raise ValueError("la revalidación no produjo una huella estable")
+        receipt_root = target / ".lifecycle" / "local" / "adopcion"
+        receipt_root.mkdir(parents=True, exist_ok=True)
+        receipt_path = receipt_root / f"revalidacion-{utc_now().replace(':', '')}.env"
+        write_receipt(
+            receipt_path,
+            {
+                "FORMAT_VERSION": "1",
+                "OPERATION": "REVALIDATE",
+                "TARGET": str(target),
+                "PREVIOUS_COMMIT": previous_commit,
+                "PREVIOUS_FINGERPRINT": previous_fingerprint,
+                "NEW_COMMIT": before.head,
+                "NEW_FINGERPRINT": observation.fingerprint,
+                "STATE_REVISION": values["STATE_REVISION"],
+                "CONFIRMED_BY": actor,
+                "REVALIDATED_AT": utc_now(),
+            },
+        )
+    return receipt_path
+
+
 def _vcs_visibility(target: Path, changed_paths: set[str]) -> tuple[str, str]:
     """Declarar qué parte de lo escrito es visible para git.
 

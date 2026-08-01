@@ -68,6 +68,15 @@ Después:
 
 Tratar una instalación idéntica como `ALREADY_ADOPTED` sin reescribir.
 
+## Revalidar
+
+Un repo vivo avanza después de adoptar: el drift que Sextante detecta es
+honesto, pero dejaba en deadlock toda ampliación del paquete. `revalidar`
+es la vía legítima: re-corrobora el STATE-MAP con el estado actual, por
+decisión humana, registrando el salto (commit y huella, antes y después)
+en un recibo. No esconde drift — lo declara. El STATE-MAP jamás se edita
+a mano.
+
 ## Recuperar
 
 Corregir en el área preparada mientras exista una hipótesis nueva y progreso

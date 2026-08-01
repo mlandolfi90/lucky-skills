@@ -10,7 +10,7 @@ from lifecycle_core.receipts import local_state_root
 
 from .models import AdoptionPlan
 from .planner import build_plan
-from .transaction import apply_plan
+from .transaction import apply_plan, revalidate_state_map
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -36,6 +36,9 @@ def build_parser() -> argparse.ArgumentParser:
     apply.add_argument("--accept-risk-by", default="")
     apply.add_argument("--commit", action="store_true")
     apply.add_argument("--commit-confirmed-by", default="")
+    revalidar = subparsers.add_parser("revalidar")
+    revalidar.add_argument("--target", required=True)
+    revalidar.add_argument("--confirmed-by", required=True)
     return parser
 
 
@@ -44,6 +47,8 @@ def main(argv: list[str] | None = None) -> int:
     try:
         if arguments.command == "plan":
             return _plan(arguments)
+        if arguments.command == "revalidar":
+            return _revalidar(arguments)
         return _apply(arguments)
     except (OSError, ValueError) as error:
         print(f"ADOPTION_ERROR={error}", file=sys.stderr)
@@ -88,6 +93,23 @@ def _plan(arguments: argparse.Namespace) -> int:
     print("WRITE_GATE=BLOCK")
     print("NEEDS=CONFIRM_ADOPTION")
     print(f"PLAN={output.resolve()}")
+    return 0
+
+
+def _revalidar(arguments: argparse.Namespace) -> int:
+    receipt = revalidate_state_map(
+        Path(arguments.target),
+        confirmed_by=arguments.confirmed_by,
+    )
+    values = load_env(receipt)
+    print("STATE_MAP=REVALIDATED")
+    print(f"COMMIT={values['PREVIOUS_COMMIT'][:8]}->{values['NEW_COMMIT'][:8]}")
+    print(
+        "FINGERPRINT="
+        f"{values['PREVIOUS_FINGERPRINT'][:8]}->{values['NEW_FINGERPRINT'][:8]}"
+    )
+    print(f"STATE_REVISION={values['STATE_REVISION']}")
+    print(f"RECEIPT={receipt.resolve()}")
     return 0
 
 

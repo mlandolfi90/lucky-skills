@@ -7,3 +7,7 @@ __pycache__/
 htmlcov/
 .observability/
 dist/
+
+# artefactos locales de otras herramientas (no del canon)
+.codebase-memory/
+/plugins/

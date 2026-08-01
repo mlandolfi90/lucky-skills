@@ -12,7 +12,7 @@ from support import ADAPTER_ROOT, ROOT
 sys.path.insert(0, str(ADAPTER_ROOT))
 
 from adopcion.planner import build_plan  # noqa: E402
-from adopcion.transaction import apply_plan  # noqa: E402
+from adopcion.transaction import apply_plan, revalidate_state_map  # noqa: E402
 from lifecycle_core.envfile import canonical_env, load_env  # noqa: E402
 from lifecycle_core.hashing import tree_hash  # noqa: E402
 from lifecycle_core.receipts import verify_receipt  # noqa: E402
@@ -169,6 +169,46 @@ class AdoptionTests(unittest.TestCase):
         visible, total = values["VCS_VISIBLE"].split("/")
         self.assertLess(int(visible), int(total))
         self.assertIn(".lifecycle/state/STATE-MAP.env", values["VCS_IGNORED"])
+
+    def test_revalidar_unblocks_a_repo_that_advanced_after_adoption(self) -> None:
+        # El deadlock de la flota: adoptar, commitear, seguir trabajando
+        # (contenido nuevo), y toda adopción posterior bloqueada por drift
+        # honesto — sin vía de re-corroboración. revalidar es esa vía.
+        subprocess.run(["git", "init", "-q", "-b", "main", str(self.target)],
+                       check=True)
+        for key, value in (("user.email", "t@t"), ("user.name", "t")):
+            subprocess.run(["git", "-C", str(self.target), "config", key, value],
+                           check=True)
+        plan = self._plan(self._landing())
+        apply_plan(plan, confirmed_plan_hash=plan.plan_hash,
+                   confirmed_by="human:test")
+        subprocess.run(["git", "-C", str(self.target), "add", "-A"], check=True)
+        subprocess.run(["git", "-C", str(self.target), "commit", "-qm",
+                        "adopta gobernanza"], check=True)
+        # El repo vive: contenido nuevo commiteado después de adoptar.
+        (self.target / "app.py").write_text("codigo\n", encoding="utf-8")
+        subprocess.run(["git", "-C", str(self.target), "add", "app.py"],
+                       check=True)
+        subprocess.run(["git", "-C", str(self.target), "commit", "-qm",
+                        "trabajo del proyecto"], check=True)
+
+        with self.assertRaisesRegex(ValueError, "WRITE_GATE|edición"):
+            self._plan(self._landing())
+
+        receipt = revalidate_state_map(self.target, confirmed_by="human:test")
+        values = load_env(receipt)
+        self.assertEqual(values["OPERATION"], "REVALIDATE")
+        self.assertNotEqual(values["PREVIOUS_FINGERPRINT"],
+                            values["NEW_FINGERPRINT"])
+
+        second = self._plan(self._landing())
+        result = apply_plan(second, confirmed_plan_hash=second.plan_hash,
+                            confirmed_by="human:test")
+        self.assertTrue(verify_receipt(result))
+
+    def test_revalidar_requires_an_adopted_repo(self) -> None:
+        with self.assertRaisesRegex(ValueError, "no está adoptado"):
+            revalidate_state_map(self.target, confirmed_by="human:test")
 
     def test_archives_replaced_and_legacy_paths(self) -> None:
         old = self.target / "skills" / "alpha"
