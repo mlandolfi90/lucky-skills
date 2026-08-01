@@ -125,6 +125,10 @@ def apply_release(
     push_result = "NO"
     release_result = "READY"
     reason = "NONE"
+    changelog_path = repository / "CHANGELOG.md"
+    changelog_original = (
+        changelog_path.read_bytes() if changelog_path.exists() else None
+    )
     try:
         published = validate_skill(skill_root)
         if str(published.version) != plan.to_version:
@@ -132,10 +136,14 @@ def apply_release(
         if _canary_hash(catalog, plan.skill_id) != plan.canary_hash:
             raise ValueError("el canary publicado no coincide con el plan")
         if create_commit:
+            # Historia narrativa generada por la máquina, jamás mantenida a
+            # mano: cada release deja su entrada en el CHANGELOG dentro del
+            # mismo commit de release.
+            _prepend_changelog(changelog_path, plan, actor)
             relative_skill = skill_root.relative_to(repository).as_posix()
             commit = commit_paths(
                 repository,
-                (relative_skill,),
+                (relative_skill, "CHANGELOG.md"),
                 message=f"chore(skills): release {plan.skill_id} {plan.to_version}",
             )
             release_result = "PUBLISHED"
@@ -189,6 +197,10 @@ def apply_release(
     except Exception:
         if commit == "NO":
             manifest_path.write_bytes(original)
+            if changelog_original is not None:
+                changelog_path.write_bytes(changelog_original)
+            elif changelog_path.exists():
+                changelog_path.unlink()
         raise
 
     receipt_root = repository / ".lifecycle" / "local" / "releases"
@@ -222,6 +234,22 @@ def apply_release(
     )
     _consume_closure(repository, plan, receipt_id)
     return receipt
+
+
+def _prepend_changelog(path: Path, plan: ReleasePlan, actor: str) -> None:
+    header = (
+        "# Changelog de la suite\n\n"
+        "Generado por publicar-skill; no editar a mano.\n"
+    )
+    body = path.read_text(encoding="utf-8") if path.exists() else header
+    entry = (
+        f"\n## {plan.skill_id} {plan.to_version} — {utc_now()[:10]}"
+        f" — {plan.impact}\n"
+        f"- {plan.from_version} → {plan.to_version} · QUALITY={plan.quality}"
+        f" · autorizó {actor}\n"
+    )
+    rest = body[len(header):] if body.startswith(header) else body
+    path.write_text(header + entry + rest, encoding="utf-8", newline="\n")
 
 
 def _consumed_closure_marker(repository: Path, closure_hash: str) -> Path:

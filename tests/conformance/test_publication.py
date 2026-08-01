@@ -132,6 +132,14 @@ class PublicationTests(unittest.TestCase):
         values = load_env(receipt)
         self.assertEqual(values["RELEASE"], "PUBLISHED")
         self.assertEqual(values["PUSH"], "PUSHED")
+        changelog = (self.workspace / "CHANGELOG.md").read_text(encoding="utf-8")
+        self.assertIn("## demo 1.2.4", changelog)
+        self.assertIn("autorizó human:release", changelog)
+        committed = self._run(
+            "git", "-C", str(self.workspace),
+            "show", "--name-only", "--format=", "HEAD",
+        ).stdout
+        self.assertIn("CHANGELOG.md", committed)
         self.assertEqual(values["COMMIT_CONFIRMED_BY"], "human:commit")
         self.assertEqual(values["TAG_CONFIRMED_BY"], "human:tag")
         self.assertEqual(values["PUSH_CONFIRMED_BY"], "human:push")
