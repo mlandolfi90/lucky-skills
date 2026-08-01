@@ -1,6 +1,7 @@
 # Conceptos canónicos
 
 - [Adopción](adoption.md)
+- [Paquetes de adopción](adoption-packs.md)
 - [Plan hash](plan-hash.md)
 - [Collision Map](collision-map.md)
 - [Veredicto de arquitectura](architecture-verdict.md)
