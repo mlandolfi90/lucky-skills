@@ -1,0 +1,92 @@
+{
+  "description": "Observador lifecycle asesor; nunca bloquea ni decide por el humano.",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python",
+            "args": [
+              "-B",
+              "${CLAUDE_PROJECT_DIR}/skills/configurar-hooks/scripts/run_hook.py",
+              "claude-code",
+              "SessionStart"
+            ],
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit|NotebookEdit|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python",
+            "args": [
+              "-B",
+              "${CLAUDE_PROJECT_DIR}/skills/configurar-hooks/scripts/run_hook.py",
+              "claude-code",
+              "PreToolUse"
+            ],
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python",
+            "args": [
+              "-B",
+              "${CLAUDE_PROJECT_DIR}/skills/configurar-hooks/scripts/run_hook.py",
+              "claude-code",
+              "PostToolUse"
+            ],
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PostToolUseFailure": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python",
+            "args": [
+              "-B",
+              "${CLAUDE_PROJECT_DIR}/skills/configurar-hooks/scripts/run_hook.py",
+              "claude-code",
+              "PostToolUseFailure"
+            ],
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python",
+            "args": [
+              "-B",
+              "${CLAUDE_PROJECT_DIR}/skills/configurar-hooks/scripts/run_hook.py",
+              "claude-code",
+              "SessionEnd"
+            ],
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}

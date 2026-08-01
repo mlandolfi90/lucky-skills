@@ -1,0 +1,4 @@
+interface:
+  display_name: "Autopsia"
+  short_description: "Analiza una ejecución después de recuperarla"
+  default_prompt: "Usa $autopsia para registrar por qué falló esta ejecución y cómo se corrigió."

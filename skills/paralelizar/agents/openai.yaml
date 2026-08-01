@@ -1,0 +1,4 @@
+interface:
+  display_name: "Paralelizar"
+  short_description: "Reparte carriles independientes entre subagentes sin repartir el juicio"
+  default_prompt: "Usa $paralelizar para repartir esta tarea en carriles paralelos."

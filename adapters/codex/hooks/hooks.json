@@ -1,0 +1,55 @@
+{
+  "description": "Observador lifecycle asesor; nunca bloquea ni decide por el humano.",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python -B \"$(git rev-parse --show-toplevel)/skills/configurar-hooks/scripts/run_hook.py\" codex SessionStart",
+            "commandWindows": "powershell -NoProfile -NonInteractive -Command \"$r=(git rev-parse --show-toplevel).Trim(); & python -B (Join-Path $r 'skills/configurar-hooks/scripts/run_hook.py') codex SessionStart\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash|apply_patch|Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python -B \"$(git rev-parse --show-toplevel)/skills/configurar-hooks/scripts/run_hook.py\" codex PreToolUse",
+            "commandWindows": "powershell -NoProfile -NonInteractive -Command \"$r=(git rev-parse --show-toplevel).Trim(); & python -B (Join-Path $r 'skills/configurar-hooks/scripts/run_hook.py') codex PreToolUse\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "apply_patch|Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python -B \"$(git rev-parse --show-toplevel)/skills/configurar-hooks/scripts/run_hook.py\" codex PostToolUse",
+            "commandWindows": "powershell -NoProfile -NonInteractive -Command \"$r=(git rev-parse --show-toplevel).Trim(); & python -B (Join-Path $r 'skills/configurar-hooks/scripts/run_hook.py') codex PostToolUse\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python -B \"$(git rev-parse --show-toplevel)/skills/configurar-hooks/scripts/run_hook.py\" codex Stop",
+            "commandWindows": "powershell -NoProfile -NonInteractive -Command \"$r=(git rev-parse --show-toplevel).Trim(); & python -B (Join-Path $r 'skills/configurar-hooks/scripts/run_hook.py') codex Stop\"",
+            "timeout": 3
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Crisol"
+  short_description: "Orquesta calidad incorporada en cambios amplios"
+  default_prompt: "Usa $crisol para ejecutar el ciclo de calidad de este cambio."

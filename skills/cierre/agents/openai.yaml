@@ -1,0 +1,4 @@
+interface:
+  display_name: "Cierre"
+  short_description: "Verifica y cierra un cambio con evidencia"
+  default_prompt: "Usa $cierre para comprobar si este cambio puede cerrarse."
