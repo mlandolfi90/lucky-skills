@@ -1,11 +1,11 @@
 # Escalera de construcción
 
-`ESTADO=PROTOTIPO`
-`VERSION=0.1.0-prototype.1`
+`ESTADO=PUBLICADO`
+`VERSION=1.0.0`
 
-Las seis fases tienen implementación y pruebas de conformidad. Ninguna está
-publicada: falta la propuesta SemVer, el manifiesto y el tag vía
-`publicar-skill` (D-060, D-061). Cada fase declara abajo su estado real.
+Las seis fases tienen implementación y pruebas de conformidad, y la suite
+está sellada: cada skill ancla su 1.0.0 en un tag anotado
+`skill-<id>-v1.0.0`. Las releases posteriores pasan por `publicar-skill`.
 
 Este archivo describe el alcance construido, no el orden de trabajo pendiente.
 Antes de dar por cerrada cualquier fase, corroborar contra el código —
@@ -67,7 +67,7 @@ Antes de dar por cerrada cualquier fase, corroborar contra el código —
 ## Fase 6 — Distribución y actualización
 
 `OBJETIVO=PROPAGACION_CONTROLADA`
-`ESTADO=IMPLEMENTADO_SIN_PUBLICAR`
+`ESTADO=IMPLEMENTADO`
 
 - Catálogo versionado y manifiesto de adopción.
 - Actualización con diff, compatibilidad, canary y rollback.

@@ -10,7 +10,7 @@ Que ningún repo trabaje con gobernanza vencida sin saberlo.
 ## Fuente
 
 ```text
-CATALOG_SOURCE=<repo del catálogo canónico>
+CATALOG_SOURCE=github.com/mlandolfi90/lucky-skills
 REF=último tag skill-<id>-v* publicado; sin tags, el manifiesto en la rama default
 ```
 
