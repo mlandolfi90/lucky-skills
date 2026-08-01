@@ -129,7 +129,16 @@ def build_plan(
             items[state_map_index], action="ARCHIVE_REPLACE"
         )
 
-    affected = tuple(item.destination for item in items if item.action != "UNCHANGED")
+    # El STATE-MAP queda fuera del escaneo de colisiones: es estado que la
+    # propia transacción gestiona y reescribe, y su legitimidad la corrobora
+    # el aterrizaje (una edición ajena muere ahí, antes de llegar acá). Tras
+    # `revalidar`, el STATE-MAP modificado sin commitear es acto de gobernanza
+    # con recibo, no trabajo ajeno — contarlo era un falso positivo.
+    affected = tuple(
+        item.destination
+        for item in items
+        if item.action != "UNCHANGED" and item.role != "STATE_MAP"
+    )
     collisions: tuple[str, ...] = ()
     if affected and is_repository(target_resolved):
         collisions = dirty_paths(target_resolved, affected)

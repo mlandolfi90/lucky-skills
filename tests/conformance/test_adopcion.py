@@ -202,6 +202,9 @@ class AdoptionTests(unittest.TestCase):
                             values["NEW_FINGERPRINT"])
 
         second = self._plan(self._landing())
+        # El STATE-MAP revalidado (modificado sin commitear, con recibo) no es
+        # trabajo ajeno: no debe aparecer como colisión del plan siguiente.
+        self.assertEqual(second.collisions, ())
         result = apply_plan(second, confirmed_plan_hash=second.plan_hash,
                             confirmed_by="human:test")
         self.assertTrue(verify_receipt(result))
