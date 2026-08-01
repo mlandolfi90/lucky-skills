@@ -1,0 +1,4 @@
+interface:
+  display_name: "Sincronizar"
+  short_description: "Coordina versiones entre repositorios registrados"
+  default_prompt: "Usa $sincronizar para comparar y proponer actualizaciones en los repositorios registrados."

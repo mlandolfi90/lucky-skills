@@ -1,0 +1,4 @@
+interface:
+  display_name: "Mapa de colisiones"
+  short_description: "Detecta solapamientos antes de escribir"
+  default_prompt: "Usa $mapa-colisiones para detectar rutas y criterios que podrían colisionar."

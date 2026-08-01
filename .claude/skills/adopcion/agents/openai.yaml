@@ -1,0 +1,4 @@
+interface:
+  display_name: "Adopción"
+  short_description: "Instala skills con rollback y autorización"
+  default_prompt: "Usa $adopcion para preparar una adopción segura en este repositorio."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Consultar catálogo"
+  short_description: "Ubica y lee skills de catálogos externos como referencia"
+  default_prompt: "Usa $consultar-catalogo para buscar este conocimiento en los catálogos externos."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Verificar arquitectura"
+  short_description: "Comprueba fronteras y principios estructurales"
+  default_prompt: "Usa $arquitectura-verificar para revisar este cambio contra la arquitectura real."

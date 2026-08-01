@@ -1,0 +1,4 @@
+interface:
+  display_name: "Mapear despliegue"
+  short_description: "Mapa de accesos del deploy: nombres y rutas, valores jamás"
+  default_prompt: "Usa $mapear-despliegue para armar el mapa de accesos de este deploy."

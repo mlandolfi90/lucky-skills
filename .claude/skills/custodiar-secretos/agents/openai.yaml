@@ -1,0 +1,4 @@
+interface:
+  display_name: "Custodiar secretos"
+  short_description: "Ninguna clave toca el chat: prevención primero, cero disculpas"
+  default_prompt: "Usa $custodiar-secretos antes de tocar cualquier credencial en esta tarea."

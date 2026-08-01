@@ -1,0 +1,4 @@
+interface:
+  display_name: "Podar v2"
+  short_description: "Retira restos de enforcement v2 de los ámbitos ya gobernados por v3"
+  default_prompt: "Usa $podar-v2 para inventariar y podar los restos v2 de este ámbito."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Diseñar"
+  short_description: "Convierte una intención en diseño verificable, con colisiones consultadas"
+  default_prompt: "Usa $disenar para diseñar esta feature antes de construirla."
