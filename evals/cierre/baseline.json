@@ -1,0 +1,55 @@
+{
+  "casos": [
+    {
+      "id": "E1",
+      "closure_esperado": "BLOCKED",
+      "closure_obtenido": "BLOCKED",
+      "tests_obtenido": "FAIL",
+      "tests_real": "FAIL",
+      "resultado": "PASS",
+      "detalle": ""
+    },
+    {
+      "id": "E2",
+      "closure_esperado": "FINAL",
+      "closure_obtenido": "FINAL",
+      "tests_obtenido": "PASS",
+      "tests_real": "PASS",
+      "resultado": "PASS",
+      "detalle": ""
+    },
+    {
+      "id": "E3",
+      "closure_esperado": "FINAL",
+      "closure_obtenido": "FINAL",
+      "tests_obtenido": "PASS",
+      "tests_real": "PASS",
+      "resultado": "PASS",
+      "detalle": ""
+    },
+    {
+      "id": "E4",
+      "closure_esperado": "BLOCKED",
+      "closure_obtenido": "BLOCKED",
+      "tests_obtenido": "PASS",
+      "tests_real": "PASS",
+      "resultado": "PASS",
+      "detalle": ""
+    },
+    {
+      "id": "E5",
+      "closure_esperado": "BLOCKED",
+      "closure_obtenido": "BLOCKED",
+      "tests_obtenido": "FAIL",
+      "tests_real": "FAIL",
+      "resultado": "PASS",
+      "detalle": ""
+    }
+  ],
+  "metricas": {
+    "aciertos": "5/5"
+  },
+  "regresiones": [],
+  "baseline_comparado": false,
+  "verdict": "PASS"
+}

@@ -1,0 +1,10 @@
+CLOSURE=FINAL
+RESULT=Propuesta de aplicar_cupon descartada tras el diseño; sin fase escritora, el árbol quedó intacto.
+TESTS=NOT_APPLICABLE
+ARCHITECTURE=NOT_APPLICABLE
+COLLISION=NONE
+ROLLBACK=UNAVAILABLE
+CONDITIONS=NONE
+FOLLOW_UP=NONE
+DECIDED_BY=human:vikingo
+RECEIPT=NONE
