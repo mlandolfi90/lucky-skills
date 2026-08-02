@@ -1,0 +1,65 @@
+{
+  "casos": [
+    {
+      "id": "C1",
+      "esperado": "OK",
+      "obtenido": "AUSENTE",
+      "cita": "N/A",
+      "resultado": "PASS",
+      "detalle": ""
+    },
+    {
+      "id": "C2",
+      "esperado": "DRIFT",
+      "obtenido": "DRIFT",
+      "cita": "VALIDA",
+      "resultado": "PASS",
+      "detalle": ""
+    },
+    {
+      "id": "C3",
+      "esperado": "DRIFT",
+      "obtenido": "DRIFT",
+      "cita": "VALIDA",
+      "resultado": "PASS",
+      "detalle": ""
+    },
+    {
+      "id": "C4",
+      "esperado": "OK",
+      "obtenido": "AUSENTE",
+      "cita": "N/A",
+      "resultado": "PASS",
+      "detalle": ""
+    },
+    {
+      "id": "C5",
+      "esperado": "DRIFT",
+      "obtenido": "DRIFT",
+      "cita": "VALIDA",
+      "resultado": "PASS",
+      "detalle": ""
+    },
+    {
+      "id": "C6",
+      "esperado": "UNVERIFIED",
+      "obtenido": "UNVERIFIED",
+      "cita": "VALIDA",
+      "resultado": "PASS",
+      "detalle": ""
+    }
+  ],
+  "extras": [],
+  "schema": {
+    "ok": true,
+    "problemas": []
+  },
+  "metricas": {
+    "precision": 1.0,
+    "recall": 1.0,
+    "citas": "4/4"
+  },
+  "regresiones": [],
+  "baseline_comparado": false,
+  "verdict": "PASS"
+}

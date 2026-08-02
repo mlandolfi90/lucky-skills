@@ -1,0 +1,28 @@
+### 2.1 — Resultado de la auditoría (formato propio del agente)
+
+Revisé el manual contra el código. Detalle de lo encontrado, en otro orden
+y con prosa intercalada — el juez no debe penalizar el formato (issue #175
+de SkillOpt: el juez de ellos sí lo hacía, y el optimizador rompió la skill
+para complacerlo).
+
+MAP_UPDATED=NO
+UNVERIFIED=1
+DRIFT_FIXED=0
+
+Primero, lo que no pude comprobar desde el código:
+
+HALLAZGO=UNVERIFIED|docs/MANUAL.md:16|el servicio procesa 1000 solicitudes por segundo|NONE
+
+Después, los drifts confirmados:
+
+  HALLAZGO=DRIFT|docs/MANUAL.md:12|timeout por defecto es de 30 segundos|src/calculadora.py:3
+
+Nota: encontré también estos dos en la sección Funciones.
+
+HALLAZGO=DRIFT|docs/MANUAL.md:7|dividir lanza ZeroDivisionError cuando el denominador es cero|src/calculadora.py:13
+HALLAZGO=DRIFT|docs/MANUAL.md:6|sumar valida que ambos argumentos sean enteros|src/calculadora.py:7
+
+DRIFT_FOUND=3
+DOCS_REVIEWED=1
+AUDIT_SCOPE=FULL
+AUDIT_BASE=NONE

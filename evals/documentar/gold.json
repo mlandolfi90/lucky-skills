@@ -1,0 +1,47 @@
+{
+  "descripcion": "Etiquetas gold del fixture de `documentar`. Las anclas son texto, no numeros de linea (DRIFT-014): el juez resuelve la linea buscando el ancla.",
+  "casos": [
+    {
+      "id": "C1",
+      "doc": "docs/MANUAL.md",
+      "ancla": "recibe dos números y devuelve su suma",
+      "esperado": "OK"
+    },
+    {
+      "id": "C2",
+      "doc": "docs/MANUAL.md",
+      "ancla": "valida que ambos argumentos sean enteros",
+      "esperado": "DRIFT",
+      "codigo": "src/calculadora.py",
+      "ancla_codigo": "def sumar(a, b):"
+    },
+    {
+      "id": "C3",
+      "doc": "docs/MANUAL.md",
+      "ancla": "lanza `ZeroDivisionError`",
+      "esperado": "DRIFT",
+      "codigo": "src/calculadora.py",
+      "ancla_codigo": "return None"
+    },
+    {
+      "id": "C4",
+      "doc": "docs/MANUAL.md",
+      "ancla": "usa 2 decimales por defecto",
+      "esperado": "OK"
+    },
+    {
+      "id": "C5",
+      "doc": "docs/MANUAL.md",
+      "ancla": "timeout por defecto es de 30",
+      "esperado": "DRIFT",
+      "codigo": "src/calculadora.py",
+      "ancla_codigo": "DEFAULT_TIMEOUT = 60"
+    },
+    {
+      "id": "C6",
+      "doc": "docs/MANUAL.md",
+      "ancla": "1000 solicitudes por segundo",
+      "esperado": "UNVERIFIED"
+    }
+  ]
+}

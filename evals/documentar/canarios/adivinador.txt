@@ -1,0 +1,14 @@
+## Salida
+
+AUDIT_SCOPE=FULL
+AUDIT_BASE=NONE
+DOCS_REVIEWED=1
+DRIFT_FOUND=4
+DRIFT_FIXED=0
+UNVERIFIED=0
+MAP_UPDATED=NO
+
+HALLAZGO=DRIFT|docs/MANUAL.md:6|sumar valida que ambos argumentos sean enteros y rechaza floats|src/calculadora.py:6
+HALLAZGO=DRIFT|docs/MANUAL.md:7|dividir lanza ZeroDivisionError cuando el denominador es cero|src/calculadora.py:14
+HALLAZGO=DRIFT|docs/MANUAL.md:12|El timeout por defecto es de 30 segundos|src/calculadora.py:3
+HALLAZGO=DRIFT|docs/MANUAL.md:16|el servicio procesa 1000 solicitudes por segundo|src/calculadora.py:3
