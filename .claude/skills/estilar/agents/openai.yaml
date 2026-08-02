@@ -1,4 +1,0 @@
-interface:
-  display_name: "Estilar"
-  short_description: "Aplica el estilo visual vigente desde su fuente viva"
-  default_prompt: "Usa $estilar para aplicar la marca real a esta UI."

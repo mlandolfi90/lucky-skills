@@ -17,7 +17,7 @@ from lifecycle_core.receipts import local_state_root, utc_now, write_receipt
 from sextante.local_probe import probe_local
 
 from .models import AdoptionPlan
-from .planner import build_plan
+from .planner import PROJECTION_EXCLUDES, build_plan
 
 
 def apply_plan(
@@ -245,7 +245,29 @@ def _prepare(plan: AdoptionPlan, staged: Path) -> None:
             destination.write_text(content, encoding="utf-8", newline="\n")
             continue
         source = Path(item.source)
-        shutil.copytree(source, destination)
+        shutil.copytree(source, destination, ignore=_projection_ignore(plan, item, source))
+
+
+def _projection_ignore(plan: AdoptionPlan, item, source: Path):
+    """Filtro de copia para proyecciones de harness (ver PROJECTION_EXCLUDES).
+
+    Solo excluye entradas del NIVEL SUPERIOR de la skill, espejando el hash
+    del plan (`tree_hash(..., exclude_top=...)`): lo copiado y lo prometido
+    deben ser el mismo árbol o la validación de activación bloquea.
+    """
+    if item.role != "HARNESS":
+        return None
+    excludes = PROJECTION_EXCLUDES.get(plan.harness, ())
+    if not excludes:
+        return None
+    top = str(source.resolve())
+
+    def _ignore(directory: str, names: list[str]) -> list[str]:
+        if str(Path(directory).resolve()) == top:
+            return [name for name in names if name in excludes]
+        return []
+
+    return _ignore
 
 
 def _backup(plan: AdoptionPlan, target: Path, backup: Path, archive: Path) -> None:

@@ -1,4 +1,0 @@
-interface:
-  display_name: "Hotfix"
-  short_description: "Coordina una corrección urgente y reversible"
-  default_prompt: "Usa $hotfix para corregir urgentemente este fallo en el target confirmado."

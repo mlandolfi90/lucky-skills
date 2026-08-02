@@ -1,4 +1,0 @@
-interface:
-  display_name: "Cargar reglas"
-  short_description: "Carga las reglas del proyecto al inicio y las sostiene toda la sesión"
-  default_prompt: "Usa $cargar-reglas como primer acto de esta sesión."

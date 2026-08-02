@@ -1,4 +1,0 @@
-interface:
-  display_name: "Desplegar"
-  short_description: "Deploy por promoción CI con prueba positiva de aterrizaje"
-  default_prompt: "Usa $desplegar para llevar este cambio cerrado a su entorno."

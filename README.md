@@ -18,8 +18,11 @@ cuando se necesitan, con el criterio siempre en manos de quien trabaja.
   jamás fingida.
 - `docs/concepts/` — el vocabulario canónico, un concepto por página.
   Para adoptar en un repo: [paquetes de adopción](docs/concepts/adoption-packs.md).
-- `tests/` — 168 pruebas de conformidad. `python -m pytest -q` y
+- `tests/` — 175 pruebas de conformidad. `python -m pytest -q` y
   `python adapters/reference_python/run_validate_suite.py` son la verdad.
+- `evals/` — termómetros de conducta: fixtures con fallas sembradas y jueces
+  deterministas que miden cómo un agente EJERCE una skill (hoy: `documentar`
+  y `cierre`). El score avisa; jamás edita — specs en `docs/specs/eval-*.md`.
 
 ## Las tres reglas de la casa
 

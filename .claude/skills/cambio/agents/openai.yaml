@@ -1,4 +1,0 @@
-interface:
-  display_name: "Cambio"
-  short_description: "Clasifica y registra el siguiente escalón"
-  default_prompt: "Usa $cambio para clasificar esta observación y elegir el siguiente escalón."

@@ -1,4 +1,0 @@
-interface:
-  display_name: "Ley viva"
-  short_description: "Avisa al inicio si las skills adoptadas tienen versión nueva"
-  default_prompt: "Usa $ley-viva para comprobar la vigencia de la gobernanza de este repo."

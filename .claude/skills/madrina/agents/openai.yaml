@@ -1,4 +1,0 @@
-interface:
-  display_name: "Madrina"
-  short_description: "Bautiza skills nacientes: sanas, con nombre propio y sin siamesas"
-  default_prompt: "Usa $madrina para dar a luz esta skill nueva con las verificaciones de nacimiento."

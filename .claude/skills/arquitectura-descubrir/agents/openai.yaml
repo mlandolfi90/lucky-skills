@@ -1,4 +1,0 @@
-interface:
-  display_name: "Descubrir arquitectura"
-  short_description: "Reconstruye la arquitectura real del repositorio"
-  default_prompt: "Usa $arquitectura-descubrir para mapear la arquitectura real del proyecto."

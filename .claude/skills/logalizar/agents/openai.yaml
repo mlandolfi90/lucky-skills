@@ -1,4 +1,0 @@
-interface:
-  display_name: "Logalizar"
-  short_description: "Instrumenta con eventos estándar para cazar errores en runtime"
-  default_prompt: "Usa $logalizar para instrumentar este alcance y capturar el error en runtime."

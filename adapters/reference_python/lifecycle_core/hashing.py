@@ -44,15 +44,23 @@ def tree_hash(
     *,
     ignored_names: Iterable[str] = DEFAULT_IGNORED_NAMES,
     max_entries: int = MAX_TREE_ENTRIES,
+    exclude_top: Iterable[str] = (),
 ) -> str:
     resolved = root.resolve(strict=True)
     if not resolved.is_dir():
         raise ValueError(f"{root}: se esperaba un directorio")
     ignored = frozenset(ignored_names)
+    # Exclusión SOLO del nivel superior: la usa la proyección de harness para
+    # hashear el árbol tal como se instala (p. ej. sin `agents/` en
+    # claude-code). No es un ignore global: un `agents/` anidado sí cuenta.
+    excluded_top = frozenset(exclude_top)
     records: list[bytes] = []
     entries = 0
     for current, directories, files in os.walk(resolved, followlinks=False):
         current_path = Path(current)
+        if excluded_top and current_path == resolved:
+            directories[:] = [name for name in directories if name not in excluded_top]
+            files = [name for name in files if name not in excluded_top]
         directories[:] = sorted(name for name in directories if name not in ignored)
         for directory in directories:
             child = current_path / directory

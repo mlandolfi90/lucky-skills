@@ -22,6 +22,14 @@ HARNESSES = {
     "claude-ai": "",
     "codex": ".agents/skills",
 }
+# La proyección de harness replica lo que el empaquetador instala para ese
+# harness (adapters/<h>/PACKAGING.env): `agents/` es metadato OpenAI/Codex
+# (INCLUDE_OPENAI_METADATA) y no viaja a claude-code. La fuente CANONICAL
+# siempre se copia completa; solo la proyección filtra. Sin esto, adopción y
+# empaquetado producían árboles distintos para el mismo harness.
+PROJECTION_EXCLUDES = {
+    "claude-code": ("agents",),
+}
 SENSITIVE_PARTS = ("secret", "password", "token", "credential", "private")
 SENSITIVE_SUFFIXES = (".pem", ".key", ".p12", ".pfx")
 MAX_ARCHIVE_FILE_BYTES = 5 * 1024 * 1024
@@ -62,6 +70,7 @@ def build_plan(
                     f"{projection_root}/{manifest.skill_id}",
                     manifest.skill_id,
                     "HARNESS",
+                    exclude_top=PROJECTION_EXCLUDES.get(harness, ()),
                 )
             )
         items.append(
@@ -179,8 +188,14 @@ def _directory_item(
     destination: str,
     skill_id: str,
     role: str,
+    exclude_top: tuple[str, ...] = (),
 ) -> PlanItem:
-    source_hash = tree_hash(source)
+    # El hash de la fuente describe lo que se va a INSTALAR: para una
+    # proyección filtrada, el árbol fuente sin sus exclusiones de tope.
+    # El hash del destino existente se toma completo a propósito: una
+    # proyección vieja que aún carga `agents/` debe salir ARCHIVE_REPLACE,
+    # nunca UNCHANGED.
+    source_hash = tree_hash(source, exclude_top=exclude_top)
     target_path = resolve_within(target, destination)
     if not target_path.exists():
         action = "CREATE"

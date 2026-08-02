@@ -1,4 +1,0 @@
-interface:
-  display_name: "Documentar"
-  short_description: "Detecta drift documental con evidencia y lo corrige con aprobación"
-  default_prompt: "Usa $documentar para auditar si la documentación sigue diciendo la verdad."

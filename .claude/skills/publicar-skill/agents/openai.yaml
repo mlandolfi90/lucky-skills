@@ -1,4 +1,0 @@
-interface:
-  display_name: "Publicar skill"
-  short_description: "Valida y publica una versión de skill"
-  default_prompt: "Usa $publicar-skill para preparar y publicar una versión validada."

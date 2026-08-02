@@ -1,6 +1,0 @@
-interface:
-  display_name: "Sextante"
-  short_description: "Triangula el estado real del proyecto"
-  default_prompt: "Usa $sextante para ubicarme en el estado real de este proyecto."
-policy:
-  allow_implicit_invocation: true

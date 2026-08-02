@@ -1,4 +1,0 @@
-interface:
-  display_name: "Microfix"
-  short_description: "Aplica una corrección mínima comprobable"
-  default_prompt: "Usa $microfix para probar esta corrección pequeña y reversible."

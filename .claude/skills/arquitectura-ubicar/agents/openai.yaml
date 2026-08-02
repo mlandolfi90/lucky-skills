@@ -1,4 +1,0 @@
-interface:
-  display_name: "Ubicar cambio"
-  short_description: "Decide dónde pertenece un cambio"
-  default_prompt: "Usa $arquitectura-ubicar para decidir dónde debe vivir este cambio."

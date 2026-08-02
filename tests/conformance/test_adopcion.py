@@ -67,6 +67,56 @@ class AdoptionTests(unittest.TestCase):
         )
         self.assertEqual(load_env(second_receipt)["RESULT"], "ALREADY_ADOPTED")
 
+    def test_claude_code_projection_excludes_agents_metadata(self) -> None:
+        # `agents/openai.yaml` es metadato Codex/OpenAI (PACKAGING.env:
+        # INCLUDE_OPENAI_METADATA=NO para claude-code). La proyección debe
+        # replicar el empaquetado; sin este filtro, adopción y empaquetado
+        # producían árboles distintos para el mismo harness.
+        agents = self.skill / "agents"
+        agents.mkdir()
+        (agents / "openai.yaml").write_text(
+            'interface:\n  display_name: "Alpha"\n',
+            encoding="utf-8",
+        )
+        plan = build_plan(
+            source_skill=self.skill,
+            target=self.target,
+            harness="claude-code",
+            landing_receipt=self._landing(),
+        )
+        receipt = apply_plan(
+            plan,
+            confirmed_plan_hash=plan.plan_hash,
+            confirmed_by="human:test",
+        )
+        self.assertTrue(verify_receipt(receipt))
+        # La fuente canónica viaja completa; solo la proyección filtra.
+        self.assertTrue(
+            (self.target / "skills" / "alpha" / "agents" / "openai.yaml").is_file()
+        )
+        projection = self.target / ".claude" / "skills" / "alpha"
+        self.assertTrue((projection / "SKILL.md").is_file())
+        self.assertFalse((projection / "agents").exists())
+
+    def test_codex_projection_keeps_agents_metadata(self) -> None:
+        agents = self.skill / "agents"
+        agents.mkdir()
+        (agents / "openai.yaml").write_text(
+            'interface:\n  display_name: "Alpha"\n',
+            encoding="utf-8",
+        )
+        plan = self._plan(self._landing())
+        apply_plan(
+            plan,
+            confirmed_plan_hash=plan.plan_hash,
+            confirmed_by="human:test",
+        )
+        self.assertTrue(
+            (
+                self.target / ".agents" / "skills" / "alpha" / "agents" / "openai.yaml"
+            ).is_file()
+        )
+
     def test_state_source_is_portable_and_free_of_local_paths(self) -> None:
         plan = self._plan(self._landing())
         apply_plan(

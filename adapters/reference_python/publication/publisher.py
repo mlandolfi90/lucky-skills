@@ -67,7 +67,11 @@ def build_release_plan(
             skill_id,
             override_version=str(to_version),
         ),
-        quality="PASS",
+        # QUALITY no es una medición nueva: refleja el TESTS=PASS del cierre
+        # consumido, verificado por el gate de arriba. Se deriva del recibo
+        # (no un literal) para que la procedencia quede trazable; los
+        # termómetros de conducta viven en evals/, fuera de este plan.
+        quality=closure["TESTS"],
     ).with_hash()
 
 

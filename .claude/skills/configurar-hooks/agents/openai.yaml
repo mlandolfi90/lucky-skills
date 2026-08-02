@@ -1,4 +1,0 @@
-interface:
-  display_name: "Configurar hooks"
-  short_description: "Genera hooks asesores por harness"
-  default_prompt: "Usa $configurar-hooks para preparar hooks asesores para el harness activo."
