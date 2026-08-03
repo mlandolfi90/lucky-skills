@@ -42,9 +42,11 @@ def main(argv: list[str] | None = None) -> int:
     print(f"CANDIDATOS={len(candidatos)}")
     for c in candidatos:
         pista = "SI" if c.pista_nombre else "NO"
+        raiz = "POSIBLE" if c.raiz_composicion else "NO"
         print(
             f"CANDIDATO={c.ruta}|ediciones_aditivas={c.ediciones_aditivas}"
             f"|ediciones_totales={c.ediciones_totales}|pista_nombre={pista}"
+            f"|temas={c.temas}|raiz_composicion={raiz}"
         )
     print("MODE=ADVISORY")
     if candidatos:

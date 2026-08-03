@@ -40,10 +40,22 @@ class Candidato:
     ediciones_aditivas: int
     ediciones_totales: int
     pista_nombre: bool
+    # Señal 2 (aporte PizarraEvo 2026-08-03): el discriminante fuerte no es
+    # "¿crece?" sino "¿features inconexas abren el mismo archivo?". Proxy
+    # medible: los co-cambios de sus ediciones aditivas son disjuntos.
+    temas: str = "N/D"  # INCONEXOS | CONEXOS | N/D
+    # Señal 3: una raíz de composición crece por adición POR DISEÑO (cablear
+    # está bien). Proxy: densidad de imports/wiring en el contenido actual.
+    raiz_composicion: bool = False
 
     @property
     def score(self) -> int:
-        return self.ediciones_aditivas + (2 if self.pista_nombre else 0)
+        base = self.ediciones_aditivas + (2 if self.pista_nombre else 0)
+        if self.temas == "INCONEXOS":
+            base += 2
+        if self.raiz_composicion:
+            base -= 2
+        return base
 
 
 def _git(repo: Path, *args: str) -> str:
@@ -65,15 +77,18 @@ def _archivos_vivos(repo: Path, rev: str) -> set[str]:
     return {linea for linea in salida.splitlines() if linea}
 
 
-def _historia_por_archivo(
+def _log_completo(
     repo: Path, rev: str, ultimos: int | None = None
-) -> dict[str, list[tuple[int, int]]]:
-    """ruta -> [(adds, dels)] en orden nuevo→viejo (el último es el nacimiento)."""
+) -> list[dict[str, tuple[int, int]]]:
+    """Lista de commits (nuevo→viejo); cada uno: ruta -> (adds, dels)."""
     extra = ["-n", str(ultimos)] if ultimos else []
     salida = _git(repo, "log", rev, *extra, "--numstat", "--no-renames", "--format=@%H")
-    historia: dict[str, list[tuple[int, int]]] = {}
+    commits: list[dict[str, tuple[int, int]]] = []
     for linea in salida.splitlines():
-        if not linea or linea.startswith("@"):
+        if linea.startswith("@"):
+            commits.append({})
+            continue
+        if not linea or not commits:
             continue
         partes = linea.split("\t", 2)
         if len(partes) != 3 or partes[0] == "-":
@@ -82,8 +97,49 @@ def _historia_por_archivo(
             adds, dels = int(partes[0]), int(partes[1])
         except ValueError:
             continue
-        historia.setdefault(partes[2], []).append((adds, dels))
-    return historia
+        commits[-1][partes[2]] = (adds, dels)
+    return commits
+
+
+def _jaccard(a: set[str], b: set[str]) -> float:
+    if not a and not b:
+        return 1.0
+    union = a | b
+    return len(a & b) / len(union) if union else 1.0
+
+
+def _temas(commits: list[dict[str, tuple[int, int]]], indices: list[int], ruta: str) -> str:
+    """INCONEXOS si los co-cambios de las ediciones aditivas casi no se solapan."""
+    conjuntos = [set(commits[i]) - {ruta} for i in indices]
+    conjuntos = [c for c in conjuntos if c]  # commits-solo-este-archivo no opinan
+    if len(conjuntos) < 2:
+        return "N/D"
+    pares = [
+        _jaccard(conjuntos[i], conjuntos[j])
+        for i in range(len(conjuntos))
+        for j in range(i + 1, len(conjuntos))
+    ]
+    promedio = sum(pares) / len(pares)
+    return "INCONEXOS" if promedio <= 0.2 else "CONEXOS"
+
+
+_IMPORT_PATTERN = re.compile(
+    r"^\s*(import\s|from\s.+\simport|const\s.+=\s*require\(|require\(|"
+    r"export\s+\{[^}]*\}\s*from|module\.exports|app\.use\()"
+)
+
+
+def _es_raiz_de_composicion(repo: Path, rev: str, ruta: str) -> bool:
+    """Cablear está bien: un archivo mayormente de imports/wiring crece por diseño."""
+    try:
+        contenido = _git(repo, "show", f"{rev}:{ruta}")
+    except ValueError:
+        return False
+    lineas = [l for l in contenido.splitlines() if l.strip()]
+    if not lineas:
+        return False
+    wiring = sum(1 for l in lineas if _IMPORT_PATTERN.match(l))
+    return wiring / len(lineas) >= 0.5
 
 
 def escanear(
@@ -106,7 +162,12 @@ def escanear(
       declarada: un archivo nacido dentro de la ventana suma una edición).
     """
     vivos = _archivos_vivos(repo, rev)
-    historia = _historia_por_archivo(repo, rev, ultimos)
+    commits = _log_completo(repo, rev, ultimos)
+    historia: dict[str, list[tuple[int, tuple[int, int]]]] = {}
+    for indice, archivos in enumerate(commits):
+        for ruta, stats in archivos.items():
+            historia.setdefault(ruta, []).append((indice, stats))
+
     candidatos: list[Candidato] = []
     for ruta, ediciones in historia.items():
         if ruta not in vivos:
@@ -119,8 +180,8 @@ def escanear(
         # Aditiva: agrega sin borrar (aunque sea UNA línea — la entrada
         # típica de un registro), o agrega al menos el doble de lo que toca.
         aditivas = [
-            (a, d)
-            for a, d in crecimientos
+            (indice, (a, d))
+            for indice, (a, d) in crecimientos
             if 0 < a <= max_lineas_por_edicion and (d == 0 or a >= 2 * d)
         ]
         if len(aditivas) < min_ediciones:
@@ -138,9 +199,20 @@ def escanear(
                 ediciones_aditivas=len(aditivas),
                 ediciones_totales=len(crecimientos),
                 pista_nombre=pista,
+                temas=_temas(commits, [i for i, _ in aditivas], ruta),
+                raiz_composicion=_es_raiz_de_composicion(repo, rev, ruta),
             )
         )
+    # El discriminante manda (aporte PizarraEvo): features inconexas abriendo
+    # el mismo archivo pesa más que cualquier conteo bruto. Después la pista
+    # de nombre, después el volumen. Una raíz de composición baja al fondo.
     return sorted(
         candidatos,
-        key=lambda c: (not c.pista_nombre, -c.ediciones_aditivas, c.ruta),
+        key=lambda c: (
+            c.raiz_composicion,
+            c.temas != "INCONEXOS",
+            not c.pista_nombre,
+            -c.ediciones_aditivas,
+            c.ruta,
+        ),
     )

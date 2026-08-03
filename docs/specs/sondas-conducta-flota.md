@@ -37,6 +37,21 @@ Límite declarado: mira historia, no semántica. Un archivo que DEJÓ de ser
 registro pero sobrevive como shim puede seguir apareciendo con historia
 completa — la ventana `--ultimos` es la lectura correcta para "hoy".
 
+### v2 — el discriminante (aporte PizarraEvo, 2026-08-03)
+
+Validación externa: PizarraEvo revisó a mano los dos candidatos sin pista
+de su HEAD y confirmó ambos (2/2). Su precisión quedó incorporada: el
+discriminante fuerte no es "¿crece?" sino "¿features INCONEXAS abren el
+mismo archivo?". Dos señales nuevas, medibles sin escalera:
+- `temas=INCONEXOS|CONEXOS|N/D` — Jaccard promedio de los co-cambios entre
+  las ediciones aditivas (≤0.2 = features que no comparten nada abren el
+  mismo archivo).
+- `raiz_composicion=POSIBLE` — densidad de imports/wiring ≥ 0.5: una raíz
+  que cablea crece por diseño; se rotula y baja al fondo, no se calla.
+El ranking ordena: raíz al fondo → INCONEXOS primero → pista → volumen.
+Post-v2, el ranking sobre PizarraEvo coincide con el juicio humano
+independiente (repositorio-sqlite #1, rutas-http #2).
+
 ## Pieza 2 — `run_auditar_escalera.py`
 
 Mide adoptado-vs-ejercido: commits (totales y desde la adopción) contra

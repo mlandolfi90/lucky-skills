@@ -95,6 +95,44 @@ class SondaAbiertoCerradoTests(unittest.TestCase):
         self._crecer(plano, ["// h3"], "agrega h3")
         self.assertEqual([c.ruta for c in escanear(self.repo)], ["handlers.js"])
 
+    def test_features_inconexas_marcan_temas(self) -> None:
+        # Dos features que no comparten NADA abren el mismo registro: la
+        # firma del discriminante (aporte PizarraEvo 2026-08-03).
+        registro = self.repo / "catalogo-rutas.js"
+        registro.write_text("export const R = {\n};\n", encoding="utf-8")
+        self._commit("nace")
+        (self.repo / "feature_a.js").write_text("// a\n", encoding="utf-8")
+        with registro.open("a", encoding="utf-8") as f:
+            f.write("// ruta de a\n")
+        self._commit("feature a")
+        (self.repo / "feature_b.js").write_text("// b\n", encoding="utf-8")
+        with registro.open("a", encoding="utf-8") as f:
+            f.write("// ruta de b\n")
+        self._commit("feature b")
+
+        candidatos = escanear(self.repo)
+        top = candidatos[0]
+        self.assertEqual(top.ruta, "catalogo-rutas.js")
+        self.assertEqual(top.temas, "INCONEXOS")
+
+    def test_raiz_de_composicion_se_rotula_y_baja(self) -> None:
+        # Un archivo que solo cablea (imports/wiring) crece por diseño:
+        # se marca y va al fondo del ranking, no se calla.
+        raiz = self.repo / "index-tipos.js"
+        raiz.write_text(
+            "import a from './a.js'\nimport b from './b.js'\n"
+            "export { a } from './a.js'\n",
+            encoding="utf-8",
+        )
+        self._commit("nace la raiz")
+        self._crecer(raiz, ["import c from './c.js'"], "cablea c")
+        self._crecer(raiz, ["import d from './d.js'"], "cablea d")
+
+        candidatos = escanear(self.repo)
+        top = candidatos[0]
+        self.assertEqual(top.ruta, "index-tipos.js")
+        self.assertTrue(top.raiz_composicion)
+
     def test_ventana_reciente_modo_hook(self) -> None:
         registro = self.repo / "tipos-index.js"
         registro.write_text("export const X = {\n};\n", encoding="utf-8")
