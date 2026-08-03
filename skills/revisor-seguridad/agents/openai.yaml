@@ -1,0 +1,4 @@
+interface:
+  display_name: "Revisor de seguridad"
+  short_description: "Mide qué expone lo construido, con canarios"
+  default_prompt: "Usa $revisor-seguridad para medir qué expone este proyecto."
