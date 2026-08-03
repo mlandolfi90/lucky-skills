@@ -8,6 +8,7 @@ from pathlib import Path
 
 from lifecycle_core.git import dirty_paths, is_repository
 from lifecycle_core.envfile import canonical_env, load_env
+from lifecycle_core.harness_catalog import load_harnesses
 from lifecycle_core.hashing import sha256_file, tree_hash
 from lifecycle_core.manifest import dependency_closure, validate_skill
 from lifecycle_core.paths import normalize_relative, resolve_within
@@ -16,20 +17,10 @@ from .landing import validate_landing
 from .models import AdoptionPlan, PlanItem
 
 
-HARNESSES = {
-    "generic": "",
-    "claude-code": ".claude/skills",
-    "claude-ai": "",
-    "codex": ".agents/skills",
-}
-# La proyección de harness replica lo que el empaquetador instala para ese
-# harness (adapters/<h>/PACKAGING.env): `agents/` es metadato OpenAI/Codex
-# (INCLUDE_OPENAI_METADATA) y no viaja a claude-code. La fuente CANONICAL
-# siempre se copia completa; solo la proyección filtra. Sin esto, adopción y
-# empaquetado producían árboles distintos para el mismo harness.
-PROJECTION_EXCLUDES = {
-    "claude-code": ("agents",),
-}
+# El eje de harnesses no vive acá: lo declara cada `adapters/<harness>/
+# PACKAGING.env` y lo sirve `harness_catalog`. Antes eran dos tablas a mano
+# —prefijo y exclusiones— que había que acordarse de tocar en cada harness
+# nuevo, con el mismo dato ya escrito en la carpeta del adaptador.
 SENSITIVE_PARTS = ("secret", "password", "token", "credential", "private")
 SENSITIVE_SUFFIXES = (".pem", ".key", ".p12", ".pfx")
 MAX_ARCHIVE_FILE_BYTES = 5 * 1024 * 1024
@@ -45,8 +36,10 @@ def build_plan(
 ) -> AdoptionPlan:
     source = source_skill.resolve(strict=True)
     target_resolved = target.resolve(strict=True)
-    if harness not in HARNESSES:
+    harnesses = load_harnesses(source.parent.parent)
+    if harness not in harnesses:
         raise ValueError(f"harness no soportado: {harness}")
+    spec = harnesses[harness]
     landing = validate_landing(landing_receipt, target_resolved)
     root_manifest = validate_skill(source)
     closure = dependency_closure(source.parent, root_manifest.skill_id)
@@ -61,7 +54,7 @@ def build_plan(
             "CANONICAL",
         )
         items.append(canonical_item)
-        projection_root = HARNESSES[harness]
+        projection_root = spec.skill_prefix
         if projection_root:
             items.append(
                 _directory_item(
@@ -70,7 +63,7 @@ def build_plan(
                     f"{projection_root}/{manifest.skill_id}",
                     manifest.skill_id,
                     "HARNESS",
-                    exclude_top=PROJECTION_EXCLUDES.get(harness, ()),
+                    exclude_top=spec.projection_excludes,
                 )
             )
         items.append(

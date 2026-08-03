@@ -7,7 +7,7 @@ import unittest
 import zipfile
 from pathlib import Path
 
-from support import ADAPTER_ROOT, ROOT
+from support import ADAPTER_ROOT, ROOT, seed_adapters
 
 
 sys.path.insert(0, str(ADAPTER_ROOT))
@@ -22,6 +22,7 @@ class SkillPackagingTests(unittest.TestCase):
         self.base = Path(self.temporary_directory.name)
         self.output = self.base / "output"
         self.catalog = self.base / "skills"
+        seed_adapters(self.base)
         self.catalog.mkdir()
         self.write_skill("alpha")
         self.write_skill("beta", requires="alpha@1.0.0")

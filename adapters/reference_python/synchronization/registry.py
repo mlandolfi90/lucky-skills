@@ -6,12 +6,13 @@ from pathlib import Path
 from urllib.parse import urlsplit
 
 from lifecycle_core.envfile import load_env
+from lifecycle_core.harness_catalog import harness_ids
 from lifecycle_core.manifest import SKILL_ID_PATTERN
 
 
 BRANCH_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._/-]{0,127}$")
 SCP_REMOTE_PATTERN = re.compile(r"^(?:[A-Za-z0-9._-]+@)?[A-Za-z0-9.-]+:[^\s]+$")
-HARNESSES = {"generic", "claude-code", "claude-ai", "codex"}
+# Los harnesses válidos los declara adapters/<harness>/PACKAGING.env.
 ALLOWED_REMOTE_SCHEMES = {"file", "git", "https", "ssh"}
 
 
@@ -28,8 +29,18 @@ class RepositoryEntry:
         return "*" in self.skills or skill_id in self.skills
 
 
-def load_registry(registry_root: Path) -> tuple[RepositoryEntry, ...]:
+def load_registry(
+    registry_root: Path,
+    *,
+    repository_root: Path | None = None,
+) -> tuple[RepositoryEntry, ...]:
     root = registry_root.resolve(strict=True)
+    # Los harnesses válidos los declara adapters/<harness>/PACKAGING.env. Se
+    # pide el repositorio de forma EXPLÍCITA en vez de deducirlo de la forma
+    # del path del registro: adivinar la estructura acopla dos cosas que no
+    # tienen por qué vivir juntas. Sin repositorio, el HARNESS no se valida
+    # acá y lo hace quien empaqueta, que sí lo conoce.
+    validos = harness_ids(repository_root) if repository_root else None
     entries: list[RepositoryEntry] = []
     seen: set[str] = set()
     for path in sorted(root.glob("*.env")):
@@ -56,7 +67,7 @@ def load_registry(registry_root: Path) -> tuple[RepositoryEntry, ...]:
         remote = _remote_without_embedded_credentials(values["REMOTE_URL"])
         branch = _validated_branch(values["DEFAULT_BRANCH"])
         harness = values["HARNESS"]
-        if harness not in HARNESSES:
+        if validos is not None and harness not in validos:
             raise ValueError(f"{path.name}: HARNESS no soportado")
         skills = _skills(values["SKILLS"])
         status = values["STATUS"]

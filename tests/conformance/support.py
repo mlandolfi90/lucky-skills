@@ -4,6 +4,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+import shutil
 from pathlib import Path
 
 
@@ -167,3 +168,18 @@ def _argument_value(arguments: list[str], name: str) -> str:
         return arguments[arguments.index(name) + 1]
     except (ValueError, IndexError):
         return ""
+
+
+def seed_adapters(repository_root: Path) -> None:
+    """Sembrar los contratos de harness que el catálogo declara.
+
+    Un catálogo declara sus harnesses en `adapters/<harness>/PACKAGING.env`:
+    es de ahí que salen el prefijo de proyección y las exclusiones. Un
+    catálogo de prueba sin ellos no modelaba un catálogo real.
+    """
+    destino = repository_root / "adapters"
+    destino.mkdir(parents=True, exist_ok=True)
+    for contrato in sorted((ROOT / "adapters").glob("*/PACKAGING.env")):
+        carpeta = destino / contrato.parent.name
+        carpeta.mkdir(exist_ok=True)
+        shutil.copy2(contrato, carpeta / "PACKAGING.env")

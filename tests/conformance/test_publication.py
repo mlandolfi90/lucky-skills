@@ -7,7 +7,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from support import ADAPTER_ROOT, ROOT
+from support import ADAPTER_ROOT, ROOT, seed_adapters
 
 sys.path.insert(0, str(ADAPTER_ROOT))
 
@@ -32,13 +32,7 @@ class PublicationTests(unittest.TestCase):
         self.workspace = Path(self.temporary.name)
         (self.workspace / ".lifecycle" / "local").mkdir(parents=True)
         self.catalog = self.workspace / "skills"
-        for harness in ("claude-ai", "claude-code", "codex"):
-            adapter = self.workspace / "adapters" / harness
-            adapter.mkdir(parents=True)
-            shutil.copy2(
-                ROOT / "adapters" / harness / "PACKAGING.env",
-                adapter / "PACKAGING.env",
-            )
+        seed_adapters(self.workspace)
         self.skill = self.catalog / "demo"
         self.skill.mkdir(parents=True)
         (self.skill / "SKILL.md").write_text(

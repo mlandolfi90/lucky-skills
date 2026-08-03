@@ -43,7 +43,7 @@ def build_sync_plan(
             source_hash=manifest.content_hash,
             actor=actor,
         )
-        for entry in load_registry(registry)
+        for entry in load_registry(registry, repository_root=catalog_root.parent)
         if entry.includes(skill_id)
     )
     return SyncPlan(

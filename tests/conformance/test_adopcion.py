@@ -7,7 +7,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from support import ADAPTER_ROOT, ROOT
+from support import ADAPTER_ROOT, ROOT, seed_adapters
 
 sys.path.insert(0, str(ADAPTER_ROOT))
 
@@ -27,6 +27,7 @@ class AdoptionTests(unittest.TestCase):
         self.target = self.base / "target"
         self.receipts = self.base / "sextante-receipts"
         self.catalog.mkdir(parents=True)
+        seed_adapters(self.catalog.parent)
         self.target.mkdir()
         self.skill = self._write_skill("alpha")
 

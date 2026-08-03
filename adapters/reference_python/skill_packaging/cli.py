@@ -4,7 +4,9 @@ import argparse
 from pathlib import Path
 from typing import Sequence
 
-from .packager import SUPPORTED_HARNESSES, package_skills
+from lifecycle_core.harness_catalog import harness_ids
+
+from .packager import package_skills
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -14,7 +16,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--repository-root", type=Path, required=True)
     parser.add_argument("--catalog-root", type=Path, required=True)
     parser.add_argument("--output-root", type=Path, required=True)
-    parser.add_argument("--harness", choices=SUPPORTED_HARNESSES, required=True)
+    parser.add_argument("--harness", required=True)
     parser.add_argument("--skill", action="append", required=True, dest="skills")
     return parser
 

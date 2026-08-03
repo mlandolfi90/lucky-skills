@@ -6,7 +6,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from support import ADAPTER_ROOT
+from support import ADAPTER_ROOT, seed_adapters
 
 sys.path.insert(0, str(ADAPTER_ROOT))
 
@@ -28,6 +28,7 @@ class SynchronizationTests(unittest.TestCase):
         self.catalog = self.base / "catalog" / "skills"
         self.registry = self.base / "registry" / "repos"
         self.catalog.mkdir(parents=True)
+        seed_adapters(self.catalog.parent)
         self.registry.mkdir(parents=True)
         self._write_skill()
         self.remote = self._remote()

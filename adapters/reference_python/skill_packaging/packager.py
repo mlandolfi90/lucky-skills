@@ -8,11 +8,11 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from lifecycle_core.envfile import load_env
+from lifecycle_core.harness_catalog import packageable_harness_ids
 from lifecycle_core.hashing import sha256_bytes, sha256_file
 from lifecycle_core.manifest import Manifest, dependency_closure
 
 
-SUPPORTED_HARNESSES = ("claude-ai", "claude-code", "codex")
 PORTABLE_FILES = ("SKILL.md", "manifest.env")
 OPTIONAL_PORTABLE_FILES = (".gitattributes",)
 PORTABLE_DIRECTORIES = ("assets", "references", "scripts")
@@ -82,7 +82,7 @@ def package_skills(
 
 
 def _load_harness_spec(repository_root: Path, harness_id: str) -> HarnessSpec:
-    if harness_id not in SUPPORTED_HARNESSES:
+    if harness_id not in packageable_harness_ids(repository_root):
         raise ValueError(f"harness no soportado: {harness_id}")
     values = load_env(repository_root / "adapters" / harness_id / "PACKAGING.env")
     expected = {

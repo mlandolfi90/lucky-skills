@@ -10,6 +10,7 @@ from pathlib import Path
 from lifecycle_core.authorization import require_human
 from lifecycle_core.envfile import canonical_env, load_env
 from lifecycle_core.git import commit_paths, git, is_repository
+from lifecycle_core.harness_catalog import load_harnesses
 from lifecycle_core.hashing import sha256_file, tree_hash
 from lifecycle_core.locking import directory_lock
 from lifecycle_core.paths import resolve_within
@@ -17,7 +18,7 @@ from lifecycle_core.receipts import local_state_root, utc_now, write_receipt
 from sextante.local_probe import probe_local
 
 from .models import AdoptionPlan
-from .planner import PROJECTION_EXCLUDES, build_plan
+from .planner import build_plan
 
 
 def apply_plan(
@@ -249,7 +250,7 @@ def _prepare(plan: AdoptionPlan, staged: Path) -> None:
 
 
 def _projection_ignore(plan: AdoptionPlan, item, source: Path):
-    """Filtro de copia para proyecciones de harness (ver PROJECTION_EXCLUDES).
+    """Filtro de copia para proyecciones de harness.
 
     Solo excluye entradas del NIVEL SUPERIOR de la skill, espejando el hash
     del plan (`tree_hash(..., exclude_top=...)`): lo copiado y lo prometido
@@ -257,7 +258,11 @@ def _projection_ignore(plan: AdoptionPlan, item, source: Path):
     """
     if item.role != "HARNESS":
         return None
-    excludes = PROJECTION_EXCLUDES.get(plan.harness, ())
+    # Las exclusiones salen del contrato del propio harness
+    # (adapters/<harness>/PACKAGING.env), no de una tabla a mano.
+    catalogo = load_harnesses(Path(plan.source_skill).parent.parent)
+    spec = catalogo.get(plan.harness)
+    excludes = spec.projection_excludes if spec else ()
     if not excludes:
         return None
     top = str(source.resolve())

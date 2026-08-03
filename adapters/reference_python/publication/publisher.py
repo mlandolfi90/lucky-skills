@@ -12,7 +12,8 @@ from lifecycle_core.git import commit_paths, git, is_repository
 from lifecycle_core.hashing import sha256_bytes, sha256_file, tree_hash
 from lifecycle_core.manifest import Version, dependency_closure, validate_skill
 from lifecycle_core.receipts import operation_id, utc_now, verify_receipt, write_receipt
-from skill_packaging.packager import SUPPORTED_HARNESSES, package_skills
+from lifecycle_core.harness_catalog import packageable_harness_ids
+from skill_packaging.packager import package_skills
 
 from .models import ReleasePlan
 
@@ -437,7 +438,7 @@ def _canary_hash(
                 version=override_version,
             )
         output = temporary / "output"
-        for harness in SUPPORTED_HARNESSES:
+        for harness in packageable_harness_ids(repository):
             result = package_skills(
                 repository_root=repository,
                 catalog_root=catalog,
@@ -460,7 +461,7 @@ def _staged_catalog(
     staged_repository = temporary / "repository"
     staged_catalog = staged_repository / "skills"
     shutil.copytree(catalog, staged_catalog)
-    for harness in SUPPORTED_HARNESSES:
+    for harness in packageable_harness_ids(repository):
         source = repository / "adapters" / harness / "PACKAGING.env"
         destination = staged_repository / "adapters" / harness / "PACKAGING.env"
         destination.parent.mkdir(parents=True, exist_ok=True)
