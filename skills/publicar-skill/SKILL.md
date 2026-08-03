@@ -27,6 +27,9 @@ Convertir un cambio cerrado en una versión consumible.
    soportado.
 3. Comparar con la versión vigente.
 4. Proponer:
+   - `INITIAL`: nacimiento. Una skill que nunca se publicó se sella en la
+     versión que declara; no se bumpea. Lo determina la ausencia de su tag,
+     no la pide quien publica.
    - `PATCH`: corrección compatible.
    - `MINOR`: capacidad compatible.
    - `MAJOR`: contrato incompatible.
@@ -45,7 +48,7 @@ forzar el remoto: emitir `HUMAN_REQUIRED` con la razón exacta.
 SKILL=...
 FROM_VERSION=...
 TO_VERSION=...
-IMPACT=PATCH|MINOR|MAJOR
+IMPACT=INITIAL|PATCH|MINOR|MAJOR
 QUALITY=PASS|FAIL
 PLAN_HASH=...
 COMMIT=<SHA>|NO

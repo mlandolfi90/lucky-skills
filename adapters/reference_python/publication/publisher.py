@@ -46,13 +46,24 @@ def build_release_plan(
     repository = catalog_root.parent
     _require_unconsumed_closure(repository, closure_hash)
     _require_content_change(catalog_root, manifest)
-    normalized_impact = impact.upper()
-    if normalized_impact == "AUTO":
-        # El bump se calcula, no se tipea: los commits convencionales desde el
-        # último tag proponen el impacto. La autoridad humana no se pierde —
-        # el impacto resuelto queda dentro del PLAN_HASH que se confirma.
-        normalized_impact = _propose_impact(catalog_root, manifest)
-    to_version = manifest.version.bump(normalized_impact)
+    if _sin_tag_previo(catalog_root, manifest):
+        # NACIMIENTO: una skill que nunca se publicó no se bumpea, se SELLA en
+        # la versión que declara. Bumpear aquí publicaba 1.0.1 como primera
+        # versión y llamaba PATCH ("corrección compatible") a un nacimiento —
+        # una mentira sobre un contrato que nadie había publicado todavía. Las
+        # 28 originales no lo destaparon porque las selló la migración, no
+        # este ciclo; apareció al nacer la primera skill de verdad.
+        normalized_impact = "INITIAL"
+        to_version = manifest.version
+    else:
+        normalized_impact = impact.upper()
+        if normalized_impact == "AUTO":
+            # El bump se calcula, no se tipea: los commits convencionales desde
+            # el último tag proponen el impacto. La autoridad humana no se
+            # pierde — el impacto resuelto queda dentro del PLAN_HASH que se
+            # confirma.
+            normalized_impact = _propose_impact(catalog_root, manifest)
+        to_version = manifest.version.bump(normalized_impact)
     return ReleasePlan(
         catalog=str(catalog_root),
         skill_id=manifest.skill_id,
@@ -298,6 +309,23 @@ def _consume_closure(repository: Path, plan: ReleasePlan, release_id: str) -> No
     )
 
 
+def _sin_tag_previo(catalog_root: Path, manifest) -> bool:
+    """¿La skill nunca se publicó? (no existe el tag de su versión vigente).
+
+    Fuera de un repositorio no hay historia que consultar: se trata como
+    publicada para no convertir cualquier checkout suelto en un nacimiento.
+    """
+    repository = catalog_root.parent
+    if not is_repository(repository):
+        return False
+    tag_name = f"skill-{manifest.skill_id}-v{manifest.version}"
+    tag_check = git(
+        repository,
+        ("rev-parse", "--verify", "--quiet", f"refs/tags/{tag_name}"),
+    )
+    return tag_check.returncode != 0
+
+
 def _propose_impact(catalog_root: Path, manifest) -> str:
     """Proponer el impacto desde los commits convencionales de la skill.
 
@@ -343,13 +371,9 @@ def _require_content_change(catalog_root: Path, manifest) -> None:
     repository = catalog_root.parent
     if not is_repository(repository):
         return
-    tag_name = f"skill-{manifest.skill_id}-v{manifest.version}"
-    tag_check = git(
-        repository,
-        ("rev-parse", "--verify", "--quiet", f"refs/tags/{tag_name}"),
-    )
-    if tag_check.returncode != 0:
+    if _sin_tag_previo(catalog_root, manifest):
         return
+    tag_name = f"skill-{manifest.skill_id}-v{manifest.version}"
     try:
         relative = manifest.root.relative_to(repository).as_posix()
     except ValueError:
@@ -372,7 +396,12 @@ def _revalidate_plan(plan: ReleasePlan, skill_root: Path) -> None:
     closure = Path(plan.closure_receipt)
     if not verify_receipt(closure) or sha256_file(closure) != plan.closure_hash:
         raise ValueError("el comprobante de cierre cambió")
-    if manifest.version.bump(plan.impact) != Version.parse(plan.to_version):
+    esperada = (
+        manifest.version
+        if plan.impact == "INITIAL"
+        else manifest.version.bump(plan.impact)
+    )
+    if esperada != Version.parse(plan.to_version):
         raise ValueError("la transición SemVer cambió")
     if (
         _canary_hash(

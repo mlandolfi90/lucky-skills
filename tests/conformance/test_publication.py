@@ -110,6 +110,19 @@ class PublicationTests(unittest.TestCase):
 
     def test_authorized_git_release_commits_tags_and_pushes_atomically(self) -> None:
         remote = self._initialize_git_remote()
+        # Historia previa: 1.2.3 ya publicada y un cambio encima. Sin el tag
+        # esto sería un NACIMIENTO (se sella, no se bumpea) y el caso dejaría
+        # de probar lo que dice su nombre: la mecánica git de una release
+        # posterior.
+        self._run("git", "-C", str(self.workspace), "tag", "-a",
+                  "skill-demo-v1.2.3", "-m", "release demo 1.2.3")
+        with (self.skill / "SKILL.md").open(
+            "a", encoding="utf-8", newline="\n"
+        ) as stream:
+            stream.write("\nCorrección menor.\n")
+        self._run("git", "-C", str(self.workspace), "add", "skills")
+        self._run("git", "-C", str(self.workspace), "commit", "-m",
+                  "fix(demo): corrección menor")
         plan = build_release_plan(
             catalog=self.catalog,
             skill_id="demo",
@@ -296,6 +309,65 @@ class PublicationTests(unittest.TestCase):
         ).stdout.strip()
         self.assertEqual(object_type, "tag")
         self.assertTrue(remote)
+
+    def _git(self, *args: str) -> subprocess.CompletedProcess:
+        return subprocess.run(
+            ["git", "-C", str(self.workspace), *args],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+
+    def _repo_con_skill(self) -> None:
+        self._git("init", "-q")
+        self._git("config", "user.email", "test@example.invalid")
+        self._git("config", "user.name", "Test")
+        self._git("add", "-A")
+        self._git("commit", "-q", "-m", "nace demo")
+
+    def test_primera_release_sella_la_version_declarada(self) -> None:
+        # Nacimiento: sin tag previo, la skill se SELLA en lo que declara.
+        # Bumpear acá publicaba 1.2.4 como primera version y llamaba PATCH
+        # ("correccion compatible") a un nacimiento.
+        self._repo_con_skill()
+        plan = build_release_plan(
+            catalog=self.catalog,
+            skill_id="demo",
+            impact="AUTO",
+            closure_receipt=self._closure(),
+        )
+        self.assertEqual(plan.impact, "INITIAL")
+        self.assertEqual(plan.from_version, "1.2.3")
+        self.assertEqual(plan.to_version, "1.2.3")
+        receipt = apply_release(
+            plan,
+            confirmed_plan_hash=plan.plan_hash,
+            confirmed_by="human:test",
+        )
+        # El manifiesto queda en su version declarada, no avanza.
+        self.assertEqual(
+            load_env(self.skill / "manifest.env")["SKILL_VERSION"], "1.2.3"
+        )
+        self.assertEqual(load_env(receipt)["IMPACT"], "INITIAL")
+
+    def test_con_tag_previo_sigue_bumpeando(self) -> None:
+        # Control del discriminante: con el tag de su version vigente presente,
+        # la misma llamada vuelve a ser un bump normal. Sin este caso, un
+        # INITIAL universal pasaria el test de arriba y romperia el ciclo.
+        self._repo_con_skill()
+        self._git("tag", "-a", "skill-demo-v1.2.3", "-m", "sello previo")
+        with (self.skill / "SKILL.md").open("a", encoding="utf-8", newline="\n") as f:
+            f.write("\nContenido nuevo para que haya algo que publicar.\n")
+        self._git("add", "-A")
+        self._git("commit", "-q", "-m", "fix: algo")
+        plan = build_release_plan(
+            catalog=self.catalog,
+            skill_id="demo",
+            impact="AUTO",
+            closure_receipt=self._closure(),
+        )
+        self.assertEqual(plan.impact, "PATCH")
+        self.assertEqual(plan.to_version, "1.2.4")
 
     def _closure(self) -> Path:
         observation = create_observation(
