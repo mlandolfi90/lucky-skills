@@ -2,6 +2,9 @@
 
 Generado por publicar-skill; no editar a mano.
 
+## sextante 2.0.0 — 2026-08-03 — MAJOR
+- 1.0.0 → 2.0.0 · QUALITY=PASS · autorizó human:vikingo
+
 ## disenar 1.1.0 — 2026-08-03 — MINOR
 - 1.0.0 → 1.1.0 · QUALITY=PASS · autorizó human:vikingo
 
