@@ -2,5 +2,8 @@
 
 Generado por publicar-skill; no editar a mano.
 
+## sincronizar 1.0.1 — 2026-08-03 — PATCH
+- 1.0.0 → 1.0.1 · QUALITY=PASS · autorizó human:vikingo
+
 ## publicar-skill 2.0.0 — 2026-08-03 — MAJOR
 - 1.0.0 → 2.0.0 · QUALITY=PASS · autorizó human:vikingo
