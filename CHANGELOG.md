@@ -2,6 +2,9 @@
 
 Generado por publicar-skill; no editar a mano.
 
+## documentar 1.0.1 — 2026-08-03 — PATCH
+- 1.0.0 → 1.0.1 · QUALITY=PASS · autorizó human:vikingo
+
 ## cambio 1.0.1 — 2026-08-03 — PATCH
 - 1.0.0 → 1.0.1 · QUALITY=PASS · autorizó human:vikingo
 
