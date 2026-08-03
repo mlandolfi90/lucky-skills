@@ -1,11 +1,30 @@
-# Huella local portable v4
+# Huella local portable v5
 
 Este documento fija el algoritmo de `LOCAL_FINGERPRINT` para
-`CONTRACT_VERSION=1`. La huella identifica contenido: rutas y bytes dentro de
-una ventana acotada. La posición en git — commit, rama, índice —, los modos, la
-suciedad y la vigencia se registran y verifican aparte; incluirlos en la huella
-hacía que adoptar en una rama y mergear a otra produjera drift permanente sin
-que cambiara un byte, y que Windows y Linux divergieran por el bit ejecutable.
+`CONTRACT_VERSION=1`. La huella identifica contenido: rutas y contenido
+canónico dentro de una ventana acotada. La posición en git — commit, rama,
+índice —, los modos, la suciedad y la vigencia se registran y verifican aparte;
+incluirlos en la huella hacía que adoptar en una rama y mergear a otra
+produjera drift permanente sin que cambiara un byte, y que Windows y Linux
+divergieran por el bit ejecutable.
+
+**Contenido canónico (v5).** El material que se hashea son los bytes con CRLF
+convertido a LF, salvo que el contenido sea binario — NUL en los primeros 8000
+bytes, el mismo criterio de git. Antes se hasheaban los bytes del checkout, y
+con `core.autocrlf` git los reescribe al bajar los archivos: el mismo commit
+producía huellas distintas según la máquina y según qué herramienta escribió
+cada archivo. Un clon nunca reproducía la huella sellada y `revalidar` no
+convergía jamás; y el STATE-MAP, que se versiona y viaja a cada destino,
+llevaba adentro un valor que sólo valía para un checkout. Git guarda LF, así
+que normalizar devuelve el contenido versionado. El tamaño del registro es el
+del contenido canónico, nunca el del archivo en disco: si el registro delatara
+la conversión, dos checkouts del mismo commit volverían a divergir con el mismo
+digest. Los OID crudos siguen disponibles aparte, y contra el índice de git se
+compara el canónico — un archivo intacto en CRLF salía sucio con el árbol
+limpio.
+
+Migración: toda huella sellada antes de v5 queda inválida. Cada repositorio
+adoptado revalida una vez; el salto queda en su recibo.
 
 ## Codificación común
 
@@ -23,7 +42,7 @@ JSON cuyos elementos son cadenas:
 Ejemplo de registro:
 
 ```json
-["ENTRY","src/main.py","FILE","12","RAW","<sha256>"]
+["ENTRY","src/main.py","FILE","12","CANONICAL","<sha256>"]
 ```
 
 Usar escapes `\uXXXX` con hex minúsculos y pares surrogate para puntos mayores
@@ -53,7 +72,7 @@ Los registros de entrada son:
 ["ENTRY",path,"SPECIAL",bits_de_tipo]
 ["ENTRY",path,"CONTENT_LIMIT",tamaño]
 ["ENTRY",path,causa_de_fallo,tamaño]
-["ENTRY",path,"FILE",tamaño,"RAW",sha256_bytes]
+["ENTRY",path,"FILE",tamaño_canónico,"CANONICAL",sha256_contenido_canónico]
 ["ENTRY",path,"FILE",tamaño_normalizado,"NORMALIZED_SELF_VALUE",sha256_bytes_normalizados]
 ```
 
@@ -158,10 +177,17 @@ byte sí.
 
 ## Dirty y conformidad
 
-`LOCAL_DIRTY` no reutiliza la normalización: comparar de forma conservadora
-untracked, stages no cero, índice contra HEAD, bytes crudos y modo POSIX
+`LOCAL_DIRTY` no reutiliza la exclusión autorreferencial: comparar de forma
+conservadora untracked, stages no cero, índice contra HEAD y modo POSIX
 observable. Por eso un cambio solo en `GIT_LOCAL_FINGERPRINT` puede conservar
 la huella y seguir dirty.
+
+Contra el índice se compara el OID del contenido **canónico**, no el de los
+bytes del disco: git guarda el contenido normalizado, así que con
+`core.autocrlf` un archivo intacto en CRLF daba un OID crudo distinto al del
+índice y salía sucio con `git status` limpio. La exclusión autorreferencial no
+entra en esa comparación — el índice tiene el contenido real, y aplicársela
+dejaría el STATE-MAP sucio para siempre.
 
 Un adaptador debe ejecutar
 [los vectores de conformidad](conformance-v1.json) antes de declararse

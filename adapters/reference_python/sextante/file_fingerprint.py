@@ -187,28 +187,22 @@ def fingerprint_files(
         # El modo no entra en la huella (D-078): un mismo árbol debe producir la
         # misma huella en Windows y Linux, trackeado o no. El gate de permisos
         # vive en dirty, que sí usa el modo observado del blob.
-        if hashed.material_normalized:
-            material.append(
-                canonical_record(
-                    "ENTRY",
-                    relative_path.as_posix(),
-                    "FILE",
-                    hashed.material_size,
-                    "NORMALIZED_SELF_VALUE",
-                    hashed.digest,
-                )
+        # El registro describe el contenido CANÓNICO y nada del transporte: ni
+        # el tamaño en disco ni si hubo conversión de finales de línea entran
+        # acá. Si entraran, dos checkouts del mismo commit —uno con CRLF, otro
+        # con LF— emitirían registros distintos con el mismo digest, y la
+        # huella volvería a no reproducir (exactamente lo que pasó al primer
+        # intento del arreglo).
+        material.append(
+            canonical_record(
+                "ENTRY",
+                relative_path.as_posix(),
+                "FILE",
+                hashed.material_size,
+                "NORMALIZED_SELF_VALUE" if hashed.material_normalized else "CANONICAL",
+                hashed.digest,
             )
-        else:
-            material.append(
-                canonical_record(
-                    "ENTRY",
-                    relative_path.as_posix(),
-                    "FILE",
-                    metadata.st_size,
-                    "RAW",
-                    hashed.digest,
-                )
-            )
+        )
         blobs.append(
             BlobIdentity(
                 path=relative_path.as_posix(),
@@ -230,6 +224,60 @@ def fingerprint_files(
     )
 
 
+BINARY_SNIFF_BYTES = 8000
+
+
+class _EolNormalizer:
+    """Convierte CRLF a LF en streaming, salvo que el contenido sea binario.
+
+    Por qué (local-fingerprint v2, caso Lucky-PizarraEvo 2026-08-03): la
+    huella hasheaba los BYTES DEL CHECKOUT. Con `core.autocrlf` git reescribe
+    los finales de línea al bajar los archivos, así que el mismo commit daba
+    huellas distintas según la máquina y según qué herramienta escribió cada
+    archivo — y el STATE-MAP, que se versiona y viaja a cada destino, llevaba
+    adentro un valor específico de un checkout. Un clon del mismo commit nunca
+    reproducía la huella sellada, y `revalidar` no convergía jamás.
+
+    Git guarda LF en el repositorio, así que normalizar a LF devuelve el mismo
+    contenido que git almacena: la huella pasa a describir el CONTENIDO
+    VERSIONADO y no el transporte de bytes. La decisión binario/texto imita a
+    git: NUL en los primeros 8000 bytes ⇒ binario, y ahí no se toca nada.
+    """
+
+    def __init__(self) -> None:
+        self._decided = False
+        self.binary = False
+        self._sniffed = 0
+        self._pending_cr = False
+
+    def feed(self, chunk: bytes) -> bytes:
+        if not self._decided and self._sniffed < BINARY_SNIFF_BYTES:
+            ventana = chunk[: BINARY_SNIFF_BYTES - self._sniffed]
+            self._sniffed += len(ventana)
+            if b"\0" in ventana:
+                self.binary = True
+                self._decided = True
+            elif self._sniffed >= BINARY_SNIFF_BYTES:
+                self._decided = True
+        if self.binary:
+            return chunk
+        if self._pending_cr:
+            # Un CR que quedó colgando del chunk anterior: era CRLF sólo si
+            # este arranca con LF; si no, es un CR suelto y git no lo toca.
+            chunk = b"\r" + chunk
+            self._pending_cr = False
+        if chunk.endswith(b"\r"):
+            self._pending_cr = True
+            chunk = chunk[:-1]
+        return chunk.replace(b"\r\n", b"\n")
+
+    def finish(self) -> bytes:
+        if self._pending_cr and not self.binary:
+            self._pending_cr = False
+            return b"\r"
+        return b""
+
+
 def _hash_file(
     path: Path,
     *,
@@ -244,6 +292,9 @@ def _hash_file(
     header = f"blob {expected.st_size}\0".encode("ascii")
     blob_sha1.update(header)
     blob_sha256.update(header)
+    normalizer = _EolNormalizer()
+    canonical: list[bytes] = []
+    canonical_size = 0
     flags = os.O_RDONLY | getattr(os, "O_BINARY", 0)
     flags |= getattr(os, "O_NOFOLLOW", 0)
     descriptor: int | None = None
@@ -268,11 +319,18 @@ def _hash_file(
             bytes_read += len(chunk)
             if bytes_read > byte_limit:
                 return _failed_hash("CONTENT_LIMIT_REACHED", bytes_read=bytes_read)
-            digest.update(chunk)
             blob_sha1.update(chunk)
             blob_sha256.update(chunk)
+            normalizado = normalizer.feed(chunk)
+            if normalizado:
+                canonical.append(normalizado)
+                canonical_size += len(normalizado)
             if state_map_chunks is not None:
                 state_map_chunks.append(chunk)
+        cola = normalizer.finish()
+        if cola:
+            canonical.append(cola)
+            canonical_size += len(cola)
         finished = os.fstat(descriptor)
         if not _same_file(opened, finished) or bytes_read != finished.st_size:
             return _failed_hash("CHANGED_DURING_SCAN", bytes_read=bytes_read)
@@ -282,20 +340,33 @@ def _hash_file(
         if descriptor is not None:
             os.close(descriptor)
 
+    # El material de la huella es el contenido CANÓNICO (LF), no los bytes del
+    # checkout: así un clon del mismo commit reproduce la huella. Los blob OIDs
+    # crudos siguen disponibles aparte para quien necesite los bytes en disco.
+    contenido_canonico = b"".join(canonical)
+    digest.update(contenido_canonico)
     material_digest = digest.hexdigest()
-    material_blob_sha1 = blob_sha1.hexdigest()
-    material_blob_sha256 = blob_sha256.hexdigest()
-    material_size = bytes_read
+    material_blob_sha1, material_blob_sha256 = git_blob_oids(contenido_canonico)
+    material_size = canonical_size
+    # `material_normalized` marca SOLO la exclusión autorreferencial del
+    # STATE-MAP, que es una decisión de contenido y debe verse en el registro.
+    # La conversión de finales de línea es transporte: no se marca.
     material_normalized = False
     if state_map_chunks is not None:
-        normalized, material_normalized = normalize_fingerprint_material(
+        # El STATE-MAP además excluye su propio valor de huella (autorreferencia),
+        # y lo hace sobre el contenido canónico, no sobre los bytes del disco.
+        normalized, excluded = normalize_fingerprint_material(
             relative_path,
-            b"".join(state_map_chunks),
+            contenido_canonico,
         )
-        if material_normalized:
+        if excluded:
+            # Solo el material de la HUELLA lleva la exclusión. Los blob OIDs
+            # se comparan contra el índice de git para decidir `dirty`, y el
+            # índice tiene el contenido real: si les metiéramos la exclusión,
+            # el STATE-MAP saldría sucio siempre, con el árbol limpio.
             material_digest = hashlib.sha256(normalized).hexdigest()
-            material_blob_sha1, material_blob_sha256 = git_blob_oids(normalized)
             material_size = len(normalized)
+            material_normalized = True
 
     return FileHashResult(
         digest=material_digest,

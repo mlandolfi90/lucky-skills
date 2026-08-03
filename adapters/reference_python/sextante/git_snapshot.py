@@ -76,10 +76,15 @@ def dirty_paths(
         if entry.mode == "160000":
             continue
         blob = observed.get(path)
+        # Contra el índice se compara el OID del contenido CANÓNICO, no el de
+        # los bytes del disco: git guarda el contenido normalizado, así que con
+        # `core.autocrlf` un archivo intacto en CRLF daba un OID crudo distinto
+        # al del índice y salía sucio con `git status` limpio (mismo origen que
+        # la huella no reproducible, local-fingerprint v2).
         observed_oid = (
-            blob.sha256
+            blob.material_sha256
             if blob and object_format == "sha256"
-            else (blob.sha1 if blob else None)
+            else (blob.material_sha1 if blob else None)
         )
         if observed_oid != entry.oid:
             dirty.add(path)
