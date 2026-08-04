@@ -2,6 +2,9 @@
 
 Generado por publicar-skill; no editar a mano.
 
+## sincronizar 1.1.0 — 2026-08-04 — MINOR
+- 1.0.1 → 1.1.0 · QUALITY=PASS · autorizó human:vikingo
+
 ## sextante 2.0.1 — 2026-08-04 — PATCH
 - 2.0.0 → 2.0.1 · QUALITY=PASS · autorizó human:vikingo
 
