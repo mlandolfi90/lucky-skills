@@ -21,6 +21,10 @@ class RepositoryAssessment:
     changes: tuple[str, ...]
     risks: tuple[str, ...]
     collisions: tuple[str, ...]
+    # Mensaje crudo de la falla cuando no se pudo medir. `reason` queda como
+    # token estable para decidir; `detail` es para que un humano entienda QUÉ
+    # falló sin volver a correr nada. Vacío cuando la medición sí se logró.
+    detail: str = ""
 
 
 @dataclass(frozen=True)

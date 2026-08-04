@@ -8,7 +8,7 @@ from lifecycle_core.envfile import load_env
 
 from .branches import release_branch
 from .models import SyncPlan
-from .scanner import CLASSIFICATIONS, build_sync_plan
+from .scanner import APPLICABLE, CLASSIFICATIONS, build_sync_plan
 from .transaction import apply_sync_plan
 
 
@@ -59,8 +59,17 @@ def main(argv: list[str] | None = None) -> int:
                 print(f"{classification}={count}")
             print(f"BATCH_PLAN={plan.plan_hash}")
             print(f"BRANCH_PREFIX={plan.branch_prefix}")
+            # Lo que no se pudo medir se nombra acá, con su causa. Si sólo
+            # apareciera el conteo, un UNDETERMINED se leería como un repo
+            # menos y nadie iría a buscar por qué.
             for repository in plan.repositories:
-                if repository.classification in {"READY_FAST", "NEEDS_ADAPTATION"}:
+                if repository.classification == "UNDETERMINED":
+                    print(
+                        f"UNDETERMINED={repository.repo_id}|{repository.reason}|"
+                        f"{repository.detail}"
+                    )
+            for repository in plan.repositories:
+                if repository.classification in APPLICABLE:
                     branch = release_branch(
                         prefix=plan.branch_prefix,
                         skill_id=plan.skill_id,

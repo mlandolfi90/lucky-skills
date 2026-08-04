@@ -18,7 +18,23 @@ from .models import RepositoryAssessment, SyncPlan
 from .registry import RepositoryEntry, load_registry
 
 
-CLASSIFICATIONS = {"CURRENT", "READY_FAST", "NEEDS_ADAPTATION", "BLOCKED"}
+CLASSIFICATIONS = {
+    "CURRENT",
+    "READY_FAST",
+    "NEEDS_ADAPTATION",
+    "BLOCKED",
+    # No pudimos establecer el estado. NO es un veredicto sobre el repositorio:
+    # es la confesión de que la medición falló. Antes esto caía en BLOCKED y un
+    # fallo transitorio quedaba indistinguible de un repo realmente bloqueado —
+    # con la consecuencia de que un BLOCKED falso sacaba un repositorio de la
+    # sincronización sin que nadie se enterara. Medido en vivo: la misma tanda
+    # dio BLOCKED para una skill y READY_FAST para las otras tres del mismo
+    # repositorio, cuando el comprobante de aterrizaje es por repositorio.
+    "UNDETERMINED",
+}
+# Las que habilitan escritura. El resto se excluye, incluida UNDETERMINED:
+# no saber nunca autoriza.
+APPLICABLE = {"READY_FAST", "NEEDS_ADAPTATION"}
 
 
 def build_sync_plan(
@@ -106,7 +122,13 @@ def _assess(
             branch=entry.default_branch,
         )
         if result.returncode != 0:
-            return _blocked(entry, "REMOTE_INACCESSIBLE")
+            # No pudimos clonar: puede ser red, credenciales o que el remoto ya
+            # no exista. Ninguna de las tres es un estado del repositorio.
+            return _undetermined(
+                entry,
+                "REMOTE_INACCESSIBLE",
+                _detail(result.stderr or result.stdout),
+            )
         remote_head = head(clone)
         classification, observed, reason = _classify_state(
             clone,
@@ -143,20 +165,18 @@ def _assess(
                 harness=entry.harness,
                 landing_receipt=landing,
             )
-        except (OSError, ValueError):
-            return RepositoryAssessment(
-                repo_id=entry.repo_id,
-                remote_url=entry.remote_url,
-                default_branch=entry.default_branch,
-                harness=entry.harness,
+        except (OSError, ValueError) as error:
+            # Aterrizar o planificar falló. Puede ser el repositorio (STATE-MAP
+            # vencido, gate honesto) o puede ser la corrida (timeout, disco,
+            # red). Desde acá NO se distingue, así que no se inventa veredicto:
+            # se declara que no se pudo medir y se conserva el mensaje para que
+            # un humano lea la causa sin volver a correr todo.
+            return _undetermined(
+                entry,
+                "LANDING_OR_ADOPTION_FAILED",
+                _detail(f"{type(error).__name__}: {error}"),
                 remote_head=remote_head,
                 observed_version=observed,
-                classification="BLOCKED",
-                reason="LANDING_OR_ADOPTION_BLOCKED",
-                transition_hash="NONE",
-                changes=(),
-                risks=(),
-                collisions=(),
             )
         return RepositoryAssessment(
             repo_id=entry.repo_id,
@@ -208,18 +228,61 @@ def _classify_state(
     return "NEEDS_ADAPTATION", str(observed), "MAJOR_OR_INITIAL_ADAPTATION"
 
 
-def _blocked(entry: RepositoryEntry, reason: str) -> RepositoryAssessment:
+def _detail(raw: str) -> str:
+    """Una línea legible. Sin truncar a ciegas: si no entra, se dice."""
+    collapsed = " ".join((raw or "").split())
+    if not collapsed:
+        return "sin detalle"
+    if len(collapsed) <= 500:
+        return collapsed
+    return collapsed[:497] + "..."
+
+
+def _assessment(
+    entry: RepositoryEntry,
+    *,
+    classification: str,
+    reason: str,
+    detail: str = "",
+    remote_head: str = "UNKNOWN",
+    observed_version: str = "UNKNOWN",
+) -> RepositoryAssessment:
     return RepositoryAssessment(
         repo_id=entry.repo_id,
         remote_url=entry.remote_url,
         default_branch=entry.default_branch,
         harness=entry.harness,
-        remote_head="UNKNOWN",
-        observed_version="UNKNOWN",
-        classification="BLOCKED",
+        remote_head=remote_head,
+        observed_version=observed_version,
+        classification=classification,
         reason=reason,
         transition_hash="NONE",
         changes=(),
         risks=(),
         collisions=(),
+        detail=detail,
+    )
+
+
+def _blocked(entry: RepositoryEntry, reason: str) -> RepositoryAssessment:
+    """El repositorio no admite la transición, y eso SÍ lo sabemos."""
+    return _assessment(entry, classification="BLOCKED", reason=reason)
+
+
+def _undetermined(
+    entry: RepositoryEntry,
+    reason: str,
+    detail: str,
+    *,
+    remote_head: str = "UNKNOWN",
+    observed_version: str = "UNKNOWN",
+) -> RepositoryAssessment:
+    """No sabemos, y decirlo es la única respuesta honesta."""
+    return _assessment(
+        entry,
+        classification="UNDETERMINED",
+        reason=reason,
+        detail=detail,
+        remote_head=remote_head,
+        observed_version=observed_version,
     )

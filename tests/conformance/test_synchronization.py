@@ -414,5 +414,136 @@ class MajorJumpAcceptanceTests(unittest.TestCase):
         self.assertNotIn("accept_adaptation_by", str(raised.exception))
 
 
+class NoPudeMedirNoEsEstaBloqueadoTests(unittest.TestCase):
+    """Un fallo de medición jamás se disfraza de veredicto del repositorio.
+
+    Encontrado en vivo propagando la cascada de sextante 2.0.0: la misma tanda
+    dio BLOCKED para una skill de lucky-debugger y READY_FAST para las otras
+    tres del MISMO repositorio, cuando el comprobante de aterrizaje es por
+    repositorio y no puede depender de qué skill se sincroniza. Once
+    repeticiones posteriores dieron READY_FAST: el BLOCKED era falso.
+
+    La causa: `_assess` atrapaba (OSError, ValueError) y mapeaba cualquiera a
+    BLOCKED/LANDING_OR_ADOPTION_BLOCKED, tirando el mensaje. Un timeout de red
+    y un repo genuinamente bloqueado salían idénticos — y un BLOCKED falso
+    saca un repositorio de la sincronización sin que nadie se entere.
+
+    El camino de `apply`, 60 líneas más abajo en el mismo módulo, ya hacía lo
+    correcto (`reason = _single_line(str(error))`). El escáner era el outlier.
+    """
+
+    def setUp(self) -> None:
+        self.temporary = tempfile.TemporaryDirectory()
+        self.base = Path(self.temporary.name)
+        self.catalog = self.base / "catalog" / "skills"
+        self.registry = self.base / "registry" / "repos"
+        self.catalog.mkdir(parents=True)
+        seed_adapters(self.catalog.parent)
+        self.registry.mkdir(parents=True)
+        (self.catalog / "demo").mkdir()
+        (self.catalog / "demo" / "manifest.env").write_text(
+            'FORMAT_VERSION="1"\nSKILL_ID="demo"\nSKILL_VERSION="1.0.0"\nREQUIRES=""\n',
+            encoding="utf-8",
+            newline="\n",
+        )
+        (self.catalog / "demo" / "SKILL.md").write_text(
+            "---\nname: demo\ndescription: skill de prueba\n---\n\n# demo\n",
+            encoding="utf-8",
+            newline="\n",
+        )
+
+    def tearDown(self) -> None:
+        self.temporary.cleanup()
+
+    def _registrar(self, remote: str, *, status: str = "ACTIVE") -> None:
+        (self.registry / "r.env").write_text(
+            'FORMAT_VERSION="1"\n'
+            'REPO_ID="r"\n'
+            f'REMOTE_URL="{remote}"\n'
+            'DEFAULT_BRANCH="main"\n'
+            'HARNESS="codex"\n'
+            'SKILLS="demo"\n'
+            f'STATUS="{status}"\n',
+            encoding="utf-8",
+            newline="\n",
+        )
+
+    def _evaluar(self):
+        plan = build_sync_plan(
+            catalog=self.catalog,
+            registry=self.registry,
+            skill_id="demo",
+            confirmed_by="human:test",
+        )
+        return plan.repositories[0]
+
+    def test_remoto_inalcanzable_es_undetermined_no_blocked(self) -> None:
+        # No poder clonar puede ser red, credenciales o un remoto borrado.
+        # Ninguna de las tres es un estado del repositorio.
+        self._registrar((self.base / "no-existe.git").as_posix())
+        assessment = self._evaluar()
+        self.assertEqual(assessment.classification, "UNDETERMINED")
+        self.assertEqual(assessment.reason, "REMOTE_INACCESSIBLE")
+
+    def test_la_causa_cruda_sobrevive(self) -> None:
+        # Sin esto el arreglo no sirve: el operador ve "no pude" y no sabe
+        # por qué. Fue justo el detalle lo que destapó, en la propagación
+        # real, que un repo había commiteado encima de su STATE-MAP sellado.
+        self._registrar((self.base / "no-existe.git").as_posix())
+        assessment = self._evaluar()
+        self.assertTrue(assessment.detail)
+        self.assertNotEqual(assessment.detail, "sin detalle")
+        self.assertNotIn("\n", assessment.detail)
+        self.assertLessEqual(len(assessment.detail), 500)
+
+    def test_pausado_sigue_siendo_blocked(self) -> None:
+        # La política SÍ se conoce: el operador pausó el repo a propósito.
+        # Degradarla a "no pude medir" sería mentir en la otra dirección.
+        self._registrar((self.base / "no-existe.git").as_posix(), status="PAUSED")
+        assessment = self._evaluar()
+        self.assertEqual(assessment.classification, "BLOCKED")
+        self.assertEqual(assessment.reason, "REGISTRY_PAUSED")
+        self.assertEqual(assessment.detail, "")
+
+    def test_no_saber_nunca_autoriza_escribir(self) -> None:
+        from synchronization.scanner import APPLICABLE
+
+        self.assertNotIn("UNDETERMINED", APPLICABLE)
+        assessment = RepositoryAssessment(
+            repo_id="r",
+            remote_url="C:/no/existe.git",
+            default_branch="main",
+            harness="codex",
+            remote_head="a" * 40,
+            observed_version="UNKNOWN",
+            classification="UNDETERMINED",
+            reason="LANDING_OR_ADOPTION_FAILED",
+            transition_hash="b" * 16,
+            changes=(),
+            risks=(),
+            collisions=(),
+            detail="TimeoutError: se acabó el tiempo",
+        )
+        plan = SyncPlan(
+            catalog="C:/no/existe/skills",
+            registry="C:/no/existe/registry",
+            skill_id="demo",
+            skill_version="1.0.0",
+            branch_prefix="codex/",
+            source_hash="c" * 64,
+            repositories=(assessment,),
+        ).with_hash()
+        with self.assertRaisesRegex(ValueError, "no aplicables"):
+            apply_sync_plan(
+                plan,
+                confirmed_plan_hash=plan.plan_hash,
+                selected_repositories=("r",),
+                confirmed_by="human:test",
+                push_confirmed_by="human:test",
+                git_author_name="sync",
+                git_author_email="sync@test",
+            )
+
+
 if __name__ == "__main__":
     unittest.main()

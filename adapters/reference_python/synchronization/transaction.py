@@ -23,7 +23,7 @@ from sextante.local_probe import probe_local
 from .branches import release_branch
 from .landing import create_landing_receipt
 from .models import RepositoryAssessment, SyncPlan
-from .scanner import adoption_transition_hash
+from .scanner import APPLICABLE, adoption_transition_hash
 
 
 @dataclass(frozen=True)
@@ -233,7 +233,7 @@ def _selected(
     invalid = tuple(
         item.repo_id
         for item in selected
-        if item.classification not in {"READY_FAST", "NEEDS_ADAPTATION"}
+        if item.classification not in APPLICABLE
         or item.transition_hash == "NONE"
     )
     if invalid:
