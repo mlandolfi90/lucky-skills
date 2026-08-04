@@ -82,6 +82,19 @@ path absoluto, con drive o con componente `..` es inseguro. Un límite, entrada
 especial, cambio durante lectura, texto no portable o fallo de lectura vuelve
 incompleta la sonda y obliga `LOCAL=PARTIAL`.
 
+`MISSING` cubre dos situaciones que el sistema operativo NO distingue por su
+código de error, y que esta sonda sí debe distinguir:
+
+- El archivo **no está**. Es una observación real y correcta: la sonda sigue
+  completa. Borrar un archivo trackeado es trabajo corriente y no degrada nada.
+- El archivo **está y no se lo alcanza**, porque su ruta absoluta excede el
+  límite del sistema. Es un fallo de lectura: la sonda queda incompleta y debe
+  declarar su causa. Confundirlo con el caso anterior produce una huella
+  distinta de la real bajo un escaneo que se dice completo — y si esa huella
+  se sella en un State Map, el repositorio reporta drift para siempre.
+
+El discriminante es el largo de la ruta absoluta, no el código de error.
+
 El modo del archivo no participa en ningún registro: el mismo árbol produce la
 misma huella esté trackeado o no, en Windows o en Linux. El bit POSIX
 observable se verifica por separado en la detección de dirty, donde el sistema
