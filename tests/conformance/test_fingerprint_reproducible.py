@@ -10,6 +10,7 @@ así que la suite entera pasaba con la huella rota.
 
 from __future__ import annotations
 
+import os
 import subprocess
 import sys
 import tempfile
@@ -20,9 +21,15 @@ from support import ADAPTER_ROOT
 
 sys.path.insert(0, str(ADAPTER_ROOT))
 
+from sextante.file_fingerprint import (  # noqa: E402
+    WINDOWS_PATH_LIMIT,
+    _fuera_de_alcance,
+    fingerprint_files,
+)
 from sextante.local_probe import probe_local  # noqa: E402
 
 SONDA = dict(timeout_seconds=30, max_entries=1000)
+LIMITES = dict(timeout_seconds=30, max_entries=1000)
 
 
 class HuellaReproducibleTests(unittest.TestCase):
@@ -129,6 +136,61 @@ class HuellaSobreviveAlClonTests(unittest.TestCase):
         copia, _ = probe_local(clone, **SONDA)
         self.assertEqual(original.fingerprint, copia.fingerprint)
         self.assertEqual(original.dirty_count, copia.dirty_count)
+
+
+class NoAlcanzarNoEsFaltarTests(unittest.TestCase):
+    """Un archivo que existe y no se puede leer no es un archivo borrado.
+
+    Windows corta las rutas en 260 caracteres; git las escribe igual porque
+    usa su propia API. El archivo queda en disco y `lstat` no llega. Antes eso
+    entraba como MISSING y el escaneo seguía declarándose COMPLETE, así que la
+    huella salía distinta con cartel de ALIGNED. Medido en vivo sobre el mismo
+    commit: ruta corta 0816f48a con 0 archivos fuera de alcance, ruta de 158
+    chars 8921644e con 10 archivos de 260-266 — las dos diciendo COMPLETE.
+
+    Lo grave no era la lectura: una huella así sellada en un STATE-MAP deja al
+    repositorio reportando DRIFT para siempre.
+
+    Los dos casos levantan FileNotFoundError, así que el errno no los separa;
+    el largo de la ruta sí. Y separarlos importa en la otra dirección: borrar
+    un archivo trackeado es trabajo corriente y no debe degradar nada.
+    """
+
+    def setUp(self) -> None:
+        self.temporary = tempfile.TemporaryDirectory()
+        self.workspace = Path(self.temporary.name)
+
+    def tearDown(self) -> None:
+        self.temporary.cleanup()
+
+    def test_un_archivo_fuera_de_alcance_degrada_el_escaneo(self) -> None:
+        if os.name != "nt":
+            self.skipTest("el límite de ruta es de Windows")
+        # No hace falta crear el archivo: `lstat` falla igual, y es
+        # exactamente lo que pasa cuando git lo escribió y nosotros no
+        # llegamos. Lo que se pinea es que el LARGO decide el veredicto.
+        relleno = "d" * 120
+        largo = f"{relleno}/{relleno}/archivo.md"
+        self.assertGreaterEqual(len(str(self.workspace / largo)), WINDOWS_PATH_LIMIT)
+        resultado = fingerprint_files(self.workspace, (largo,), **LIMITES)
+        self.assertEqual(resultado.status, "PATH_LIMIT_REACHED")
+        self.assertFalse(resultado.complete)
+
+    def test_un_archivo_borrado_no_degrada_nada(self) -> None:
+        # El caso corriente: git lo tiene en el índice y el humano lo borró.
+        # Eso es un estado real y medido, no una medición fallida. Si esto
+        # degradara, cualquier borrado sin commitear ensuciaría el veredicto.
+        resultado = fingerprint_files(self.workspace, ("borrado.md",), **LIMITES)
+        self.assertEqual(resultado.status, "COMPLETE")
+        self.assertTrue(resultado.complete)
+
+    def test_el_discriminante_es_el_largo_no_el_errno(self) -> None:
+        if os.name != "nt":
+            self.skipTest("el límite de ruta es de Windows")
+        corto = self.workspace / "corto.md"
+        largo = self.workspace / ("e" * (WINDOWS_PATH_LIMIT - len(str(self.workspace))))
+        self.assertFalse(_fuera_de_alcance(corto))
+        self.assertTrue(_fuera_de_alcance(largo))
 
 
 if __name__ == "__main__":

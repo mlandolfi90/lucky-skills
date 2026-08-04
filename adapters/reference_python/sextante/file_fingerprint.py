@@ -19,6 +19,22 @@ from .fingerprint_contract import canonical_record, portable_path_text
 
 MAX_TOTAL_CONTENT_BYTES = 512 * 1024 * 1024
 CHUNK_BYTES = 1024 * 1024
+# Windows corta las rutas en 260 caracteres. Git las escribe igual (usa su
+# propia API), así que el archivo EXISTE y nosotros no lo alcanzamos.
+WINDOWS_PATH_LIMIT = 260
+
+
+def _fuera_de_alcance(candidate: Path) -> bool:
+    """¿El archivo no está, o no llegamos a él?
+
+    Los dos casos levantan FileNotFoundError, así que el errno no los separa.
+    Y separarlos importa: borrar un archivo trackeado es trabajo normal y no
+    debe degradar nada, mientras que no alcanzarlo deja la huella incompleta
+    sin que se note. Medido en vivo: un clon en ruta profunda dejó 10 archivos
+    de 260-266 caracteres fuera del alcance y la huella salió distinta,
+    declarándose COMPLETE y ALIGNED.
+    """
+    return os.name == "nt" and len(str(candidate)) >= WINDOWS_PATH_LIMIT
 
 
 @dataclass(frozen=True)
@@ -97,6 +113,8 @@ def fingerprint_files(
             material.append(
                 canonical_record("ENTRY", relative_path.as_posix(), "MISSING")
             )
+            if _fuera_de_alcance(candidate):
+                status_value = "PATH_LIMIT_REACHED"
             continue
 
         if stat.S_ISLNK(metadata.st_mode):
