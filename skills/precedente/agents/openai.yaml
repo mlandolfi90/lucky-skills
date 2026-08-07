@@ -1,0 +1,4 @@
+interface:
+  display_name: "Precedente"
+  short_description: "Busca qué ya existe antes de resolver de cero"
+  default_prompt: "Usa $precedente antes de diagnosticar un fallo o diseñar: buscá si esto ya lo resolvió alguien."

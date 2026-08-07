@@ -2,6 +2,9 @@
 
 Generado por publicar-skill; no editar a mano.
 
+## precedente 1.0.0 — 2026-08-07 — INITIAL
+- 1.0.0 → 1.0.0 · QUALITY=PASS · autorizó human:vikingo
+
 ## crisol 1.0.1 — 2026-08-07 — PATCH
 - 1.0.0 → 1.0.1 · QUALITY=PASS · autorizó human:vikingo
 
