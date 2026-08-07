@@ -1,6 +1,6 @@
 ---
 name: crisol
-description: Orquestar calidad incorporada para un cambio que afecta contratos, arquitectura o varias unidades. Usar cuando el humano pida Crisol o el fast path resulte insuficiente.
+description: Orquestar un ciclo de cambio con carriles separados y verificación independiente. Usar cuando el humano pida Crisol o al ejecutar un cambio diagnosticado que no cabe seguro en una sola unidad.
 ---
 
 # Crisol
