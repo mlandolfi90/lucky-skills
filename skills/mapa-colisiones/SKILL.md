@@ -1,6 +1,6 @@
 ---
 name: mapa-colisiones
-description: Detectar solapamientos de rutas, símbolos, contratos y criterios antes de escribir. Usar con trabajo paralelo, planes multiarchivo o cuando otra sesión pueda tocar el mismo alcance.
+description: Detectar solapamientos de rutas, símbolos, contratos y criterios antes de escribir. Usar ante un plan multiarchivo, claims lifecycle activos, o ramas de otros actores sobre el mismo alcance.
 ---
 
 # Mapa de colisiones
