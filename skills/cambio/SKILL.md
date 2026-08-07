@@ -1,6 +1,6 @@
 ---
 name: cambio
-description: Registrar una observación, diagnosticarla y clasificar el siguiente escalón. Usar al capturar algo visto o deseado antes de elegir microfix, hotfix, feature, quality, refactor o migration.
+description: Registrar una observación, diagnosticarla y clasificar el siguiente escalón. Usar antes de tocar el repositorio por un fallo o una mejora, mientras no haya escalón elegido para ese trabajo.
 ---
 
 # Cambio

@@ -2,6 +2,9 @@
 
 Generado por publicar-skill; no editar a mano.
 
+## cambio 1.0.2 — 2026-08-07 — PATCH
+- 1.0.1 → 1.0.2 · QUALITY=PASS · autorizó human:vikingo
+
 ## mapa-colisiones 1.0.2 — 2026-08-07 — PATCH
 - 1.0.1 → 1.0.2 · QUALITY=PASS · autorizó human:vikingo
 
