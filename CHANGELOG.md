@@ -2,6 +2,9 @@
 
 Generado por publicar-skill; no editar a mano.
 
+## madrina 1.1.0 — 2026-08-07 — MINOR
+- 1.0.0 → 1.1.0 · QUALITY=PASS · autorizó human:vikingo
+
 ## sincronizar 1.1.0 — 2026-08-04 — MINOR
 - 1.0.1 → 1.1.0 · QUALITY=PASS · autorizó human:vikingo
 
