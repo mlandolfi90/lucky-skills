@@ -17,12 +17,17 @@ Decidir el estado final de una ejecución a partir de evidencia actual.
 6. Rollback existe o su ausencia fue aceptada.
 7. Deuda, seguimientos y riesgos están registrados.
 8. Commit, push o deploy solo ocurrieron si estaban autorizados.
-9. Si la corrida dejó un aprendizaje reutilizable (síntoma→acción) o una
-   sospecha sin evidencia dura, proponerlo al saber como ficha o señal,
-   citando el recibo de esta corrida en formato `receipt:<RECEIPT_HASH>`
-   (el saber acepta ese ancla junto al ledger v2). Sin saber disponible,
-   declararlo.
-10. Cero fuga de secretos, sin excepción: el diff, los logs, los recibos y
+9. Si esta corrida consultó el saber, decir qué pasó con lo consultado:
+   citar cada ficha usada con su veredicto —funcionó, parcial o no
+   funcionó— anclando en el recibo de esta corrida, en formato
+   `receipt:<RECEIPT_HASH>` (el saber acepta ese ancla junto al ledger v2).
+   Una ficha que no sirvió vale tanto como una que sirvió: sin citas
+   negativas nadie se entera de que una guía enseña algo equivocado. No
+   haber consultado nada es una respuesta válida y se declara.
+10. Si la corrida dejó un aprendizaje reutilizable (síntoma→acción) o una
+    sospecha sin evidencia dura, proponerlo al saber como ficha o señal,
+    citando el mismo recibo. Sin saber disponible, declararlo.
+11. Cero fuga de secretos, sin excepción: el diff, los logs, los recibos y
     el transcript no contienen claves, tokens ni credenciales — ni en claro
     ni hardcodeados. Los secretos viajan por nombre, jamás por valor; para
     comparar un valor se usa su hash, nunca el valor. Un secreto detectado
@@ -51,6 +56,7 @@ ROLLBACK=READY|APPLIED|UNAVAILABLE
 CONDITIONS=...
 FOLLOW_UP=...
 DECIDED_BY=...
+SABER=<fichas citadas|NONE|UNAVAILABLE>
 RECEIPT=...
 ```
 
