@@ -1,0 +1,4 @@
+interface:
+  display_name: "Coordinación por Slack"
+  short_description: "Habla con las otras sesiones sin que copies y pegues"
+  default_prompt: "Usa $slack-coordinacion para revisar Slack y decirme qué me pidieron las otras sesiones."
