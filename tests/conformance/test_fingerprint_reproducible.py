@@ -24,6 +24,7 @@ sys.path.insert(0, str(ADAPTER_ROOT))
 from sextante.file_fingerprint import (  # noqa: E402
     WINDOWS_PATH_LIMIT,
     _fuera_de_alcance,
+    _modo_observable,
     fingerprint_files,
 )
 from sextante.local_probe import probe_local  # noqa: E402
@@ -191,6 +192,85 @@ class NoAlcanzarNoEsFaltarTests(unittest.TestCase):
         largo = self.workspace / ("e" * (WINDOWS_PATH_LIMIT - len(str(self.workspace))))
         self.assertFalse(_fuera_de_alcance(corto))
         self.assertTrue(_fuera_de_alcance(largo))
+
+
+class UnEjecutableSeMideComoCualquierArchivoTests(unittest.TestCase):
+    """El modo sólo decide donde el sistema lo informa; donde lo fabrica, no.
+
+    En Windows CPython sintetiza el bit de ejecución desde la EXTENSIÓN:
+    `lstat` lo agrega para .bat/.cmd/.exe/.com y `fstat` nunca. El chequeo de
+    estabilidad comparaba ambos, así que TODO ejecutable fallaba antes de leer
+    un byte y salía por el camino que no registra contenido.
+
+    Tres efectos del mismo origen, y el tercero es el grave:
+      1. ningún repositorio Windows con un .bat podía adoptarse jamás
+      2. esos archivos quedaban sucios para siempre con el árbol limpio
+      3. su registro quedaba en ruta+estado+tamaño, así que dos ejecutables
+         DISTINTOS del mismo tamaño producían la misma huella — la huella
+         dejaba de describir el contenido, violando D-078
+
+    Encontrado por la sesión de Suscripciones, que no podía adoptar el Taller
+    en un repositorio con tres .bat. La suite daba 229/3 idéntico antes y
+    después del arreglo: no había un solo fixture ejecutable, y el módulo ya
+    declaraba el modo inobservable en `_working_tree_mode` mientras el chequeo
+    de estabilidad lo comparaba igual.
+    """
+
+    def setUp(self) -> None:
+        self.temporary = tempfile.TemporaryDirectory()
+        self.workspace = Path(self.temporary.name)
+
+    def tearDown(self) -> None:
+        self.temporary.cleanup()
+
+    def _escribir(self, nombre: str, contenido: bytes) -> None:
+        (self.workspace / nombre).write_bytes(contenido)
+
+    def test_un_ejecutable_no_rompe_el_escaneo(self) -> None:
+        # El fixture que faltaba: sin un ejecutable real en el árbol, este
+        # camino no se recorría en ninguna dirección.
+        self._escribir("script.bat", b"@echo off\r\n")
+        self._escribir("otro.cmd", b"rem x\r\n")
+        self._escribir("legible.txt", b"texto\n")
+        resultado = fingerprint_files(
+            self.workspace,
+            ("script.bat", "otro.cmd", "legible.txt"),
+            **LIMITES,
+        )
+        self.assertEqual(resultado.status, "COMPLETE")
+        self.assertTrue(resultado.complete)
+
+    def test_dos_ejecutables_distintos_del_mismo_tamano_no_comparten_huella(
+        self,
+    ) -> None:
+        # La propiedad de integridad. Con el defecto, ambos registros eran
+        # ENTRY|ruta|estado|tamaño y el contenido no entraba: mismo tamaño,
+        # misma huella. Un ejecutable podía cambiar sin que nadie lo notara.
+        #
+        # MISMA RUTA en dos árboles distintos, y no dos rutas en uno: la ruta
+        # ENTRA en el registro, así que dos nombres distintos dan material
+        # distinto aunque el contenido nunca se lea. Ese test pasaría con el
+        # defecto puesto y no probaría nada — lo destapó el mutante.
+        primero = self.workspace / "uno"
+        segundo = self.workspace / "dos"
+        primero.mkdir()
+        segundo.mkdir()
+        (primero / "x.bat").write_bytes(b"@echo AAA")
+        (segundo / "x.bat").write_bytes(b"@echo BBB")
+        self.assertEqual(
+            (primero / "x.bat").stat().st_size,
+            (segundo / "x.bat").stat().st_size,
+            "el fixture pierde sentido si los tamaños difieren",
+        )
+        uno = fingerprint_files(primero, ("x.bat",), **LIMITES)
+        otro = fingerprint_files(segundo, ("x.bat",), **LIMITES)
+        self.assertNotEqual(uno.material, otro.material)
+
+    def test_el_modo_decide_solo_donde_el_sistema_lo_informa(self) -> None:
+        # Un único predicado para las dos decisiones sobre el modo: antes
+        # `_working_tree_mode` lo declaraba inobservable en Windows y
+        # `_same_file` lo comparaba igual. Divergían.
+        self.assertEqual(_modo_observable(), os.name != "nt")
 
 
 if __name__ == "__main__":

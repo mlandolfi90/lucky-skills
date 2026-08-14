@@ -417,8 +417,23 @@ def _failed_hash(status: str, *, bytes_read: int = 0) -> FileHashResult:
     )
 
 
+def _modo_observable() -> bool:
+    """¿El sistema informa el modo del archivo, o lo fabrica?
+
+    En Windows CPython sintetiza el bit de ejecución desde la EXTENSIÓN
+    (.bat, .cmd, .exe, .com): `lstat` lo inventa y `fstat`, que sólo ve un
+    descriptor, nunca lo agrega. Ahí el modo no es una observación del
+    sistema y no se puede usar para decidir nada.
+
+    Las dos decisiones sobre el modo consultan este predicado, para que no
+    puedan divergir: `_working_tree_mode` ya lo declaraba inobservable en
+    Windows mientras `_same_file` lo comparaba igual.
+    """
+    return os.name != "nt"
+
+
 def _working_tree_mode(mode: int) -> str:
-    if os.name == "nt":
+    if not _modo_observable():
         return "UNOBSERVABLE"
     return "100755" if mode & stat.S_IXUSR else "100644"
 
@@ -431,10 +446,19 @@ def _sha1():
 
 
 def _same_file(left: os.stat_result, right: os.stat_result) -> bool:
+    """¿Es el mismo archivo antes y después de abrirlo?
+
+    El modo entra sólo donde el sistema lo informa de verdad. Donde lo
+    fabrica, compararlo hacía fallar a TODO ejecutable antes de leer un byte
+    — y ese fallo salía por el camino que no registra contenido, así que dos
+    ejecutables distintos del mismo tamaño quedaban con el mismo registro.
+    Identidad, tamaño y mtime siguen respondiendo la pregunta en ambos.
+    """
+    if _modo_observable() and left.st_mode != right.st_mode:
+        return False
     return (
         left.st_dev == right.st_dev
         and left.st_ino == right.st_ino
-        and left.st_mode == right.st_mode
         and left.st_size == right.st_size
         and left.st_mtime_ns == right.st_mtime_ns
     )
