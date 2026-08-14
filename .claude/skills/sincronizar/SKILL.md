@@ -23,7 +23,13 @@ Clasificar cada repositorio:
 - `CURRENT`: versión vigente.
 - `READY_FAST`: transición compatible sin adaptación conocida.
 - `NEEDS_ADAPTATION`: instalación inicial o cambio de contrato.
-- `BLOCKED`: inaccesible, estado inválido o conflicto.
+- `BLOCKED`: el repositorio no admite la transición, y eso se sabe.
+- `UNDETERMINED`: no se pudo establecer el estado. No es un veredicto sobre
+  el repositorio: es la medición confesando que falló. Nunca autoriza aplicar.
+
+Un fallo de medición jamás se reporta como `BLOCKED`. Cuando aparece
+`UNDETERMINED` se emite además la causa cruda, para que un humano entienda qué
+pasó sin volver a correr el plan.
 
 Mostrar primero:
 
@@ -34,6 +40,8 @@ CURRENT=...
 READY_FAST=...
 NEEDS_ADAPTATION=...
 BLOCKED=...
+UNDETERMINED=...
+UNDETERMINED=<repo-id>|<motivo>|<causa cruda>   (una por repositorio sin medir)
 BATCH_PLAN=...
 BRANCH_PREFIX=...
 BRANCH=<repo-id>|<rama-exacta>

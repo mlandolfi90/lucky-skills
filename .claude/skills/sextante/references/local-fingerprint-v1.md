@@ -1,11 +1,30 @@
-# Huella local portable v4
+# Huella local portable v5
 
 Este documento fija el algoritmo de `LOCAL_FINGERPRINT` para
-`CONTRACT_VERSION=1`. La huella identifica contenido: rutas y bytes dentro de
-una ventana acotada. La posición en git — commit, rama, índice —, los modos, la
-suciedad y la vigencia se registran y verifican aparte; incluirlos en la huella
-hacía que adoptar en una rama y mergear a otra produjera drift permanente sin
-que cambiara un byte, y que Windows y Linux divergieran por el bit ejecutable.
+`CONTRACT_VERSION=1`. La huella identifica contenido: rutas y contenido
+canónico dentro de una ventana acotada. La posición en git — commit, rama,
+índice —, los modos, la suciedad y la vigencia se registran y verifican aparte;
+incluirlos en la huella hacía que adoptar en una rama y mergear a otra
+produjera drift permanente sin que cambiara un byte, y que Windows y Linux
+divergieran por el bit ejecutable.
+
+**Contenido canónico (v5).** El material que se hashea son los bytes con CRLF
+convertido a LF, salvo que el contenido sea binario — NUL en los primeros 8000
+bytes, el mismo criterio de git. Antes se hasheaban los bytes del checkout, y
+con `core.autocrlf` git los reescribe al bajar los archivos: el mismo commit
+producía huellas distintas según la máquina y según qué herramienta escribió
+cada archivo. Un clon nunca reproducía la huella sellada y `revalidar` no
+convergía jamás; y el STATE-MAP, que se versiona y viaja a cada destino,
+llevaba adentro un valor que sólo valía para un checkout. Git guarda LF, así
+que normalizar devuelve el contenido versionado. El tamaño del registro es el
+del contenido canónico, nunca el del archivo en disco: si el registro delatara
+la conversión, dos checkouts del mismo commit volverían a divergir con el mismo
+digest. Los OID crudos siguen disponibles aparte, y contra el índice de git se
+compara el canónico — un archivo intacto en CRLF salía sucio con el árbol
+limpio.
+
+Migración: toda huella sellada antes de v5 queda inválida. Cada repositorio
+adoptado revalida una vez; el salto queda en su recibo.
 
 ## Codificación común
 
@@ -23,7 +42,7 @@ JSON cuyos elementos son cadenas:
 Ejemplo de registro:
 
 ```json
-["ENTRY","src/main.py","FILE","12","RAW","<sha256>"]
+["ENTRY","src/main.py","FILE","12","CANONICAL","<sha256>"]
 ```
 
 Usar escapes `\uXXXX` con hex minúsculos y pares surrogate para puntos mayores
@@ -39,9 +58,20 @@ detecta dentro de un snapshot Git inválido, `GIT_SNAPSHOT_INVALID`.
 
 Aplicar `WORKSPACE_MAX_ENTRIES`, `COLLECTOR_TIMEOUT_SECONDS` y un máximo total
 de 512 MiB de contenido; leer archivos en bloques de hasta 1 MiB. Para cada
-archivo regular, comparar identidad, tipo, modo, tamaño y mtime antes, durante
-y después de abrir. El mtime sirve únicamente para detectar carreras: nunca
+archivo regular, comparar identidad, tipo, tamaño y mtime antes, durante y
+después de abrir. El mtime sirve únicamente para detectar carreras: nunca
 entra en un registro ni en la huella.
+
+El modo entra en esa comparación SÓLO donde el sistema lo informa de verdad.
+Hay sistemas que lo fabrican: en Windows el bit de ejecución se sintetiza
+desde la EXTENSIÓN del archivo al consultar la ruta, y no aparece al
+consultar el descriptor ya abierto — comparar ambos es comparar un valor
+inventado contra uno real, y todo ejecutable falla antes de leerse. El fallo
+sale por el camino que registra ruta, estado y tamaño sin contenido, así que
+dos ejecutables distintos del mismo tamaño terminan con el mismo registro y
+la huella deja de describir lo que hay. Donde el modo es fabricado, no
+participa de esta comparación; identidad, tamaño y mtime siguen respondiendo
+la pregunta.
 
 Los registros de entrada son:
 
@@ -53,7 +83,7 @@ Los registros de entrada son:
 ["ENTRY",path,"SPECIAL",bits_de_tipo]
 ["ENTRY",path,"CONTENT_LIMIT",tamaño]
 ["ENTRY",path,causa_de_fallo,tamaño]
-["ENTRY",path,"FILE",tamaño,"RAW",sha256_bytes]
+["ENTRY",path,"FILE",tamaño_canónico,"CANONICAL",sha256_contenido_canónico]
 ["ENTRY",path,"FILE",tamaño_normalizado,"NORMALIZED_SELF_VALUE",sha256_bytes_normalizados]
 ```
 
@@ -62,6 +92,19 @@ UTF-8 del texto del destino del enlace; el archivo enlazado no se sigue. Un
 path absoluto, con drive o con componente `..` es inseguro. Un límite, entrada
 especial, cambio durante lectura, texto no portable o fallo de lectura vuelve
 incompleta la sonda y obliga `LOCAL=PARTIAL`.
+
+`MISSING` cubre dos situaciones que el sistema operativo NO distingue por su
+código de error, y que esta sonda sí debe distinguir:
+
+- El archivo **no está**. Es una observación real y correcta: la sonda sigue
+  completa. Borrar un archivo trackeado es trabajo corriente y no degrada nada.
+- El archivo **está y no se lo alcanza**, porque su ruta absoluta excede el
+  límite del sistema. Es un fallo de lectura: la sonda queda incompleta y debe
+  declarar su causa. Confundirlo con el caso anterior produce una huella
+  distinta de la real bajo un escaneo que se dice completo — y si esa huella
+  se sella en un State Map, el repositorio reporta drift para siempre.
+
+El discriminante es el largo de la ruta absoluta, no el código de error.
 
 El modo del archivo no participa en ningún registro: el mismo árbol produce la
 misma huella esté trackeado o no, en Windows o en Linux. El bit POSIX
@@ -158,10 +201,17 @@ byte sí.
 
 ## Dirty y conformidad
 
-`LOCAL_DIRTY` no reutiliza la normalización: comparar de forma conservadora
-untracked, stages no cero, índice contra HEAD, bytes crudos y modo POSIX
+`LOCAL_DIRTY` no reutiliza la exclusión autorreferencial: comparar de forma
+conservadora untracked, stages no cero, índice contra HEAD y modo POSIX
 observable. Por eso un cambio solo en `GIT_LOCAL_FINGERPRINT` puede conservar
 la huella y seguir dirty.
+
+Contra el índice se compara el OID del contenido **canónico**, no el de los
+bytes del disco: git guarda el contenido normalizado, así que con
+`core.autocrlf` un archivo intacto en CRLF daba un OID crudo distinto al del
+índice y salía sucio con `git status` limpio. La exclusión autorreferencial no
+entra en esa comparación — el índice tiene el contenido real, y aplicársela
+dejaría el STATE-MAP sucio para siempre.
 
 Un adaptador debe ejecutar
 [los vectores de conformidad](conformance-v1.json) antes de declararse

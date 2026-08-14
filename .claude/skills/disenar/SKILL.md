@@ -19,6 +19,13 @@ Pensar la solución sobre el estado real, antes de escribir una línea.
 - Diseñar no escribe código ni muta el proyecto: es lectura y propuesta.
 - Proporcional a la escalera: una feature chica merece un diseño de una
   página, no una ceremonia.
+- Crecer agregando donde el crecimiento es previsible: si el diseño declara
+  un eje que va a crecer —entradas de un catálogo, tipos, adaptadores—, ese
+  eje se cierra a la edición y una entrada nueva es un archivo nuevo detrás
+  de un puerto, no una línea más en un archivo compartido. Un cambio que
+  mueve el contrato mismo pide rediseño, y rediseñar entonces es correcto,
+  no una falla. No abrir puntos de extensión para ejes que nadie recorrerá.
+  El caso completo, en [crecer agregando](references/crecer-agregando.md).
 
 ## Flujo
 

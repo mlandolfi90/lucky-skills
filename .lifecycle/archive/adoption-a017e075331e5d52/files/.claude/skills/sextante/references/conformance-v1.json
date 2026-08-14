@@ -1,0 +1,113 @@
+{
+ "schema": 1,
+ "policy_defaults": {
+  "REMOTE_MAX_AGE_SECONDS": 900,
+  "RUNTIME_MAX_AGE_SECONDS": 600,
+  "CAPABILITIES_MAX_AGE_SECONDS": 300,
+  "COLLECTOR_TIMEOUT_SECONDS": 10,
+  "WORKSPACE_MAX_ENTRIES": 2000
+ },
+ "policy_limits": {
+  "REMOTE_MAX_AGE_SECONDS": 86400,
+  "RUNTIME_MAX_AGE_SECONDS": 86400,
+  "CAPABILITIES_MAX_AGE_SECONDS": 86400,
+  "COLLECTOR_TIMEOUT_SECONDS": 60,
+  "WORKSPACE_MAX_ENTRIES": 50000
+ },
+ "component_cases": [
+  {
+   "id": "canonical-policy",
+   "component": "POLICY",
+   "relative_path": "config/SEXTANTE.env",
+   "raw": "README_POLICY=\"IGNORE\"\nCOLLECTOR_TIMEOUT_SECONDS=\"10\"\n",
+   "expected_status": "LOADED"
+  },
+  {
+   "id": "canonical-sources",
+   "component": "SOURCES",
+   "relative_path": "config/SOURCES.env",
+   "raw": "REMOTE_NAME=\"AUTO\"\nRUNTIME_MODE=\"UNDECLARED\"\nRUNTIME_CANDIDATES=\"\"\n",
+   "expected_status": "LOADED"
+  },
+  {
+   "id": "invalid-runtime-mode",
+   "component": "SOURCES",
+   "relative_path": "config/SOURCES.env",
+   "raw": "REMOTE_NAME=\"AUTO\"\nRUNTIME_MODE=\"MAGIC\"\nRUNTIME_CANDIDATES=\"\"\n",
+   "expected_status": "INVALID"
+  },
+  {
+   "id": "canonical-state-map",
+   "component": "STATE_MAP",
+   "relative_path": "state/STATE-MAP.env",
+   "raw": "STATE_SCHEMA=\"1\"\nSTATE_REVISION=\"0\"\nGIT_LOCAL_COMMIT=\"UNKNOWN\"\nGIT_LOCAL_FINGERPRINT=\"UNKNOWN\"\nGIT_REMOTE_COMMIT=\"UNKNOWN\"\nGIT_REMOTE_REF=\"UNKNOWN\"\nRUNTIME_VERSION=\"UNKNOWN\"\nCAPABILITIES_HASH=\"UNKNOWN\"\nTARGET_WHERE=\"UNCONFIRMED\"\nTARGET_ACTION=\"UNCONFIRMED\"\nTARGET_CONFIRMED_BY=\"UNCONFIRMED\"\n",
+   "expected_status": "LOADED"
+  },
+  {
+   "id": "noncanonical-state-map",
+   "component": "STATE_MAP",
+   "relative_path": "state/STATE-MAP.env",
+   "raw": "STATE_SCHEMA=\"1\"\nSTATE_REVISION=\"0\"\nGIT_LOCAL_COMMIT=\"UNKNOWN\"\nGIT_LOCAL_FINGERPRINT=UNKNOWN\nGIT_REMOTE_COMMIT=\"UNKNOWN\"\nGIT_REMOTE_REF=\"UNKNOWN\"\nRUNTIME_VERSION=\"UNKNOWN\"\nCAPABILITIES_HASH=\"UNKNOWN\"\nTARGET_WHERE=\"UNCONFIRMED\"\nTARGET_ACTION=\"UNCONFIRMED\"\nTARGET_CONFIRMED_BY=\"UNCONFIRMED\"\n",
+   "expected_status": "INVALID"
+  },
+  {
+   "id": "non-ascii-state-revision",
+   "component": "STATE_MAP",
+   "relative_path": "state/STATE-MAP.env",
+   "raw": "STATE_SCHEMA=\"1\"\nSTATE_REVISION=\"\u0661\"\nGIT_LOCAL_COMMIT=\"UNKNOWN\"\nGIT_LOCAL_FINGERPRINT=\"UNKNOWN\"\nGIT_REMOTE_COMMIT=\"UNKNOWN\"\nGIT_REMOTE_REF=\"UNKNOWN\"\nRUNTIME_VERSION=\"UNKNOWN\"\nCAPABILITIES_HASH=\"UNKNOWN\"\nTARGET_WHERE=\"UNCONFIRMED\"\nTARGET_ACTION=\"UNCONFIRMED\"\nTARGET_CONFIRMED_BY=\"UNCONFIRMED\"\n",
+   "expected_status": "INVALID"
+  }
+ ],
+ "record_cases": [
+  {
+   "id": "format-record",
+   "fields": [
+    "FORMAT",
+    "SEXTANTE_LOCAL_V4"
+   ],
+   "expected": "[\"FORMAT\",\"SEXTANTE_LOCAL_V4\"]"
+  },
+  {
+   "id": "escaped-path-record",
+   "fields": [
+    "ENTRY",
+    "a|b\n\u00e7.txt",
+    "FILE",
+    "4",
+    "RAW",
+    "0000000000000000000000000000000000000000000000000000000000000000"
+   ],
+   "expected": "[\"ENTRY\",\"a|b\\n\\u00e7.txt\",\"FILE\",\"4\",\"RAW\",\"0000000000000000000000000000000000000000000000000000000000000000\"]"
+  }
+ ],
+ "fingerprint_cases": [
+  {
+   "id": "empty-unversioned-workspace",
+   "records": [
+    "[\"FORMAT\",\"SEXTANTE_LOCAL_V4\"]",
+    "[\"VERSIONING\",\"UNVERSIONED\"]"
+   ],
+   "sha256": "886e9f405b9bea76b5f41099c4d94d57fb1d9139a53bfe95a5620402dc377c1d"
+  },
+  {
+   "id": "framed-path-and-file",
+   "records": [
+    "[\"FORMAT\",\"SEXTANTE_LOCAL_V4\"]",
+    "[\"VERSIONING\",\"UNVERSIONED\"]",
+    "[\"ENTRY\",\"a|b\\n\\u00e7.txt\",\"FILE\",\"4\",\"RAW\",\"0000000000000000000000000000000000000000000000000000000000000000\"]"
+   ],
+   "sha256": "fb3235e782c41f47db130b2dab452777ce029d71589a2ac0fa0c276ed4886a64"
+  }
+ ],
+ "state_map_normalization_cases": [
+  {
+   "id": "exclude-only-self-value",
+   "path": ".lifecycle/state/STATE-MAP.env",
+   "input": "STATE_SCHEMA=\"1\"\nGIT_LOCAL_FINGERPRINT=\"abc\"\nSTATE_REVISION=\"0\"\n",
+   "expected": "STATE_SCHEMA=\"1\"\nGIT_LOCAL_FINGERPRINT=\"<EXCLUDED_SELF_VALUE>\"\nSTATE_REVISION=\"0\"\n",
+   "changed": true,
+   "blob_sha1": "a88fd66242e3bb7afe794a47f20634fb213fc769",
+   "blob_sha256": "bf5d017b3f975da2795ada68ec08b609ab921050f0f1b840a04c682cadb2118a"
+  }
+ ]
+}

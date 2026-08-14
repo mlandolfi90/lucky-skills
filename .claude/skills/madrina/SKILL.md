@@ -18,6 +18,15 @@ Que cada skill nazca sana, con nombre propio y sin hermanas siamesas.
   nace. Solapamiento parcial (profundizar el carril de otra) → se declara
   con justificación. El mismo chequeo que la publicación exige en su
   puerta, aplicado en la cuna.
+- Disparador negable: el "usar cuándo" nombra un momento que se puede
+  descartar. Si ante una tarea cualquiera no se puede contestar "no, este no
+  es el momento" sin ponerse a discutir, eso no es un disparador: es un
+  default encubierto, y la skill va a estorbar en todo el camino. Una
+  condición verificable acota ("cuando la estructura no esté corroborada");
+  una especulativa no acota nada ("cuando alguien pueda tocar el mismo
+  alcance" nunca es falso en un taller con varias sesiones vivas). Único y
+  ancho son defectos distintos: el primero lo caza la invariante de arriba,
+  el segundo sólo ésta.
 - Cuerpo sano: frontmatter mínimo, manifiesto con dependencias reales,
   invariantes, flujo, degradación declarada si consulta servicios, y salida
   en campos comprobables.
@@ -31,8 +40,8 @@ Que cada skill nazca sana, con nombre propio y sin hermanas siamesas.
 ## Flujo
 
 1. Escribir la responsabilidad en una frase comprobable.
-2. Buscar siamesas en el catálogo: disparadores y responsabilidades de
-   todas las skills vivas.
+2. Contrastar el disparador dos veces: contra el catálogo vivo, buscando
+   siamesas; y contra sí mismo, comprobando que el momento se pueda negar.
 3. Bautizar: nombre único, estilo de la casa.
 4. Dar cuerpo: estructura completa con las dependencias mínimas reales.
 5. Verificar salud: la validación de la suite en verde.
@@ -44,6 +53,7 @@ Que cada skill nazca sana, con nombre propio y sin hermanas siamesas.
 SKILL_ID=...
 RESPONSIBILITY=<una frase>
 SIAMESE=NONE|DECLARED|BLOCKED
+TRIGGER=NEGABLE|BROAD
 REQUIRES=...
 HEALTH=PASS|FAIL
 HANDOFF=PUBLICATION|BLOCKED
