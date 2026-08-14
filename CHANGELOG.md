@@ -2,6 +2,9 @@
 
 Generado por publicar-skill; no editar a mano.
 
+## sextante 2.0.2 — 2026-08-14 — PATCH
+- 2.0.1 → 2.0.2 · QUALITY=PASS · autorizó human:vikingo
+
 ## precedente 1.0.0 — 2026-08-07 — INITIAL
 - 1.0.0 → 1.0.0 · QUALITY=PASS · autorizó human:vikingo
 

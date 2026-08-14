@@ -58,9 +58,20 @@ detecta dentro de un snapshot Git inválido, `GIT_SNAPSHOT_INVALID`.
 
 Aplicar `WORKSPACE_MAX_ENTRIES`, `COLLECTOR_TIMEOUT_SECONDS` y un máximo total
 de 512 MiB de contenido; leer archivos en bloques de hasta 1 MiB. Para cada
-archivo regular, comparar identidad, tipo, modo, tamaño y mtime antes, durante
-y después de abrir. El mtime sirve únicamente para detectar carreras: nunca
+archivo regular, comparar identidad, tipo, tamaño y mtime antes, durante y
+después de abrir. El mtime sirve únicamente para detectar carreras: nunca
 entra en un registro ni en la huella.
+
+El modo entra en esa comparación SÓLO donde el sistema lo informa de verdad.
+Hay sistemas que lo fabrican: en Windows el bit de ejecución se sintetiza
+desde la EXTENSIÓN del archivo al consultar la ruta, y no aparece al
+consultar el descriptor ya abierto — comparar ambos es comparar un valor
+inventado contra uno real, y todo ejecutable falla antes de leerse. El fallo
+sale por el camino que registra ruta, estado y tamaño sin contenido, así que
+dos ejecutables distintos del mismo tamaño terminan con el mismo registro y
+la huella deja de describir lo que hay. Donde el modo es fabricado, no
+participa de esta comparación; identidad, tamaño y mtime siguen respondiendo
+la pregunta.
 
 Los registros de entrada son:
 
