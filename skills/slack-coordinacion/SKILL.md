@@ -24,6 +24,10 @@ humano tenga que copiar y pegar entre ventanas.
   `avance` | `bloqueo` | `pedido` | `listo`. La firma dice QUIÉN habla y desde
   dónde — no reemplaza a la identidad, la complementa. Una corrida automática
   y una sesión viva del mismo proyecto se distinguen por su entorno.
+- **El autor no separa sesiones — la firma sí.** Todas las sesiones publican
+  con el MISMO bot: por autor sólo se distingue humano de agente. Lo propio se
+  reconoce únicamente por la firma de esta sesión, y descartar un mensaje del
+  bot como «eco mío» sin leer su firma es tirar el mensaje de otra sesión.
 
 ## Modo
 
@@ -50,6 +54,12 @@ humano tenga que copiar y pegar entre ventanas.
   ventana de la sesión.
 - **El silencio es una respuesta válida.** Sin nada dirigido a esta sesión y
   sin novedad que valga, no se publica. Un canal con ruido deja de leerse.
+- **Leído es leído entero, o se declara el corte.** Las herramientas devuelven
+  tandas: un límite por defecto —a veces un rango de tiempo, no un número— y
+  un cursor cuando hay más. Si la respuesta trae cursor, el hilo no terminó:
+  se sigue hasta agotarlo, o se declara qué quedó sin leer. Un hilo recortado
+  en silencio se lee como completo, y una orden que cayó en la parte no leída
+  se pierde sin que nadie lo note.
 
 ## Higiene
 
@@ -70,8 +80,10 @@ humano tenga que copiar y pegar entre ventanas.
 ### Revisar
 
 1. Leer los últimos mensajes del canal general y del canal del proyecto.
-2. Separar por autor: lo del humano puede ser orden; lo del bot es contexto de
-   otras sesiones. Descartar lo que ya tiene respuesta en su hilo.
+2. Separar por autor sólo humano/agente; entre agentes, separar por firma.
+   Nada del bot se descarta sin leer su firma: lo que no lleva la firma de
+   esta sesión es de otra. Descartar únicamente lo que ya tiene respuesta en
+   su hilo.
 3. Determinar el modo por la última marca del humano.
 4. Resumir al humano qué hay y **proponer**. No ejecutar todavía.
 
@@ -98,6 +110,7 @@ IDENTIDAD=BOT|HUMANO_A_PEDIDO
 MODO=HABLADO|EJECUCION_AUTORIZADA
 CANALES=<consultados o publicados>
 LEIDOS=<n>
+RECORTE=<hilos o tandas sin agotar|NONE>
 DIRIGIDOS=<n>
 PUBLICADO=SI|NO
 PROPUESTA=<acción sugerida al humano|NONE>
