@@ -2,6 +2,9 @@
 
 Generado por publicar-skill; no editar a mano.
 
+## slack-coordinacion 1.3.0 — 2026-08-24 — MINOR
+- 1.2.0 → 1.3.0 · QUALITY=PASS · autorizó human:vikingo
+
 ## slack-coordinacion 1.2.0 — 2026-08-24 — MINOR
 - 1.1.0 → 1.2.0 · QUALITY=PASS · autorizó human:vikingo
 
