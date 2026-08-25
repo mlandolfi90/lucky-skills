@@ -2,9 +2,11 @@
 
 ```text
 FORMA=decidir-en-puntos
-VERSION=1.0.0
+VERSION=1.1.0
 ORIGEN=sesión de lucky-tool-gns3, regla del operador del 2026-08-24,
   sostenida ~15 turnos de trabajo real; propuesta vía #skills-discusions
+AJUSTES=1.1.0 (2026-08-25, regla del operador): tope de 7 puntos por salida,
+  panorama antes que decisiones, desborde paginado
 ```
 
 Para cuando el cuello de botella no es el trabajo sino leer el informe del
@@ -24,6 +26,17 @@ trabajo: el humano despacha decisiones contestando sólo un número.
   recomendación, va aparte y declarada como tal.
 - **Las correcciones propias son un punto más, no una nota al pie.** Lo que
   la sesión afirmó mal antes se corrige en su propio punto, visible.
+- **Siete puntos por salida, tope duro.** Veinte puntos priorizados siguen
+  siendo ilegibles para una mente humana; siete es lo que una memoria de
+  trabajo sostiene.
+- **Primero el panorama, las decisiones al final.** Ver el estado completo
+  ayuda a decidir; una pregunta antes de su contexto obliga a releer.
+- **El tope recorta panorama, jamás decisiones.** Lo accionable siempre
+  llega; el contexto se comprime primero.
+- **El desborde se pagina, no se pierde.** La salida cierra con `RESTO=n` y
+  los puntos restantes llegan en las respuestas siguientes, cada página bajo
+  el tope, con numeración estable: el punto 8 se llama 8 también en la
+  página dos, y se contesta por número igual.
 
 ## Por qué el tope hace trabajo
 
