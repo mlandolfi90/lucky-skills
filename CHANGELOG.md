@@ -2,6 +2,9 @@
 
 Generado por publicar-skill; no editar a mano.
 
+## entonar 1.1.1 — 2026-08-25 — PATCH
+- 1.1.0 → 1.1.1 · QUALITY=PASS · autorizó human:vikingo
+
 ## entonar 1.1.0 — 2026-08-25 — MINOR
 - 1.0.0 → 1.1.0 · QUALITY=PASS · autorizó human:vikingo
 

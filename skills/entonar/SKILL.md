@@ -54,6 +54,11 @@ publicación, que es lo que la versiona y la hace reversible.
 
 ## Salida
 
+**Se emite sólo cuando la skill actúa**: al activar una forma, al cambiarla,
+al listar el registro o al declarar una degradación. Bajo una forma ya
+vigente y estable no se emite nada — un recibo que aparece en cada respuesta
+gasta los tokens que la forma vino a ahorrar, y deja de leerse.
+
 ```text
 FORMA=<id@version|NONE>
 CAMBIO=SI|NO
