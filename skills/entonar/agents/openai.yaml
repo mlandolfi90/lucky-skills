@@ -1,0 +1,4 @@
+interface:
+  display_name: "Entonar"
+  short_description: "Habla en la forma que el humano eligio, desde su registro vivo"
+  default_prompt: "Usa $entonar para aplicar o cambiar la forma de comunicacion vigente."
