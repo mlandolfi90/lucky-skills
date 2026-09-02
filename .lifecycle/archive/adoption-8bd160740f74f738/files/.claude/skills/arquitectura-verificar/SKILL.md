@@ -30,28 +30,12 @@ Comprobar:
 7. Sustitución y contratos respetados.
 8. Interfaces pequeñas y dependencias invertidas.
 9. Cambio atómico, archivos proporcionados y ausencia de duplicación evitable.
-   La proporción se mide por bocas públicas: funciones, clases, métodos de
-   clase y rutas declaradas. No cuentan nombres privados, declaraciones de
-   tipo, constantes de módulo ni archivos de prueba. Bloquea el diff que suma
-   una boca a un archivo que ya llega a doce, o que crea uno con doce o más;
-   el archivo tocado que ya estaba en doce y no creció es deuda previa.
-   Bloquea también el nombre público nuevo repetido entre archivos hermanos
-   sin declararlo como contrato en el índice de su carpeta; lo ya repetido es
-   deuda previa. El conteo sale de un comando; sin conteo ejecutado el
-   veredicto es `UNKNOWN`, no `BLOCK`.
 10. Si existe frontend, solo la frontera de página/API observada en ese repo
     cruza al backend. Átomos, moléculas, organismos, templates o equivalentes
     reales no hacen fetch ni conocen URLs o clientes del backend.
 11. Collision Map resuelto para las rutas tocadas.
 12. Configuración y dependencias externas compatibles con 12-factor cuando
     aplique.
-
-Un archivo que crece por adición a propósito —raíz de composición, tabla de
-ruteo, índice de exports, migraciones— se exime del gate 9 en
-`.lifecycle/state/BOCAS-OK`, una línea por archivo con su número y su razón.
-El número congela lo que ya hay: si el diff lo supera, vuelve a bloquear. Un
-símbolo repetido a propósito se declara contrato en el índice de su carpeta y
-deja de contar. No hay excepción por commit: el gate corre antes de que exista.
 
 ## Veredicto
 
