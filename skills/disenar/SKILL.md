@@ -26,6 +26,12 @@ Pensar la solución sobre el estado real, antes de escribir una línea.
   mueve el contrato mismo pide rediseño, y rediseñar entonces es correcto,
   no una falla. No abrir puntos de extensión para ejes que nadie recorrerá.
   El caso completo, en [crecer agregando](references/crecer-agregando.md).
+- Hexagonal se paga: puertos y adaptadores compran poder cambiar la
+  infraestructura sin tocar el núcleo, y probar el núcleo sin levantarla. Sin
+  variación real, sin una regla que valga la pena aislar y sin cambio de
+  infraestructura previsto, un puerto es indirección sin comprador. Cuándo sí,
+  cuándo no, los cuatro leaks que pasan igual y cómo se ve en cada lenguaje,
+  en [hexagonal proporcionado](references/hexagonal-proporcionado.md).
 
 ## Flujo
 
