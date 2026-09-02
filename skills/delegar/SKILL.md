@@ -16,6 +16,14 @@ presupuesto fija y dónde se degrada. Agregar un régimen no toca esta skill
 ni a los demás; ajustar uno existente es un cambio de esta skill y pasa por
 su escalera y su publicación.
 
+## Uso
+
+- `delegar <id>` activa un régimen. Ejemplo: `delegar votar`.
+- `delegar` solo, o "¿qué regímenes hay?", lista el registro con una línea
+  por régimen.
+- Cada archivo del registro trae una sección **Cómo se usa**: qué decís, qué
+  hace la sesión y qué recibís. Leerla antes de elegir.
+
 ## Invariantes
 
 - **La elección es del humano, siempre.** La skill aplica el régimen elegido;

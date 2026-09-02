@@ -10,6 +10,13 @@ ORIGEN=sesión del Taller, 2026-09-01: el régimen nulo, para que "sin agentes"
 Para cuando el humano quiere ver cada paso, o la tarea es chica y un agente
 tardaría más en arrancar que la madre en hacerlo.
 
+## Cómo se usa
+
+- Decís: `delegar en-serie`.
+- La sesión no lanza nada. Hace el trabajo paso a paso, a la vista.
+- Recibís: cada paso conforme ocurre. Si la tarea no entra, te lo dice y
+  nombra el régimen que sí la cubre.
+
 ## Reglas
 
 - **Cero agentes.** La sesión madre hace todo, en el orden que el humano ve.

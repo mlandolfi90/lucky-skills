@@ -11,6 +11,14 @@ ORIGEN=regla del operador del 2026-09-01, sesión del Taller: "sin refutadores,
 Para cuando la sesión madre necesita ojos, no opiniones: los agentes traen
 evidencia y la madre hace todo lo demás.
 
+## Cómo se usa
+
+- Decís: `delegar solo-investigar` y qué querés saber.
+- La sesión escribe el esquema de lo que busca, lanza hasta cuatro agentes de
+  lectura con alcance cerrado, y sintetiza ella.
+- Recibís: la evidencia en ese esquema, lo que cada agente no pudo, y la
+  decisión de la madre a partir de eso.
+
 ## Reglas
 
 - **Sólo agentes de lectura.** Un agente bajo este régimen no escribe, no

@@ -12,6 +12,14 @@ ORIGEN=sesión del Taller, 2026-09-01. Es lo que el harness hacía solo bajo
 Para lo que no puede estar mal: lo que entra al catálogo, a producción, o a
 una regla que va a regir a otros.
 
+## Cómo se usa
+
+- Decís: `delegar refutar` y la propuesta a poner a prueba.
+- La sesión lanza investigadores, después escépticos con lentes distintas, y
+  un consolidador. Ella dictamina al final.
+- Recibís: hallazgos separados en verificados y teóricos, con gravedad; el
+  veredicto de la madre; y qué lente no pudo cubrirse.
+
 ## Reglas
 
 - **Tres roles, en este orden**: investigadores (lectura, esquema declarado),
