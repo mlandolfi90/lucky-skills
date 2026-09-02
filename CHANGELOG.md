@@ -2,6 +2,9 @@
 
 Generado por publicar-skill; no editar a mano.
 
+## delegar 1.0.0 — 2026-09-02 — INITIAL
+- 1.0.0 → 1.0.0 · QUALITY=PASS · autorizó human:vikingo
+
 ## disenar 1.2.0 — 2026-09-02 — MINOR
 - 1.1.0 → 1.2.0 · QUALITY=PASS · autorizó human:vikingo
 
