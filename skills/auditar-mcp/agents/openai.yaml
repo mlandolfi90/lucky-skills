@@ -1,0 +1,4 @@
+interface:
+  display_name: "Auditar MCP"
+  short_description: "Construye auditoría interna en un MCP para atribuir cada llamada a su sesión"
+  default_prompt: "Usa $auditar-mcp para construir o revisar la auditoría interna de este MCP."
