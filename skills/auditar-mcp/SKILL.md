@@ -74,12 +74,11 @@ registro responde "quién y qué quiso hacer"; no impide nada.
 
 ## Referencia viva
 
-Implementación verificada en vivo: repo `lucky-tool-gns3` rama `dev`
-(`shared/auditoria.py`, `shared/identidad.py`, `mcp/auditoria_middleware.py`,
-`tests/unit/test_auditoria.py`), commits `8abbf6f..e42988c`. Leer esos cinco
-commits en orden: los cuatro últimos son huecos aparecidos después de que la
-primera versión ya estaba "terminada" — el material de qué revisar cuando
-parece listo.
+Implementación verificada en vivo: repo `lucky-tool-gns3`, commits
+`8abbf6f`, `982835c`, `3a3f8b8`, `01c11a7`, `e42988c` — anclar ahí, no a
+rutas de archivos, que se mueven. Leer los cinco en orden: los cuatro
+últimos son huecos aparecidos después de que la primera versión ya estaba
+"terminada" — el material de qué revisar cuando parece listo.
 
 ## Salida
 
