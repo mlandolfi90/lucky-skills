@@ -2,6 +2,9 @@
 
 Generado por publicar-skill; no editar a mano.
 
+## auditar-mcp 1.0.0 — 2026-09-05 — INITIAL
+- 1.0.0 → 1.0.0 · QUALITY=PASS · autorizó human:vikingo
+
 ## delegar 1.1.0 — 2026-09-02 — MINOR
 - 1.0.0 → 1.1.0 · QUALITY=PASS · autorizó human:vikingo
 
