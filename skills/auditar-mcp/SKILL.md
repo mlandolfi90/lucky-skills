@@ -9,6 +9,16 @@ Hacer atribuible cada llamada de herramienta de un MCP compartido, sin que el
 registro fugue secretos ni mienta sobre resultados. Forense, no defensa: el
 registro responde "quién y qué quiso hacer"; no impide nada.
 
+El agujero es estructural, no un descuido: un MCP típico es una pasarela
+fina que se apoya en lo que dice el servidor, y cuando el servidor no
+atribuye (credencial compartida, sin logs de acceso), nadie atribuye — el
+MCP es el único punto donde existe la tripleta sesión→intención→llamada.
+Por lo mismo, una pasarela sin registro tampoco puede auditarse en su
+propia fidelidad: respuestas que afirman más de lo que pasó solo se ven
+comparando lo que entró con lo que salió. Frontera con logalizar:
+logalizar mira hacia adentro de una lógica propia; auditar-mcp mira el
+borde — y en una pasarela, el borde es casi todo lo que hay.
+
 ## Invariantes
 
 - **Medir antes de elegir el patrón.** Ante resultados no atribuibles hay
@@ -51,6 +61,19 @@ registro responde "quién y qué quiso hacer"; no impide nada.
 - **Apagado por omisión**: escribir en disco lo decide el operador vía
   variable de entorno. Comprobar si algo regenera el archivo donde vive el
   interruptor: un interruptor que se apaga solo es peor que no tenerlo.
+- **Modo crudo: suspende la redacción, y lo dice.** Para depurar hace falta
+  ver el argumento mandado Y la respuesta entera en la misma línea (única
+  prueba de que un parámetro llegó y se descartó en silencio). Un "casi
+  crudo" que redacta un poco no sirve y da falsa seguridad: o redacta, o
+  no. El precio: el archivo pasa a ser material sensible. Un modo que
+  suspende la redacción tiene que ser imposible de encender por inercia e
+  imposible de confundir encendido: se activa con una palabra (`crudo`),
+  nunca con `1`; el archivo se llama distinto y a gritos
+  (`auditoria-CRUDA-…`); cada línea lleva `"modo":"crudo"` (la marca viaja
+  con el contenido pegado suelto); y un WARNING en el log del proceso al
+  primer uso — contra el interruptor olvidado de una sesión anterior. Es el
+  punto donde auditar se vuelve logalizar y hereda sus obligaciones:
+  temporal, con fecha de apagado, se borra al terminar.
 - **El registro se prueba con fallos, no solo con éxitos**: secreto
   centinela buscado en el texto crudo, parámetro inexistente, opacidad sin
   tamaño, mensaje de excepción no copiado, apagado que no escribe, fallo de
