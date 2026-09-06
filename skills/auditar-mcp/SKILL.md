@@ -54,10 +54,21 @@ borde — y en una pasarela, el borde es casi todo lo que hay.
   todas las herramientas futuras: cada excepción lleva su motivo escrito al
   lado. Del error, el tipo o código; jamás el mensaje. Rige
   custodiar-secretos.
-- **Un archivo por escritor**: el id de sesión va en el nombre del archivo,
-  incluso con ruta explícita configurada. Un candado entre procesos
-  administra la pregunta; el nombre la elimina. JSONL, y una función que
-  responda dónde escribe. El archivo va al .gitignore.
+- **Un archivo por escritor, y el nombre dice quién escribió.** Tres marcas
+  van SIEMPRE en el nombre, incluso con ruta explícita configurada: el
+  nombre del MCP adelante (un `ls` agrupa por herramienta y `cat
+  <mcp>-auditoria-*.jsonl` junta los de uno), el id de sesión, y la marca
+  de crudo cuando corresponde (`<mcp>-auditoria-CRUDA-<sesion>.jsonl` —
+  quién escribió y que está sin redactar son dos cosas y las dos se leen de
+  un vistazo). El nombre del MCP se deriva de la distribución instalada
+  (`importlib.metadata`), nunca de una constante a mano: una skill que se
+  aplica copiando deja constantes copiadas sin cambiar, y entonces dos MCP
+  escriben con el mismo nombre — el archivo miente sobre su origen. Si la
+  ruta configurada ya nombra al MCP, no se repite. Un candado entre
+  procesos administra la colisión; el nombre la elimina. JSONL, y una
+  función que responda dónde escribe. Al .gitignore con patrón
+  `*auditoria-*.jsonl` (el prefijo del MCP rompe el patrón viejo, y
+  olvidarlo commitea material sensible).
 - **Apagado por omisión**: escribir en disco lo decide el operador vía
   variable de entorno. Comprobar si algo regenera el archivo donde vive el
   interruptor: un interruptor que se apaga solo es peor que no tenerlo.
