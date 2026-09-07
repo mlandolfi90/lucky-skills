@@ -1,0 +1,33 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "lucky-auditoria-mcp"
+version = "0.1.0"
+description = "Auditoria interna para MCP compartidos: atribuye cada llamada a su sesion sin fugar secretos."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "mlandolfi90" }]
+dependencies = [
+    # `tomllib` entro en 3.11. Abajo de eso hace falta el respaldo, y la
+    # configuracion NO es opcional: sin ella el redactor falla cerrado.
+    "tomli>=2.0; python_version < '3.11'",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "pytest-asyncio>=0.23", "ruff>=0.6"]
+
+[project.scripts]
+lucky-auditoria = "lucky_auditoria.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/lucky_auditoria"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
