@@ -26,7 +26,7 @@ receta R1–R11 de la skill `auditar-mcp` 1.2.2.
 ```toml
 # pyproject.toml del MCP anfitrión
 dependencies = [
-    "lucky-auditoria-mcp @ git+https://github.com/mlandolfi90/lucky-skills@auditoria-mcp-v0.4.0#subdirectory=packages/lucky-auditoria-mcp",
+    "lucky-auditoria-mcp @ git+https://github.com/mlandolfi90/lucky-skills@auditoria-mcp-v0.5.0#subdirectory=packages/lucky-auditoria-mcp",
 ]
 ```
 
@@ -77,6 +77,36 @@ class TestAuditoria(KitDeAuditoria):
     def construir(self, tmp_path):
         return Auditor("gns3-mcp", config="config/auditoria.toml")
 ```
+
+Y en el `conftest.py`, las tres guardas del entorno, que también vienen en el
+paquete:
+
+```python
+# tests/conftest.py
+from pathlib import Path
+from lucky_auditoria.pruebas import guardas_del_entorno
+
+globals().update(guardas_del_entorno(Path(__file__).resolve().parents[1]))
+```
+
+Hacen tres cosas, y ninguna es higiene:
+
+- **Ningún test hereda un proyecto real.** Claude Code exporta
+  `CLAUDE_PROJECT_DIR` al proceso hijo, así que sin esto la suite corre contra
+  un repo de verdad en la máquina de quien desarrolla y contra ninguno en el CI:
+  el mismo test, dos comportamientos.
+- **Ningún test escribe en el `cwd` de pytest**, que bajo HTTP *es* el destino.
+  Un test de transporte http que se olvide del `chdir` no falla: escribe en
+  `<repo>/registro_auditoria/` y sigue verde.
+- **La suite no ensucia la máquina**, comparando los **archivos** de los tres
+  lugares prohibidos —estado del usuario, repo del anfitrión, `cwd`— antes y
+  después. Se comparan archivos y no si la carpeta existía, porque esa versión
+  **se apaga sola en la máquina donde uno ya se ensució**: pasó acá el
+  2026-09-07 y lo destapó el CI, con seis celdas en rojo, después de horas en
+  verde local.
+
+Vienen en el paquete y no como receta a copiar por el mismo motivo por el que
+existe el kit: un modismo que hay que reescribir en cada repo se reescribe mal.
 
 ## El interruptor
 

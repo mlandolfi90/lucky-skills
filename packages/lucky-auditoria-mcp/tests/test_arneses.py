@@ -41,14 +41,22 @@ class TestSoloLaDeclaracionLeeElEntorno:
         suelto es una variable que nadie declaro y que igual puede terminar en
         el archivo.
 
-        `registro.py` esta exento y con motivo: lee el INTERRUPTOR y las rutas
-        del sistema (`LOCALAPPDATA`, `XDG_STATE_HOME`), que son configuracion
-        del operador y no viajan a ninguna linea.
+        Dos exentos, cada uno con su motivo:
+
+        - `registro.py` lee el INTERRUPTOR (`<MCP>_AUDITORIA`), que es
+          configuracion del operador y no viaja a ninguna linea. Hasta 0.3.3
+          leia tambien `LOCALAPPDATA` y `XDG_STATE_HOME`; desde R1 de 1.5.0 no
+          hay estado del usuario y esas dos ya no se tocan. Esta frase decia lo
+          contrario hasta que alguien la leyo al lado del codigo.
+        - `pruebas/__init__.py` mira el estado del usuario para comprobar que la
+          suite NO escribio ahi. Es la guarda que vigila el lugar prohibido, o
+          sea lo contrario de armar una linea con el.
         """
-        exentos = {"arneses.py", "registro.py"}
+        exentos = {"arneses.py", "registro.py", "pruebas/__init__.py"}
         culpables = {}
         for ruta in SRC.rglob("*.py"):
-            if ruta.name in exentos or "__pycache__" in ruta.parts:
+            relativa = ruta.relative_to(SRC).as_posix()
+            if relativa in exentos or "__pycache__" in ruta.parts:
                 continue
             arbol = ast.parse(ruta.read_text(encoding="utf-8"))
             for nodo in ast.walk(arbol):
@@ -58,7 +66,7 @@ class TestSoloLaDeclaracionLeeElEntorno:
                     and isinstance(nodo.value, ast.Name)
                     and nodo.value.id == "os"
                 ):
-                    culpables.setdefault(ruta.name, []).append(nodo.lineno)
+                    culpables.setdefault(relativa, []).append(nodo.lineno)
 
         assert culpables == {}
 

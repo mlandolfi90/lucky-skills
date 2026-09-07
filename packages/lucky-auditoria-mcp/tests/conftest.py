@@ -10,6 +10,8 @@ from pathlib import Path
 
 import pytest
 
+from lucky_auditoria.pruebas import guardas_del_entorno
+
 CONFIG = """
 [argumentos]
 action = { tipo = "str", largo_max = 32 }
@@ -40,38 +42,12 @@ def config(tmp_path) -> Path:
     return ruta
 
 
-@pytest.fixture(autouse=True, scope="session")
-def _la_suite_no_ensucia_la_maquina():
-    """Ninguna prueba puede dejar un registro fuera de su `tmp_path`.
-
-    No es higiene: es el defecto que este paquete persigue, cometido por su
-    propia suite. Paso de verdad -tests del modo crudo escribiendo archivos con
-    el centinela adentro en el `%LOCALAPPDATA%` de quien corria pytest-, y lo
-    encontro mirar el disco, no leer los tests.
-
-    Desde R1 de auditar-mcp 1.5.0 el peligro se MUDO, y por eso esta guarda
-    mira dos lugares en vez de uno:
-
-    - el estado del usuario, que ya no se usa nunca. Si aparece algo ahi, es
-      que quedo codigo de la version anterior.
-    - **el repo de este mismo paquete**, que es el peligro nuevo: ahora todo
-      va a `<proyecto>/registro_auditoria/`, y un test que se olvide de apuntar
-      el proyecto a su `tmp_path` -o de mover el cwd, bajo HTTP- lo escribe
-      aca adentro. Es el mismo incidente que motivo R1, cometido por la suite
-      que lo prueba.
-    """
-    import os
-
-    base = os.environ.get("LOCALAPPDATA") or os.environ.get("XDG_STATE_HOME")
-    estado = Path(base) if base else Path.home() / ".local" / "state"
-    repo = Path(__file__).resolve().parents[1]
-    sospechosos = [estado / "registro_auditoria", repo / "registro_auditoria"]
-    antes = {s: s.exists() for s in sospechosos}
-    yield
-    for sospechoso in sospechosos:
-        if not antes[sospechoso] and sospechoso.exists():
-            dejados = [str(p) for p in sospechoso.rglob("*") if p.is_file()]
-            raise AssertionError(
-                f"la suite escribio fuera de su tmp_path: {sospechoso}\n"
-                + "\n".join(dejados[:10])
-            )
+# Las tres guardas del entorno salen del KIT, no de una copia local. Es el
+# mismo motivo por el que el kit existe: un modismo que hay que copiar a mano
+# se copia mal. La tercera nacio preguntando si la carpeta existia antes, o sea
+# que se apagaba sola en la maquina donde uno ya se habia ensuciado, y asi
+# dejo pasar un defecto entero hasta el CI. Si el anfitrion la hereda, esa
+# version rota no puede reaparecer en un repo.
+#
+# El paquete es su propio anfitrion: vigila SU repo, que es `parents[1]`.
+globals().update(guardas_del_entorno(Path(__file__).resolve().parents[1]))
