@@ -312,15 +312,20 @@ logueando `?token=<JWT>` en claro.
 | Python · `mcp` 1.x | **pendiente** | `request_handlers[CallToolRequest]` |
 | Python · `mcp` 2.x | pendiente | middleware nativo |
 | Node · SDK TypeScript | pendiente | paquete hermano, mismo JSONL |
-| stdio | medido en **Python 3.12.10** y **3.13** | sesión = proceso |
+| stdio | medido en **Python 3.12.10** | sesión = proceso |
 | streamable-http | escrito; **medición pendiente** en un servidor vivo | `mcp-session-id` en cada línea |
 
 Las versiones de la tabla son exactas a propósito, y las del `pyproject.toml` están
 pineadas con `==`: un rango afirma compatibilidad con versiones que nadie probó,
-incluidas las que todavía no existen. La suite corrió a mano en **3.12.10** y en
-**3.13** (esta última por `skills-v3-65`, en un venv limpio). **Python 3.10 no
-lo midió nadie**: es el piso declarado y el único que ejercita el import gateado
-por versión, y el CI que lo cubriría no se ha ejecutado nunca.
+incluidas las que todavía no existen. La suite corrió a mano sólo en **Python 3.12.10**, en dos venv distintos de la
+misma máquina — que no son dos entornos. **Ni 3.10 ni 3.13 los midió nadie**, y
+son los dos extremos del rango declarado; 3.10 además es el único que ejercita
+el import gateado por versión (`tomli` en lugar de `tomllib`). El CI que los
+cubriría **no se ha ejecutado nunca**.
+
+Este párrafo decía que 3.13 estaba medida. Era falso: lo dio por sentado una
+sesión, lo copié sin verificarlo, y quedó escrito en dos repos con forma de
+medición. Es la razón por la que las versiones se declaran por nombre.
 
 El enganche de `mcp` 1.x está **escrito y no medido**: el override que sí se
 midió es el de otro repo, sobre `@server.call_tool()`; el de acá envuelve el
