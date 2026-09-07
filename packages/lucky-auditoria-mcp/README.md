@@ -19,14 +19,14 @@ fidelidad**. Respuestas que afirman más de lo que pasó sólo se ven comparando
 que entró con lo que salió.
 
 Este paquete es la extracción de la auditoría de `lucky-tool-gns3`, según la
-receta R1–R11 de la skill `auditar-mcp` 1.2.1.
+receta R1–R11 de la skill `auditar-mcp` 1.2.2.
 
 ## Instalar
 
 ```toml
 # pyproject.toml del MCP anfitrión
 dependencies = [
-    "lucky-auditoria-mcp @ git+https://github.com/mlandolfi90/lucky-skills@auditoria-mcp-v0.1.0#subdirectory=packages/lucky-auditoria-mcp",
+    "lucky-auditoria-mcp @ git+https://github.com/mlandolfi90/lucky-skills@auditoria-mcp-v0.1.3#subdirectory=packages/lucky-auditoria-mcp",
 ]
 ```
 
@@ -85,7 +85,7 @@ Uno solo: **`<NOMBRE_DEL_MCP>_AUDITORIA`**.
 | Valor | Qué hace |
 |---|---|
 | vacío o `0` | apagado, de verdad: ni archivo vacío ni directorio creado |
-| `1` | redactado, en el directorio del usuario |
+| `1` | redactado, donde dice la tabla de abajo |
 | `crudo` | **sin redactar** — ver abajo |
 | una ruta **absoluta** | redactado, ahí |
 | cualquier otra cosa | **apagado**, y se dice en el log |
@@ -114,37 +114,54 @@ silencio).
 
 ## Dónde escribe
 
-`<estado del usuario>/<mcp>/registro_auditoria/<mcp>-auditoria[-CRUDA]-<escritor>.jsonl`
+La rama la decide el **transporte**, que es una medición —cuántas sesiones
+atiende un proceso— y no una suposición. Elegir mal no da un error: da un
+archivo en el lugar equivocado.
+
+| transporte | modo | dónde |
+|---|---|---|
+| stdio | redactado | `<proyecto que llamó>/registro_auditoria/` |
+| stdio | crudo | `<estado del usuario>/registro_auditoria/<proyecto>/` |
+| stdio | sin proyecto | `<estado>/registro_auditoria/_sin_proyecto/` + aviso |
+| http | ambos | `<estado del usuario>/registro_auditoria/<mcp>/` |
 
 donde el estado del usuario es `%LOCALAPPDATA%`, si no `XDG_STATE_HOME`, si no
-`~/.local/state`.
+`~/.local/state`. Una ruta absoluta en la variable manda sobre todo esto —salvo
+en crudo, que no se puede pedir por ruta.
 
-**En el directorio del usuario, nunca en el del proyecto.** El `cwd` de un MCP
-por stdio no es el repo que uno cree: lo hereda de quien lo lanzó. Medido el
-2026-09-07, un mismo MCP registrado **una** vez corría con el `cwd` puesto en
-tres repos ajenos y dejó 273 KB de archivos crudos con credenciales en los tres;
-el `.gitignore` que lo protegía vivía en su propio repo mientras el archivo caía
-en cualquier otro.
+**El redactado va al proyecto que llamó**, y la carpeta **se protege sola**: el
+paquete escribe adentro un `.gitignore` con `*` la primera vez que la crea. Así
+ningún repo que no la esperaba puede commitearla con un `git add -A`. Ensanchar
+el `.gitignore` de cada repo arregla los que uno conoce; la carpeta autoignorada
+arregla el próximo.
 
-No se arregla ensanchando `.gitignore` — eso cubre los repos que uno conoce y
-deja pasar el próximo. Una ruta absoluta en la variable sigue mandando: el
-default protege al que no eligió, no le saca la elección al que sí.
+**El crudo nunca va bajo un árbol de proyecto**, aunque se lo conozca. Un
+`.gitignore` lo respeta git y nadie más: un zip, un `rsync`, un `COPY .` de
+Docker, un sdist o un "subir carpeta" copian el árbol entero. El redactado
+sobrevive a eso; el crudo lleva credenciales, y es el único donde equivocarse no
+se deshace.
 
-**Si ese directorio no se puede crear, no se escribe en ningún lado.** Acá había
-una caída al `cwd` —"mejor el `cwd` que perder el registro"— y estaba mal: no
-escribir no rompe nada, porque el escritor ya se traga sus fallos, mientras que
-la caída pone el archivo con credenciales justo en el repo ajeno del que habla
-el párrafo de arriba. Perder un registro es barato; dejarlo donde no va, no.
+**Bajo HTTP el estado del usuario es el camino esperado, no la excepción**, y
+está medido: el servidor es un contenedor de larga vida que arranca sin relación
+con ningún proyecto —`CLAUDE_PROJECT_DIR` da cero coincidencias— y `roots` es
+una petición asíncrona al cliente, que depende de que la declare, hay que
+cachearla por sesión, y devuelve una URI que el servidor casi seguro no tiene
+montada. El proyecto que llamó, si `roots` lo da, va como **campo de la línea**.
+Ahí no hay aviso: en stdio la ausencia de proyecto es señal, en HTTP sería ruido
+constante, y un aviso que suena siempre deja de leerse.
+
+**El `cwd` no se usa nunca.** Es lo que el lanzador le dejó al hijo —medido en
+`%TEMP%` y en el repo de otro—, no una propiedad del proyecto. El motivo medido
+(2026-09-07): un mismo MCP registrado **una** vez dejó 273 KB de crudos con
+credenciales en tres repos ajenos, y el `.gitignore` que lo protegía vivía en su
+propio repo mientras el archivo caía en cualquier otro.
+
+**Si el directorio no se puede crear, no se escribe en ningún lado.** No
+escribir tampoco rompe, porque el escritor ya se traga sus fallos.
 
 `<escritor>` es el id de sesión en stdio (un proceso por sesión) y el pid en
 HTTP (N sesiones por proceso: ponerlas en el nombre daría N archivos abiertos
 para una colisión que no existe).
-
-Y al `.gitignore` del anfitrión, con comodín adelante:
-
-```gitignore
-*auditoria-*.jsonl
-```
 
 ## Qué se escribe, y qué no
 

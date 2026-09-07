@@ -29,11 +29,13 @@ sola cuando el codigo no llego ahi.
 
 import json
 import os
+import shutil
+import subprocess
 from pathlib import Path
 
 import pytest
 
-from lucky_auditoria import arneses
+from lucky_auditoria import arneses, identidad
 
 # Un valor que no puede aparecer por casualidad en ningun lado.
 CENTINELA = "pa55w0rd-centinela-8f21c3"
@@ -73,6 +75,15 @@ class KitDeAuditoria:
         cwd = tmp_path / "cwd-limpio"
         cwd.mkdir()
         monkeypatch.chdir(cwd)
+        # El estado del usuario tambien va a `tmp_path`. Sin esto, correr la
+        # suite deja archivos CRUDOS -con el centinela adentro- en el
+        # `%LOCALAPPDATA%` real de quien la corrio; me paso escribiendo estas
+        # mismas guardas. Una suite que ensucia la maquina es un defecto, y en
+        # una suite de auditoria es el defecto que la suite persigue.
+        estado = tmp_path / "estado-del-usuario"
+        estado.mkdir()
+        monkeypatch.setenv("LOCALAPPDATA", str(estado))
+        monkeypatch.setenv("XDG_STATE_HOME", str(estado))
         auditor = self.construir(tmp_path)
         monkeypatch.setenv(auditor.variable, str(tmp_path / "registro.jsonl"))
         return auditor
@@ -208,12 +219,182 @@ class KitDeAuditoria:
         assert nombre.startswith(auditor.nombre), "falta el nombre del MCP"
         assert "elegido" in nombre, "se perdio la eleccion del operador"
 
-    def test_el_default_no_es_el_cwd(self, auditor, monkeypatch):
-        # El cwd de un MCP por stdio lo hereda de quien lo lanzo, y eso deja
-        # archivos con credenciales en repos ajenos.
+    def test_el_default_no_es_el_cwd(self, auditor, monkeypatch, tmp_path):
+        # El cwd de un MCP por stdio lo hereda de quien lo lanzo: es `%TEMP%` o
+        # el repo de otro, nunca una propiedad del proyecto.
         monkeypatch.setenv(auditor.variable, "1")
+        monkeypatch.setattr(identidad, "raiz_del_proyecto", lambda: str(tmp_path / "proy"))
 
         assert Path(os.getcwd()) not in auditor.ruta().parents
+
+    # -- R1: el proyecto que llamo, en una carpeta que se ignora sola -------
+
+    @pytest.fixture
+    def proyecto(self, tmp_path, monkeypatch):
+        """Un proyecto que llamo, declarado como lo declararia el arnes."""
+        raiz = tmp_path / "el-repo-que-llamo"
+        raiz.mkdir()
+        monkeypatch.setattr(identidad, "raiz_del_proyecto", lambda: str(raiz))
+        return raiz
+
+    def test_stdio_redactado_va_al_proyecto_que_llamo(
+        self, auditor, monkeypatch, proyecto
+    ):
+        monkeypatch.setenv(auditor.variable, "1")
+        auditor.registrar(self.herramienta_normal, {})
+
+        assert auditor.ruta().parent == proyecto / "registro_auditoria"
+
+    def test_stdio_CRUDO_nunca_cae_bajo_un_arbol_de_proyecto(
+        self, auditor, monkeypatch, proyecto, tmp_path
+    ):
+        """La celda que se decidio aparte, y el motivo por el que se decidio.
+
+        Un `.gitignore` lo respeta git y NADIE MAS: un zip, un rsync, un
+        `COPY .` de Docker, un sdist o un "subir carpeta" copian el arbol
+        entero. El redactado sobrevive a eso; el crudo lleva credenciales, y es
+        el unico lugar donde equivocarse no se deshace.
+        """
+        monkeypatch.setenv(auditor.variable, "crudo")
+        auditor.registrar(self.herramienta_normal, {"clave": CENTINELA})
+
+        ruta = auditor.ruta()
+        assert proyecto not in ruta.parents, f"el crudo cayo en el proyecto: {ruta}"
+        # Y esta bajo el estado del usuario, en una carpeta que lo nombra.
+        assert "registro_auditoria" in ruta.parts
+        assert proyecto.name in ruta.parent.name
+
+    def test_el_crudo_de_dos_checkouts_del_mismo_repo_no_se_mezcla(
+        self, auditor, monkeypatch, tmp_path
+    ):
+        # El nombre a secas alcanzaria casi siempre y fallaria feo cuando no:
+        # dos checkouts del mismo repo escribirian en la misma carpeta y sus
+        # registros se leerian como uno solo.
+        monkeypatch.setenv(auditor.variable, "crudo")
+        for sub in ("a", "b"):
+            (tmp_path / sub / "mi-repo").mkdir(parents=True)
+        uno = tmp_path / "a" / "mi-repo"
+        otro = tmp_path / "b" / "mi-repo"
+
+        monkeypatch.setattr(identidad, "raiz_del_proyecto", lambda: str(uno))
+        primera = auditor.ruta().parent
+        monkeypatch.setattr(identidad, "raiz_del_proyecto", lambda: str(otro))
+        segunda = auditor.ruta().parent
+
+        assert primera != segunda
+
+    def test_http_va_al_estado_del_usuario_del_servidor_y_sin_aviso(
+        self, tmp_path, monkeypatch, caplog
+    ):
+        # El servidor es un contenedor de larga vida que arranca sin relacion
+        # con ningun proyecto. No hay aviso a proposito: en stdio la ausencia de
+        # proyecto es señal, en HTTP seria ruido constante.
+        estado = tmp_path / "estado-http"
+        estado.mkdir()
+        monkeypatch.setenv("LOCALAPPDATA", str(estado))
+        monkeypatch.setenv("XDG_STATE_HOME", str(estado))
+        auditor = self.construir(tmp_path)
+        auditor.transporte = "http"
+        monkeypatch.setenv(auditor.variable, "1")
+        with caplog.at_level("WARNING"):
+            ruta = auditor.ruta()
+
+        assert ruta.parent == estado / "registro_auditoria" / auditor.nombre
+        assert not any("sin proyecto" in r.message for r in caplog.records)
+
+    def test_la_carpeta_nace_con_su_gitignore(self, auditor, monkeypatch, proyecto):
+        monkeypatch.setenv(auditor.variable, "1")
+        auditor.registrar(self.herramienta_normal, {})
+
+        marca = proyecto / "registro_auditoria" / ".gitignore"
+        assert marca.exists()
+        assert marca.read_text(encoding="utf-8").strip().endswith("*")
+
+    def test_git_no_levanta_el_registro_en_un_repo_de_verdad(
+        self, auditor, monkeypatch, tmp_path
+    ):
+        """La guarda que importa: no que el archivo exista, sino que git lo ignore.
+
+        Un `.gitignore` con la sintaxis equivocada existe igual y no protege
+        nada. Se le pregunta a git, que es quien decide.
+        """
+        git = shutil.which("git")
+        if git is None:
+            pytest.skip("no hay git para preguntarle")
+        repo = tmp_path / "repo-ajeno"
+        repo.mkdir()
+        subprocess.run([git, "init", "-q"], cwd=repo, check=True)
+        monkeypatch.setenv(auditor.variable, "1")
+        monkeypatch.setattr(identidad, "raiz_del_proyecto", lambda: str(repo))
+        auditor.registrar(self.herramienta_normal, {"clave": CENTINELA})
+
+        relativa = auditor.ruta().relative_to(repo).as_posix()
+        ignorado = subprocess.run([git, "check-ignore", "-q", relativa], cwd=repo)
+        assert ignorado.returncode == 0, f"git NO ignora {relativa}"
+
+        # Y el control de punta a punta: el gesto que causo el incidente.
+        subprocess.run([git, "add", "-A"], cwd=repo, check=True)
+        listo = subprocess.run(
+            [git, "diff", "--cached", "--name-only"], cwd=repo, capture_output=True, text=True
+        ).stdout
+        assert "registro_auditoria" not in listo, listo
+
+    def test_la_raiz_del_proyecto_nunca_sale_del_cwd(self, monkeypatch, tmp_path):
+        """La guarda sobre la FUENTE, no sobre quien la usa.
+
+        La encontro la reversion: los tests de arriba monkeypatchean
+        `raiz_del_proyecto`, asi que un respaldo al cwd DENTRO de esa funcion
+        pasaba las cuatro en verde. Es el mismo patron que ya nos mordio dos
+        veces -la proteccion existe y el respaldo la anula-, y esta vez el
+        respaldo estaba en el unico lugar que las guardas no miraban.
+        """
+        cwd = tmp_path / "cwd-de-otro-repo"
+        cwd.mkdir()
+        monkeypatch.chdir(cwd)
+        for arnes in arneses.catalogo():
+            if arnes.testigo:
+                monkeypatch.delenv(arnes.testigo, raising=False)
+            for variable in arnes.campos:
+                monkeypatch.delenv(variable, raising=False)
+        monkeypatch.setattr(identidad, "_RAIZ_DEL_PROYECTO", None)
+
+        # None, no el cwd: sin fuente no se adivina, y el que llama decide.
+        assert identidad.raiz_del_proyecto() is None
+
+    def test_sin_proyecto_no_se_adivina_y_se_avisa(
+        self, auditor, monkeypatch, tmp_path, caplog
+    ):
+        # Ni el arnes ni los roots dijeron cual espacio de trabajo llamo. El cwd
+        # no sirve para adivinarlo, asi que va aparte y con nombre propio.
+        monkeypatch.setenv(auditor.variable, "1")
+        monkeypatch.setattr(identidad, "raiz_del_proyecto", lambda: None)
+        monkeypatch.setenv("LOCALAPPDATA", str(tmp_path / "estado"))
+        monkeypatch.setenv("XDG_STATE_HOME", str(tmp_path / "estado"))
+        with caplog.at_level("WARNING"):
+            ruta = auditor.ruta()
+
+        assert ruta.parent.name == "_sin_proyecto"
+        assert Path(os.getcwd()) not in ruta.parents
+        assert any("sin proyecto" in r.message for r in caplog.records)
+
+    def test_el_aviso_es_una_vez_por_proceso_y_no_por_llamada(
+        self, auditor, monkeypatch, tmp_path, caplog
+    ):
+        """Lo encontro la reversion, y no era lo que yo buscaba con ella.
+
+        La mutacion que probe -"HTTP avisa como stdio"- resulto inalcanzable
+        bajo HTTP, y en cambio destapo esto: nadie comprobaba que el aviso no se
+        repitiera. Un aviso por llamada es la razon exacta por la que R1 decide
+        NO avisar bajo HTTP: uno que suena siempre deja de leerse, y entonces
+        tampoco se lee el que importa.
+        """
+        monkeypatch.setenv(auditor.variable, "1")
+        monkeypatch.setattr(identidad, "raiz_del_proyecto", lambda: None)
+        with caplog.at_level("WARNING"):
+            for _ in range(5):
+                auditor.registrar(self.herramienta_normal, {})
+
+        assert sum("sin proyecto" in r.message for r in caplog.records) == 1
 
     # -- no romper ----------------------------------------------------------
 
