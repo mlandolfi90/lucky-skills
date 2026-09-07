@@ -58,7 +58,7 @@ __all__ = [
     "tipo_del_error",
 ]
 
-__version__ = "0.1.1"
+__version__ = "0.1.2"
 
 
 def instalar_auditoria(

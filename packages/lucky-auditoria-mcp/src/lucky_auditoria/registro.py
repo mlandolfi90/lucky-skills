@@ -365,12 +365,16 @@ class Auditor:
         cual = self.modo()
         ruta = self.ruta()
         info: dict[str, Any] = {"modo": cual, "archivo": str(ruta) if ruta else None}
+        # Siempre, no solo cuando hay problema. Una clave que aparece nada mas
+        # cuando algo anda mal obliga a saber que puede aparecer: quien lee el
+        # `check` sano no se entera de que existe, y entonces tampoco la busca.
+        # Una redaccion cerrada no rompe nada -el registro sigue escribiendo,
+        # forma y ningun valor- pero apaga el tercer camino de error sin apagar
+        # el registro: `rechazos` devuelve vacio sobre un registro con fallos
+        # adentro. El ERROR del arranque es una vez, y nadie mira el log.
+        info["redaccion"] = "cerrada" if self.redaccion.problema else "abierta"
         if self.redaccion.problema:
-            # Una redaccion cerrada no rompe nada, y por eso no se nota: el
-            # registro sigue escribiendo -forma de cada argumento y ningun
-            # valor- y `rechazos` queda ciego, porque el retorno tampoco se
-            # anota. El ERROR del arranque es una vez, y nadie mira el log.
-            info["config"] = self.redaccion.problema
+            info["redaccion_motivo"] = self.redaccion.problema
         if cual == "apagado":
             return info
         if cual == "crudo":
