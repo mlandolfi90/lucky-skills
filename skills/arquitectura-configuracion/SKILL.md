@@ -110,6 +110,50 @@ regla.
   dice qué claves tiene el archivo, y la explicación dice dónde vive de
   verdad, por qué no puede moverse (quién lo lee ahí: la herramienta, el
   framework, el runtime) y cómo se genera o se copia desde `/config/`.
+  La regla nació corrigiendo el razonamiento "mover no agrega nada, la
+  forma ya está versionada y los valores ya ignorados": el invariante no
+  protege dónde vive el valor, protege DÓNDE SE ENCUENTRA LA
+  EXPLICACIÓN — un repo nuevo no sabe que tiene que mirar la raíz. Cómo
+  se cumple, medido (lucky-tool-netbox, 78fa493):
+  - "No se puede mover" son dos casos con textos distintos en la
+    excepción: IMPOSIBLE (el cliente MCP descubre `.mcp.json` en la raíz
+    por convención suya; no hay flag) y POSIBLE PERO CARO (`.env` lo
+    nombra por ruta absoluta el `.mcp.json` de cada máquina, ignorado
+    por git: moverlo rompe en silencio registros que nadie ve). El
+    segundo es reversible y queda como pendiente que exige avisar
+    antes; el primero no.
+  - El molde se MUEVE a `/config/`, no se copia: dos copias del mismo
+    contrato es peor que ninguna — se edita una, la otra sigue diciendo
+    lo de antes, y las dos son texto válido, así que nada falla.
+  - Sin punto adelante: `config/env.example`, no `config/.env.example`
+    — un archivo oculto dentro de un directorio cuya razón de ser es que
+    se encuentre.
+  - `config/README.md` obligatorio: tabla molde → archivo real → quién
+    lo escribe; por qué el real no está acá, un párrafo por archivo; los
+    comandos para poner en marcha; y las reglas (precedencia, defaults en
+    el cargador, falla cerrado, moldes sin valores, `LOCALES`). Un
+    `/config/` sin README es un cajón: alguien encuentra el molde y no
+    sabe adónde copiarlo.
+  - Puntero en los dos sentidos: cada molde abre diciendo adónde va el
+    archivo real y por qué; el README de la raíz dice que la explicación
+    está en `/config/`.
+- **C1-ter — Las guardas del contrato de `/config/`.** Una excepción
+  sin guarda se convierte en dos contratos, y `/config/` es terreno
+  versionado (al revés que un `.env`), así que hay que comprobar
+  activamente lo que en un directorio ignorado se daba por hecho. Una
+  prueba por cada una: cada molde está en `/config/` y su copia NO
+  reaparece en la raíz; existe `config/README.md`, nombra cada molde y
+  dice adónde va cada archivo real; ningún archivo real se coló en
+  `/config/` (con y sin punto: `config/.env` y `config/env`); ningún
+  molde trae un valor real — secretos vacíos (`TOKEN=`) y marcadores sin
+  resolver (`<RUTA AL REPO>`: una ruta resuelta salió de la máquina de
+  alguien); y ningún molde trae un permiso encendido de fábrica — las
+  claves peligrosas (escrituras, borrados, auditoría) van en un bloque
+  que el cliente NO lee (`_env_opcionales`), para que copiar el molde
+  entero no pueda encender nada. Medido por reversión, 7/7 — y dos
+  "nada falla" de la primera vuelta eran fallas de la sonda, no de la
+  guarda: una prueba de "el README menciona X" es débil por
+  construcción, mide presencia de una cadena, no que esté explicado.
 - **C2 — Un solo cargador, con el nombre de la industria.** `config/` es
   también el paquete que carga: expone un único objeto de settings
   tipado y validado al arrancar (`from config import settings`; en
@@ -159,10 +203,16 @@ regla.
 
 ## Referencia viva
 
-Primer caso de la casa: el directorio `config/` con sus `.example` en el
-repo OptimizacionMikrotik, creado para que ningún valor quede en el
-código. Pendiente de medir contra estos invariantes; cuando se mida, el
-resultado va a ficha del saber y a la siguiente versión de esta skill.
+Dos casos de la casa. Medido: `lucky-tool-netbox`, commit `78fa493` —
+`config/env.example`, `config/mcp.json.example`, `config/README.md` con la
+tabla molde → archivo real → quién lo escribe, y
+`tests/test_contrato_de_configuracion.py` con las guardas de C1-ter (7
+decisiones probadas por reversión); es la implementación de referencia
+de C1-bis. Y la guarda de literales por forma y posición de
+`lucky-tool-gns3` (`scripts/guarda_configuracion.py`, `2da6a3f`, 30
+literales declarados). Pendiente de medir: el `config/` de
+OptimizacionMikrotik, el primero que se pidió. Anclar en commits, no en
+rutas.
 
 ## Salida
 
