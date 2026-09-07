@@ -144,7 +144,12 @@ class TestElRespaldoDeTomlEnPython310:
 
     Esta maquina solo tiene 3.12, asi que el import gateado por version
     (`except ModuleNotFoundError: import tomli`) NO se ejercita aca: lo corre el
-    CI en su celda de 3.10, y ese CI todavia no se ejecuto nunca.
+    CI en su celda de 3.10. Ese CI corrio, y en rojo: la comparacion de abajo
+    importaba `tomllib` en un interprete donde no existe, o sea que el test
+    que media el respaldo era el unico que no podia correr donde el respaldo
+    se usa. En 3.10 se salta con motivo; la segunda prueba si corre ahi,
+    porque en 3.10 `modulo.tomllib` YA es `tomli` y la compara consigo misma
+    -lo que prueba es que cargar() no depende de cual de los dos este atras.
 
     Lo que SI se puede medir sin un 3.10 es la otra mitad de la afirmacion: que
     la version pineada de `tomli` parsea esta configuracion igual que `tomllib`.
@@ -157,7 +162,11 @@ class TestElRespaldoDeTomlEnPython310:
 
     def test_tomli_parsea_esta_config_igual_que_tomllib(self):
         import tomli
-        import tomllib
+
+        tomllib = pytest.importorskip(
+            "tomllib",
+            reason="tomllib entro en 3.11; en 3.10 el respaldo ES tomli, no hay contraparte",
+        )
 
         crudo = CONFIG.encode("utf-8")
 

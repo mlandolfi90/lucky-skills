@@ -22,16 +22,20 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Que esta medido de verdad, a mano y fuera del CI, que no corrio nunca:
-        #   3.12.10 -> las dos sesiones, en dos venv distintos. Nada mas.
-        #   3.10    -> NADIE. Es el piso declarado y el unico que ejercita el
-        #              import gateado por version (`tomli` en vez de `tomllib`).
-        #   3.13    -> NADIE. Aca decia "medido por skills-v3-65" y era falso:
-        #              su venv usa el Python del sistema, que es el mismo 3.12
-        #              que el mio. Ellos escribieron 3.13, yo lo copie al README
-        #              sin verificarlo, y quedo escrito en dos repos como una
-        #              medicion. Dos sesiones en la misma maquina no son dos
-        #              entornos: para eso esta el CI, que todavia no corrio.
+        # Que esta medido de verdad, y por quien:
+        #   3.12.10 -> a mano, las dos sesiones, en dos venv de la misma
+        #              maquina (que no son dos entornos); y este CI en verde,
+        #              ubuntu y windows.
+        #   3.13    -> este CI en verde, ubuntu y windows. Antes decia "medido
+        #              por skills-v3-65" a mano y era falso (su venv era 3.12);
+        #              despues decia "nadie" y tambien era falso: el CI ya lo
+        #              habia medido. Ninguna de las dos sesiones miro los runs.
+        #   3.10    -> este CI en ROJO tres veces (0.3.1 y su tag): el test que
+        #              comparaba tomli contra tomllib importaba tomllib donde
+        #              no existe. Desde 0.3.2 ese test se salta en 3.10 con
+        #              motivo; la celda 3.10 mide el respaldo real (tomli).
+        # Un CI que corre no es una medicion hasta que alguien lee el
+        # resultado: `gh run list --workflow auditoria-mcp.yml`.
         python: ["3.10", "3.12", "3.13"]
         # Los dos, porque el directorio por defecto se resuelve distinto
         # (`%LOCALAPPDATA%` contra `XDG_STATE_HOME`) y ahi vive la regla que

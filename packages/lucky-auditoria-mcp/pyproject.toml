@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "lucky-auditoria-mcp"
-version = "0.3.1"
+version = "0.3.2"
 description = "Auditoria interna para MCP compartidos: atribuye cada llamada a su sesion sin fugar secretos."
 readme = "README.md"
 requires-python = ">=3.10"

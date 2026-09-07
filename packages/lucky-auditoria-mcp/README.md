@@ -317,15 +317,22 @@ logueando `?token=<JWT>` en claro.
 
 Las versiones de la tabla son exactas a propósito, y las del `pyproject.toml` están
 pineadas con `==`: un rango afirma compatibilidad con versiones que nadie probó,
-incluidas las que todavía no existen. La suite corrió a mano sólo en **Python 3.12.10**, en dos venv distintos de la
-misma máquina — que no son dos entornos. **Ni 3.10 ni 3.13 los midió nadie**, y
-son los dos extremos del rango declarado; 3.10 además es el único que ejercita
-el import gateado por versión (`tomli` en lugar de `tomllib`). El CI que los
-cubriría **no se ha ejecutado nunca**.
+incluidas las que todavía no existen. A mano, la suite corrió sólo en **Python
+3.12.10**, en dos venv distintos de la misma máquina — que no son dos entornos.
+Lo demás lo mide el CI (`.github/workflows/auditoria-mcp.yml`), y hay que
+**leerlo**: `gh run list --workflow auditoria-mcp.yml`. Estado al 2026-09-07:
+**3.12 y 3.13 en verde** en ubuntu y windows; **3.10 en rojo** en 0.3.1 — el
+test que comparaba `tomli` contra `tomllib` importaba `tomllib` donde no existe,
+o sea que el único test que medía el respaldo era el que no podía correr donde el
+respaldo se usa. Desde 0.3.2 ese test se salta en 3.10 con motivo, y la celda
+3.10 mide lo que tiene que medir: que `cargar()` funciona con `tomli` detrás.
 
-Este párrafo decía que 3.13 estaba medida. Era falso: lo dio por sentado una
-sesión, lo copié sin verificarlo, y quedó escrito en dos repos con forma de
-medición. Es la razón por la que las versiones se declaran por nombre.
+Este párrafo se corrigió dos veces. Primero decía que 3.13 estaba medida a mano:
+falso, lo dio por sentado una sesión y lo copié sin verificarlo. Después decía
+que el CI "no se ha ejecutado nunca": también falso — había corrido doce veces,
+las tres últimas en rojo, y ninguna de las dos sesiones había mirado los runs.
+Es la razón por la que las versiones se declaran por nombre y el CI se lee con
+el comando, no de memoria.
 
 El enganche de `mcp` 1.x está **escrito y no medido**: el override que sí se
 midió es el de otro repo, sobre `@server.call_tool()`; el de acá envuelve el
