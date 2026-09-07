@@ -2,6 +2,9 @@
 
 Generado por publicar-skill; no editar a mano.
 
+## arquitectura-verificar 1.2.0 — 2026-09-07 — MINOR
+- 1.1.0 → 1.2.0 · QUALITY=PASS · autorizó human:vikingo
+
 ## cierre 1.2.0 — 2026-09-07 — MINOR
 - 1.1.0 → 1.2.0 · QUALITY=PASS · autorizó human:vikingo
 
