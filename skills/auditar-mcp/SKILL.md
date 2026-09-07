@@ -308,9 +308,16 @@ requisito de nacimiento. Lo que es igual en todos vive en un paquete
 compartido (`lucky-auditoria`); lo que se mide en cada uno vive en su
 `config/`.
 
-- **R1 — Dónde se guarda: en el proyecto que LLAMÓ, en una carpeta que
-  se ignora sola.** `<proyecto que llamó>/registro_auditoria/`, una sola
-  carpeta por proyecto para todos sus MCP. El proyecto que llamó se
+- **R1 — Dónde se guarda: el redactado en el proyecto que LLAMÓ, en una
+  carpeta que se ignora sola; el crudo en el estado del usuario,
+  siempre.** Redactado: `<proyecto que llamó>/registro_auditoria/`, una
+  sola carpeta por proyecto para todos sus MCP. Crudo: `<estado del
+  usuario>/registro_auditoria/<proyecto>/`, sin excepción — un
+  `.gitignore` lo respeta git y nadie más (un zip, un rsync, un `COPY .`
+  de Docker, un sdist, un "subir carpeta" copian el árbol entero), y el
+  crudo lleva credenciales enteras y es el único donde equivocarse no se
+  deshace. Es la asimetría de R4 aplicada al lugar: el material sensible
+  va donde la regla dice, no donde es cómodo. El proyecto que llamó se
   conoce, medido: el proceso hijo recibe la raíz de la sesión por el
   entorno (`CLAUDE_PROJECT_DIR` en Claude Code; el catálogo de arneses
   de la regla 2 dice la variable de cada uno) y, si el arnés no la da,
