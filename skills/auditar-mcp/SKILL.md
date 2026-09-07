@@ -130,9 +130,19 @@ en el MCP que se está construyendo.
   que existen de verdad suele dar un número chico y convierte el debate en
   una cuenta.
 - Un campo es seguro por nombre + tipo + tope de largo, no por nombre: el
-  tipo lo elige el cliente y el registro anota ANTES de que nadie valide.
-  `lineas="<secreto>"` donde se esperaba un int llega al disco si la lista
-  solo mira el nombre. Lo que no coincide con la forma declarada cae a
+  tipo lo elige el cliente y el registro anota ANTES de que nadie valide
+  — medido, no supuesto: con fastmcp 4.0.3 la línea se escribe con el
+  valor rechazado adentro; si el gancho escribiera post-validación, la
+  lista por tipo sería una precaución teórica y su test pasaría igual
+  sin cubrir la fuga. `lineas="<secreto>"` donde se esperaba un int llega
+  al disco si la lista solo mira el nombre.
+- La lista blanca protege el REGISTRO, no el proceso: el log del
+  framework es otra superficie y se mide aparte. Medido: fastmcp 4.0.3
+  escribe el valor rechazado entero en su propio WARNING (`Invalid
+  arguments for tool 'x': [{... 'input': '<el secreto>'}]`) — lo que la
+  lista tacha del registro sale íntegro por el log del proceso, y ningún
+  paquete puede taparlo. Hermana de `mask_error_details` (regla 4) y del
+  precedente de uvicorn con el `?token=` en claro. Lo que no coincide con la forma declarada cae a
   descripción (`{tipo, largo}`); una guarda compara la forma declarada
   contra el esquema que el servidor publica.
 - La lista es por nombre de campo y vale para todas las herramientas
@@ -470,6 +480,25 @@ compartido (`lucky-auditoria`); lo que se mide en cada uno vive en su
   anfitrión), no iterando los módulos propios del paquete — esa propiedad
   es buena en un repo solo y se da vuelta al compartirse.
 
+- **R12 — Retroalimentación obligatoria, siempre.** Esta skill y su
+  paquete se construyeron enteros con lo que devolvieron quienes los
+  aplicaron: cada regla de arriba nació de una medición ajena, y tres
+  afirmaciones resultaron falsas fuera del repo donde se midieron. Por
+  eso quien aplica esta skill —en un MCP nuevo, en un retrofit, o al
+  sincronizar una versión— devuelve SIEMPRE una retroalimentación al
+  cerrar, no solo cuando algo salió mal. Qué se devuelve: lo que la
+  receta no cubría; lo que resultó falso o distinto en este caso, con la
+  medición; lo que el paquete no absorbió y hubo que hacer a mano; las
+  casillas pendientes que se midieron (R6); y los defectos "forma
+  correcta, contenido vacío" encontrados por el camino. A quién: a la
+  sesión custodia del catálogo (la que publica esta skill) por mensaje,
+  citando commit y recibo; al saber como ficha síntoma→acción con
+  `receipt:<hash>` cuando el aprendizaje sirve fuera de este MCP; y al
+  paquete como rama o pedido de cambio cuando es código. "Sin novedades"
+  también se reporta: es la única forma de saber que la receta se aplicó
+  entera y aguantó. Una aplicación que no devuelve nada deja a la skill
+  igual que antes y al próximo sin lo que este ya sabe.
+
 ## Flujo
 
 1. Medir el contrato del servidor y su reacción al pedido repetido; elegir
@@ -486,6 +515,8 @@ compartido (`lucky-auditoria`); lo que se mide en cada uno vive en su
    modos; E2E contra proceso real; runner verificado (reglas 8 y 9).
 7. Cazar en el registro crudo, barrer por forma, declarar alcance y lo
    que queda afuera (reglas 10 y 11).
+8. Devolver la retroalimentación a la sesión custodia, al saber y al
+   paquete (R12) — también cuando no hubo novedades.
 
 ## Referencia viva
 
@@ -515,4 +546,8 @@ ARCHIVO=<mcp>-auditoria[-CRUDA]-…
 INTERRUPTOR=OFF_POR_OMISION ESTADO_VISIBLE=SI|NO
 TESTS_FUGA=PASS|FAIL RUNNER=PRESENTE|AUSENTE
 ALCANCE_DECLARADO=...
+RETROALIMENTACION=ENVIADA|SIN_NOVEDADES_ENVIADA|PENDIENTE (<a quién, commit, recibo>)
 ```
+
+`PENDIENTE` no es un cierre: la aplicación no termina hasta que la
+retroalimentación salió.
