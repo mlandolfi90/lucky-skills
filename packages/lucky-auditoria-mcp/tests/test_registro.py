@@ -7,6 +7,7 @@ test que la cace no esta protegida, este donde este escrita.
 """
 
 import json
+from pathlib import Path
 
 import pytest
 from conftest import CONFIG
@@ -177,3 +178,28 @@ class TestLaCabeceraDiceSiLaRedaccionREGIA:
         assert redaccion["valida"] is False
         assert redaccion["huella"] is None
         assert "no se pudo leer" in redaccion["problema"]
+
+
+class TestElPaqueteDiceUnaSolaVersion:
+    """Dos numeros de version en el mismo paquete, y ninguno fallaba.
+
+    Paso: un commit mio dejo `pyproject.toml` en 0.3.2 y `__version__` en
+    0.3.3. La causa fue un `sed` que no matcheo -el merge habia traido otro
+    numero del que yo esperaba- y no dijo nada: el reemplazo silencioso es un
+    no-op, y un no-op se ve igual que un exito.
+
+    Lo encontro otra sesion leyendo el archivo, no la suite. Esta guarda es
+    para que la proxima lo encuentre la suite: la version que declara el
+    manifiesto y la que expone el paquete son la MISMA cosa dicha dos veces, y
+    cuando se separan el que instala y el que importa leen distinto.
+    """
+
+    def test_el_manifiesto_y_el_modulo_coinciden(self):
+        import tomli
+
+        import lucky_auditoria
+
+        raiz = Path(__file__).resolve().parents[1]
+        manifiesto = tomli.loads((raiz / "pyproject.toml").read_text(encoding="utf-8"))
+
+        assert manifiesto["project"]["version"] == lucky_auditoria.__version__
