@@ -267,7 +267,17 @@ en el MCP que se está construyendo.
   arnés no aparezca en el texto del archivo.
 - La reversión encuentra huecos en las pruebas tanto como en el código
   (medido: 2 de 7 en un repo). Una prueba que pasa con la decisión rota
-  no es una prueba de esa decisión.
+  no es una prueba de esa decisión. Y el respaldo permisivo se esconde
+  también en el andamiaje: cuatro guardas que monkeypatchean la función
+  de la raíz dejan sin mirar justo la función donde vivía la caída al
+  cwd.
+- Una suite de auditoría que ensucia la máquina cometió el defecto que
+  audita: desde que el crudo ignora la ruta elegida (R1), apuntar la
+  variable a `tmp_path` ya no alcanza — cada fixture mueve también
+  `LOCALAPPDATA` y `XDG_STATE_HOME`, y una guarda de sesión falla si la
+  suite dejó un archivo con el centinela fuera del temporal. Medido: los
+  tests de crudo dejaban centinelas en el estado real del que corría la
+  suite, y se vio mirando el disco, no leyendo los tests.
 - Verificar que exista un runner que corra estos tests (CI o equivalente)
   y decirlo si no lo hay. Un test de fuga que nadie corre no es
   protección, es documentación de una intención — y el que se rompe en
@@ -328,12 +338,16 @@ compartido (`lucky-auditoria`); lo que se mide en cada uno vive en su
   `CLAUDE_PROJECT_DIR` da 0 coincidencias; `roots` es una petición
   asíncrona al cliente, depende de que la declare, hay que cachearla por
   sesión, y devuelve una URI que el servidor casi seguro no tiene
-  montada). Ahí el camino esperado, no la excepción, es el estado del
-  usuario del SERVIDOR: `<estado del usuario>/registro_auditoria/<mcp>/`
-  con la sesión en cada línea (R2, R6), y el proyecto que llamó — si
-  `roots` lo da — como campo de la línea, no como carpeta. La rama se
-  elige por la medición de la regla 2 (cuántas sesiones atiende un
-  proceso), no por adivinar. En stdio, sin variable ni `roots`, no se
+  montada). Ahí el camino esperado, no la excepción, es DENTRO del
+  contenedor, en el estado del servidor: `<estado del
+  usuario>/registro_auditoria/<mcp>/` sobre un volumen persistente (si
+  no, el registro muere con el contenedor), con la sesión en cada línea
+  (R2, R6) y el proyecto que llamó — si `roots` lo da — como campo de la
+  línea, no como carpeta. Y como el archivo vive en otra máquina, el MCP
+  expone su lectura como herramienta propia (`auditoria`, ver R9): sin
+  ella, nadie del lado del cliente lo ve. La rama se elige por la
+  medición de la regla 2 (cuántas sesiones atiende un proceso), no por
+  adivinar. En stdio, sin variable ni `roots`, no se
   adivina: va a `<estado del usuario>/registro_auditoria/_sin_proyecto/`
   (`%LOCALAPPDATA%`, `XDG_STATE_HOME` o `~/.local/state`) y se avisa —
   el aviso es señal porque en stdio es raro; en HTTP sería ruido
@@ -422,7 +436,16 @@ compartido (`lucky-auditoria`); lo que se mide en cada uno vive en su
 - **R9 — Lectores estándar en el paquete.** Un formato, unos lectores:
   `cazar` (argumento cuyo valor no vuelve en la respuesta — candidatos,
   no veredictos), `rechazos` (retornos con `rechazadas > 0`),
-  `por-sesion`. Sin ellos cada MCP reinventa el `jq`.
+  `por-sesion`. Sin ellos cada MCP reinventa el `jq`. Bajo HTTP los
+  mismos lectores se exponen como herramienta del propio MCP
+  (`auditoria`: `estado`, `listar`, `leer` con filtro por sesión,
+  herramienta y rango, `cazar`, `rechazos`), porque el archivo vive en el
+  servidor. Tres límites que la vuelven segura: solo sirve el REDACTADO —
+  el crudo se lee en el servidor, nunca sale por una herramienta a
+  cualquier cliente conectado; su propia llamada se anota pero su retorno
+  es opaco para el registro (leer el registro no puede escribir el
+  registro con el registro adentro); y devuelve páginas con tope
+  declarado, diciendo cuántas líneas quedaron afuera (regla 10).
 - **R10 — Retrofit en tres pasos.** Instalar el paquete; una línea en el
   arranque (`instalar_auditoria(servidor, nombre=…)`, nombre obligatorio,
   enganche elegido por framework detectado); copiar el `.example` y
