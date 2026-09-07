@@ -68,6 +68,44 @@ class AdoptionTests(unittest.TestCase):
         )
         self.assertEqual(load_env(second_receipt)["RESULT"], "ALREADY_ADOPTED")
 
+    def test_plan_refuses_a_source_that_drifted_from_its_own_tag(self) -> None:
+        # Entre un commit y su sello, la fuente lleva contenido nuevo con el
+        # manifest viejo. Un plan armado ahí copia bytes que ningún tag selló y
+        # los registra con el número del tag anterior, sin que nada falle. La
+        # guarda vive en build_plan porque apply lo vuelve a correr: verificar
+        # antes desde afuera no cubre la ventana (TOCTOU).
+        repository = self.catalog.parent
+        self._git(repository, "init", "-q")
+        self._git(repository, "add", "-A")
+        self._git(repository, "commit", "-q", "-m", "catalogo")
+        self._git(repository, "tag", "-a", "skill-alpha-v1.0.0", "-m", "sello")
+
+        self._plan(self._landing())  # sellada e intacta: se puede adoptar
+
+        skill_md = self.skill / "SKILL.md"
+        original = skill_md.read_text(encoding="utf-8")
+        skill_md.write_text(original + "\nregla nueva sin sellar\n", encoding="utf-8")
+        with self.assertRaisesRegex(ValueError, "SOURCE_UNSEALED"):
+            self._plan(self._landing())
+
+        skill_md.write_text(original, encoding="utf-8")
+        self._plan(self._landing())  # de vuelta al tag: se puede
+
+        extra = self.skill / "nuevo.md"
+        extra.write_text("archivo que ningun tag sello\n", encoding="utf-8")
+        with self.assertRaisesRegex(ValueError, "SOURCE_UNSEALED"):
+            self._plan(self._landing())
+        extra.unlink()
+
+        # apply recalcula el plan: un plan confirmado sobre una fuente que se
+        # movió después se rechaza también, que es el caso que corrompió a un
+        # repo de la flota.
+        plan = self._plan(self._landing())
+        skill_md.write_text(original + "\ncambio posterior al plan\n", encoding="utf-8")
+        with self.assertRaisesRegex(ValueError, "SOURCE_UNSEALED"):
+            apply_plan(plan, confirmed_plan_hash=plan.plan_hash, confirmed_by="human:test")
+        self.assertFalse((self.target / "skills" / "alpha").exists())
+
     def test_claude_code_projection_excludes_agents_metadata(self) -> None:
         # `agents/openai.yaml` es metadato Codex/OpenAI (PACKAGING.env:
         # INCLUDE_OPENAI_METADATA=NO para claude-code). La proyección debe
@@ -571,6 +609,20 @@ class AdoptionTests(unittest.TestCase):
             newline="\n",
         )
         return root
+
+    def _git(self, repository: Path, *arguments: str) -> None:
+        subprocess.run(
+            [
+                "git",
+                "-c", "user.name=test",
+                "-c", "user.email=test@example.com",
+                "-c", "commit.gpgsign=false",
+                "-C", str(repository),
+                *arguments,
+            ],
+            check=True,
+            capture_output=True,
+        )
 
     def _landing(self) -> Path:
         before = set(self.receipts.rglob("sextante-*.env"))

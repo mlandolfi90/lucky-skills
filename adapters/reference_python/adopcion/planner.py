@@ -6,7 +6,7 @@ import stat
 from dataclasses import replace
 from pathlib import Path
 
-from lifecycle_core.git import dirty_paths, is_repository
+from lifecycle_core.git import dirty_paths, git, is_repository
 from lifecycle_core.envfile import canonical_env, load_env
 from lifecycle_core.harness_catalog import load_harnesses
 from lifecycle_core.hashing import sha256_file, tree_hash
@@ -43,6 +43,8 @@ def build_plan(
     landing = validate_landing(landing_receipt, target_resolved)
     root_manifest = validate_skill(source)
     closure = dependency_closure(source.parent, root_manifest.skill_id)
+    for manifest in closure:
+        _require_sealed_source(manifest)
     items: list[PlanItem] = []
 
     for manifest in closure:
@@ -173,6 +175,49 @@ def build_plan(
         risks=risks,
     )
     return plan.with_hash()
+
+
+def _require_sealed_source(manifest) -> None:
+    """La fuente tiene que ser exactamente lo que el tag de su versión dice.
+
+    Entre un commit y su sello, `main` lleva contenido nuevo con el manifest
+    viejo, y un plan armado ahí copia bytes que no coinciden con ningún tag y
+    los registra con el número del tag anterior — sin que nada falle. Pasó de
+    verdad: un repo de la flota se llevó el SKILL.md de un commit posterior al
+    tag 1.3.0 registrado como 1.3.0, y `ley-viva` lo habría dado por CURRENT
+    para siempre. Comprobarlo ANTES desde afuera no alcanza (TOCTOU: `apply`
+    vuelve a leer la fuente); la guarda vive acá, y `apply` la vuelve a correr
+    al recalcular el plan.
+
+    Sin repositorio o sin tag (skill nunca publicada, o un tag congelado con
+    `git archive`) no hay contra qué comparar y se permite. Los archivos sin
+    trackear también cuentan: `git diff` no los ve y un archivo nuevo en la
+    skill es contenido que ningún tag selló.
+    """
+    repository = manifest.root.parent.parent
+    if not is_repository(repository):
+        return
+    tag_name = f"skill-{manifest.skill_id}-v{manifest.version}"
+    tag_check = git(
+        repository,
+        ("rev-parse", "--verify", "--quiet", f"refs/tags/{tag_name}"),
+    )
+    if tag_check.returncode != 0:
+        return
+    try:
+        relative = manifest.root.relative_to(repository).as_posix()
+    except ValueError:
+        return
+    diff = git(repository, ("diff", "--quiet", tag_name, "--", relative))
+    untracked = git(
+        repository,
+        ("ls-files", "--others", "--exclude-standard", "--", relative),
+    )
+    if diff.returncode != 0 or untracked.stdout.strip():
+        raise ValueError(
+            f"SOURCE_UNSEALED: {relative} difiere del tag {tag_name}; "
+            "adoptar desde el tag (git archive) o sellar la version nueva"
+        )
 
 
 def _directory_item(
