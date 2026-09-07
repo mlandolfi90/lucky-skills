@@ -314,10 +314,23 @@ compartido (`lucky-auditoria`); lo que se mide en cada uno vive en su
   conoce, medido: el proceso hijo recibe la raíz de la sesión por el
   entorno (`CLAUDE_PROJECT_DIR` en Claude Code; el catálogo de arneses
   de la regla 2 dice la variable de cada uno) y, si el arnés no la da,
-  el protocolo permite pedirle al cliente sus `roots`. Sin ninguna de
-  las dos, no se adivina: va a `<estado del usuario>/registro_auditoria/
-  _sin_proyecto/` (`%LOCALAPPDATA%`, `XDG_STATE_HOME` o
-  `~/.local/state`) y se avisa. El cwd no se usa nunca: es lo que el
+  el protocolo permite pedirle al cliente sus `roots`. Eso vale para
+  stdio, donde el que escribe y el que llamó son la misma máquina y el
+  mismo proceso-por-sesión. Bajo HTTP no (medido: el servidor es un
+  contenedor de larga vida que arranca sin relación con ningún proyecto;
+  `CLAUDE_PROJECT_DIR` da 0 coincidencias; `roots` es una petición
+  asíncrona al cliente, depende de que la declare, hay que cachearla por
+  sesión, y devuelve una URI que el servidor casi seguro no tiene
+  montada). Ahí el camino esperado, no la excepción, es el estado del
+  usuario del SERVIDOR: `<estado del usuario>/registro_auditoria/<mcp>/`
+  con la sesión en cada línea (R2, R6), y el proyecto que llamó — si
+  `roots` lo da — como campo de la línea, no como carpeta. La rama se
+  elige por la medición de la regla 2 (cuántas sesiones atiende un
+  proceso), no por adivinar. En stdio, sin variable ni `roots`, no se
+  adivina: va a `<estado del usuario>/registro_auditoria/_sin_proyecto/`
+  (`%LOCALAPPDATA%`, `XDG_STATE_HOME` o `~/.local/state`) y se avisa —
+  el aviso es señal porque en stdio es raro; en HTTP sería ruido
+  constante, y por eso allí no hay aviso. El cwd no se usa nunca: es lo que el
   lanzador le dejó al hijo (medido: `%TEMP%`, o el repo de otro), no una
   propiedad del proyecto. Y la carpeta se protege sola: el paquete
   escribe adentro un `.gitignore` con `*` la primera vez que la crea, así
