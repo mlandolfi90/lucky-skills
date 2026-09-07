@@ -224,10 +224,55 @@ class TestAfirmaciones:
 
         assert lectores.afirmaciones(lectores.leer([registro])) == []
 
-    def test_sin_ok_declarado_no_se_supone_que_salio_bien(self, registro):
+    def test_sin_ok_declarado_TAMBIEN_se_mira(self, registro):
+        """Este test decia lo contrario, y estaba mal.
+
+        Codificaba el criterio "es un exito declarado" (`ok is True`), que
+        lucky-tool-mtk-chr midio sobre un registro real: de 44 lineas, 22 no
+        traen el campo `ok` -21 verbos distintos, practicamente todos los de
+        LECTURA, que contestan el dato pelado. Con aquel criterio las señales
+        quedaban ciegas justo donde un parser que no devolvio nada se veria.
+
+        El criterio que sobrevive a los dos casos es "no es un fracaso
+        declarado". Que el exito se exprese por ausencia de `ok` es una decision
+        de cada MCP, y el lector es de todos.
+        """
         _escribir(registro, [_cruda({"items": []})])
 
+        salida = lectores.afirmaciones(lectores.leer([registro]))
+
+        assert salida[0]["señales"] == ["exito_con_efecto_vacio", "respuesta_flaca"]
+
+    def test_un_fracaso_declarado_sigue_sin_mirarse(self, registro):
+        # El control opuesto: el cambio no puede apagar la unica exclusion que
+        # si vale, que es la que ya estaba.
+        _escribir(registro, [_cruda({"ok": False, "items": []})])
+
         assert lectores.afirmaciones(lectores.leer([registro])) == []
+
+    def test_una_lectura_de_dos_campos_utiles_no_es_flaca(self, registro):
+        """El defecto que aparece al arreglar el gate, y que no me pasaron.
+
+        El umbral era `len(resp) <= 2` sobre respuestas que SIEMPRE traian `ok`,
+        o sea "un campo util a lo sumo". Al empezar a mirar las respuestas sin
+        `ok`, ese mismo numero pasa a significar "dos campos utiles", y una
+        lectura legitima -`{"version": ..., "uptime": ...}`- caeria como flaca.
+        El umbral heredaba el `ok` como si fuera un campo.
+        """
+        _escribir(registro, [_cruda({"version": "7.21.5", "uptime": "1d21h"})])
+
+        assert lectores.afirmaciones(lectores.leer([registro])) == []
+
+    def test_pero_un_solo_campo_util_si_es_flaca_con_ok_o_sin_ok(self, registro):
+        _escribir(
+            registro,
+            [_cruda({"ok": True, "mensaje": "listo"}), _cruda({"mensaje": "listo"})],
+        )
+
+        salida = lectores.afirmaciones(lectores.leer([registro]))
+
+        assert len(salida) == 2
+        assert all("respuesta_flaca" in x["señales"] for x in salida)
 
 
 class TestCazarSalteaLoQueNoVuelve:

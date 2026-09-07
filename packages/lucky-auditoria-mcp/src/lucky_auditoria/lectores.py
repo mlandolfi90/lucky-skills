@@ -94,7 +94,7 @@ def cazar(lineas: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:
         datos = _respuesta_estructurada(linea)
         if datos is None:
             continue
-        if isinstance(datos, dict) and datos.get("ok") is False:
+        if isinstance(datos, dict) and _es_un_fracaso(datos):
             continue
         vistos = set()
         for escalar in _escalares(datos):
@@ -125,7 +125,33 @@ _CLAVES_DE_CONTEO = ("total", "cuantos", "cantidad")
 # contra el historial suena mejor y necesitaria un corpus por verbo: ahi ya es
 # un modelo, no un lector. La medicion: un parser que no entendio nada deja
 # `{"ok": true}` y a lo sumo un campo mas.
-_CLAVES_FLACA = 2
+#
+# Se cuentan las claves REALES, sin `ok`. El umbral original era `len(resp) <=
+# 2` sobre respuestas que siempre traian `ok`, o sea "un campo util a lo sumo".
+# Contando crudo, una respuesta de lectura sin `ok` -`{"version": ..,
+# "uptime": ..}`, dos campos utiles- caeria como flaca sin serlo: el umbral
+# heredaba el `ok` como si fuera un campo.
+_CAMPOS_FLACA = 1
+
+
+def _es_un_fracaso(respuesta: dict[str, Any]) -> bool:
+    """`ok: false` explicito. La AUSENCIA de `ok` no es un fracaso.
+
+    El criterio era "es un exito declarado" (`ok is True`) y estaba mal. Medido
+    por lucky-tool-mtk-chr sobre un registro real de 44 lineas: 6 con
+    `ok: true`, 16 con `ok: false` y **22 SIN el campo** -21 verbos distintos,
+    practicamente todos los de LECTURA, que contestan el dato pelado
+    (`{"version": ..., "uptime": ...}`).
+
+    O sea que exigir `ok is True` dejaba las señales ciegas en 22 de 44 lineas,
+    y justo en los verbos de lectura, que son donde un parser que no devolvio
+    nada se veria. Las dos señales estaban miopes exactamente donde mas servian.
+
+    Que el exito se exprese por ausencia es una decision de CADA MCP, asi que el
+    criterio que sobrevive a los dos casos no es "es un exito declarado" sino
+    "no es un fracaso declarado".
+    """
+    return respuesta.get("ok") is False
 
 
 def _vacios(respuesta: dict[str, Any]) -> dict[str, Any]:
@@ -170,7 +196,7 @@ def afirmaciones(lineas: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:
     encontradas = []
     for linea in lineas:
         respuesta = _respuesta_estructurada(linea)
-        if not isinstance(respuesta, dict) or respuesta.get("ok") is not True:
+        if not isinstance(respuesta, dict) or _es_un_fracaso(respuesta):
             continue
         señales = []
         vacios = _vacios(respuesta)
@@ -186,7 +212,7 @@ def afirmaciones(lineas: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:
         # respaldan, y la diferencia queda reportada a quien la midio.
         if listas and all(not x for x in listas):
             señales.append("exito_con_efecto_vacio")
-        if len(respuesta) <= _CLAVES_FLACA:
+        if len([k for k in respuesta if k != "ok"]) <= _CAMPOS_FLACA:
             señales.append("respuesta_flaca")
         if señales:
             encontradas.append(
