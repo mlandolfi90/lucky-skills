@@ -308,27 +308,29 @@ requisito de nacimiento. Lo que es igual en todos vive en un paquete
 compartido (`lucky-auditoria`); lo que se mide en cada uno vive en su
 `config/`.
 
-- **R1 — Dónde se guarda.** En un directorio del USUARIO, nunca del
-  proyecto: `<estado del usuario>/<mcp>/registro_auditoria/`, donde el
-  estado del usuario es `%LOCALAPPDATA%` en Windows, si no
-  `XDG_STATE_HOME`, si no `~/.local/state`. Si no se puede crear, no se
-  escribe y se dice en el log: no hay caída al cwd, porque no escribir
-  tampoco rompe (el escritor ya se traga el fallo) y la caída agrega
-  exactamente el daño que R1 existe para evitar — peor en crudo, cuando el
-  archivo lleva credenciales. Motivo medido (2026-09-07): el
-  cwd y `CLAUDE_PROJECT_DIR` de un MCP por stdio son de quien lo LANZÓ,
-  no del MCP — `CLAUDE_PROJECT_DIR` identifica al que invocó, y un MCP
-  compartido por N sesiones tiene N valores a la vez; a veces ni está. Un
-  mismo MCP registrado una sola vez corría con el cwd en tres repos
-  ajenos y dejó 273 KB de archivos crudos con credenciales en los tres;
-  el `.gitignore` que lo protegía vivía en su propio repo mientras el
-  archivo caía en cualquier otro. Atajar solo el `%TEMP%` ataja el caso
-  que hace ruido y deja pasar el que hace daño; ensanchar `.gitignore`
-  arregla los repos que uno conoce y deja pasar el próximo. Una ruta
-  explícita en el activador sigue mandando: el default protege al que no
-  eligió, no le saca la elección al que sí. `CLAUDE_PROJECT_DIR` sí sirve
-  para el campo `arnes.proyecto` de cada línea: ahí nombra correctamente
-  el espacio de trabajo de la sesión que llamó.
+- **R1 — Dónde se guarda: en el proyecto que LLAMÓ, en una carpeta que
+  se ignora sola.** `<proyecto que llamó>/registro_auditoria/`, una sola
+  carpeta por proyecto para todos sus MCP. El proyecto que llamó se
+  conoce, medido: el proceso hijo recibe la raíz de la sesión por el
+  entorno (`CLAUDE_PROJECT_DIR` en Claude Code; el catálogo de arneses
+  de la regla 2 dice la variable de cada uno) y, si el arnés no la da,
+  el protocolo permite pedirle al cliente sus `roots`. Sin ninguna de
+  las dos, no se adivina: va a `<estado del usuario>/registro_auditoria/
+  _sin_proyecto/` (`%LOCALAPPDATA%`, `XDG_STATE_HOME` o
+  `~/.local/state`) y se avisa. El cwd no se usa nunca: es lo que el
+  lanzador le dejó al hijo (medido: `%TEMP%`, o el repo de otro), no una
+  propiedad del proyecto. Y la carpeta se protege sola: el paquete
+  escribe adentro un `.gitignore` con `*` la primera vez que la crea, así
+  ningún repo que no la esperaba puede commitearla con un `git add -A`
+  — el motivo medido (2026-09-07) de la regla: un mismo MCP registrado
+  una vez dejó 273 KB de crudos con credenciales en tres repos cuyos
+  `.gitignore` no lo cubrían. Ensanchar el `.gitignore` de cada repo
+  arregla los que uno conoce; la carpeta autoignorada arregla el
+  próximo. Si no se puede crear, no se escribe y se dice en el log: no
+  hay caída a ningún otro lado, porque no escribir tampoco rompe. Una
+  ruta ABSOLUTA en el activador sigue mandando (R4). Lo que el MCP no
+  sabe es de qué repo es él mismo — por eso el archivo lleva su nombre
+  (R2) y no al revés.
 - **R2 — Cómo se nombra.** `<mcp>-auditoria[-CRUDA]-<escritor>.jsonl`.
   `<mcp>` derivado del paquete o atado al manifiesto por prueba;
   `<escritor>` = id de sesión en stdio, pid en HTTP.
