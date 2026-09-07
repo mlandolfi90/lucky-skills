@@ -139,7 +139,24 @@ class TestDondeEscribeEnLaCadena:
                 with pytest.raises(ToolError):
                     await c.call_tool("leer", {"name": "R1", "lineas": CENTINELA})
 
+        # Control del INSTRUMENTO antes que del hecho. `fastmcp` tiene
+        # `propagate=False` y dos RichHandler propios (medido en 4.0.3), asi
+        # que un capturador enganchado en la raiz podria no ver nada -y
+        # entonces la prueba no diria que no hay fuga, diria que no la estamos
+        # mirando. Con pytest 9.1.1 SI llega, medido: un record de
+        # `fastmcp.server.server`. Si algun dia deja de llegar, esto lo dice.
+        assert caplog.records, (
+            "el capturador no vio NINGUN record: `fastmcp` no propaga a la raiz "
+            "y el instrumento dejo de servir. Este test no puede afirmar nada "
+            "hasta arreglarlo."
+        )
+
         salida = " ".join(r.getMessage() for r in caplog.records)
+        # La asercion es POSITIVA a proposito, y eso la hace inmune al fallo de
+        # arriba: si el capturador no viera nada, `salida` seria vacia y este
+        # assert daria rojo. Una guarda que afirmara la AUSENCIA del centinela
+        # se cumpliria sola con el instrumento roto -es la familia de "la guarda
+        # que se cumple sola", esta vez del lado del que mide.
         assert CENTINELA in salida, (
             "fastmcp ya no escribe el valor rechazado en su log: sacar el aviso "
             "del README y borrar este test"
