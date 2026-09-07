@@ -26,7 +26,7 @@ receta R1–R11 de la skill `auditar-mcp` 1.2.2.
 ```toml
 # pyproject.toml del MCP anfitrión
 dependencies = [
-    "lucky-auditoria-mcp @ git+https://github.com/mlandolfi90/lucky-skills@auditoria-mcp-v0.1.3#subdirectory=packages/lucky-auditoria-mcp",
+    "lucky-auditoria-mcp @ git+https://github.com/mlandolfi90/lucky-skills@auditoria-mcp-v0.2.0#subdirectory=packages/lucky-auditoria-mcp",
 ]
 ```
 
@@ -228,21 +228,53 @@ temporal, con fecha de apagado, se borra al terminar.
 
 ## Leer el registro
 
+Bajo **stdio** el archivo está en el disco del que llamó, y el CLI alcanza:
+
 ```bash
-lucky-auditoria por-sesion  ~/.local/state/gns3-mcp/registro_auditoria/*.jsonl
+lucky-auditoria por-sesion  <proyecto>/registro_auditoria/*.jsonl
 lucky-auditoria rechazos    ...
-lucky-auditoria cazar       ...*CRUDA*.jsonl
+lucky-auditoria cazar       <estado>/registro_auditoria/<proyecto>/*CRUDA*.jsonl
 ```
 
 `cazar` es la que paga el paquete: "argumento que el cliente mandó y cuyo valor
 no aparece en ningún escalar de la respuesta", comparando por **valor** y no por
 substring. Produce **candidatos, nunca veredictos** — hay argumentos que
 legítimamente no vuelven, y decidirlo exigiría conocer cada verbo. Se tría a
-mano.
+mano. Un hallazgo no se cierra arreglando el caso: se convierte en una forma que
+se barre en todo el repo.
 
-Un hallazgo no se cierra arreglando el caso: se convierte en una forma que se
-barre en todo el repo. El registro encuentra uno; la forma encuentra los
-hermanos.
+Bajo **HTTP** el archivo vive dentro del contenedor, así que sin una herramienta
+que lo exponga nadie del lado del cliente lo ve. El paquete la trae:
+
+```python
+from lucky_auditoria import herramienta
+herramienta.instalar(mcp, auditor)      # solo tiene sentido bajo HTTP
+```
+
+`auditoria(action=...)` con `estado`, `listar`, `leer` (filtros `sesion`,
+`herramienta`, `desde`, `hasta`, `limite`, `salteo`), `cazar`, `rechazos` y
+`por_sesion`.
+
+**Tres límites la vuelven segura**, porque exponerla la pone al alcance de
+cualquier cliente conectado:
+
+1. **Sólo el redactado.** El crudo se lee en el servidor y no sale por una
+   herramienta jamás. Los archivos crudos no se listan ni por nombre — decir
+   "hay tres que no te muestro" ya cuenta cuántas sesiones de depuración hubo. Y
+   si una línea suelta dice `modo: crudo`, se descarta **y se dice cuántas**.
+2. **Su retorno es opaco para el registro.** La llamada se anota —quién leyó el
+   registro es información forense de primera— pero su retorno no: la segunda
+   lectura traería la primera, y a la tercera el archivo crece con copias de sí
+   mismo. Lo decide el paquete, no el `config` del anfitrión: no es un dato
+   suyo, es una propiedad de esta herramienta, y quien se olvide de declararla
+   se lleva la recursión puesta.
+3. **Pagina con tope declarado**, diciendo cuántas líneas quedaron afuera. Un
+   lector que recorta en silencio comete la familia de defectos que este
+   registro vino a cazar.
+
+`cazar` por esta vía devuelve siempre vacío **y explica por qué**: necesita la
+respuesta entera, que sólo existe en el crudo. Un `[]` a secas se leería como
+"no hay nada que cazar", y eso esta herramienta no lo puede afirmar.
 
 ## Compatibilidad
 
@@ -253,7 +285,7 @@ hermanos.
 | Python · `mcp` 2.x | pendiente | middleware nativo |
 | Node · SDK TypeScript | pendiente | paquete hermano, mismo JSONL |
 | stdio | medido | sesión = proceso |
-| streamable-http | pendiente en este paquete | `mcp-session-id` en cada línea |
+| streamable-http | escrito; **medición pendiente** en un servidor vivo | `mcp-session-id` en cada línea |
 
 El enganche de `mcp` 1.x está **escrito y no medido**: el override que sí se
 midió es el de otro repo, sobre `@server.call_tool()`; el de acá envuelve el

@@ -28,6 +28,19 @@ _ARCHIVO_POR_DEFECTO = "auditoria.jsonl"
 _DIRECTORIO = "registro_auditoria"
 _SIN_PROYECTO = "_sin_proyecto"
 
+# La herramienta que el propio paquete expone para LEER el registro (R9 bajo
+# HTTP). Su llamada se anota -quien leyo el registro es informacion forense de
+# primera- pero su retorno NO: leer el registro no puede escribir el registro
+# con el registro adentro, porque la segunda lectura traeria la primera y a la
+# tercera el archivo crece con copias de si mismo.
+#
+# Lo decide el paquete y no el `config` del anfitrion. R11 dice que los datos
+# son del anfitrion, y esto no es un dato suyo: es una propiedad de esta
+# herramienta, y un anfitrion que se olvida de declararla se lleva la recursion
+# puesta. Va aca y no en el enganche para que valga en todos a la vez: la
+# propiedad, no la mitigacion.
+HERRAMIENTA_PROPIA = "auditoria"
+
 # El modo crudo se enciende con una PALABRA, no con un `1`: encenderlo tiene que
 # ser un acto deliberado y no el resultado de copiar un ejemplo.
 _PALABRAS_CRUDAS = frozenset({"crudo", "crude", "debug", "raw"})
@@ -367,6 +380,9 @@ class Auditor:
         ruta = self.ruta()
         if ruta is None:
             return
+        if herramienta == HERRAMIENTA_PROPIA:
+            retorno = None
+            respuesta = None
         cual = self.modo()
         crudo = cual == "crudo"
         if crudo:
