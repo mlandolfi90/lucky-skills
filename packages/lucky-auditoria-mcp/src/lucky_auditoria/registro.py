@@ -242,8 +242,15 @@ class Auditor:
             "transporte": self.transporte,
             "framework": self.framework,
             "modo": modo,
-            "config": self.redaccion.huella_config,
-            "config_problema": self.redaccion.problema,
+            # `valida` aparte de `huella` y no deducible de ella: una redaccion
+            # cerrada tiene `huella: null`, y "no hay huella" se lee igual que
+            # "no la pude calcular". El que lee el archivo tres semanas despues
+            # necesita saber si las listas REGIAN, no solo cuales eran.
+            "redaccion": {
+                "huella": self.redaccion.huella_config,
+                "valida": self.redaccion.problema is None,
+                "problema": self.redaccion.problema,
+            },
             "inicio": sesion["iniciada"],
             "cwd": sesion["cwd"],
         }

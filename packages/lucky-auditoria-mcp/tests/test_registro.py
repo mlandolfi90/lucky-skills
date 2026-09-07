@@ -79,7 +79,8 @@ class TestLaCabecera:
         assert cabecera["esquema"] >= 1
         # Sin la huella de la config, un argumento recortado no se distingue de
         # uno completo al leer el registro tres semanas despues.
-        assert cabecera["config"].startswith("sha256:")
+        assert cabecera["redaccion"]["huella"].startswith("sha256:")
+        assert cabecera["redaccion"]["valida"] is True
 
     def test_no_lleva_valores_de_configuracion_ni_del_entorno(self, auditor, monkeypatch):
         monkeypatch.setenv("UN_TOKEN_DEL_ARNES", "no-deberia-aparecer")
@@ -144,3 +145,19 @@ class TestElCheckAvisaSiLaRedaccionQuedoCerrada:
 
     def test_con_la_config_sana_no_hay_ruido(self, auditor):
         assert "config" not in auditor.estado()
+
+
+class TestLaCabeceraDiceSiLaRedaccionREGIA:
+    def test_una_redaccion_cerrada_lo_declara_en_la_cabecera(self, tmp_path, monkeypatch):
+        # `valida` no se deduce de `huella`: una redaccion cerrada tiene la
+        # huella en null, y "no hay huella" se lee igual que "no la calcule".
+        # Sin el booleano, un archivo escrito con las listas caidas parece uno
+        # escrito con listas que no declaraban nada.
+        a = Auditor("mcp-de-prueba", config=tmp_path / "no-existe.toml")
+        monkeypatch.setenv(a.variable, str(tmp_path / "reg.jsonl"))
+        a.registrar("x", {})
+
+        redaccion = _lineas(a)[0]["redaccion"]
+        assert redaccion["valida"] is False
+        assert redaccion["huella"] is None
+        assert "no se pudo leer" in redaccion["problema"]
