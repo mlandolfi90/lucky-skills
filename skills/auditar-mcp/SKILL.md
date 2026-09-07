@@ -295,6 +295,80 @@ compartida); si el servidor lo soporta, se mide y se declara aplazado o
 hecho. Riesgo conocido: encender una ACL vacía con usuarios no-admin
 deniega todo — crear usuarios y entradas ANTES de dejar el admin.
 
+## Receta: valores fijos para todo MCP de la casa
+
+Las reglas de arriba dicen por qué; esto dice qué. Se aplica igual a un
+MCP nuevo, a uno ya nacido o a uno copiado: la puerta está abierta, no es
+requisito de nacimiento. Lo que es igual en todos vive en un paquete
+compartido (`lucky-auditoria`); lo que se mide en cada uno vive en su
+`config/`.
+
+- **R1 — Dónde se guarda.** `<raíz del proyecto>/registro_auditoria/`.
+  La raíz es `CLAUDE_PROJECT_DIR` si existe; si no, el cwd — y si el cwd
+  resulta ser el temporal del sistema, se avisa y no se escribe. El
+  directorio entero va al `.gitignore`. Otra ruta, solo por activador
+  explícito.
+- **R2 — Cómo se nombra.** `<mcp>-auditoria[-CRUDA]-<escritor>.jsonl`.
+  `<mcp>` derivado del paquete o atado al manifiesto por prueba;
+  `<escritor>` = id de sesión en stdio, pid en HTTP.
+- **R3 — Qué guarda.** Una línea JSON por llamada: `cuando` (ISO 8601
+  UTC), `sesion`, `pid`, `arnes{id, proyecto}`, `cliente`, `herramienta`,
+  `argumentos` (lista blanca por forma), `retorno` (su propia lista
+  blanca), `resultado` ok|error, `error` (código o tipo del fondo),
+  `duracion_ms`, `modo`. En crudo, además: argumentos tal cual y
+  respuesta entera con tope de 20 KB, diciendo de cuánto se cortó.
+- **R3-bis — Cabecera.** Primera línea del archivo, escrita con la
+  primera llamada (no al arrancar). Es donde el registro declara su
+  alcance: `tipo:"cabecera"`, versión del esquema de las líneas, quién
+  escribe (`mcp` con versión y commit, `pid`, `sesion`, `arnes`,
+  `transporte`, `framework` con versión), `modo`, hash del
+  `config/auditoria.toml` vigente (sin él, un argumento recortado no se
+  distingue de uno completo), `inicio` y `cwd` medido. Nada de valores de
+  configuración ni del entorno fuera del catálogo de arneses.
+- **R4 — Activadores y dónde van.** Uno solo: `<MCP>_AUDITORIA` =
+  vacío/`0` (apagado) · `1` (redactado) · `crudo` · una ruta. En stdio va
+  en el bloque `env` del registro del cliente (`.mcp.json`); en HTTP, en
+  el entorno del servicio (compose, unidad). Nunca en un `.env` que un
+  script regenera. Las listas blancas van en `config/auditoria.toml` con
+  su `.example`: la forma en el repo, nunca un valor.
+- **R5 — Compatibilidad: medida o pendiente, nunca prometida.**
+
+  | Caso | Estado | Enganche |
+  |---|---|---|
+  | Python · fastmcp 4 | medido (gns3, netbox, mtk-chr) | middleware |
+  | Python · `mcp` 1.x | medido (mtk-chr antes del port) | override de `call_tool` |
+  | Python · `mcp` 2.x | pendiente | middleware nativo |
+  | Node · SDK TypeScript | pendiente | paquete hermano, mismo JSONL |
+  | stdio | medido | sesión = proceso |
+  | streamable-http | medido | `mcp-session-id` en cada línea |
+
+- **R6 — Lo pendiente que se implementa deja saber.** Cuando alguien
+  aplica la auditoría sobre una casilla pendiente de R5 —otro framework,
+  otro transporte, otro lenguaje— o descubre que una medida no vale en
+  su caso, el aprendizaje va al saber como ficha (síntoma→acción, con
+  `receipt:<hash>`) y la tabla se actualiza en la siguiente versión de
+  esta skill. Una casilla no pasa de pendiente a medida por prosa: pasa
+  por una ficha con evidencia.
+- **R7 — Retención.** El crudo se borra al cerrar la sesión de
+  depuración (obligación heredada de logalizar). El redactado rota por
+  tamaño o edad. El `check` avisa cuando hay crudos con más edad que la
+  ventana declarada: hoy nada limpia solo, y por eso se acumulan.
+- **R8 — Bloque `auditoria` del `check`.** Campos fijos, iguales en todo
+  MCP: `modo`, `archivo`, `aviso` (solo en crudo), `acumulado{archivos,
+  crudos, bytes, mas_viejo}`. Si contar falla, informa el tipo de error
+  y no tumba el `check`.
+- **R9 — Lectores estándar en el paquete.** Un formato, unos lectores:
+  `cazar` (argumento cuyo valor no vuelve en la respuesta — candidatos,
+  no veredictos), `rechazos` (retornos con `rechazadas > 0`),
+  `por-sesion`. Sin ellos cada MCP reinventa el `jq`.
+- **R10 — Retrofit en tres pasos.** Instalar el paquete; una línea en el
+  arranque (`instalar_auditoria(servidor, nombre=…)`, nombre obligatorio,
+  enganche elegido por framework detectado); copiar el `.example` y
+  medir la superficie para llenarlo. El kit de pruebas del paquete
+  (fuga en dos modos, `chdir`, handler registrado, reversión) dice si
+  quedó bien. Los tres MCP vivos son los primeros retrofits: la
+  extracción se prueba contra ellos antes de llamarse estándar.
+
 ## Flujo
 
 1. Medir el contrato del servidor y su reacción al pedido repetido; elegir
