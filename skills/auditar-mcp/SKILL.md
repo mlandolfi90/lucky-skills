@@ -136,13 +136,24 @@ en el MCP que se está construyendo.
   lista por tipo sería una precaución teórica y su test pasaría igual
   sin cubrir la fuga. `lineas="<secreto>"` donde se esperaba un int llega
   al disco si la lista solo mira el nombre.
-- La lista blanca protege el REGISTRO, no el proceso: el log del
-  framework es otra superficie y se mide aparte. Medido: fastmcp 4.0.3
-  escribe el valor rechazado entero en su propio WARNING (`Invalid
-  arguments for tool 'x': [{... 'input': '<el secreto>'}]`) — lo que la
-  lista tacha del registro sale íntegro por el log del proceso, y ningún
-  paquete puede taparlo. Hermana de `mask_error_details` (regla 4) y del
-  precedente de uvicorn con el `?token=` en claro. Lo que no coincide con la forma declarada cae a
+- La lista blanca protege el REGISTRO, no el proceso: el registro puede
+  estar limpio y el proceso haber filtrado igual, y el archivo de
+  auditoría no es evidencia sobre las otras superficies. Medido en
+  fastmcp 4.0.2 y 4.0.3 (dos puntos, no una serie): un argumento con tipo
+  inválido ni llega a la tool — el gancho anota la línea con el argumento
+  reducido a forma y el archivo queda LIMPIO — pero el valor entero sale
+  por DOS puertas: el WARNING del framework en stderr (`Invalid arguments
+  for tool 'x': [{... 'input': '<el secreto>'}]`) y el error que recibe
+  el agente (`input_value='<el secreto>'` dentro del `ToolError`), o sea
+  que vuelve al modelo. `mask_error_details` no tapa ninguna de las dos
+  (probado con True y con False: idéntico). La puerta de stderr pasa por
+  `logging`, pero no se ve desde la raíz: el logger `fastmcp` tiene
+  `propagate=False` con handlers propios, y un handler en la raíz captura
+  cero — la trampa es instrumentar la raíz, ver nada y concluir que no
+  pasa por logging; un `logging.Filter` sobre el logger `fastmcp` sí la
+  ataja. Para la puerta del error devuelto no hay interruptor. Hermana
+  de `mask_error_details` (regla 4) y del precedente de uvicorn con el
+  `?token=` en claro. Lo que no coincide con la forma declarada cae a
   descripción (`{tipo, largo}`); una guarda compara la forma declarada
   contra el esquema que el servidor publica.
 - La lista es por nombre de campo y vale para todas las herramientas
@@ -269,6 +280,15 @@ en el MCP que se está construyendo.
 - Un test que corre una carrera entre las dos condiciones que debería
   separar no es "frágil": a veces mide otra cosa, y envenena un arnés de
   mutación. Se saca la carrera, no se sube el número hasta que ande.
+- Una simulación lleva un control de que simula: al simular "Python
+  3.10" bloqueando `tomllib`, envolver `__import__` no bloqueó nada
+  (`importorskip` usa `importlib.import_module`) y dio un falso rojo que
+  casi "arregla" código sano; un finder en `sys.meta_path` sí bloquea, y
+  se prueba primero que el módulo de verdad no importa. Y un skip que
+  deja el CI verde a costa de no medir lo que existía para medir es verde
+  en el sentido malo: la comparación se hace contra una expectativa
+  escrita a mano que vale en todas las versiones, y el skip queda solo
+  para lo que de verdad no existe ahí.
 - E2E contra un proceso real, lanzando el binario por su transporte: lo
   único que descubre ganchos que no disparan, campos que están en otro
   lado, y lo que en el mismo proceso no se puede probar — que el
@@ -304,7 +324,13 @@ en el MCP que se está construyendo.
   mandó y cuyo valor no aparece en ningún escalar de la respuesta"
   (comparación por valor, no por substring). Produce CANDIDATOS, nunca
   veredictos: hay argumentos que legítimamente no vuelven, y decidirlo
-  exigiría conocer cada verbo. Se tría a mano.
+  exigiría conocer cada verbo. Se tría a mano. La condición de entrada al
+  cazador es "no es un fracaso declarado", no "`ok` es verdadero": medido
+  sobre 44 líneas reales, 22 no traían el campo `ok` (21 verbos, casi
+  todos de lectura), y un cazador que filtra por `ok is True` está ciego
+  en la mitad del corpus, justo donde más sirve. Y el umbral de
+  "respuesta flaca" no cuenta `ok` como campo útil, o una lectura
+  legítima de dos campos cae como flaca.
 - Un hallazgo no se cierra arreglando el caso: se convierte en una forma
   que se barre en todo el repo. El registro encuentra uno; la forma
   encuentra los hermanos (p. ej. todo sitio que recorta salida sin decir
