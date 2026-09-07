@@ -1,13 +1,14 @@
 ---
 name: auditar-mcp
-description: Construir auditoría interna en un MCP para atribuir cada llamada a su sesión. Usar al construir o revisar un MCP cuyo backend comparten varias sesiones con credencial única.
+description: Construir auditoría interna en un MCP para atribuir cada llamada a su sesión y depurar la pasarela. Usar al construir o revisar un MCP cuyo backend comparten varias sesiones con credencial única.
 ---
 
 # Auditar MCP
 
-Hacer atribuible cada llamada de herramienta de un MCP compartido, sin que el
-registro fugue secretos ni mienta sobre resultados. Forense, no defensa: el
-registro responde "quién y qué quiso hacer"; no impide nada.
+Hacer atribuible cada llamada de herramienta de un MCP compartido y usar ese
+registro para mejorar y depurar la pasarela, sin que el registro fugue
+secretos ni mienta sobre resultados. Lo forense (quién hizo qué) es lo que
+no tiene reemplazo; lo que más rinde es la depuración.
 
 El agujero es estructural, no un descuido: un MCP típico es una pasarela
 fina que se apoya en lo que dice el servidor, y cuando el servidor no
@@ -19,110 +20,287 @@ comparando lo que entró con lo que salió. Frontera con logalizar:
 logalizar mira hacia adentro de una lógica propia; auditar-mcp mira el
 borde — y en una pasarela, el borde es casi todo lo que hay.
 
-## Invariantes
+Toda regla de abajo nació de una medición en un repo real y varias se
+cayeron al cambiar de transporte o de SDK. Ninguna se aplica sin medirla
+en el MCP que se está construyendo.
 
-- **Medir antes de elegir el patrón.** Ante resultados no atribuibles hay
-  tres respuestas de industria, ordenadas por lo que exigen del servidor:
-  clave de idempotencia (requiere servidor), petición-respuesta asíncrona
-  202+Location (requiere servidor), reconciliación con registro propio (no
-  requiere nada). La elección se decide leyendo el contrato real del
-  servidor (OpenAPI, docs), nunca suponiéndolo.
-- **Medir cómo reacciona el servidor a un pedido repetido**: rechaza
-  (reintento seguro), duplica (ensucia visible) o renombra en silencio
-  (éxito + daño a la vez — el peor). Si el servidor puede reescribir lo
-  enviado, eso no sirve como identidad: reconciliar contra una foto de ids
-  tomada ANTES de operar.
-- **La identidad se acuña en el propio MCP.** Con transporte stdio el
-  proceso ya es la sesión: uuid + pid + iniciada + cwd, en un módulo
-  importado una vez. El nombre del cliente (`claude-code`) nombra al
-  producto, no a la sesión; el `cwd` es lo que separa espacios de trabajo.
-  Declarar el límite: el nombre bonito de la sesión no viaja por el
-  protocolo — el registro separa por espacio de trabajo, no por sesión.
-- **Un solo punto de enganche**: el middleware del framework, nunca decorar
-  herramienta por herramienta — la herramienta N+1 nace auditada. Un gancho
-  declarado no es un gancho que corre: probarlo en aislamiento antes de
-  construir encima. Todo lo leído del contexto va defensivo (getattr +
-  try): auditar jamás puede romper una llamada.
-- **Un error devuelto también es un error.** En MCP el fallo idiomático es
-  una respuesta de error, no una excepción; sin esto el registro anota "ok"
-  sobre rechazos. Parsear el código de error de la respuesta (JSON, no
-  búsqueda de palabra) y anotar solo el código, nunca el mensaje.
-- **Lista blanca de argumentos, no lista negra**: protege lo que aún no se
-  inventó. Lo no declarado se reduce a forma (tipo + largo); herramientas
-  de texto libre (ssh, console, http) son opacas hasta en el tamaño — el
-  largo mide una password. Nombres genéricos en la lista blanca valen para
-  todas las herramientas futuras: cada excepción lleva su motivo escrito al
-  lado. Del error, el tipo o código; jamás el mensaje. Rige
-  custodiar-secretos.
-- **Un archivo por escritor, y el nombre dice quién escribió.** Tres marcas
-  van SIEMPRE en el nombre, incluso con ruta explícita configurada: el
-  nombre del MCP adelante (un `ls` agrupa por herramienta y `cat
-  <mcp>-auditoria-*.jsonl` junta los de uno), el id de sesión, y la marca
-  de crudo cuando corresponde (`<mcp>-auditoria-CRUDA-<sesion>.jsonl` —
-  quién escribió y que está sin redactar son dos cosas y las dos se leen de
-  un vistazo). El nombre del MCP se deriva de la distribución instalada
-  (`importlib.metadata`), nunca de una constante a mano: una skill que se
-  aplica copiando deja constantes copiadas sin cambiar, y entonces dos MCP
-  escriben con el mismo nombre — el archivo miente sobre su origen. Si la
-  ruta configurada ya nombra al MCP, no se repite. Un candado entre
-  procesos administra la colisión; el nombre la elimina. JSONL, y una
-  función que responda dónde escribe. Al .gitignore con patrón
-  `*auditoria-*.jsonl` (el prefijo del MCP rompe el patrón viejo, y
-  olvidarlo commitea material sensible).
-- **Apagado por omisión**: escribir en disco lo decide el operador vía
-  variable de entorno. Comprobar si algo regenera el archivo donde vive el
-  interruptor: un interruptor que se apaga solo es peor que no tenerlo.
-- **Modo crudo: suspende la redacción, y lo dice.** Para depurar hace falta
-  ver el argumento mandado Y la respuesta entera en la misma línea (única
-  prueba de que un parámetro llegó y se descartó en silencio). Un "casi
-  crudo" que redacta un poco no sirve y da falsa seguridad: o redacta, o
-  no. El precio: el archivo pasa a ser material sensible. Un modo que
-  suspende la redacción tiene que ser imposible de encender por inercia e
-  imposible de confundir encendido: se activa con una palabra (`crudo`),
-  nunca con `1`; el archivo se llama distinto y a gritos
-  (`auditoria-CRUDA-…`); cada línea lleva `"modo":"crudo"` (la marca viaja
-  con el contenido pegado suelto); y un WARNING en el log del proceso al
-  primer uso — contra el interruptor olvidado de una sesión anterior. Es el
-  punto donde auditar se vuelve logalizar y hereda sus obligaciones:
-  temporal, con fecha de apagado, se borra al terminar.
-- **El registro se prueba con fallos, no solo con éxitos**: secreto
-  centinela buscado en el texto crudo, parámetro inexistente, opacidad sin
-  tamaño, mensaje de excepción no copiado, apagado que no escribe, fallo de
-  escritura que no levanta, y un E2E contra proceso real — lo único que
-  descubre ganchos que no disparan.
-- **El registro declara su propio alcance**: qué anota, qué no, y por qué.
+## Reglas de desarrollo
+
+### 1. Medir antes de elegir el patrón
+
+- Ante resultados no atribuibles hay tres respuestas de industria,
+  ordenadas por lo que exigen del servidor: clave de idempotencia
+  (requiere servidor), petición-respuesta asíncrona 202+Location (requiere
+  servidor), reconciliación con registro propio (no requiere nada). Se
+  elige leyendo el contrato real (OpenAPI, docs), nunca suponiéndolo.
+- Medir cómo reacciona el servidor a un pedido repetido: rechaza (reintento
+  seguro), duplica (ensucia visible) o renombra en silencio (éxito + daño a
+  la vez — el peor). Si puede reescribir lo enviado, eso no sirve como
+  identidad: reconciliar contra una foto de ids tomada ANTES de operar.
+  Medir puede QUITAR requisitos, no solo agregarlos: un servidor que
+  rechaza no necesita la foto previa. Y "rechaza" puede depender de un
+  ajuste apagable del servidor: medir el ajuste, no solo la respuesta.
+
+### 2. Identidad: se acuña en el MCP, y se mide de dónde sale
+
+- El proceso del MCP es el único componente que uno controla y que ve la
+  llamada. La identidad se acuña ahí (uuid + pid + iniciada), en un módulo
+  importado una vez. Trampa nombrada: el `session_id` del framework puede
+  ser un UUID nuevo por llamada (fastmcp 4 bajo stdio reconstruye la
+  conexión por pedido); es el campo que uno agarra primero y el que no
+  sirve. El nombre del cliente (`claude-code`) nombra al producto, no a la
+  sesión.
+- Antes de darse por vencido con la sesión, medir el ENTORNO del proceso
+  hijo: el arnés puede heredarle el id exacto de la conversación y la raíz
+  del proyecto (en Claude Code: `CLAUDE_CODE_SESSION_ID`,
+  `CLAUDE_PROJECT_DIR`). Es un canal por producto, no un estándar: se
+  modela como catálogo de arneses, cada uno declarando su variable
+  testigo, sus campos y su límite. Sumar un arnés no toca código
+  compartido. Bajo HTTP el protocolo trae `mcp-session-id` y no hay que
+  acuñar nada.
+- Medir el `cwd` del proceso, no asumirlo: hay lanzadores que lo ponen en
+  `%TEMP%` para todos los espacios de trabajo, y entonces no separa nada.
+- El entorno que trae la identidad también trae secretos (tokens del
+  arnés). La fuente de identidad necesita su propia lista blanca: la
+  declaración del arnés ES la lista, ningún otro código lee `os.environ`,
+  y una prueba prohíbe por clase que una variable declarada contenga
+  TOKEN/SECRET/KEY/PASSWORD/CREDENTIAL.
+- Medir cuántas sesiones atiende un proceso, porque es una propiedad del
+  transporte: stdio = una (el stdin/stdout lo creó quien lanzó; dos
+  clientes no pueden compartirlo); streamable-http = muchas. Todo lo que
+  sigue depende de esa cuenta.
+
+### 3. Enganche: un solo punto, verificado contra la tabla de ruteo
+
+- La propiedad que sobrevive a los SDK es "el punto por donde pasa todo
+  `tools/call`", no "el middleware del framework" — conviven bases
+  incompatibles (`mcp` 1.x sin middleware, `mcp` 2.x con middleware,
+  `fastmcp` 4.x con hooks). Se usa la vía de extensión del framework
+  elegido; nunca decorar herramienta por herramienta: la N+1 nace
+  auditada.
+- Un gancho declarado no es un gancho que corre: probarlo en aislamiento.
+  Y un test que llama al override directo pasa por definición: la guarda
+  invoca el handler REGISTRADO en la tabla de ruteo del servidor, para que
+  falle si el SDK deja de ligarlo.
+- Todo lo leído del contexto va defensivo (getattr + try): auditar jamás
+  rompe una llamada. Del contexto del transporte se saca un campo por
+  nombre, nunca el diccionario: los headers HTTP traen `authorization`.
+- Los nombres de los campos del contexto se miden, no se suponen: el
+  protocolo dice `clientInfo`, el SDK puede exponer `client_info`; el
+  error da forma correcta con contenido vacío, sin fallar.
+
+### 4. Desenlace: un error tiene tres caminos, y el tipo se busca al fondo
+
+- Un error devuelto también es un error. Los caminos son tres: excepción;
+  retorno con `is_error` (sin excepción, el código viaja en el contenido);
+  y retorno normal que trae el rechazo adentro (`{aplicadas:0,
+  rechazadas:3}` — la forma normal de cualquier tool por lote). Los dos
+  primeros los decide el gancho; el tercero se ve porque el resumen del
+  retorno pasa por su lista blanca (regla 5) y queda al lado del estado:
+  el estado habla de la llamada, el resumen de cada ítem.
+- Parsear el código de error (JSON), no buscar la palabra: un texto que
+  menciona `error_code` no es un fallo.
+- Del error, el tipo o el código; jamás el mensaje, que arrastra los
+  argumentos. Pero medir si el framework envuelve: en fastmcp 4 el tipo de
+  afuera es siempre `ToolError` y el registro queda coherente y vacío. El
+  error real sobrevive en `__cause__`: recorrer la cadena hasta el fondo,
+  con tope de iteraciones (una cadena circular cuelga el servidor). El
+  envoltorio sirve cuando difiere: `ToolError` sobre `PlanNotFound` dice
+  "el dominio lo rechazó"; `NotFoundError` pelado dice "tool inexistente".
+- El middleware re-lanza sin envolver. Y aparte del registro, medir qué
+  recorta el framework antes de que el error llegue al modelo (en fastmcp,
+  `mask_error_details` explícito); es otra superficie, no la del log.
+
+### 5. Redacción: listas blancas, por forma, y una por superficie
+
+- Lista blanca, no lista negra: protege lo que aún no se inventó. Medir la
+  superficie antes de discutir: contar los nombres de argumento distintos
+  que existen de verdad suele dar un número chico y convierte el debate en
+  una cuenta.
+- Un campo es seguro por nombre + tipo + tope de largo, no por nombre: el
+  tipo lo elige el cliente y el registro anota ANTES de que nadie valide.
+  `lineas="<secreto>"` donde se esperaba un int llega al disco si la lista
+  solo mira el nombre. Lo que no coincide con la forma declarada cae a
+  descripción (`{tipo, largo}`); una guarda compara la forma declarada
+  contra el esquema que el servidor publica.
+- La lista es por nombre de campo y vale para todas las herramientas
+  futuras: los nombres genéricos (`x`, `name`) son decisiones con su motivo
+  escrito al lado, no defaults.
+- Herramientas de texto libre (ssh, console, http, tftp) son opacas hasta
+  en el tamaño: el largo de lo tipeado mide una password.
+- El retorno necesita su propia lista, con el defecto invertido: un
+  argumento no declarado se anota reducido a forma (omitirlo deja al
+  registro mintiendo sobre lo pedido); un retorno no declarado NO se anota
+  ni en forma (anotarlo de más convierte el registro en copia del
+  inventario). Misma palabra, decisión opuesta según el lado.
+- Trato `huella` (sha256 corto) para credenciales que hay que
+  correlacionar sin guardar. Se aplica en los DOS lados o no correlaciona
+  nada: la credencial nace en un retorno y se usa en un argumento.
+- El redactor falla cerrado ante cualquier problema, incluida una forma
+  inesperada de su propia configuración, y eso se prueba: auditar tampoco
+  puede romper el ARRANQUE. Caso nombrado: `por_defecto = "completo"` deja
+  la lista escrita y sin efecto; el archivo parece configurado.
+- Rige custodiar-secretos en todo el carril.
+
+### 6. Archivo: el nombre dice quién escribió; la sesión va en cada línea
+
+- El nombre identifica al ESCRITOR; la sesión identifica la LLAMADA y va
+  en cada línea. Bajo stdio proceso == sesión y el id también puede ir en
+  el nombre; bajo HTTP un proceso atiende N sesiones y ponerlas en el
+  nombre da N archivos abiertos para una colisión que no existe (el
+  candado de hilos ya ordena a los escritores de un proceso).
+- Marcas que van SIEMPRE en el nombre, incluso con ruta explícita: el
+  nombre del MCP adelante (`ls` agrupa por herramienta; `cat
+  <mcp>-auditoria-*.jsonl` junta los de uno) y la marca de crudo cuando
+  corresponde (`<mcp>-auditoria-CRUDA-…`): quién escribió y que está sin
+  redactar son dos cosas y las dos se leen de un vistazo. Si la ruta
+  configurada ya nombra al MCP, no se repite.
+- El nombre del MCP se deriva de la distribución instalada, nunca de una
+  constante a mano: la skill se aplica copiando, y una constante copiada
+  hace que dos MCP escriban con el mismo nombre. Medir si la instalación
+  lo permite: en modo editable (como corre un MCP en desarrollo) suele no
+  haber camino del paquete a la distribución; ahí la constante se ata al
+  manifiesto (`[project].name`) con una prueba que en una copia falla.
+  Segunda fuente válida: el nombre que el servidor declara a sus clientes.
+- JSONL, una línea por llamada; una función que responda dónde escribe
+  (los tests la usan). La cabecera se escribe con la primera línea, no al
+  arrancar: un servidor que nadie usó no deja rastro.
+- Al `.gitignore` con patrón `*auditoria-*.jsonl`: el prefijo del MCP
+  rompe el patrón sin comodín adelante, y olvidarlo commitea material
+  sensible.
+
+### 7. Interruptor: apagado por omisión, y con salida visible
+
+- Escribir en disco lo decide el operador vía variable de entorno; sin
+  ella, apagado. Comprobar quién regenera el archivo donde vive: un `.env`
+  reescrito entero desde el gestor de secretos apaga el interruptor en
+  silencio, y un interruptor que se apaga solo es peor que no tenerlo. Va
+  donde no lo regeneren (p. ej. el bloque `env` del registro del cliente).
+- Medir por dónde llega el `.env` al proceso: según el mecanismo de carga,
+  una variable puede quedar en las settings del framework sin exportarse a
+  `os.environ` (y descartarse en silencio por `extra="ignore"`), o llegar
+  a todo. No generalizar de un repo a otro.
+- La herramienta de estado que el MCP ya tiene informa la auditoría: modo
+  activo, ruta del archivo de esta sesión, aviso si está en crudo, y el
+  acumulado del DIRECTORIO (archivos, crudos, bytes) — no del archivo
+  propio, porque la pregunta es la del que se olvidó de apagarlo hace tres
+  días. Va en la herramienta de estado y no en una nueva: una dedicada a
+  "¿cómo está la auditoría?" no la llama nadie, que es por lo que el
+  problema existía. Si contar falla, informa el tipo de error y no tumba
+  el `check`.
+
+### 8. Modo crudo: suspende la redacción, y lo dice
+
+- Para depurar hace falta ver el argumento mandado Y la respuesta entera
+  en la misma línea (separados no se cruzan). Un "casi crudo" que redacta
+  un poco no sirve y da falsa seguridad: o redacta, o no. Mientras el MCP
+  está en desarrollo, el crudo es el modo de trabajo, no una escotilla; el
+  formato se decide por él.
+- El precio: el archivo pasa a ser material sensible. Un modo que suspende
+  la redacción tiene que ser imposible de encender por inercia e imposible
+  de confundir encendido: se activa con una palabra (`crudo`), nunca con
+  `1`; el archivo se llama distinto y a gritos; cada línea lleva
+  `"modo":"crudo"` (la marca viaja con el contenido pegado suelto); WARNING
+  en el log del proceso al primer uso — y como eso es una vez por proceso
+  y nadie mira el log, el acumulado de la regla 7 es lo que lo recuerda.
+- Es el punto donde auditar se vuelve logalizar y hereda sus
+  obligaciones: temporal, con fecha de apagado, se borra al terminar.
+
+### 9. Pruebas: de fuga, en los dos modos, y con un guardián que las corra
+
+- La mayoría de los tests son de fuga, no de formato: secreto centinela
+  buscado en el TEXTO CRUDO del archivo (no en el objeto parseado), por
+  cada camino; parámetro que no existe (la razón de ser de la lista
+  blanca); opacas sin tamaño; mensaje de excepción no copiado; apagado que
+  no escribe; fallo de escritura que no levanta; marcas del nombre con
+  ruta explícita.
+- Las guardas son conscientes del modo, con expectativa invertida: en
+  redactado el centinela NO aparece; en crudo SÍ debe aparecer. Sin la
+  segunda, una redacción rota que borra todo pasa en verde y el modo de
+  depurar deja de depurar sin que nadie lo note. Una guarda que solo
+  prueba ausencia se cumple sola cuando el código no llegó ahí.
+- Ejercitar con llamadas que fallan, por los tres caminos de la regla 4.
+  Un registro probado solo con éxitos miente justo cuando importa.
+- Cada decisión se prueba por reversión: romperla a mano y verificar qué
+  test la caza. Una comprobación redundante no es una guarda y no se le
+  puede escribir un test.
+- Un test que corre una carrera entre las dos condiciones que debería
+  separar no es "frágil": a veces mide otra cosa, y envenena un arnés de
+  mutación. Se saca la carrera, no se sube el número hasta que ande.
+- E2E contra un proceso real: lo único que descubre ganchos que no
+  disparan y campos que están en otro lado.
+- Verificar que exista un runner que corra estos tests (CI o equivalente)
+  y decirlo si no lo hay. Un test de fuga que nadie corre no es
+  protección, es documentación de una intención — y el que se rompe en
+  silencio es el que impedía escribir una password en disco.
+
+### 10. Usar el registro: cazar, no solo leer
+
+- Del registro crudo sale una señal mecanizable: "argumento que el cliente
+  mandó y cuyo valor no aparece en ningún escalar de la respuesta"
+  (comparación por valor, no por substring). Produce CANDIDATOS, nunca
+  veredictos: hay argumentos que legítimamente no vuelven, y decidirlo
+  exigiría conocer cada verbo. Se tría a mano.
+- Un hallazgo no se cierra arreglando el caso: se convierte en una forma
+  que se barre en todo el repo. El registro encuentra uno; la forma
+  encuentra los hermanos (p. ej. todo sitio que recorta salida sin decir
+  cuánto quedó afuera).
+- El registro declara su propio alcance, incluido lo que NO ve: encuentra
+  defectos en el borde de una llamada; lo que el MCP DECLARA (el texto de
+  instrucciones, las descripciones de herramientas) no lo ve, porque nadie
+  llama a una descripción. Esa prosa es superficie aparte: toda afirmación
+  del texto expuesto se verifica contra el runtime (`list_tools()`), nunca
+  contra otro texto, barriendo por eje (hosts, puertos, versiones,
+  nombres de herramientas, promesas absolutas).
+
+### 11. Lo que queda afuera, y se dice
+
+Forense y depuración, no defensa. La otra mitad es identidad propia contra
+el servidor (usuarios/ACL por espacio de trabajo en vez de credencial
+compartida); si el servidor lo soporta, se mide y se declara aplazado o
+hecho. Riesgo conocido: encender una ACL vacía con usuarios no-admin
+deniega todo — crear usuarios y entradas ANTES de dejar el admin.
 
 ## Flujo
 
 1. Medir el contrato del servidor y su reacción al pedido repetido; elegir
-   el patrón por descarte medido.
-2. Acuñar identidad de sesión en el MCP; verificar por medición qué campos
-   del contexto llegan de verdad (y con qué nombre).
-3. Enganchar el middleware único; ejercitarlo con llamadas que fallan.
-4. Diseñar la redacción por lista blanca con sus excepciones motivadas.
-5. Interruptor apagado por omisión; verificar quién regenera su archivo.
-6. Suite con los tests de fuga; E2E contra proceso real.
-7. Declarar lo que queda afuera (p. ej. identidad propia contra el
-   servidor: usuarios/ACL por espacio de trabajo, con su riesgo de
-   deny-all si la ACL nace vacía).
+   el patrón por descarte medido (regla 1).
+2. Medir cuántas sesiones atiende un proceso, el entorno heredado y el
+   `cwd` real; acuñar identidad y catalogar el arnés (regla 2).
+3. Enganchar el punto único; probarlo contra el handler registrado;
+   ejercitarlo con los tres caminos de error (reglas 3 y 4).
+4. Medir la superficie de argumentos y retornos; escribir las listas
+   blancas por forma, con excepciones motivadas (regla 5).
+5. Nombre del archivo, interruptor apagado por omisión, estado visible
+   con acumulado del directorio (reglas 6 y 7).
+6. Modo crudo con sus cuatro protecciones; suite de fuga en los dos
+   modos; E2E contra proceso real; runner verificado (reglas 8 y 9).
+7. Cazar en el registro crudo, barrer por forma, declarar alcance y lo
+   que queda afuera (reglas 10 y 11).
 
 ## Referencia viva
 
-Implementación verificada en vivo: repo `lucky-tool-gns3`, commits
-`8abbf6f`, `982835c`, `3a3f8b8`, `01c11a7`, `e42988c` — anclar ahí, no a
-rutas de archivos, que se mueven. Leer los cinco en orden: los cuatro
-últimos son huecos aparecidos después de que la primera versión ya estaba
-"terminada" — el material de qué revisar cuando parece listo.
+Tres implementaciones medidas, en tres combinaciones distintas: repo
+`lucky-tool-gns3` (stdio + fastmcp 4; commits `8abbf6f`, `982835c`,
+`3a3f8b8`, `01c11a7`, `e42988c`, `4d9088d`, `189a6b4`), repo
+`lucky-tool-mtk-chr` (streamable-http + SDK `mcp` 1.x; commit `3ccfd57`,
+`docs/retroalimentacion-auditar-mcp.md`), repo `lucky-tool-netbox`
+(stdio + fastmcp 4, catálogo de arneses; commit `1382090`). Anclar en
+commits, no en rutas. Leer los de gns3 en orden: los que siguen al primero
+son huecos aparecidos después de "terminado".
 
 ## Salida
 
 ```text
 PATRON=IDEMPOTENCIA|ASYNC|RECONCILIACION
 MEDICION_SERVIDOR=<contrato leído y reacción a repetido>
-IDENTIDAD=<campos acuñados y su límite declarado>
-ENGANCHE=MIDDLEWARE|BLOCKED
-REDACCION=WHITELIST
-TESTS_FUGA=PASS|FAIL
-INTERRUPTOR=OFF_POR_OMISION
+TRANSPORTE=<stdio|http> SESIONES_POR_PROCESO=<1|N>
+IDENTIDAD=<campos acuñados, canal medido, límite declarado>
+ENGANCHE=REGISTRADO|BLOCKED
+CAMINOS_DE_ERROR=3
+REDACCION=WHITELIST_ARGS+WHITELIST_RETORNO+FORMA
+ARCHIVO=<mcp>-auditoria[-CRUDA]-…
+INTERRUPTOR=OFF_POR_OMISION ESTADO_VISIBLE=SI|NO
+TESTS_FUGA=PASS|FAIL RUNNER=PRESENTE|AUSENTE
 ALCANCE_DECLARADO=...
 ```
