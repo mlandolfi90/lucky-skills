@@ -26,7 +26,7 @@ receta R1–R11 de la skill `auditar-mcp` 1.2.2.
 ```toml
 # pyproject.toml del MCP anfitrión
 dependencies = [
-    "lucky-auditoria-mcp @ git+https://github.com/mlandolfi90/lucky-skills@auditoria-mcp-v0.3.0#subdirectory=packages/lucky-auditoria-mcp",
+    "lucky-auditoria-mcp @ git+https://github.com/mlandolfi90/lucky-skills@auditoria-mcp-v0.3.1#subdirectory=packages/lucky-auditoria-mcp",
 ]
 ```
 
@@ -308,12 +308,19 @@ logueando `?token=<JWT>` en claro.
 
 | Caso | Estado | Enganche |
 |---|---|---|
-| Python · fastmcp 4 | medido (gns3, netbox, mtk-chr) | `add_middleware` |
+| Python · **fastmcp 4.0.3** (con `mcp` 2.1.1) | medido: suite propia, y en repos vivos con 4.0.2 | `add_middleware` |
 | Python · `mcp` 1.x | **pendiente** | `request_handlers[CallToolRequest]` |
 | Python · `mcp` 2.x | pendiente | middleware nativo |
 | Node · SDK TypeScript | pendiente | paquete hermano, mismo JSONL |
-| stdio | medido | sesión = proceso |
+| stdio | medido en **Python 3.12.10** y **3.13** | sesión = proceso |
 | streamable-http | escrito; **medición pendiente** en un servidor vivo | `mcp-session-id` en cada línea |
+
+Las versiones de la tabla son exactas a propósito, y las del `pyproject.toml` están
+pineadas con `==`: un rango afirma compatibilidad con versiones que nadie probó,
+incluidas las que todavía no existen. La suite corrió a mano en **3.12.10** y en
+**3.13** (esta última por `skills-v3-65`, en un venv limpio). **Python 3.10 no
+lo midió nadie**: es el piso declarado y el único que ejercita el import gateado
+por versión, y el CI que lo cubriría no se ha ejecutado nunca.
 
 El enganche de `mcp` 1.x está **escrito y no medido**: el override que sí se
 midió es el de otro repo, sobre `@server.call_tool()`; el de acá envuelve el
