@@ -445,7 +445,15 @@ compartido (`lucky-auditoria`); lo que se mide en cada uno vive en su
   cualquier cliente conectado; su propia llamada se anota pero su retorno
   es opaco para el registro (leer el registro no puede escribir el
   registro con el registro adentro); y devuelve páginas con tope
-  declarado, diciendo cuántas líneas quedaron afuera (regla 10).
+  declarado, diciendo cuántas líneas quedaron afuera (regla 10). Dos
+  consecuencias medidas al implementarla: los archivos crudos no se
+  listan ni por nombre — una lista con los crudos tachados ya filtra
+  cuántas sesiones de depuración hubo y cuándo; y `cazar` por esta vía
+  devuelve vacío Y explica por qué (necesita la respuesta entera, que
+  solo vive en el crudo): un `[]` a secas se leería como "no hay nada que
+  cazar", afirmación que la herramienta no puede hacer. La herramienta
+  no se instala sola con el registro: bajo stdio agranda la superficie
+  del MCP sin resolver nada; la decide el anfitrión.
 - **R10 — Retrofit en tres pasos.** Instalar el paquete; una línea en el
   arranque (`instalar_auditoria(servidor, nombre=…)`, nombre obligatorio,
   enganche elegido por framework detectado); copiar el `.example` y
