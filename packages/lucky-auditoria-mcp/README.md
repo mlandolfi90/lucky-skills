@@ -26,7 +26,7 @@ receta R1–R11 de la skill `auditar-mcp` 1.2.2.
 ```toml
 # pyproject.toml del MCP anfitrión
 dependencies = [
-    "lucky-auditoria-mcp @ git+https://github.com/mlandolfi90/lucky-skills@auditoria-mcp-v0.3.1#subdirectory=packages/lucky-auditoria-mcp",
+    "lucky-auditoria-mcp @ git+https://github.com/mlandolfi90/lucky-skills@auditoria-mcp-v0.3.3#subdirectory=packages/lucky-auditoria-mcp",
 ]
 ```
 
@@ -317,22 +317,31 @@ logueando `?token=<JWT>` en claro.
 
 Las versiones de la tabla son exactas a propósito, y las del `pyproject.toml` están
 pineadas con `==`: un rango afirma compatibilidad con versiones que nadie probó,
-incluidas las que todavía no existen. A mano, la suite corrió sólo en **Python
-3.12.10**, en dos venv distintos de la misma máquina — que no son dos entornos.
-Lo demás lo mide el CI (`.github/workflows/auditoria-mcp.yml`), y hay que
-**leerlo**: `gh run list --workflow auditoria-mcp.yml`. Estado al 2026-09-07:
-**3.12 y 3.13 en verde** en ubuntu y windows; **3.10 en rojo** en 0.3.1 — el
-test que comparaba `tomli` contra `tomllib` importaba `tomllib` donde no existe,
-o sea que el único test que medía el respaldo era el que no podía correr donde el
-respaldo se usa. Desde 0.3.2 ese test se salta en 3.10 con motivo, y la celda
-3.10 mide lo que tiene que medir: que `cargar()` funciona con `tomli` detrás.
+incluidas las que todavía no existen. Las versiones del `pyproject.toml` están pineadas con `==`: un rango afirma
+compatibilidad con versiones que nadie probó, incluidas las que todavía no
+existen. A mano, la suite corrió sólo en **Python 3.12.10**, en dos venv
+distintos de la misma máquina — que no son dos entornos. Lo demás lo mide el CI
+(`.github/workflows/auditoria-mcp.yml`), y hay que **leerlo**:
+`gh run list --workflow auditoria-mcp.yml`.
 
-Este párrafo se corrigió dos veces. Primero decía que 3.13 estaba medida a mano:
-falso, lo dio por sentado una sesión y lo copié sin verificarlo. Después decía
-que el CI "no se ha ejecutado nunca": también falso — había corrido doce veces,
-las tres últimas en rojo, y ninguna de las dos sesiones había mirado los runs.
-Es la razón por la que las versiones se declaran por nombre y el CI se lee con
-el comando, no de memoria.
+Estado al 2026-09-07, leído de los runs: **3.10, 3.12 y 3.13 en verde**, en
+`ubuntu-latest` y `windows-latest`.
+
+Este párrafo se corrigió dos veces, en direcciones opuestas, y las dos quedan
+escritas porque son la razón de la regla:
+
+1. Dijo que **3.13 estaba medida a mano**. Falso: lo dio por sentado una sesión,
+   se copió sin verificar, y quedó en dos repos con forma de medición.
+2. Después dijo que **el CI no se había ejecutado nunca**. También falso: había
+   corrido doce veces, las tres últimas en **rojo**, y ninguna de las dos
+   sesiones había mirado los runs. El test que rompía era el escrito para medir
+   3.10, que importaba `tomllib` — el módulo que en 3.10 no existe. El único
+   test que medía el respaldo era el que no podía correr donde el respaldo se
+   usa.
+
+De ahí la forma: **exigir que exista un runner no alcanza; hay que leer su
+resultado.** Un CI rojo que nadie mira vale lo mismo que uno que no corre, con
+el agravante de que parece cobertura.
 
 El enganche de `mcp` 1.x está **escrito y no medido**: el override que sí se
 midió es el de otro repo, sobre `@server.call_tool()`; el de acá envuelve el

@@ -139,38 +139,53 @@ class TestLaHuellaDeLaConfigViajaALaCabecera:
         assert Redaccion.cerrada("por la prueba").huella_config is None
 
 
+# Lo que esta configuracion TIENE que dar, escrito a mano y no derivado de
+# ningun parser. Es lo unico que se puede comprobar en 3.10, donde no hay
+# `tomllib` contra que comparar.
+_ESPERADO = {
+    "argumentos": {
+        "action": {"tipo": "str", "largo_max": 32},
+        "name": {"tipo": "str", "largo_max": 128},
+        "lineas": {"tipo": "int"},
+    },
+    "herramientas": {"opacas": ["ssh"]},
+    "huellas": {"campos": ["token"]},
+    "retorno": {"failed": "fallaron", "total_operations": "total"},
+    "conteos": {
+        "summary": {"total_items": "total", "failed": "fallaron", "succeeded": "salieron"}
+    },
+}
+
+
 class TestElRespaldoDeTomlEnPython310:
     """`tomllib` entro en 3.11; abajo el paquete usa `tomli`, y eso hay que medirlo.
 
-    Esta maquina solo tiene 3.12, asi que el import gateado por version
-    (`except ModuleNotFoundError: import tomli`) NO se ejercita aca: lo corre el
-    CI en su celda de 3.10. Ese CI corrio, y en rojo: la comparacion de abajo
-    importaba `tomllib` en un interprete donde no existe, o sea que el test
-    que media el respaldo era el unico que no podia correr donde el respaldo
-    se usa. En 3.10 se salta con motivo; la segunda prueba si corre ahi,
-    porque en 3.10 `modulo.tomllib` YA es `tomli` y la compara consigo misma
-    -lo que prueba es que cargar() no depende de cual de los dos este atras.
+    Si los dos parsearan distinto, un MCP en 3.10 tendria otras listas blancas
+    que el mismo MCP en 3.13 -mismo archivo, otra redaccion- y nadie lo notaria.
 
-    Lo que SI se puede medir sin un 3.10 es la otra mitad de la afirmacion: que
-    la version pineada de `tomli` parsea esta configuracion igual que `tomllib`.
-    Si difirieran, un MCP en 3.10 tendria otras listas blancas que el mismo MCP
-    en 3.13 -mismo archivo, otra redaccion- y nadie lo notaria.
+    La primera version de esta clase importaba `tomllib` a secas y ROMPIA el CI
+    en 3.10, que es justo la version que venia a cubrir: en 3.10 `tomllib` no
+    existe. El test escrito para medir el piso no podia correr en el piso.
 
-    Se declara lo que cubre y lo que no, en vez de dejar la version pineada
-    afirmando mas de lo medido.
+    Se arregla comparando contra una expectativa ESCRITA A MANO, que vale en
+    las dos, y dejando la comparacion cruzada solo donde hay con que cruzar. Un
+    `skip` a secas habria dejado 3.10 sin medir nada, que es lo que se queria
+    evitar.
     """
 
-    def test_tomli_parsea_esta_config_igual_que_tomllib(self):
+    def test_tomli_parsea_esta_config_como_se_espera(self):
         import tomli
 
+        assert tomli.loads(CONFIG) == _ESPERADO
+
+    def test_y_tomllib_da_lo_mismo_donde_existe(self):
+        # Solo >=3.11. En 3.10 no hay nada que cruzar, y el test de arriba ya
+        # midio lo que importa.
         tomllib = pytest.importorskip(
-            "tomllib",
-            reason="tomllib entro en 3.11; en 3.10 el respaldo ES tomli, no hay contraparte",
+            "tomllib", reason="tomllib entro en 3.11; en 3.10 rige el test de arriba"
         )
 
-        crudo = CONFIG.encode("utf-8")
-
-        assert tomli.loads(crudo.decode("utf-8")) == tomllib.loads(crudo.decode("utf-8"))
+        assert tomllib.loads(CONFIG) == _ESPERADO
 
     def test_una_redaccion_cargada_con_tomli_da_las_mismas_reglas(self, tmp_path, monkeypatch):
         import tomli

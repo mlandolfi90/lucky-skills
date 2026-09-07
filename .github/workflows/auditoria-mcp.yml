@@ -22,6 +22,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+<<<<<<< HEAD
+        # Las tres corren y las tres tienen que quedar verdes. Aca hubo un
+        # comentario diciendo que este CI "no se ejecuto nunca": era falso, y
+        # lo escribio quien no lo miro. Habia corrido doce veces, verde hasta
+        # 0.2.0 y rojo en las tres siguientes.
+        #
+        # 3.10 no es un extremo decorativo: es el unico que ejercita el import
+        # gateado por version (`tomli` en vez de `tomllib`), y es justo donde
+        # rompia el test escrito para medirlo.
+=======
         # Que esta medido de verdad, y por quien:
         #   3.12.10 -> a mano, las dos sesiones, en dos venv de la misma
         #              maquina (que no son dos entornos); y este CI en verde,
@@ -36,6 +46,7 @@ jobs:
         #              motivo; la celda 3.10 mide el respaldo real (tomli).
         # Un CI que corre no es una medicion hasta que alguien lee el
         # resultado: `gh run list --workflow auditoria-mcp.yml`.
+>>>>>>> origin/main
         python: ["3.10", "3.12", "3.13"]
         # Los dos, porque el directorio por defecto se resuelve distinto
         # (`%LOCALAPPDATA%` contra `XDG_STATE_HOME`) y ahi vive la regla que
