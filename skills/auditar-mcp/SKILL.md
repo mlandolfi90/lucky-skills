@@ -316,8 +316,16 @@ en el MCP que se está construyendo.
   la guarda tiene su trampa: si acusa solo lo que aparece NUEVO, se apaga
   sola en la máquina donde ya se ensució — el autor no vio nada porque la
   carpeta existía de corridas anteriores, y el CI limpio lo acusó en las
-  seis celdas. La guarda compara contra un estado limpio, o borra antes
-  de empezar.
+  seis celdas. La guarda compara ARCHIVOS contra un estado limpio, o
+  borra antes de empezar. Y las guardas viajan en el kit del paquete, no
+  en el conftest de un repo: la versión rota es justo la que otro
+  anfitrión habría copiado.
+- Una guarda sin prueba propia se pudre en silencio, y la reversión es
+  lo único que lo dice: las guardas del entorno no las ejercía nada —
+  romper la comparación no ponía nada en rojo — hasta que tuvieron su
+  propio archivo de tests con el caso exacto que se escapó (un archivo
+  nuevo dentro de una carpeta vieja). La protección existe y nadie
+  comprueba que proteja: la misma forma, una capa más arriba.
 - Verificar que exista un runner que corra estos tests (CI o equivalente)
   y decirlo si no lo hay. Un test de fuga que nadie corre no es
   protección, es documentación de una intención — y el que se rompe en
