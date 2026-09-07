@@ -36,6 +36,7 @@ _ACUÑADO = uuid.uuid4().hex[:12]
 _INICIADA_EN = datetime.now(timezone.utc).isoformat()
 _CLIENTE: dict[str, Any] = {}
 _SESION_DEL_TRANSPORTE: str | None = None
+_RAIZ_DEL_PROYECTO: str | None = None
 
 
 def anotar_cliente(
@@ -52,6 +53,28 @@ def anotar_cliente(
         _CLIENTE["version"] = version
     if declara_roots:
         _CLIENTE["declara_roots"] = True
+
+
+def anotar_raiz_del_proyecto(ruta: str | None) -> None:
+    """La raiz que el cliente declaro por `roots`, cuando el arnes no la dio.
+
+    La pide el ENGANCHE, que es el que tiene la sesion a mano, y no este modulo:
+    preguntar por el protocolo es una llamada al cliente, y la identidad tiene
+    que poder responderse sin red. Se anota una vez y queda.
+    """
+    global _RAIZ_DEL_PROYECTO
+    _RAIZ_DEL_PROYECTO = ruta or None
+
+
+def raiz_del_proyecto() -> str | None:
+    """Que espacio de trabajo llamo, por orden de confianza. Nunca el cwd.
+
+    El cwd es lo que el lanzador le dejo al hijo -medido: `%TEMP%`, o el repo de
+    otro-, no una propiedad del proyecto. Si no hay ninguna de las dos fuentes,
+    se devuelve None y el que llama decide: no se adivina.
+    """
+    del_arnes = arneses.detectar().get("proyecto")
+    return del_arnes or _RAIZ_DEL_PROYECTO
 
 
 def anotar_sesion_del_transporte(identificador: str | None) -> None:
@@ -86,7 +109,10 @@ def get_sesion() -> dict[str, Any]:
         # Se informa porque a veces es el dato -y cuesta cero-, pero no se usa
         # para decidir nada: ver el encabezado del modulo.
         "cwd": os.getcwd(),
-        "arnes": arneses.detectar(),
+        # El proyecto que llamo va en la LINEA siempre, venga del arnes o de
+        # los `roots` del protocolo. Bajo HTTP es el unico lugar donde puede
+        # ir: la carpeta es del servidor, que no es de ningun proyecto.
+        "arnes": {**arneses.detectar(), "proyecto": raiz_del_proyecto()},
         "cliente": dict(_CLIENTE) or None,
     }
 

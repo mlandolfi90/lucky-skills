@@ -19,6 +19,16 @@ from lucky_auditoria.registro import MAX_RESPUESTA, tipo_del_error
 def auditor(tmp_path, monkeypatch):
     config = tmp_path / "auditoria.toml"
     config.write_text(CONFIG, encoding="utf-8")
+    # El estado del usuario va a `tmp_path`, y no alcanza con apuntar la
+    # variable a un archivo: desde R1, `crudo` IGNORA la ruta elegida y va al
+    # estado del usuario a proposito. Sin esto, cada test que prueba el modo
+    # crudo deja un archivo con el centinela adentro en el `%LOCALAPPDATA%`
+    # real de quien corre la suite. Paso, y lo encontro barrer los tests de a
+    # uno mirando el disco, no leerlos.
+    estado = tmp_path / "estado-del-usuario"
+    estado.mkdir()
+    monkeypatch.setenv("LOCALAPPDATA", str(estado))
+    monkeypatch.setenv("XDG_STATE_HOME", str(estado))
     a = Auditor("mcp-de-prueba", config=config, version="1.2.3", commit="abc123")
     monkeypatch.setenv(a.variable, str(tmp_path / "reg.jsonl"))
     return a

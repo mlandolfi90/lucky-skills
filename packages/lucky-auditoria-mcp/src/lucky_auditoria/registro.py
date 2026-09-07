@@ -5,6 +5,7 @@ tumbe la operacion convierte una mejora en un modo de fallo nuevo, asi que todo
 lo que puede fallar se avisa por el log del proceso y sigue.
 """
 
+import hashlib
 import json
 import logging
 import os
@@ -25,6 +26,7 @@ ESQUEMA = 1
 
 _ARCHIVO_POR_DEFECTO = "auditoria.jsonl"
 _DIRECTORIO = "registro_auditoria"
+_SIN_PROYECTO = "_sin_proyecto"
 
 # El modo crudo se enciende con una PALABRA, no con un `1`: encenderlo tiene que
 # ser un acto deliberado y no el resultado de copiar un ejemplo.
@@ -102,6 +104,7 @@ class Auditor:
         self._cabecera_escrita: set = set()
         self._aviso_crudo_dado = False
         self._aviso_palabra_rara_dado = False
+        self._aviso_sin_proyecto_dado = False
 
     # -- el interruptor -----------------------------------------------------
 
@@ -152,44 +155,115 @@ class Auditor:
 
     # -- donde escribe ------------------------------------------------------
 
-    def directorio_por_defecto(self) -> Path | None:
-        """El directorio del USUARIO, nunca el del proyecto. Y nunca el cwd.
-
-        El cwd de un MCP por stdio no es el repo que uno cree: lo hereda de
-        quien lo lanzo. Medido el 2026-09-07, un mismo MCP registrado UNA vez
-        corria con el cwd puesto en tres repos ajenos y dejo archivos crudos con
-        credenciales en los tres; el `.gitignore` que lo protegia vivia en su
-        propio repo mientras el archivo caia en cualquier otro.
-
-        No se arregla ensanchando `.gitignore`: eso cubre los repos que uno
-        conoce y deja pasar el proximo. Tampoco atajando el `%TEMP%`, que ataja
-        el caso que hace ruido y deja pasar el que hace daño.
-
-        Una ruta absoluta en la variable sigue mandando: el default protege al
-        que no eligio, no le saca la eleccion al que si.
-
-        Devuelve None si no se puede crear, y entonces NO se escribe. Aca habia
-        una caida al cwd -"mejor el cwd que perder el registro"- y estaba mal:
-        no escribir no rompe nada, porque el escritor ya se traga sus fallos,
-        mientras que la caida pone el archivo con credenciales justo en el repo
-        ajeno del que este parrafo habla. Perder un registro es barato; dejarlo
-        donde no va, no.
-        """
+    def _estado_del_usuario(self) -> Path:
+        """`%LOCALAPPDATA%`, si no `XDG_STATE_HOME`, si no `~/.local/state`."""
         base = os.environ.get("LOCALAPPDATA") or os.environ.get("XDG_STATE_HOME")
-        raiz = Path(base) if base else Path.home() / ".local" / "state"
-        destino = raiz / self.nombre / _DIRECTORIO
+        return Path(base) if base else Path.home() / ".local" / "state"
+
+    def _carpeta_del_proyecto(self, proyecto: str) -> str:
+        """Un nombre de carpeta para un proyecto, sin colisiones silenciosas.
+
+        El nombre a secas alcanzaria casi siempre y fallaria feo cuando no: dos
+        checkouts del mismo repo en rutas distintas escribirian en la misma
+        carpeta y sus registros se leerian como uno solo. La huella corta de la
+        ruta completa lo evita sin volver el nombre ilegible.
+        """
+        limpio = Path(proyecto).name or "raiz"
+        huella = hashlib.sha256(str(proyecto).encode("utf-8")).hexdigest()[:8]
+        return f"{limpio}-{huella}"
+
+    def _destino(self, crudo: bool) -> Path:
+        """La tabla de R1, explicita. Cada celda es una decision distinta.
+
+        | transporte | modo      | donde                                     |
+        |------------|-----------|-------------------------------------------|
+        | stdio      | redactado | `<proyecto>/registro_auditoria/`          |
+        | stdio      | crudo     | `<estado>/registro_auditoria/<proyecto>/` |
+        | stdio      | sin proy. | `<estado>/registro_auditoria/_sin_proyecto/` + aviso |
+        | http       | ambos     | `<estado>/registro_auditoria/<mcp>/`      |
+
+        El crudo NUNCA va bajo un arbol de proyecto, aunque se lo conozca. Un
+        `.gitignore` lo respeta git y nadie mas: un zip, un rsync, un `COPY .`
+        de Docker, un sdist o un "subir carpeta" copian el arbol entero. El
+        redactado sobrevive a eso; el crudo lleva credenciales, y es el unico
+        lugar donde equivocarse no se deshace.
+        """
+        estado = self._estado_del_usuario() / _DIRECTORIO
+        if self.transporte != "stdio":
+            # El servidor no es de ningun proyecto: es un contenedor de larga
+            # vida. El proyecto que llamo va como campo de la linea.
+            return estado / self.nombre
+        proyecto = identidad.raiz_del_proyecto()
+        if not proyecto:
+            if not self._aviso_sin_proyecto_dado:
+                self._aviso_sin_proyecto_dado = True
+                logger.warning(
+                    "AUDITORIA sin proyecto: ni el arnes ni los roots del "
+                    "cliente dijeron cual espacio de trabajo llamo, y el cwd no "
+                    "sirve para adivinarlo. El registro va a %s.",
+                    estado / _SIN_PROYECTO,
+                )
+            return estado / _SIN_PROYECTO
+        if crudo:
+            return estado / self._carpeta_del_proyecto(proyecto)
+        return Path(proyecto) / _DIRECTORIO
+
+    def directorio_por_defecto(self) -> Path | None:
+        """El directorio donde va el registro, creado y protegido, o None.
+
+        Que celda de la tabla aplica lo decide `_destino`. Aca queda lo comun:
+        crear, autoignorar la primera vez, y no caer a ningun lado si no se
+        puede -no escribir tampoco rompe, porque el escritor ya se traga sus
+        fallos, y el cwd no se usa nunca.
+        """
+        destino = self._destino(self.modo() == "crudo")
         try:
+            nueva = not destino.exists()
             destino.mkdir(parents=True, exist_ok=True)
+            if nueva:
+                self._autoignorar(destino)
         except OSError as fallo:
             logger.warning(
                 "AUDITORIA APAGADA: no se pudo crear %s (%s). No se escribe en "
-                "ningun otro lado a proposito: el directorio de trabajo de un "
-                "MCP es el de quien lo lanzo, y ahi el archivo no va.",
+                "ningun otro lado a proposito.",
                 destino,
                 type(fallo).__name__,
             )
             return None
         return destino
+
+    def _autoignorar(self, destino: Path) -> None:
+        """Un `.gitignore` con `*` adentro, la primera vez que se crea.
+
+        Es lo que hace posible escribir en el repo de otro sin arruinarlo: la
+        carpeta se protege sola y no depende de que ese repo la haya previsto.
+        Ensanchar el `.gitignore` de cada repo arregla los que uno conoce; esto
+        arregla el proximo.
+
+        El motivo medido (2026-09-07): un mismo MCP registrado UNA vez dejo
+        273 KB de crudos con credenciales en tres repos cuyos `.gitignore` no lo
+        cubrian. En uno se salvo de casualidad, porque ese repo tenia un patron
+        parecido por su propia auditoria.
+
+        No levanta: si no se puede escribir, se avisa fuerte y el registro sigue
+        -pero eso ya es una carpeta desprotegida, y hay que verlo.
+        """
+        marca = destino / ".gitignore"
+        try:
+            if not marca.exists():
+                marca.write_text(
+                    "# Escrito por lucky-auditoria-mcp al crear esta carpeta.\n"
+                    "# El registro puede contener credenciales: no se commitea.\n"
+                    "*\n",
+                    encoding="utf-8",
+                )
+        except OSError as fallo:
+            logger.warning(
+                "AUDITORIA: no se pudo escribir %s (%s). La carpeta queda SIN "
+                "proteger y un `git add -A` de ese repo la levantaria.",
+                marca,
+                type(fallo).__name__,
+            )
 
     def ruta(self) -> Path | None:
         """Donde escribe ESTE proceso, o None si el registro esta apagado.
