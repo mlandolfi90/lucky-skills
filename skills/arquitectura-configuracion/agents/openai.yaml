@@ -1,0 +1,4 @@
+interface:
+  display_name: "Arquitectura: configuración"
+  short_description: "Ningún valor de configuración en el código; cada uno llega por un contrato declarado"
+  default_prompt: "Usa $arquitectura-configuracion para inventariar literales y declarar el contrato de configuración de este servicio."

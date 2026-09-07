@@ -32,6 +32,11 @@ Decidir el estado final de una ejecución a partir de evidencia actual.
     ni hardcodeados. Los secretos viajan por nombre, jamás por valor; para
     comparar un valor se usa su hash, nunca el valor. Un secreto detectado
     bloquea el cierre hasta rotarlo y purgarlo.
+11. Cero literales de configuración nuevos: el diff no introduce hosts,
+    puertos, URLs, rutas absolutas ni tiempos mágicos fuera del cargador
+    único (guarda de arquitectura-configuracion). Los literales previos
+    son deuda con su cuenta declarada, no bloqueo; un literal nuevo sin
+    motivo escrito al lado sí bloquea.
 
 ## Estados
 

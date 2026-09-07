@@ -303,11 +303,24 @@ requisito de nacimiento. Lo que es igual en todos vive en un paquete
 compartido (`lucky-auditoria`); lo que se mide en cada uno vive en su
 `config/`.
 
-- **R1 — Dónde se guarda.** `<raíz del proyecto>/registro_auditoria/`.
-  La raíz es `CLAUDE_PROJECT_DIR` si existe; si no, el cwd — y si el cwd
-  resulta ser el temporal del sistema, se avisa y no se escribe. El
-  directorio entero va al `.gitignore`. Otra ruta, solo por activador
-  explícito.
+- **R1 — Dónde se guarda.** En un directorio del USUARIO, nunca del
+  proyecto: `<estado del usuario>/<mcp>/registro_auditoria/`, donde el
+  estado del usuario es `%LOCALAPPDATA%` en Windows, si no
+  `XDG_STATE_HOME`, si no `~/.local/state`; caída al cwd solo si no se
+  puede crear, porque auditar no rompe. Motivo medido (2026-09-07): el
+  cwd y `CLAUDE_PROJECT_DIR` de un MCP por stdio son de quien lo LANZÓ,
+  no del MCP — `CLAUDE_PROJECT_DIR` identifica al que invocó, y un MCP
+  compartido por N sesiones tiene N valores a la vez; a veces ni está. Un
+  mismo MCP registrado una sola vez corría con el cwd en tres repos
+  ajenos y dejó 273 KB de archivos crudos con credenciales en los tres;
+  el `.gitignore` que lo protegía vivía en su propio repo mientras el
+  archivo caía en cualquier otro. Atajar solo el `%TEMP%` ataja el caso
+  que hace ruido y deja pasar el que hace daño; ensanchar `.gitignore`
+  arregla los repos que uno conoce y deja pasar el próximo. Una ruta
+  explícita en el activador sigue mandando: el default protege al que no
+  eligió, no le saca la elección al que sí. `CLAUDE_PROJECT_DIR` sí sirve
+  para el campo `arnes.proyecto` de cada línea: ahí nombra correctamente
+  el espacio de trabajo de la sesión que llamó.
 - **R2 — Cómo se nombra.** `<mcp>-auditoria[-CRUDA]-<escritor>.jsonl`.
   `<mcp>` derivado del paquete o atado al manifiesto por prueba;
   `<escritor>` = id de sesión en stdio, pid en HTTP.
@@ -368,6 +381,14 @@ compartido (`lucky-auditoria`); lo que se mide en cada uno vive en su
   (fuga en dos modos, `chdir`, handler registrado, reversión) dice si
   quedó bien. Los tres MCP vivos son los primeros retrofits: la
   extracción se prueba contra ellos antes de llamarse estándar.
+- **R11 — El paquete lleva el motor; cada repo lleva sus datos.** Las
+  listas blancas, las opacas, las huellas y el catálogo de arneses son
+  datos del MCP anfitrión (`config/`), nunca del paquete: si el paquete
+  trajera su `redaccion.toml`, el primer MCP que sume una tool con un
+  argumento nuevo tendría que tocar el paquete de todos. El descubrimiento
+  de arneses se abre desde afuera (entry points o un paquete del
+  anfitrión), no iterando los módulos propios del paquete — esa propiedad
+  es buena en un repo solo y se da vuelta al compartirse.
 
 ## Flujo
 

@@ -44,7 +44,10 @@ Comprobar:
     reales no hacen fetch ni conocen URLs o clientes del backend.
 11. Collision Map resuelto para las rutas tocadas.
 12. Configuración y dependencias externas compatibles con 12-factor cuando
-    aplique.
+    aplique, y cero literales de configuración nuevos en el diff (hosts,
+    puertos, URLs, rutas absolutas, tiempos mágicos) fuera del cargador
+    único: la guarda de arquitectura-configuracion corre sobre el diff; lo
+    ya existente es deuda previa con su cuenta declarada.
 
 Un archivo que crece por adición a propósito —raíz de composición, tabla de
 ruteo, índice de exports, migraciones— se exime del gate 9 en
