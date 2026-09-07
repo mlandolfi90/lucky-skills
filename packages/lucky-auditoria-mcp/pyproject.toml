@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "lucky-auditoria-mcp"
-version = "0.2.0"
+version = "0.3.0"
 description = "Auditoria interna para MCP compartidos: atribuye cada llamada a su sesion sin fugar secretos."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -17,7 +17,16 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8", "pytest-asyncio>=0.23", "ruff>=0.6"]
+dev = [
+    "pytest>=8",
+    "pytest-asyncio>=0.23",
+    "ruff>=0.6",
+    # Para la guarda del enganche: un cliente en proceso que hace un
+    # `tools/call` de verdad por toda la pila. No es dependencia del paquete
+    # -el enganche lo importa solo cuando lo usan-, pero sin el la guarda del
+    # gancho es estructural y no prueba que el framework lo llame.
+    "fastmcp>=4",
+]
 
 [project.scripts]
 lucky-auditoria = "lucky_auditoria.cli:main"

@@ -26,7 +26,7 @@ receta R1–R11 de la skill `auditar-mcp` 1.2.2.
 ```toml
 # pyproject.toml del MCP anfitrión
 dependencies = [
-    "lucky-auditoria-mcp @ git+https://github.com/mlandolfi90/lucky-skills@auditoria-mcp-v0.2.0#subdirectory=packages/lucky-auditoria-mcp",
+    "lucky-auditoria-mcp @ git+https://github.com/mlandolfi90/lucky-skills@auditoria-mcp-v0.3.0#subdirectory=packages/lucky-auditoria-mcp",
 ]
 ```
 
@@ -238,7 +238,19 @@ lucky-auditoria cazar       <estado>/registro_auditoria/<proyecto>/*CRUDA*.jsonl
 
 `cazar` es la que paga el paquete: "argumento que el cliente mandó y cuyo valor
 no aparece en ningún escalar de la respuesta", comparando por **valor** y no por
-substring. Produce **candidatos, nunca veredictos** — hay argumentos que
+substring (buscar `str(1)` da verdadero contra cualquier `1` suelto, y la señal
+se vuelve inútil para enteros). Se saltean `None` y los booleanos —un booleano no
+"vuelve", cambia el camino— y no corre sobre rechazos, donde es normal que el
+argumento no haya tenido efecto.
+
+`afirmaciones` es la otra mitad, medida por `lucky-tool-mtk-chr` sobre 39 verbos:
+**éxito con efecto vacío** (`ok: true` con todas las listas vacías — todas, no
+algunas: una vacía entre cinco llenas es normal) y **respuesta flaca** (`ok:
+true` con dos claves o menos, umbral absoluto). Encontró tres defectos de "no
+fallaba, contestaba mal": una duración afirmada de 24 h contra un timeout real
+de 59m58s, un conteo sobre una ventana truncada sin decirlo, y 20 de 200
+coincidencias sin decirlo. Los tres se arreglaron **reportando** lo que pasaba,
+nunca cambiando el comportamiento. Produce **candidatos, nunca veredictos** — hay argumentos que
 legítimamente no vuelven, y decidirlo exigiría conocer cada verbo. Se tría a
 mano. Un hallazgo no se cierra arreglando el caso: se convierte en una forma que
 se barre en todo el repo.
@@ -275,6 +287,22 @@ cualquier cliente conectado:
 `cazar` por esta vía devuelve siempre vacío **y explica por qué**: necesita la
 respuesta entera, que sólo existe en el crudo. Un `[]` a secas se leería como
 "no hay nada que cazar", y eso esta herramienta no lo puede afirmar.
+
+## Una fuga que este paquete NO cubre
+
+**El log del framework escribe el valor que la lista blanca tachó.** Medido con
+fastmcp 4.0.3, sin buscarlo: ante un argumento con el tipo equivocado, fastmcp
+loguea `Invalid arguments for tool 'x': [{... 'input': '<el valor entero>'}]` en
+un WARNING propio. O sea que el `Sup3rS3cr3t0` que el registro guardó como
+`{tipo: str, largo: 12}` sale íntegro por el log del proceso.
+
+El paquete no puede arreglarlo: es el log del framework, no el nuestro. Lo que
+hace es no dejar que pase inadvertido — hay un test que lo afirma, y el día que
+fastmcp deje de hacerlo se pone rojo y este aviso sobra.
+
+Mientras tanto: **el log del proceso de un MCP auditado es material sensible
+aunque el registro no lo sea.** Vale lo mismo que ya se sabía de uvicorn
+logueando `?token=<JWT>` en claro.
 
 ## Compatibilidad
 
