@@ -84,11 +84,62 @@ ven; acá son configuración y se ven, pero no en el código.
   y la guarda queda permanente con la cuenta en cero. El número de
   literales es la medida de la deuda; se declara, no se estima.
 
+## Receta: la forma fija de centralizar la configuración
+
+Los invariantes dicen qué; esto dice cómo, con valores fijos, para que
+todos los repos de la casa se vean igual. Regla del humano, textual y
+cerrada: **toda configuración (= settings) va en la raíz del repo, en
+`/config/`; todo apunta allí; nada de configuración — ni siquiera la de
+prueba, dev o test — va fuera.** Lo técnico se resuelve adentro de esa
+regla.
+
+- **C1 — Un solo lugar: `/config/`.** Todo archivo de configuración del
+  servicio vive ahí, incluidos los de dev y test (`config/dev.*`,
+  `config/test.*`): la configuración de prueba es configuración. Por
+  cada archivo, su `.example` versionado con todas las claves (tipo,
+  default, propósito, si es secreto, si es LOCAL) y el archivo real
+  ignorado por git. Un archivo de configuración fuera de `/config/` es
+  un hallazgo de la guarda, igual que un literal.
+- **C2 — Un solo cargador, con el nombre de la industria.** `config/` es
+  también el paquete que carga: expone un único objeto de settings
+  tipado y validado al arrancar (`from config import settings`; en
+  Python, `pydantic-settings` con `class Settings(BaseSettings)`; en
+  otros stacks, su equivalente: Spring `@ConfigurationProperties`,
+  `viper`, `convict`). Es el ÚNICO código que lee `os.environ` o abre
+  archivos de `config/`. El resto del código importa `settings.<clave>`;
+  lo que la industria estandariza es exactamente esto — un punto de
+  carga, precedencia declarada, fallar al arrancar —, no el nombre.
+- **C3 — Precedencia fija, y solo esa:** entorno del proceso →
+  `config/<archivo>` local → default declarado en el cargador. Sin cwd,
+  sin adivinar, sin un cuarto origen.
+- **C4 — Nombres:** toda variable de entorno con prefijo del servicio,
+  `<SERVICIO>_<CLAVE>`; cada clave declara tipo, default, si es
+  **secreto** (en `config/` va solo su NOMBRE en el gestor; el valor
+  llega por entorno — custodiar-secretos, mapear-despliegue) y si es
+  **LOCAL** (interruptor del operador que el script que regenera el
+  archivo preserva).
+- **C5 — Falla cerrado:** clave requerida ausente → el arranque para
+  nombrándola; clave desconocida → rechazo (`extra="forbid"`), nunca
+  `ignore`.
+- **C6 — Prueba de llegada:** un test por clave que la pone por su canal
+  real y mide que `settings` la ve; los tests leen su configuración de
+  `config/test.*`, no de literales en el código de prueba.
+- **C7 — Guarda de literales, por forma Y posición**, en cierre y
+  arquitectura-verificar; cuenta declarada, excepciones con motivo al
+  lado.
+- **C8 — Retrofit:** inventario (guarda en modo informe) → mover cada
+  archivo y cada literal a `/config/` + `settings` → cuenta en cero →
+  guarda permanente. Si una herramienta obliga a un archivo en otro
+  lugar por convención propia, se declara como excepción con su motivo
+  escrito, no se calla.
+
 ## Flujo
 
 1. Inventariar: correr la guarda en modo informe y listar cada literal
-   con archivo:línea.
-2. Declarar el contrato: `config/` con `.example`, cargador único con
+   con archivo:línea, y cada archivo de configuración fuera de
+   `/config/`.
+2. Declarar el contrato: `/config/` con los `.example` de todos los
+   archivos (dev y test incluidos), el cargador único `settings` con
    precedencia y defaults, lista `LOCALES`.
 3. Mover cada literal al contrato; la clave se nombra por lo que
    gobierna, no por dónde estaba.
@@ -107,6 +158,7 @@ resultado va a ficha del saber y a la siguiente versión de esta skill.
 
 ```text
 LITERALES=<cuenta actual> (archivo:línea por cada uno, o NINGUNO)
+FUERA_DE_CONFIG=<archivos de configuración fuera de /config/, o NINGUNO>
 CONTRATO=DECLARADO|AUSENTE
 CARGADOR=UNICO|DISPERSO
 PRECEDENCIA=<entorno > local > default | NO_DECLARADA>
