@@ -29,7 +29,7 @@ from conftest import CONFIG
 from fastmcp import Client, FastMCP
 from fastmcp.exceptions import ToolError
 
-from lucky_auditoria import instalar_auditoria
+from lucky_auditoria import identidad, instalar_auditoria
 from lucky_auditoria.pruebas import verificar_enganche
 
 CENTINELA = "Sup3rS3cr3t0-centinela"
@@ -38,10 +38,11 @@ CENTINELA = "Sup3rS3cr3t0-centinela"
 @pytest.fixture
 def servidor(tmp_path, monkeypatch):
     """Un MCP de dos verbos, con la auditoria enganchada como en un repo real."""
-    estado = tmp_path / "estado"
-    estado.mkdir()
-    monkeypatch.setenv("LOCALAPPDATA", str(estado))
-    monkeypatch.setenv("XDG_STATE_HOME", str(estado))
+    # Desde R1 de 1.5.0 no se escribe sin un proyecto que llamo. Se declara
+    # como lo declararia el arnes, apuntado a `tmp_path`.
+    proyecto = tmp_path / "el-repo-que-llamo"
+    proyecto.mkdir()
+    monkeypatch.setattr(identidad, "raiz_del_proyecto", lambda: str(proyecto))
     config = tmp_path / "auditoria.toml"
     config.write_text(CONFIG, encoding="utf-8")
 

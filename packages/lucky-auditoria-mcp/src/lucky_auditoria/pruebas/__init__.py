@@ -75,15 +75,14 @@ class KitDeAuditoria:
         cwd = tmp_path / "cwd-limpio"
         cwd.mkdir()
         monkeypatch.chdir(cwd)
-        # El estado del usuario tambien va a `tmp_path`. Sin esto, correr la
-        # suite deja archivos CRUDOS -con el centinela adentro- en el
-        # `%LOCALAPPDATA%` real de quien la corrio; me paso escribiendo estas
-        # mismas guardas. Una suite que ensucia la maquina es un defecto, y en
-        # una suite de auditoria es el defecto que la suite persigue.
-        estado = tmp_path / "estado-del-usuario"
-        estado.mkdir()
-        monkeypatch.setenv("LOCALAPPDATA", str(estado))
-        monkeypatch.setenv("XDG_STATE_HOME", str(estado))
+        # Desde R1 de 1.5.0 el registro va a la carpeta del PROYECTO, asi que
+        # el que tiene que estar en `tmp_path` es el proyecto, y cada prueba que
+        # lo necesita usa el fixture `proyecto`. Antes habia que mover tambien
+        # `LOCALAPPDATA` y `XDG_STATE_HOME`, porque el crudo iba al estado del
+        # usuario: sin eso, correr la suite dejaba archivos CRUDOS -con el
+        # centinela adentro- en el `%LOCALAPPDATA%` real de quien la corrio. Me
+        # paso escribiendo estas mismas guardas. El peligro se mudo, no
+        # desaparecio: ahora lo cubre la guarda de sesion del anfitrion.
         auditor = self.construir(tmp_path)
         monkeypatch.setenv(auditor.variable, str(tmp_path / "registro.jsonl"))
         return auditor
@@ -103,7 +102,7 @@ class KitDeAuditoria:
 
         assert CENTINELA not in self._texto(auditor)
 
-    def test_crudo_SI_escribe_el_valor(self, auditor, monkeypatch):
+    def test_crudo_SI_escribe_el_valor(self, auditor, monkeypatch, proyecto):
         # La expectativa invertida. Sin esta, una redaccion que borra todo pasa
         # en verde y el modo de depurar deja de depurar en silencio.
         monkeypatch.setenv(auditor.variable, "crudo")
@@ -114,7 +113,7 @@ class KitDeAuditoria:
         assert CENTINELA in self._texto(auditor)
 
     def test_el_archivo_crudo_se_llama_a_gritos_y_cada_linea_lo_dice(
-        self, auditor, monkeypatch
+        self, auditor, monkeypatch, proyecto
     ):
         monkeypatch.setenv(auditor.variable, "crudo")
         auditor.registrar(self.herramienta_normal, {})
@@ -245,61 +244,99 @@ class KitDeAuditoria:
 
         assert auditor.ruta().parent == proyecto / "registro_auditoria"
 
-    def test_stdio_CRUDO_nunca_cae_bajo_un_arbol_de_proyecto(
-        self, auditor, monkeypatch, proyecto, tmp_path
+    def test_stdio_CRUDO_va_A_LA_MISMA_carpeta_que_el_redactado(
+        self, auditor, monkeypatch, proyecto
     ):
-        """La celda que se decidio aparte, y el motivo por el que se decidio.
+        """La celda que el humano cerro, y por que cambio de lado.
 
-        Un `.gitignore` lo respeta git y NADIE MAS: un zip, un rsync, un
-        `COPY .` de Docker, un sdist o un "subir carpeta" copian el arbol
-        entero. El redactado sobrevive a eso; el crudo lleva credenciales, y es
-        el unico lugar donde equivocarse no se deshace.
+        Hasta 0.3.3 el crudo iba al estado del usuario, para que un zip, un
+        `COPY .` o un sdist -que ignoran el `.gitignore`- no se lo llevaran.
+        El precio resulto peor que el riesgo: el crudo quedaba en un arbol que
+        no es de ningun proyecto, y para borrarlo habia que acordarse de que ese
+        arbol existe. Nadie se acuerda, y el crudo con credenciales es
+        justamente lo que no puede quedar olvidado.
+
+        Ahora los dos modos comparten carpeta y la proteccion del crudo es la
+        RETENCION (R7): `auditoria limpiar` lo borra desde donde uno ya esta
+        mirando, y el `check` dice cuantos hay.
         """
         monkeypatch.setenv(auditor.variable, "crudo")
         auditor.registrar(self.herramienta_normal, {"clave": CENTINELA})
 
-        ruta = auditor.ruta()
-        assert proyecto not in ruta.parents, f"el crudo cayo en el proyecto: {ruta}"
-        # Y esta bajo el estado del usuario, en una carpeta que lo nombra.
-        assert "registro_auditoria" in ruta.parts
-        assert proyecto.name in ruta.parent.name
+        assert auditor.ruta().parent == proyecto / "registro_auditoria"
 
-    def test_el_crudo_de_dos_checkouts_del_mismo_repo_no_se_mezcla(
-        self, auditor, monkeypatch, tmp_path
+    def test_el_crudo_se_puede_limpiar_desde_la_herramienta(
+        self, auditor, monkeypatch, proyecto
     ):
-        # El nombre a secas alcanzaria casi siempre y fallaria feo cuando no:
-        # dos checkouts del mismo repo escribirian en la misma carpeta y sus
-        # registros se leerian como uno solo.
+        """Lo que hace que la celda de arriba sea sostenible y no un descuido.
+
+        Sin esto, mover el crudo a la carpeta del proyecto seria solamente
+        empeorar donde queda. Lo que lo vuelve una decision es que borrarlo pase
+        a ser una accion a mano alzada desde el cliente, en el mismo lugar donde
+        uno ya esta leyendo el registro.
+        """
+        from lucky_auditoria.herramienta import Lector
+
         monkeypatch.setenv(auditor.variable, "crudo")
-        for sub in ("a", "b"):
-            (tmp_path / sub / "mi-repo").mkdir(parents=True)
-        uno = tmp_path / "a" / "mi-repo"
-        otro = tmp_path / "b" / "mi-repo"
+        auditor.registrar(self.herramienta_normal, {"clave": CENTINELA})
+        viejo = auditor.ruta()
+        assert viejo.exists()
+        # El que este proceso esta escribiendo NO se toca: en Windows falla, y
+        # en Linux desapareceria del listado mientras se le sigue escribiendo,
+        # que es peor porque parece limpio.
+        otro = viejo.with_name(viejo.name.replace(identidad.escritor(), "otra-sesion"))
+        otro.write_text(viejo.read_text(encoding="utf-8"), encoding="utf-8")
 
-        monkeypatch.setattr(identidad, "raiz_del_proyecto", lambda: str(uno))
-        primera = auditor.ruta().parent
-        monkeypatch.setattr(identidad, "raiz_del_proyecto", lambda: str(otro))
-        segunda = auditor.ruta().parent
+        salida = Lector(auditor).limpiar()
 
-        assert primera != segunda
+        assert otro.name in salida["borrados"] and not otro.exists()
+        assert viejo.name in salida["en_uso"] and viejo.exists()
 
-    def test_http_va_al_estado_del_usuario_del_servidor_y_sin_aviso(
+    def test_limpiar_no_toca_el_redactado(self, auditor, monkeypatch, proyecto):
+        """El redactado es evidencia forense: no se tira por una herramienta.
+
+        La primera version de esta guarda miraba el archivo del PROPIO proceso,
+        y pasaba por la razon equivocada: ese archivo sobrevive porque esta EN
+        USO, no porque sea redactado. Lo destapo la reversion -romper "limpiar
+        solo borra crudos" no ponia nada en rojo-. Hace falta un redactado de
+        OTRA sesion, que es el que un `limpiar` mal escrito se lleva puesto.
+        """
+        from lucky_auditoria.herramienta import Lector
+
+        monkeypatch.setenv(auditor.variable, "1")
+        auditor.registrar(self.herramienta_normal, {})
+        propio = auditor.ruta()
+        ajeno = propio.with_name(propio.name.replace(identidad.escritor(), "otra-sesion"))
+        ajeno.write_text(propio.read_text(encoding="utf-8"), encoding="utf-8")
+
+        salida = Lector(auditor).limpiar()
+
+        assert ajeno.exists(), "se llevo puesto un redactado de otra sesion"
+        assert propio.exists()
+        assert salida["cuantos"] == 0
+
+    def test_http_va_al_directorio_de_trabajo_del_servicio_y_sin_aviso(
         self, tmp_path, monkeypatch, caplog
     ):
-        # El servidor es un contenedor de larga vida que arranca sin relacion
-        # con ningun proyecto. No hay aviso a proposito: en stdio la ausencia de
-        # proyecto es señal, en HTTP seria ruido constante.
-        estado = tmp_path / "estado-http"
-        estado.mkdir()
-        monkeypatch.setenv("LOCALAPPDATA", str(estado))
-        monkeypatch.setenv("XDG_STATE_HOME", str(estado))
+        """Bajo HTTP el cwd SI se usa, y es lo correcto.
+
+        El servidor es un contenedor de larga vida: su directorio de trabajo es
+        suyo y no lo heredo de ningun proyecto. Es la diferencia exacta con
+        stdio, donde el cwd es lo que el lanzador le dejo al hijo.
+
+        No hay aviso a proposito: en stdio la ausencia de proyecto es señal, en
+        HTTP seria ruido constante.
+        """
+        servicio = tmp_path / "adentro-del-contenedor"
+        servicio.mkdir()
+        monkeypatch.chdir(servicio)
         auditor = self.construir(tmp_path)
         auditor.transporte = "http"
         monkeypatch.setenv(auditor.variable, "1")
         with caplog.at_level("WARNING"):
             ruta = auditor.ruta()
 
-        assert ruta.parent == estado / "registro_auditoria" / auditor.nombre
+        assert ruta.parent == servicio / "registro_auditoria"
         assert not any("sin proyecto" in r.message for r in caplog.records)
 
     def test_la_carpeta_nace_con_su_gitignore(self, auditor, monkeypatch, proyecto):
@@ -361,21 +398,35 @@ class KitDeAuditoria:
         # None, no el cwd: sin fuente no se adivina, y el que llama decide.
         assert identidad.raiz_del_proyecto() is None
 
-    def test_sin_proyecto_no_se_adivina_y_se_avisa(
-        self, auditor, monkeypatch, tmp_path, caplog
+    def test_sin_proyecto_NO_SE_ESCRIBE_y_se_avisa(
+        self, auditor, monkeypatch, caplog
     ):
-        # Ni el arnes ni los roots dijeron cual espacio de trabajo llamo. El cwd
-        # no sirve para adivinarlo, asi que va aparte y con nombre propio.
+        """Ni el arnes ni los roots dijeron cual espacio de trabajo llamo.
+
+        Hasta 0.3.3 esto caia en `<estado>/registro_auditoria/_sin_proyecto/`:
+        una carpeta que nadie sabia que existia, acumulando lo que nadie iba a
+        buscar. Desde R1 de 1.5.0 no se escribe en ningun lado. No escribir
+        tampoco rompe -el escritor ya se traga sus fallos-, y un registro que
+        nadie va a encontrar no vale su riesgo.
+        """
         monkeypatch.setenv(auditor.variable, "1")
         monkeypatch.setattr(identidad, "raiz_del_proyecto", lambda: None)
-        monkeypatch.setenv("LOCALAPPDATA", str(tmp_path / "estado"))
-        monkeypatch.setenv("XDG_STATE_HOME", str(tmp_path / "estado"))
         with caplog.at_level("WARNING"):
             ruta = auditor.ruta()
+            auditor.registrar(self.herramienta_normal, {"clave": CENTINELA})
 
-        assert ruta.parent.name == "_sin_proyecto"
-        assert Path(os.getcwd()) not in ruta.parents
-        assert any("sin proyecto" in r.message for r in caplog.records)
+        assert ruta is None
+        assert any("APAGADA" in r.message for r in caplog.records)
+
+    def test_sin_proyecto_el_cwd_queda_intacto(self, auditor, monkeypatch, tmp_path):
+        # El control de la de arriba: "no devuelve ruta" y "no escribe" son dos
+        # cosas, y la que importa es la segunda.
+        monkeypatch.setenv(auditor.variable, "crudo")
+        monkeypatch.setattr(identidad, "raiz_del_proyecto", lambda: None)
+        auditor.registrar(self.herramienta_normal, {"clave": CENTINELA})
+
+        sucios = [str(p) for p in Path.cwd().rglob("*") if p.is_file()]
+        assert not sucios, f"escribio igual: {sucios}"
 
     def test_el_aviso_es_una_vez_por_proceso_y_no_por_llamada(
         self, auditor, monkeypatch, tmp_path, caplog
@@ -394,7 +445,7 @@ class KitDeAuditoria:
             for _ in range(5):
                 auditor.registrar(self.herramienta_normal, {})
 
-        assert sum("sin proyecto" in r.message for r in caplog.records) == 1
+        assert sum("APAGADA" in r.message for r in caplog.records) == 1
 
     # -- no romper ----------------------------------------------------------
 
