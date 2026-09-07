@@ -41,6 +41,153 @@ from lucky_auditoria import arneses, identidad
 CENTINELA = "pa55w0rd-centinela-8f21c3"
 
 
+# --- las tres guardas del entorno, para el conftest del anfitrion -----------
+#
+# Se envian con el paquete y no se explican en un README porque un modismo que
+# hay que copiar a mano se copia mal: la primera version de la tercera acusaba
+# solo si la carpeta no existia antes, o sea que se apagaba sola en la maquina
+# donde uno ya se habia ensuciado, y asi paso un defecto entero al CI.
+#
+#     # tests/conftest.py del anfitrion
+#     from lucky_auditoria.pruebas import guardas_del_entorno
+#     globals().update(guardas_del_entorno())
+
+
+def _sin_proyecto_heredado(monkeypatch):
+    """Ningun test ve el proyecto de quien corre la suite.
+
+    Claude Code exporta `CLAUDE_PROJECT_DIR` al proceso hijo, asi que en la
+    maquina de un desarrollador **todo test escribe en un proyecto real** si se
+    olvida de fijar el suyo: el registro cae en el repo de al lado y la suite
+    pasa igual. En el CI esa variable no existe y el mismo test se comporta
+    distinto. Una suite que se comporta distinto segun quien la corre no esta
+    midiendo lo que dice medir.
+
+    Se arranca siempre desde "no hay proyecto", que es el unico estado igual en
+    las dos maquinas; el que necesita uno lo declara. Tambien se limpia la
+    cache de `identidad`, porque el primer test que resuelva la raiz se la deja
+    puesta a todos los que siguen.
+    """
+    for arnes in arneses.catalogo():
+        if arnes.testigo:
+            monkeypatch.delenv(arnes.testigo, raising=False)
+        for variable in arnes.campos:
+            monkeypatch.delenv(variable, raising=False)
+    monkeypatch.setattr(identidad, "_RAIZ_DEL_PROYECTO", None, raising=False)
+
+
+def _corral_para_el_cwd(tmp_path, monkeypatch):
+    """Bajo HTTP el destino ES el cwd, y el cwd de pytest es el repo.
+
+    Un test de transporte http que se olvide del `chdir` no falla: escribe en
+    `<repo>/registro_auditoria/` y sigue verde. Arreglar el test que lo hizo
+    hoy arregla ese; esto arregla el proximo, que es la misma leccion que la
+    carpeta que se autoignora.
+
+    El que necesite el cwd de verdad lo declara con su propio
+    `monkeypatch.chdir`, que gana por ser posterior.
+    """
+    corral = tmp_path / "cwd-de-pytest"
+    corral.mkdir(exist_ok=True)
+    monkeypatch.chdir(corral)
+
+
+def _archivos_de(carpeta: Path) -> set:
+    if not carpeta.exists():
+        return set()
+    try:
+        return {str(p) for p in carpeta.rglob("*") if p.is_file()}
+    except OSError:
+        return set()
+
+
+def lugares_prohibidos(raiz_del_anfitrion: Path) -> set:
+    """Donde la suite NO puede dejar un registro, con su motivo cada uno.
+
+    - el estado del usuario, que desde 0.4.0 no se usa nunca. Si aparece algo
+      ahi, quedo codigo de la version anterior.
+    - **el repo del anfitrion**: ahora todo va a
+      `<proyecto>/registro_auditoria/`, y un test que se olvide de apuntar el
+      proyecto a su `tmp_path` lo escribe adentro del repo que corre la suite.
+      Es el incidente que motivo R1, cometido por la suite que lo prueba.
+    - **el cwd de pytest**, que bajo HTTP ES el destino. Suele coincidir con el
+      repo, pero no tiene por que, y un lugar que solo se vigila por
+      coincidencia no se esta vigilando.
+    """
+    base = os.environ.get("LOCALAPPDATA") or os.environ.get("XDG_STATE_HOME")
+    estado = Path(base) if base else Path.home() / ".local" / "state"
+    return {
+        estado / "registro_auditoria",
+        Path(raiz_del_anfitrion) / "registro_auditoria",
+        Path.cwd() / "registro_auditoria",
+    }
+
+
+def nuevos_desde(antes: dict) -> list:
+    """Los archivos que aparecieron desde la foto `antes`.
+
+    Es la comparacion de la guarda, sacada afuera para poder PROBARLA. La
+    reversion mostro que rompiendola no fallaba nada: una guarda que nada
+    ejerce es la que se pudre en silencio, y esta ya se pudrio una vez.
+    """
+    return sorted(
+        archivo
+        for sospechoso, previos in antes.items()
+        for archivo in _archivos_de(sospechoso) - previos
+    )
+
+
+def guardas_del_entorno(raiz_del_anfitrion: Path | None = None) -> dict:
+    """Las tres fixtures autouse, listas para `globals().update(...)`.
+
+    `raiz_del_anfitrion` es el repo a vigilar; por defecto, el directorio desde
+    el que se lanzo pytest.
+    """
+    raiz = Path(raiz_del_anfitrion) if raiz_del_anfitrion else Path.cwd()
+
+    @pytest.fixture(autouse=True)
+    def _ningun_test_hereda_un_proyecto_real(monkeypatch):
+        _sin_proyecto_heredado(monkeypatch)
+
+    @pytest.fixture(autouse=True)
+    def _ningun_test_escribe_en_el_cwd_de_pytest(tmp_path, monkeypatch):
+        _corral_para_el_cwd(tmp_path, monkeypatch)
+
+    @pytest.fixture(autouse=True, scope="session")
+    def _la_suite_no_ensucia_la_maquina():
+        """Ninguna prueba puede dejar un registro fuera de su `tmp_path`.
+
+        Se comparan ARCHIVOS y no si la carpeta existia. Preguntar
+        `carpeta.exists()` antes y despues **se apaga solo en la maquina donde
+        uno ya se ensucio**: creada una vez, toda corrida posterior la ve "de
+        antes" y no acusa nada. Paso exactamente asi (2026-09-07): un test bajo
+        HTTP sin `chdir` venia escribiendo en el repo del paquete, el worktree
+        tenia la carpeta desde hacia horas, y la suite pasaba verde en local.
+        Lo destapo el CI, que arranca de un checkout limpio, en seis celdas a
+        la vez.
+
+        Es la misma familia que el resto: la proteccion existia y una condicion
+        la anulaba en silencio.
+        """
+        antes = {s: _archivos_de(s) for s in lugares_prohibidos(raiz)}
+        yield
+        nuevos = nuevos_desde(antes)
+        if nuevos:
+            raise AssertionError(
+                "la suite escribio fuera de su tmp_path:\n"
+                + "\n".join(nuevos[:10])
+                + f"\n({len(nuevos)} archivos nuevos). Cada test tiene que apuntar "
+                "el proyecto a su tmp_path, y los de transporte http tambien el cwd."
+            )
+
+    return {
+        "_ningun_test_hereda_un_proyecto_real": _ningun_test_hereda_un_proyecto_real,
+        "_ningun_test_escribe_en_el_cwd_de_pytest": _ningun_test_escribe_en_el_cwd_de_pytest,
+        "_la_suite_no_ensucia_la_maquina": _la_suite_no_ensucia_la_maquina,
+    }
+
+
+
 class KitDeAuditoria:
     """Las guardas que todo MCP auditado tiene que pasar.
 
