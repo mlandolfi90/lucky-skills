@@ -189,7 +189,11 @@ en el MCP que se está construyendo.
 ### 7. Interruptor: apagado por omisión, y con salida visible
 
 - Escribir en disco lo decide el operador vía variable de entorno; sin
-  ella, apagado. Comprobar quién regenera el archivo donde vive: un `.env`
+  ella, apagado de verdad: ni archivo vacío ni directorio creado. La
+  prueba necesita un `chdir` a un directorio limpio: un interruptor mal
+  escrito no deja de escribir, escribe con el directorio VACÍO — en el
+  cwd — y una prueba que mira `tmp_path` pasa con el interruptor roto.
+  Comprobar quién regenera el archivo donde vive: un `.env`
   reescrito entero desde el gestor de secretos apaga el interruptor en
   silencio, y un interruptor que se apaga solo es peor que no tenerlo. Va
   donde no lo regeneren (p. ej. el bloque `env` del registro del cliente).
@@ -250,8 +254,15 @@ en el MCP que se está construyendo.
 - Un test que corre una carrera entre las dos condiciones que debería
   separar no es "frágil": a veces mide otra cosa, y envenena un arnés de
   mutación. Se saca la carrera, no se sube el número hasta que ande.
-- E2E contra un proceso real: lo único que descubre ganchos que no
-  disparan y campos que están en otro lado.
+- E2E contra un proceso real, lanzando el binario por su transporte: lo
+  único que descubre ganchos que no disparan, campos que están en otro
+  lado, y lo que en el mismo proceso no se puede probar — que el
+  interruptor VIAJE hasta el hijo, que su ausencia también viaje, que el
+  arnés se reconozca del entorno heredado, y que un token centinela del
+  arnés no aparezca en el texto del archivo.
+- La reversión encuentra huecos en las pruebas tanto como en el código
+  (medido: 2 de 7 en un repo). Una prueba que pasa con la decisión rota
+  no es una prueba de esa decisión.
 - Verificar que exista un runner que corra estos tests (CI o equivalente)
   y decirlo si no lo hay. Un test de fuga que nadie corre no es
   protección, es documentación de una intención — y el que se rompe en
@@ -310,7 +321,8 @@ Tres implementaciones medidas, en tres combinaciones distintas: repo
 a fastmcp 4 con la misma auditoría — commit `3ccfd57` y su
 `docs/retroalimentacion-auditar-mcp.md`, que separa propiedad de
 accidente del SDK), repo `lucky-tool-netbox`
-(stdio + fastmcp 4, catálogo de arneses; commit `1382090`). Anclar en
+(stdio + fastmcp 4, catálogo de arneses; commits `1382090`, `4a6ae47`).
+Anclar en
 commits, no en rutas. Leer los de gns3 en orden: los que siguen al primero
 son huecos aparecidos después de "terminado".
 
