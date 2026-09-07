@@ -58,10 +58,13 @@ ven; acá son configuración y se ven, pero no en el código.
   distintas según quién lo corra. Y vale para el intérprete: la versión
   de Python (o Node) que corrió la suite se declara por nombre, y las
   demás del rango soportado se declaran sin medir hasta que un CI las
-  corra de verdad. Medido: un paquete declaraba 3.10–3.13, la suite
-  había corrido solo en 3.12.10, y el CI que cubría 3.10 nunca se
-  ejecutó — decir "medido en 3.10 y 3.13" habría sido el mismo defecto
-  una capa más arriba.
+  corra de verdad — y se lea. Medido: un paquete declaraba 3.10–3.13,
+  la suite había corrido a mano solo en 3.12.10, y el CI que cubría
+  3.10 había corrido en rojo tres veces sin que nadie lo mirara (el
+  piso declarado importaba un módulo que en 3.10 no existe). Decir
+  "medido en 3.10 y 3.13" habría sido el mismo defecto una capa más
+  arriba; decir "el CI nunca corrió" fue el mismo defecto en la otra
+  dirección.
 - **Guarda contra literales**: una comprobación mecánica (AST o patrones)
   sobre el código fuente que detecta IPs, puertos, URLs, rutas absolutas
   y tiempos mágicos fuera del cargador. Corre en cada cierre y en

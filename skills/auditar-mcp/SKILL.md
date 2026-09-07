@@ -291,7 +291,12 @@ en el MCP que se está construyendo.
 - Verificar que exista un runner que corra estos tests (CI o equivalente)
   y decirlo si no lo hay. Un test de fuga que nadie corre no es
   protección, es documentación de una intención — y el que se rompe en
-  silencio es el que impedía escribir una password en disco.
+  silencio es el que impedía escribir una password en disco. Y LEER su
+  resultado, con el comando, antes de afirmar nada sobre él: medido, un
+  CI corrió doce veces y las tres últimas en rojo mientras dos sesiones
+  escribían "nunca corrió" en el README; y el rojo decía que el piso de
+  Python declarado no funcionaba. Un CI rojo que nadie mira es igual que
+  uno que no corre, con la diferencia de que este ya avisó.
 
 ### 10. Usar el registro: cazar, no solo leer
 
