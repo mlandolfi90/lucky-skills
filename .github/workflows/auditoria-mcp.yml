@@ -22,16 +22,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Que esta medido de verdad, a mano y fuera del CI, que no corrio nunca:
-        #   3.12.10 -> las dos sesiones, en dos venv distintos. Nada mas.
-        #   3.10    -> NADIE. Es el piso declarado y el unico que ejercita el
-        #              import gateado por version (`tomli` en vez de `tomllib`).
-        #   3.13    -> NADIE. Aca decia "medido por skills-v3-65" y era falso:
-        #              su venv usa el Python del sistema, que es el mismo 3.12
-        #              que el mio. Ellos escribieron 3.13, yo lo copie al README
-        #              sin verificarlo, y quedo escrito en dos repos como una
-        #              medicion. Dos sesiones en la misma maquina no son dos
-        #              entornos: para eso esta el CI, que todavia no corrio.
+        # Las tres corren y las tres tienen que quedar verdes. Aca hubo un
+        # comentario diciendo que este CI "no se ejecuto nunca": era falso, y
+        # lo escribio quien no lo miro. Habia corrido doce veces, verde hasta
+        # 0.2.0 y rojo en las tres siguientes.
+        #
+        # 3.10 no es un extremo decorativo: es el unico que ejercita el import
+        # gateado por version (`tomli` en vez de `tomllib`), y es justo donde
+        # rompia el test escrito para medirlo.
         python: ["3.10", "3.12", "3.13"]
         # Los dos, porque el directorio por defecto se resuelve distinto
         # (`%LOCALAPPDATA%` contra `XDG_STATE_HOME`) y ahi vive la regla que

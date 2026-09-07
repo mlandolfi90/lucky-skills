@@ -317,15 +317,27 @@ logueando `?token=<JWT>` en claro.
 
 Las versiones de la tabla son exactas a propósito, y las del `pyproject.toml` están
 pineadas con `==`: un rango afirma compatibilidad con versiones que nadie probó,
-incluidas las que todavía no existen. La suite corrió a mano sólo en **Python 3.12.10**, en dos venv distintos de la
-misma máquina — que no son dos entornos. **Ni 3.10 ni 3.13 los midió nadie**, y
-son los dos extremos del rango declarado; 3.10 además es el único que ejercita
-el import gateado por versión (`tomli` en lugar de `tomllib`). El CI que los
-cubriría **no se ha ejecutado nunca**.
+incluidas las que todavía no existen. Medido, y esta vez leyendo el CI en vez de suponerlo (`gh run list`):
 
-Este párrafo decía que 3.13 estaba medida. Era falso: lo dio por sentado una
-sesión, lo copié sin verificarlo, y quedó escrito en dos repos con forma de
-medición. Es la razón por la que las versiones se declaran por nombre.
+| Python | Estado |
+|---|---|
+| 3.12 | verde en `ubuntu-latest` y `windows-latest`, y a mano en 3.12.10 |
+| 3.13 | verde en `ubuntu-latest` y `windows-latest` |
+| 3.10 | verde desde el run que corrigió el test del respaldo de `tomli` |
+
+Este párrafo se equivocó dos veces seguidas, en direcciones opuestas, y las dos
+quedan escritas porque son la razón de la regla:
+
+1. Dijo que **3.13 estaba medida** cuando no lo estaba: una sesión lo dio por
+   sentado, se copió sin verificar, y quedó en dos repos con forma de medición.
+2. Después dijo que **el CI no se había ejecutado nunca**. También falso: había
+   corrido doce veces, verde hasta 0.2.0 y **rojo en las tres últimas**, y nadie
+   miró. El test que rompía era el escrito para medir 3.10, que importaba
+   `tomllib` — el módulo que en 3.10 no existe.
+
+De ahí la forma: **exigir que exista un runner no alcanza; hay que leer su
+resultado.** Un CI rojo que nadie mira vale lo mismo que uno que no corre, con
+el agravante de que parece cobertura.
 
 El enganche de `mcp` 1.x está **escrito y no medido**: el override que sí se
 midió es el de otro repo, sobre `@server.call_tool()`; el de acá envuelve el
