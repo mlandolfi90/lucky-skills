@@ -126,10 +126,14 @@ class TestLimite2SuRetornoEsOpaco:
     def test_lo_decide_el_paquete_y_no_el_config_del_anfitrion(self, tmp_path, monkeypatch):
         # Un anfitrion que se olvida de declararlo se llevaria la recursion
         # puesta: no es un dato suyo, es una propiedad de esta herramienta.
-        estado = tmp_path / "estado"
-        estado.mkdir()
-        monkeypatch.setenv("LOCALAPPDATA", str(estado))
-        monkeypatch.setenv("XDG_STATE_HOME", str(estado))
+        # Bajo HTTP el registro va a ./registro_auditoria/ del servicio, o sea
+        # al cwd: sin este chdir el test escribia en el directorio del PAQUETE.
+        # En la maquina del autor no se vio porque esa carpeta ya existia de
+        # corridas anteriores y la guarda de sesion solo acusa lo que aparece
+        # nuevo; el CI, limpio, lo acuso en las seis celdas.
+        servicio = tmp_path / "servicio"
+        servicio.mkdir()
+        monkeypatch.chdir(servicio)
         sin_config = Auditor("otro-mcp", config=None, transporte="http")
         monkeypatch.setenv(sin_config.variable, "1")
         sin_config.registrar(NOMBRE, {}, retorno={"total": 9}, respuesta="{}")

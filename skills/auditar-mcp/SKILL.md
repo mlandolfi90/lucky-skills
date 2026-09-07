@@ -308,12 +308,16 @@ en el MCP que se está construyendo.
   de la raíz dejan sin mirar justo la función donde vivía la caída al
   cwd.
 - Una suite de auditoría que ensucia la máquina cometió el defecto que
-  audita: desde que el crudo ignora la ruta elegida (R1), apuntar la
-  variable a `tmp_path` ya no alcanza — cada fixture mueve también
-  `LOCALAPPDATA` y `XDG_STATE_HOME`, y una guarda de sesión falla si la
-  suite dejó un archivo con el centinela fuera del temporal. Medido: los
-  tests de crudo dejaban centinelas en el estado real del que corría la
-  suite, y se vio mirando el disco, no leyendo los tests.
+  audita: cada fixture fija el proyecto a `tmp_path` y, bajo HTTP, mueve
+  el cwd con `chdir`; una guarda de sesión falla si la suite dejó un
+  archivo fuera del temporal. Medido dos veces: los tests de crudo
+  dejaban centinelas en el estado real del que corría la suite; y un
+  test HTTP sin `chdir` escribía en el directorio del propio paquete. Y
+  la guarda tiene su trampa: si acusa solo lo que aparece NUEVO, se apaga
+  sola en la máquina donde ya se ensució — el autor no vio nada porque la
+  carpeta existía de corridas anteriores, y el CI limpio lo acusó en las
+  seis celdas. La guarda compara contra un estado limpio, o borra antes
+  de empezar.
 - Verificar que exista un runner que corra estos tests (CI o equivalente)
   y decirlo si no lo hay. Un test de fuga que nadie corre no es
   protección, es documentación de una intención — y el que se rompe en
