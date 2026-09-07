@@ -280,6 +280,12 @@ en el MCP que se está construyendo.
 - Un test que corre una carrera entre las dos condiciones que debería
   separar no es "frágil": a veces mide otra cosa, y envenena un arnés de
   mutación. Se saca la carrera, no se sube el número hasta que ande.
+- Una guarda sobre una regla de exclusión usa un objeto que NO esté
+  protegido por otra razón: "limpiar no toca el redactado" se probó
+  mirando el archivo del propio proceso, que sobrevive porque está EN
+  USO y no porque sea redactado — romper la regla no ponía nada en rojo.
+  Primo del control que no ejerce la rama, pero distinto: acá la rama
+  corre y el objeto está blindado por otro motivo.
 - Una simulación lleva un control de que simula: al simular "Python
   3.10" bloqueando `tomllib`, envolver `__import__` no bloqueó nada
   (`importorskip` usa `importlib.import_module`) y dio un falso rojo que

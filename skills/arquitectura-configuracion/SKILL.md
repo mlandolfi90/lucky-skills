@@ -69,7 +69,16 @@ ven; acá son configuración y se ven, pero no en el código.
   sobre el código fuente que detecta IPs, puertos, URLs, rutas absolutas
   y tiempos mágicos fuera del cargador. Corre en cada cierre y en
   arquitectura-verificar, como el cero-fuga de secretos. Cada excepción
-  lleva su motivo escrito al lado; sin motivo, es un hallazgo.
+  lleva su motivo escrito al lado; sin motivo, es un hallazgo. La guarda
+  pide FORMA y POSICIÓN, no forma sola: el literal cuenta cuando está
+  donde un valor gobierna algo (defecto de parámetro, constante
+  asignada, argumento nombrado como configuración, espera, defecto de un
+  `.get()`, clave de configuración en un dict). Medido: por forma sola
+  daba 52, y veinte no eran configuración (`"=" * 80` y `data[-80:]`
+  contaban como el puerto 80; `radius = 300` como un timeout de cinco
+  minutos); la cuenta honesta era 30. Una guarda que mide por forma sola
+  no subestima la deuda: la INVENTA — el defecto que la skill persigue,
+  cometido por su propia herramienta.
 - **Retrofit por inventario**: en un repo ya nacido, primero se cuenta
   (la guarda en modo informe da el número), después se mueve al contrato,
   y la guarda queda permanente con la cuenta en cero. El número de
