@@ -152,6 +152,11 @@ en el MCP que se está construyendo.
   inesperada de su propia configuración, y eso se prueba: auditar tampoco
   puede romper el ARRANQUE. Caso nombrado: `por_defecto = "completo"` deja
   la lista escrita y sin efecto; el archivo parece configurado.
+- Una regla con respaldo permisivo es la regla que el respaldo dice, no
+  la que el docstring dice. Y avisar no es actuar: si la guarda detecta y
+  sigue, la guarda no existe — es una nota en un log que nadie mira. Los
+  dos defectos de R1/R4 fueron eso: la protección existía y el camino de
+  respaldo la anulaba, y el segundo se escribió corrigiendo el primero.
 - Rige custodiar-secretos en todo el carril.
 
 ### 6. Archivo: el nombre dice quién escribió; la sesión va en cada línea
@@ -337,10 +342,15 @@ compartido (`lucky-auditoria`); lo que se mide en cada uno vive en su
   primera llamada (no al arrancar). Es donde el registro declara su
   alcance: `tipo:"cabecera"`, versión del esquema de las líneas, quién
   escribe (`mcp` con versión y commit, `pid`, `sesion`, `arnes`,
-  `transporte`, `framework` con versión), `modo`, hash del
-  `config/auditoria.toml` vigente (sin él, un argumento recortado no se
-  distingue de uno completo), `inicio` y `cwd` medido. Nada de valores de
-  configuración ni del entorno fuera del catálogo de arneses.
+  `transporte`, `framework` con versión), `modo`, `redaccion{huella,
+  valida}` — la huella del `config/auditoria.toml` dice cuáles eran las
+  reglas (sin ella, un argumento recortado no se distingue de uno
+  completo) y `valida` dice si se aplicaron o si el toml no cargó y se
+  está opacando todo; son dos cosas distintas —, `inicio` y `cwd` medido.
+  Nada de valores de configuración ni del entorno fuera del catálogo de
+  arneses. El `check` (R8) responde "¿cómo está ahora?"; la cabecera
+  responde "¿cómo estaba cuando se escribió esto?", que es la pregunta
+  que se hace seis meses después, cuando ya no hay a quién llamar.
 - **R4 — Activadores y dónde van.** Uno solo: `<MCP>_AUDITORIA` =
   vacío/`0` (apagado) · `1` (redactado) · `crudo` · una ruta ABSOLUTA.
   Solo la ruta absoluta cuenta como ruta; cualquier otro valor APAGA y
