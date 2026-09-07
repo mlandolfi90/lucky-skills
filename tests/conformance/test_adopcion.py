@@ -80,7 +80,18 @@ class AdoptionTests(unittest.TestCase):
         self._git(repository, "commit", "-q", "-m", "catalogo")
         self._git(repository, "tag", "-a", "skill-alpha-v1.0.0", "-m", "sello")
 
-        self._plan(self._landing())  # sellada e intacta: se puede adoptar
+        plan = self._plan(self._landing())  # sellada e intacta: se puede adoptar
+        apply_plan(plan, confirmed_plan_hash=plan.plan_hash, confirmed_by="human:test")
+        # El estado dice de dónde salió: con esto, etiqueta y contenido no
+        # pueden discrepar sin dejar rastro (los dos repos corrompidos tenían
+        # SOURCE_COMMIT="N/D").
+        state = load_env(self.target / ".lifecycle" / "state" / "skills" / "alpha.env")
+        head = subprocess.run(
+            ["git", "-C", str(repository), "rev-parse", "HEAD"],
+            check=True, capture_output=True, text=True,
+        ).stdout.strip()
+        self.assertEqual(state["SOURCE_COMMIT"], head)
+        self.assertEqual(state["SOURCE_TAG"], "skill-alpha-v1.0.0")
 
         skill_md = self.skill / "SKILL.md"
         original = skill_md.read_text(encoding="utf-8")
@@ -104,7 +115,14 @@ class AdoptionTests(unittest.TestCase):
         skill_md.write_text(original + "\ncambio posterior al plan\n", encoding="utf-8")
         with self.assertRaisesRegex(ValueError, "SOURCE_UNSEALED"):
             apply_plan(plan, confirmed_plan_hash=plan.plan_hash, confirmed_by="human:test")
-        self.assertFalse((self.target / "skills" / "alpha").exists())
+        # El apply rechazado no tocó el TARGET: lo instalado sigue siendo lo
+        # del tag, no lo que se movió después.
+        installed = (self.target / "skills" / "alpha" / "SKILL.md").read_text(encoding="utf-8")
+        self.assertEqual(installed, original)
+        self.assertEqual(
+            load_env(self.target / ".lifecycle" / "state" / "skills" / "alpha.env")["SOURCE_TAG"],
+            "skill-alpha-v1.0.0",
+        )
 
     def test_claude_code_projection_excludes_agents_metadata(self) -> None:
         # `agents/openai.yaml` es metadato Codex/OpenAI (PACKAGING.env:

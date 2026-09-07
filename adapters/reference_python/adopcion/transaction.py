@@ -18,7 +18,7 @@ from lifecycle_core.receipts import local_state_root, utc_now, write_receipt
 from sextante.local_probe import probe_local
 
 from .models import AdoptionPlan
-from .planner import build_plan
+from .planner import build_plan, source_origin
 
 
 def apply_plan(
@@ -329,6 +329,12 @@ def _write_states(
             for item in plan.items
             if item.skill_id == skill_id and item.role == "CANONICAL"
         )
+        # El mismo cálculo que hizo el planner al armar el plan (y que apply
+        # acaba de rehacer al recalcularlo): si la fuente se movió entre uno y
+        # otro, el plan ya no coincide y no se llega acá.
+        source_commit, source_tag = source_origin(
+            Path(plan.source_skill).parent / skill_id
+        )
         values = {
             "FORMAT_VERSION": "1",
             "SKILL_ID": skill_id,
@@ -336,7 +342,8 @@ def _write_states(
             # Forma canónica portable; debe coincidir con la que el planner
             # incluyó en el hash esperado del estado.
             "SOURCE": f"skills/{skill_id}",
-            "SOURCE_COMMIT": "N/D",
+            "SOURCE_COMMIT": source_commit,
+            "SOURCE_TAG": source_tag,
             "HARNESSES": plan.harness,
             "STATUS": "ACTIVE",
             "ADOPTION_ID": plan.adoption_id,
@@ -464,10 +471,15 @@ def _validate_activation(plan: AdoptionPlan, target: Path) -> None:
             continue
         if item.role == "STATE":
             values = load_env(destination)
+            # Mismo juego de claves que `planner._state_item`: si allá entra
+            # una clave nueva y acá no, todo apply falla con "estado instalado
+            # inválido" (pasó al sumar SOURCE_COMMIT y SOURCE_TAG).
             observed = {
                 "SKILL_ID": values.get("SKILL_ID", ""),
                 "SKILL_VERSION": values.get("SKILL_VERSION", ""),
                 "SOURCE": values.get("SOURCE", ""),
+                "SOURCE_COMMIT": values.get("SOURCE_COMMIT", ""),
+                "SOURCE_TAG": values.get("SOURCE_TAG", ""),
                 "HARNESSES": values.get("HARNESSES", ""),
                 "STATUS": values.get("STATUS", ""),
                 "CONTENT_HASH": values.get("CONTENT_HASH", ""),

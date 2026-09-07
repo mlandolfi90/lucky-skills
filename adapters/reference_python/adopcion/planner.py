@@ -68,6 +68,7 @@ def build_plan(
                     exclude_top=spec.projection_excludes,
                 )
             )
+        source_commit, source_tag = source_origin(manifest.root)
         items.append(
             _state_item(
                 target_resolved,
@@ -78,6 +79,8 @@ def build_plan(
                 # pushea a cada destino, y una ruta absoluta filtra el usuario
                 # local y rompe la comparación remota de D-058.
                 source=f"skills/{manifest.skill_id}",
+                source_commit=source_commit,
+                source_tag=source_tag,
                 content_hash=canonical_item.source_hash,
                 harness=harness,
             )
@@ -318,12 +321,42 @@ def _static_file_item(
     )
 
 
+def source_origin(skill_root: Path) -> tuple[str, str]:
+    """(SOURCE_COMMIT, SOURCE_TAG) de la fuente, para que el estado adoptado
+    diga de dónde salió.
+
+    Dos repos de la flota se llevaron el contenido de un commit y lo
+    registraron con el número de otro tag, y nada en su `.lifecycle` decía de
+    dónde había salido el archivo: etiqueta y contenido podían discrepar sin
+    dejar rastro. Con el commit y el tag en el estado, la discrepancia se caza
+    comparando, no adivinando. Fuera de un repositorio (p. ej. un tag
+    extraído con `git archive`) no hay historia que leer: `N/D`, honesto.
+    """
+    repository = skill_root.parent.parent
+    if not is_repository(repository):
+        return "N/D", "N/D"
+    head = git(repository, ("rev-parse", "HEAD"))
+    commit = head.stdout.strip() if head.returncode == 0 else "N/D"
+    manifest = validate_skill(skill_root)
+    tag_name = f"skill-{manifest.skill_id}-v{manifest.version}"
+    tag_check = git(
+        repository,
+        ("rev-parse", "--verify", "--quiet", f"refs/tags/{tag_name}"),
+    )
+    # El tag solo se declara si existe: `_require_sealed_source` ya garantizó
+    # que la fuente coincide con él. Sin tag, la skill nunca se publicó.
+    tag = tag_name if tag_check.returncode == 0 else "UNPUBLISHED"
+    return commit, tag
+
+
 def _state_item(
     target: Path,
     *,
     skill_id: str,
     version: str,
     source: str,
+    source_commit: str,
+    source_tag: str,
     content_hash: str,
     harness: str,
 ) -> PlanItem:
@@ -333,6 +366,8 @@ def _state_item(
         "SKILL_ID": skill_id,
         "SKILL_VERSION": version,
         "SOURCE": source,
+        "SOURCE_COMMIT": source_commit,
+        "SOURCE_TAG": source_tag,
         "HARNESSES": harness,
         "STATUS": "ACTIVE",
         "CONTENT_HASH": content_hash,
