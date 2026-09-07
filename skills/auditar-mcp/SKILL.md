@@ -359,53 +359,42 @@ requisito de nacimiento. Lo que es igual en todos vive en un paquete
 compartido (`lucky-auditoria`); lo que se mide en cada uno vive en su
 `config/`.
 
-- **R1 — Dónde se guarda: el redactado en el proyecto que LLAMÓ, en una
-  carpeta que se ignora sola; el crudo en el estado del usuario,
-  siempre.** Redactado: `<proyecto que llamó>/registro_auditoria/`, una
-  sola carpeta por proyecto para todos sus MCP. Crudo: `<estado del
-  usuario>/registro_auditoria/<proyecto>/`, sin excepción — un
-  `.gitignore` lo respeta git y nadie más (un zip, un rsync, un `COPY .`
-  de Docker, un sdist, un "subir carpeta" copian el árbol entero), y el
-  crudo lleva credenciales enteras y es el único donde equivocarse no se
-  deshace. Es la asimetría de R4 aplicada al lugar: el material sensible
-  va donde la regla dice, no donde es cómodo. El proyecto que llamó se
-  conoce, medido: el proceso hijo recibe la raíz de la sesión por el
-  entorno (`CLAUDE_PROJECT_DIR` en Claude Code; el catálogo de arneses
-  de la regla 2 dice la variable de cada uno) y, si el arnés no la da,
-  el protocolo permite pedirle al cliente sus `roots`. Eso vale para
-  stdio, donde el que escribe y el que llamó son la misma máquina y el
-  mismo proceso-por-sesión. Bajo HTTP no (medido: el servidor es un
-  contenedor de larga vida que arranca sin relación con ningún proyecto;
-  `CLAUDE_PROJECT_DIR` da 0 coincidencias; `roots` es una petición
-  asíncrona al cliente, depende de que la declare, hay que cachearla por
-  sesión, y devuelve una URI que el servidor casi seguro no tiene
-  montada). Ahí el camino esperado, no la excepción, es DENTRO del
-  contenedor, en el estado del servidor: `<estado del
-  usuario>/registro_auditoria/<mcp>/` sobre un volumen persistente (si
-  no, el registro muere con el contenedor), con la sesión en cada línea
-  (R2, R6) y el proyecto que llamó — si `roots` lo da — como campo de la
-  línea, no como carpeta. Y como el archivo vive en otra máquina, el MCP
-  expone su lectura como herramienta propia (`auditoria`, ver R9): sin
-  ella, nadie del lado del cliente lo ve. La rama se elige por la
-  medición de la regla 2 (cuántas sesiones atiende un proceso), no por
-  adivinar. En stdio, sin variable ni `roots`, no se
-  adivina: va a `<estado del usuario>/registro_auditoria/_sin_proyecto/`
-  (`%LOCALAPPDATA%`, `XDG_STATE_HOME` o `~/.local/state`) y se avisa —
-  el aviso es señal porque en stdio es raro; en HTTP sería ruido
-  constante, y por eso allí no hay aviso. El cwd no se usa nunca: es lo que el
-  lanzador le dejó al hijo (medido: `%TEMP%`, o el repo de otro), no una
-  propiedad del proyecto. Y la carpeta se protege sola: el paquete
-  escribe adentro un `.gitignore` con `*` la primera vez que la crea, así
-  ningún repo que no la esperaba puede commitearla con un `git add -A`
-  — el motivo medido (2026-09-07) de la regla: un mismo MCP registrado
-  una vez dejó 273 KB de crudos con credenciales en tres repos cuyos
-  `.gitignore` no lo cubrían. Ensanchar el `.gitignore` de cada repo
-  arregla los que uno conoce; la carpeta autoignorada arregla el
-  próximo. Si no se puede crear, no se escribe y se dice en el log: no
-  hay caída a ningún otro lado, porque no escribir tampoco rompe. Una
-  ruta ABSOLUTA en el activador sigue mandando (R4). Lo que el MCP no
-  sabe es de qué repo es él mismo — por eso el archivo lleva su nombre
-  (R2) y no al revés.
+- **R1 — Dónde se guarda: todo archivo de la auditoría, sin excepción,
+  va a `<CLAUDE_PROJECT_DIR>/registro_auditoria/`.** Sea cual sea el modo
+  (redactado o crudo) y sea cual sea el MCP: una sola carpeta por
+  proyecto, así se ubica por proyecto y se limpia por proyecto. Es una
+  decisión del humano, cerrada: los argumentos técnicos se resuelven
+  adentro de ella, no moviéndola. Cómo se cumple:
+  - **El proyecto es el que llamó.** El proceso hijo recibe la raíz de la
+    sesión por el entorno (`CLAUDE_PROJECT_DIR` en Claude Code; el
+    catálogo de arneses de la regla 2 dice la variable de cada uno) y, si
+    el arnés no la da, el protocolo permite pedirle al cliente sus
+    `roots`. Sin ninguna de las dos no se escribe en ningún otro lado: se
+    apaga y se dice en el log, una vez por proceso. Ni estado del usuario,
+    ni cwd (medido: el cwd es lo que el lanzador le dejó al hijo —
+    `%TEMP%`, o el repo de otro —, no una propiedad del proyecto).
+  - **La carpeta se protege sola.** El paquete escribe adentro un
+    `.gitignore` con `*` la primera vez que la crea: ningún repo puede
+    commitearla con un `git add -A`. Lo que un `.gitignore` no cubre — un
+    zip, un rsync, un `COPY .` de Docker, un sdist — se cubre por
+    retención (R7): el crudo no vive más que la sesión de depuración, y
+    el `check` (R8) dice cuántos hay. El motivo medido (2026-09-07) de
+    ambas cosas: un mismo MCP dejó 273 KB de crudos con credenciales en
+    tres repos cuyos `.gitignore` no lo cubrían, y nadie sabía dónde.
+  - **Bajo HTTP** el servidor no tiene `CLAUDE_PROJECT_DIR` (medido: es
+    un contenedor de larga vida que arranca sin relación con ningún
+    proyecto; `roots` es un round-trip al cliente con una URI que el
+    servidor no tiene montada). Ahí el "proyecto" es el propio servicio:
+    `registro_auditoria/` en su directorio de trabajo dentro del
+    contenedor, sobre un volumen persistente, con la sesión en cada línea
+    (R2, R6) y el proyecto que llamó — si `roots` lo da — como campo de
+    la línea. Y como el archivo vive en otra máquina, el MCP expone su
+    lectura como herramienta propia (`auditoria`, R9): sin ella nadie del
+    lado del cliente lo ve.
+  - Una ruta ABSOLUTA en el activador sigue mandando (R4) — es la única
+    forma de elegir otro lugar, y es una elección explícita del operador.
+  - Si la carpeta no se puede crear, no se escribe y se dice: no hay
+    caída a ningún otro lado, porque no escribir tampoco rompe.
 - **R2 — Cómo se nombra.** `<mcp>-auditoria[-CRUDA]-<escritor>.jsonl`.
   `<mcp>` derivado del paquete o atado al manifiesto por prueba;
   `<escritor>` = id de sesión en stdio, pid en HTTP.
@@ -467,10 +456,19 @@ compartido (`lucky-auditoria`); lo que se mide en cada uno vive en su
   `receipt:<hash>`) y la tabla se actualiza en la siguiente versión de
   esta skill. Una casilla no pasa de pendiente a medida por prosa: pasa
   por una ficha con evidencia.
-- **R7 — Retención.** El crudo se borra al cerrar la sesión de
-  depuración (obligación heredada de logalizar). El redactado rota por
-  tamaño o edad. El `check` avisa cuando hay crudos con más edad que la
-  ventana declarada: hoy nada limpia solo, y por eso se acumulan.
+- **R7 — Retención, por proyecto.** Como todo vive en
+  `<proyecto>/registro_auditoria/` (R1), limpiar es un solo lugar por
+  proyecto: no hay que recordar en qué repos se usó el MCP ni buscar en
+  el estado del usuario. El crudo se borra al cerrar la sesión de
+  depuración (obligación heredada de logalizar) — y como la carpeta
+  puede viajar en un zip o un `COPY .` que ignora el `.gitignore`, ese
+  borrado es la protección real del crudo, no un detalle. El redactado
+  rota por tamaño o edad. El `check` (R8) cuenta lo que hay en la
+  carpeta y avisa cuando hay crudos con más edad que la ventana
+  declarada; la herramienta `auditoria` (R9) ofrece `limpiar` para
+  hacerlo sin entrar al servidor. Hoy nada limpia solo, y por eso se
+  acumulan: la retención automática se declara pendiente hasta que
+  alguien la mida en operación.
 - **R8 — Bloque `auditoria` del `check`.** Campos fijos, iguales en todo
   MCP: `modo`, `archivo`, `aviso` (solo en crudo), `redaccion`
   (`abierta|cerrada` con el motivo si está cerrada), `acumulado{archivos,
