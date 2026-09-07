@@ -26,7 +26,7 @@ receta R1–R11 de la skill `auditar-mcp` 1.2.2.
 ```toml
 # pyproject.toml del MCP anfitrión
 dependencies = [
-    "lucky-auditoria-mcp @ git+https://github.com/mlandolfi90/lucky-skills@auditoria-mcp-v0.3.1#subdirectory=packages/lucky-auditoria-mcp",
+    "lucky-auditoria-mcp @ git+https://github.com/mlandolfi90/lucky-skills@auditoria-mcp-v0.3.3#subdirectory=packages/lucky-auditoria-mcp",
 ]
 ```
 
@@ -317,23 +317,27 @@ logueando `?token=<JWT>` en claro.
 
 Las versiones de la tabla son exactas a propósito, y las del `pyproject.toml` están
 pineadas con `==`: un rango afirma compatibilidad con versiones que nadie probó,
-incluidas las que todavía no existen. Medido, y esta vez leyendo el CI en vez de suponerlo (`gh run list`):
+incluidas las que todavía no existen. Las versiones del `pyproject.toml` están pineadas con `==`: un rango afirma
+compatibilidad con versiones que nadie probó, incluidas las que todavía no
+existen. A mano, la suite corrió sólo en **Python 3.12.10**, en dos venv
+distintos de la misma máquina — que no son dos entornos. Lo demás lo mide el CI
+(`.github/workflows/auditoria-mcp.yml`), y hay que **leerlo**:
+`gh run list --workflow auditoria-mcp.yml`.
 
-| Python | Estado |
-|---|---|
-| 3.12 | verde en `ubuntu-latest` y `windows-latest`, y a mano en 3.12.10 |
-| 3.13 | verde en `ubuntu-latest` y `windows-latest` |
-| 3.10 | verde desde el run que corrigió el test del respaldo de `tomli` |
+Estado al 2026-09-07, leído de los runs: **3.10, 3.12 y 3.13 en verde**, en
+`ubuntu-latest` y `windows-latest`.
 
-Este párrafo se equivocó dos veces seguidas, en direcciones opuestas, y las dos
-quedan escritas porque son la razón de la regla:
+Este párrafo se corrigió dos veces, en direcciones opuestas, y las dos quedan
+escritas porque son la razón de la regla:
 
-1. Dijo que **3.13 estaba medida** cuando no lo estaba: una sesión lo dio por
-   sentado, se copió sin verificar, y quedó en dos repos con forma de medición.
+1. Dijo que **3.13 estaba medida a mano**. Falso: lo dio por sentado una sesión,
+   se copió sin verificar, y quedó en dos repos con forma de medición.
 2. Después dijo que **el CI no se había ejecutado nunca**. También falso: había
-   corrido doce veces, verde hasta 0.2.0 y **rojo en las tres últimas**, y nadie
-   miró. El test que rompía era el escrito para medir 3.10, que importaba
-   `tomllib` — el módulo que en 3.10 no existe.
+   corrido doce veces, las tres últimas en **rojo**, y ninguna de las dos
+   sesiones había mirado los runs. El test que rompía era el escrito para medir
+   3.10, que importaba `tomllib` — el módulo que en 3.10 no existe. El único
+   test que medía el respaldo era el que no podía correr donde el respaldo se
+   usa.
 
 De ahí la forma: **exigir que exista un runner no alcanza; hay que leer su
 resultado.** Un CI rojo que nadie mira vale lo mismo que uno que no corre, con
