@@ -47,7 +47,7 @@ NOMBRE = HERRAMIENTA_PROPIA
 TOPE = 200
 TOPE_MAXIMO = 1000
 
-ACCIONES = ("estado", "listar", "leer", "cazar", "rechazos", "por_sesion")
+ACCIONES = ("estado", "listar", "leer", "cazar", "rechazos", "por_sesion", "limpiar")
 
 
 class Lector:
@@ -108,6 +108,66 @@ class Lector:
         info = dict(self.auditor.estado())
         info["legibles"] = [a.name for a in self.archivos()]
         return info
+
+    def crudos(self) -> list[Path]:
+        """Los archivos SIN redactar del directorio.
+
+        No se listan por `listar` ni se leen por `leer` -decir "hay tres que no
+        te muestro" ya cuenta cuantas sesiones de depuracion hubo-, pero si se
+        pueden CONTAR y BORRAR: es lo que hace que R7 se pueda cumplir desde
+        donde uno ya esta mirando.
+        """
+        directorio = self._directorio()
+        if directorio is None:
+            return []
+        try:
+            return sorted(
+                a
+                for a in directorio.glob("*.jsonl")
+                if a.is_file() and "-CRUDA-" in a.name
+            )
+        except OSError:
+            return []
+
+    def limpiar(self) -> dict[str, Any]:
+        """Borra los crudos de ESTE proyecto. R7, desde el cliente.
+
+        Por que solo los crudos: el crudo lleva credenciales y su unica
+        proteccion real es no vivir mas que la sesion de depuracion -un
+        `.gitignore` no lo salva de un zip ni de un `COPY .`-. El redactado es
+        evidencia forense y no se tira por una herramienta: rota por tamaño o
+        edad, que es una decision del operador y no de quien esta conectado.
+
+        Por que es posible: desde R1, todo vive en una carpeta por proyecto.
+        Antes esto no se podia ofrecer -habia que acordarse de en que repos se
+        habia usado el MCP, y ademas mirar un arbol del usuario que nadie sabia
+        que existia-.
+
+        El archivo que este proceso esta escribiendo NO se toca, y se dice: en
+        Windows borrarlo falla, y en Linux desapareceria del listado mientras el
+        proceso le sigue escribiendo, que es peor porque parece que se limpio.
+        """
+        propio = self.auditor.ruta()
+        borrados, quedaron, fallos = [], [], []
+        for archivo in self.crudos():
+            if propio is not None and archivo == propio:
+                quedaron.append(archivo.name)
+                continue
+            try:
+                archivo.unlink()
+                borrados.append(archivo.name)
+            except OSError as fallo:
+                fallos.append({"nombre": archivo.name, "motivo": type(fallo).__name__})
+        salida: dict[str, Any] = {"borrados": borrados, "cuantos": len(borrados)}
+        if quedaron:
+            salida["en_uso"] = quedaron
+            salida["aviso"] = (
+                "no se borro el archivo que este proceso esta escribiendo. Apaga "
+                "la auditoria cruda y volve a limpiar."
+            )
+        if fallos:
+            salida["fallaron"] = fallos
+        return salida
 
     def listar(self) -> dict[str, Any]:
         directorio = self._directorio()
@@ -237,8 +297,11 @@ def instalar(servidor: Any, auditor: Auditor, *, nombre: str = NOMBRE) -> Lector
         Solo el registro REDACTADO: el crudo se lee en el servidor y no sale
         por aca. Devuelve paginas, diciendo cuantas lineas quedaron afuera.
 
+        `limpiar` BORRA los archivos crudos de este proyecto (R7). Es la unica
+        accion que escribe, y no toca el redactado.
+
         Args:
-            action: estado | listar | leer | cazar | rechazos | por_sesion
+            action: estado | listar | leer | cazar | rechazos | por_sesion | limpiar
             sesion: filtra por id de sesion (solo en `leer`)
             herramienta: filtra por nombre de herramienta (solo en `leer`)
             desde, hasta: rango ISO 8601 UTC (solo en `leer`)

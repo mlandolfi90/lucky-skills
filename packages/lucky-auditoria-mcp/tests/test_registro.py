@@ -12,7 +12,7 @@ from pathlib import Path
 import pytest
 from conftest import CONFIG
 
-from lucky_auditoria import Auditor
+from lucky_auditoria import Auditor, identidad
 from lucky_auditoria.registro import MAX_RESPUESTA, tipo_del_error
 
 
@@ -20,16 +20,15 @@ from lucky_auditoria.registro import MAX_RESPUESTA, tipo_del_error
 def auditor(tmp_path, monkeypatch):
     config = tmp_path / "auditoria.toml"
     config.write_text(CONFIG, encoding="utf-8")
-    # El estado del usuario va a `tmp_path`, y no alcanza con apuntar la
-    # variable a un archivo: desde R1, `crudo` IGNORA la ruta elegida y va al
-    # estado del usuario a proposito. Sin esto, cada test que prueba el modo
-    # crudo deja un archivo con el centinela adentro en el `%LOCALAPPDATA%`
-    # real de quien corre la suite. Paso, y lo encontro barrer los tests de a
-    # uno mirando el disco, no leerlos.
-    estado = tmp_path / "estado-del-usuario"
-    estado.mkdir()
-    monkeypatch.setenv("LOCALAPPDATA", str(estado))
-    monkeypatch.setenv("XDG_STATE_HOME", str(estado))
+    # El PROYECTO va a `tmp_path`, y no alcanza con apuntar la variable a un
+    # archivo: desde R1, el modo crudo ignora la ruta elegida y escribe en la
+    # carpeta del proyecto. Sin esto, cada test del modo crudo deja un archivo
+    # con el centinela adentro en el repo de quien corre la suite -antes era en
+    # su `%LOCALAPPDATA%`; el peligro se mudo, no desaparecio-. Paso, y lo
+    # encontro barrer los tests de a uno mirando el disco, no leerlos.
+    proyecto = tmp_path / "proyecto"
+    proyecto.mkdir()
+    monkeypatch.setattr(identidad, "raiz_del_proyecto", lambda: str(proyecto))
     a = Auditor("mcp-de-prueba", config=config, version="1.2.3", commit="abc123")
     monkeypatch.setenv(a.variable, str(tmp_path / "reg.jsonl"))
     return a

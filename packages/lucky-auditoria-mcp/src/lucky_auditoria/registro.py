@@ -5,7 +5,6 @@ tumbe la operacion convierte una mejora en un modo de fallo nuevo, asi que todo
 lo que puede fallar se avisa por el log del proceso y sigue.
 """
 
-import hashlib
 import json
 import logging
 import os
@@ -26,7 +25,6 @@ ESQUEMA = 1
 
 _ARCHIVO_POR_DEFECTO = "auditoria.jsonl"
 _DIRECTORIO = "registro_auditoria"
-_SIN_PROYECTO = "_sin_proyecto"
 
 # La herramienta que el propio paquete expone para LEER el registro (R9 bajo
 # HTTP). Su llamada se anota -quien leyo el registro es informacion forense de
@@ -168,57 +166,55 @@ class Auditor:
 
     # -- donde escribe ------------------------------------------------------
 
-    def _estado_del_usuario(self) -> Path:
-        """`%LOCALAPPDATA%`, si no `XDG_STATE_HOME`, si no `~/.local/state`."""
-        base = os.environ.get("LOCALAPPDATA") or os.environ.get("XDG_STATE_HOME")
-        return Path(base) if base else Path.home() / ".local" / "state"
+    def _destino(self, crudo: bool) -> Path | None:
+        """Donde va el registro, o None si no hay donde y hay que apagarse.
 
-    def _carpeta_del_proyecto(self, proyecto: str) -> str:
-        """Un nombre de carpeta para un proyecto, sin colisiones silenciosas.
+        | transporte | modo   | donde                                       |
+        |------------|--------|---------------------------------------------|
+        | stdio      | ambos  | `<CLAUDE_PROJECT_DIR>/registro_auditoria/`  |
+        | stdio      | sin proyecto | APAGADO, con un aviso por proceso     |
+        | http       | ambos  | `./registro_auditoria/` del servicio        |
 
-        El nombre a secas alcanzaria casi siempre y fallaria feo cuando no: dos
-        checkouts del mismo repo en rutas distintas escribirian en la misma
-        carpeta y sus registros se leerian como uno solo. La huella corta de la
-        ruta completa lo evita sin volver el nombre ilegible.
+        UNA carpeta por proyecto, sea cual sea el modo. Es una decision del
+        humano, cerrada: se ubica por proyecto y se limpia por proyecto, y los
+        argumentos tecnicos se resuelven adentro de ella.
+
+        La version anterior de este paquete mandaba el CRUDO al estado del
+        usuario, porque un `.gitignore` lo respeta git y nadie mas -un zip, un
+        `COPY .`, un sdist copian el arbol entero-. El precio era peor que el
+        riesgo: el crudo terminaba en un arbol que no es de ningun proyecto, y
+        el que lo dejo prendido tenia que acordarse de que existe ese arbol para
+        ir a borrarlo. Nadie se acuerda. Ahora los dos modos estan en la carpeta
+        del proyecto, la carpeta se autoprotege, y lo que el `.gitignore` no
+        cubre lo cubre la RETENCION (R7): el crudo no vive mas que la sesion de
+        depuracion, el `check` dice cuantos hay, y `auditoria limpiar` los borra
+        desde donde uno ya esta mirando.
+
+        Sin proyecto no se escribe en ningun lado. Es la diferencia con la
+        version anterior, que tenia `_sin_proyecto` bajo el estado del usuario:
+        una carpeta que nadie sabia que existia acumulando lo que nadie iba a
+        buscar. No escribir tampoco rompe.
+
+        Bajo HTTP el cwd SI se usa, y es lo correcto: el servidor es un
+        contenedor de larga vida, su directorio de trabajo es suyo y no lo
+        heredo de nadie. Bajo stdio el cwd no se usa nunca -medido: un mismo MCP
+        registrado una vez corria con el cwd puesto en tres repos distintos-.
         """
-        limpio = Path(proyecto).name or "raiz"
-        huella = hashlib.sha256(str(proyecto).encode("utf-8")).hexdigest()[:8]
-        return f"{limpio}-{huella}"
-
-    def _destino(self, crudo: bool) -> Path:
-        """La tabla de R1, explicita. Cada celda es una decision distinta.
-
-        | transporte | modo      | donde                                     |
-        |------------|-----------|-------------------------------------------|
-        | stdio      | redactado | `<proyecto>/registro_auditoria/`          |
-        | stdio      | crudo     | `<estado>/registro_auditoria/<proyecto>/` |
-        | stdio      | sin proy. | `<estado>/registro_auditoria/_sin_proyecto/` + aviso |
-        | http       | ambos     | `<estado>/registro_auditoria/<mcp>/`      |
-
-        El crudo NUNCA va bajo un arbol de proyecto, aunque se lo conozca. Un
-        `.gitignore` lo respeta git y nadie mas: un zip, un rsync, un `COPY .`
-        de Docker, un sdist o un "subir carpeta" copian el arbol entero. El
-        redactado sobrevive a eso; el crudo lleva credenciales, y es el unico
-        lugar donde equivocarse no se deshace.
-        """
-        estado = self._estado_del_usuario() / _DIRECTORIO
         if self.transporte != "stdio":
-            # El servidor no es de ningun proyecto: es un contenedor de larga
-            # vida. El proyecto que llamo va como campo de la linea.
-            return estado / self.nombre
+            # El proyecto que llamo va como campo de la linea, no en la ruta.
+            return Path.cwd() / _DIRECTORIO
         proyecto = identidad.raiz_del_proyecto()
         if not proyecto:
             if not self._aviso_sin_proyecto_dado:
                 self._aviso_sin_proyecto_dado = True
                 logger.warning(
-                    "AUDITORIA sin proyecto: ni el arnes ni los roots del "
-                    "cliente dijeron cual espacio de trabajo llamo, y el cwd no "
-                    "sirve para adivinarlo. El registro va a %s.",
-                    estado / _SIN_PROYECTO,
+                    "AUDITORIA APAGADA: ni el arnes ni los roots del cliente "
+                    "dijeron cual espacio de trabajo llamo, y el cwd no sirve "
+                    "para adivinarlo. No se escribe en ningun otro lado a "
+                    "proposito: un registro en un arbol que no es de nadie es "
+                    "uno que nadie va a encontrar para borrar."
                 )
-            return estado / _SIN_PROYECTO
-        if crudo:
-            return estado / self._carpeta_del_proyecto(proyecto)
+            return None
         return Path(proyecto) / _DIRECTORIO
 
     def directorio_por_defecto(self) -> Path | None:
@@ -230,6 +226,8 @@ class Auditor:
         fallos, y el cwd no se usa nunca.
         """
         destino = self._destino(self.modo() == "crudo")
+        if destino is None:
+            return None
         try:
             nueva = not destino.exists()
             destino.mkdir(parents=True, exist_ok=True)

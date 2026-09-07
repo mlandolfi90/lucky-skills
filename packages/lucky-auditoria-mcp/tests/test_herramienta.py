@@ -21,10 +21,13 @@ from lucky_auditoria.herramienta import NOMBRE, TOPE_MAXIMO, Lector
 
 @pytest.fixture
 def auditor(tmp_path, monkeypatch):
-    estado = tmp_path / "estado"
-    estado.mkdir()
-    monkeypatch.setenv("LOCALAPPDATA", str(estado))
-    monkeypatch.setenv("XDG_STATE_HOME", str(estado))
+    # Bajo HTTP el registro va a `./registro_auditoria/` del servicio (R1), o
+    # sea al CWD. Sin mover el cwd, esta suite lo escribiria en el repo del
+    # paquete: la guarda de sesion de `conftest.py` lo caza, pero es mejor no
+    # llegar ahi.
+    servicio = tmp_path / "servicio"
+    servicio.mkdir()
+    monkeypatch.chdir(servicio)
     config = tmp_path / "auditoria.toml"
     config.write_text(CONFIG, encoding="utf-8")
     a = Auditor("mcp-de-prueba", config=config, transporte="http", version="0.2.0")

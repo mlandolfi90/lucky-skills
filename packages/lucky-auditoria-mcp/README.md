@@ -26,7 +26,7 @@ receta R1–R11 de la skill `auditar-mcp` 1.2.2.
 ```toml
 # pyproject.toml del MCP anfitrión
 dependencies = [
-    "lucky-auditoria-mcp @ git+https://github.com/mlandolfi90/lucky-skills@auditoria-mcp-v0.3.3#subdirectory=packages/lucky-auditoria-mcp",
+    "lucky-auditoria-mcp @ git+https://github.com/mlandolfi90/lucky-skills@auditoria-mcp-v0.4.0#subdirectory=packages/lucky-auditoria-mcp",
 ]
 ```
 
@@ -120,41 +120,50 @@ archivo en el lugar equivocado.
 
 | transporte | modo | dónde |
 |---|---|---|
-| stdio | redactado | `<proyecto que llamó>/registro_auditoria/` |
-| stdio | crudo | `<estado del usuario>/registro_auditoria/<proyecto>/` |
-| stdio | sin proyecto | `<estado>/registro_auditoria/_sin_proyecto/` + aviso |
-| http | ambos | `<estado del usuario>/registro_auditoria/<mcp>/` |
+| stdio | redactado y crudo | `<proyecto que llamó>/registro_auditoria/` |
+| stdio | sin proyecto | **no se escribe**, y se avisa una vez por proceso |
+| http | ambos | `./registro_auditoria/` del servicio, en el contenedor |
 
-donde el estado del usuario es `%LOCALAPPDATA%`, si no `XDG_STATE_HOME`, si no
-`~/.local/state`. Una ruta absoluta en la variable manda sobre todo esto —salvo
-en crudo, que no se puede pedir por ruta.
+Una ruta absoluta en la variable manda sobre todo esto —salvo en crudo, que no
+se puede pedir por ruta: se pide por palabra, a propósito.
 
-**El redactado va al proyecto que llamó**, y la carpeta **se protege sola**: el
-paquete escribe adentro un `.gitignore` con `*` la primera vez que la crea. Así
-ningún repo que no la esperaba puede commitearla con un `git add -A`. Ensanchar
-el `.gitignore` de cada repo arregla los que uno conoce; la carpeta autoignorada
-arregla el próximo.
+**Una sola carpeta por proyecto, sea cual sea el modo.** Es una decisión del
+humano, cerrada: así se ubica por proyecto y se limpia por proyecto, y los
+argumentos técnicos se resuelven dentro de ella en vez de moviéndola.
 
-**El crudo nunca va bajo un árbol de proyecto**, aunque se lo conozca. Un
-`.gitignore` lo respeta git y nadie más: un zip, un `rsync`, un `COPY .` de
-Docker, un sdist o un "subir carpeta" copian el árbol entero. El redactado
-sobrevive a eso; el crudo lleva credenciales, y es el único donde equivocarse no
-se deshace.
+**La carpeta se protege sola**: el paquete escribe adentro un `.gitignore` con
+`*` la primera vez que la crea. Así ningún repo que no la esperaba puede
+commitearla con un `git add -A`. Ensanchar el `.gitignore` de cada repo arregla
+los que uno conoce; la carpeta autoignorada arregla el próximo.
 
-**Bajo HTTP el estado del usuario es el camino esperado, no la excepción**, y
-está medido: el servidor es un contenedor de larga vida que arranca sin relación
-con ningún proyecto —`CLAUDE_PROJECT_DIR` da cero coincidencias— y `roots` es
-una petición asíncrona al cliente, que depende de que la declare, hay que
-cachearla por sesión, y devuelve una URI que el servidor casi seguro no tiene
-montada. El proyecto que llamó, si `roots` lo da, va como **campo de la línea**.
-Ahí no hay aviso: en stdio la ausencia de proyecto es señal, en HTTP sería ruido
-constante, y un aviso que suena siempre deja de leerse.
+**El crudo comparte carpeta con el redactado desde 0.4.0, y su protección es la
+retención.** Hasta 0.3.3 iba al estado del usuario, porque un `.gitignore` lo
+respeta git y nadie más: un zip, un `rsync`, un `COPY .` de Docker o un sdist
+copian el árbol entero. El precio resultó peor que el riesgo: el crudo quedaba
+en un árbol que no es de ningún proyecto, y para borrarlo había que acordarse de
+que ese árbol existe. Nadie se acuerda, y el crudo con credenciales es
+justamente lo que no puede quedar olvidado. Ahora lo cubre R7: `auditoria
+limpiar` borra los crudos del proyecto desde donde uno ya está mirando, y el
+`check` dice cuántos hay y de qué edad.
 
-**El `cwd` no se usa nunca.** Es lo que el lanzador le dejó al hijo —medido en
-`%TEMP%` y en el repo de otro—, no una propiedad del proyecto. El motivo medido
-(2026-09-07): un mismo MCP registrado **una** vez dejó 273 KB de crudos con
-credenciales en tres repos ajenos, y el `.gitignore` que lo protegía vivía en su
-propio repo mientras el archivo caía en cualquier otro.
+**Sin proyecto no se escribe en ningún lado.** Hasta 0.3.3 caía en
+`<estado>/registro_auditoria/_sin_proyecto/`: una carpeta que nadie sabía que
+existía, acumulando lo que nadie iba a buscar.
+
+**Bajo HTTP el `cwd` sí se usa, y es lo correcto**: el servidor es un contenedor
+de larga vida, su directorio de trabajo es suyo y no lo heredó de ningún
+proyecto. Está medido que ahí no hay otra opción: `CLAUDE_PROJECT_DIR` da cero
+coincidencias, y `roots` es una petición asíncrona al cliente que depende de que
+la declare, hay que cachearla por sesión, y devuelve una URI que el servidor casi
+seguro no tiene montada. El proyecto que llamó, si `roots` lo da, va como **campo
+de la línea**. Ahí no hay aviso: en stdio la ausencia de proyecto es señal, en
+HTTP sería ruido constante, y un aviso que suena siempre deja de leerse.
+
+**Bajo stdio el `cwd` no se usa nunca.** Es lo que el lanzador le dejó al hijo
+—medido en `%TEMP%` y en el repo de otro—, no una propiedad del proyecto. El
+motivo medido (2026-09-07): un mismo MCP registrado **una** vez dejó 273 KB de
+crudos con credenciales en tres repos ajenos, y el `.gitignore` que lo protegía
+vivía en su propio repo mientras el archivo caía en cualquier otro.
 
 **Si el directorio no se puede crear, no se escribe en ningún lado.** No
 escribir tampoco rompe, porque el escritor ya se traga sus fallos.
