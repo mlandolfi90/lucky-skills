@@ -5,11 +5,12 @@ preguntas encima. `cazar` es la que paga el paquete entero.
 """
 
 import json
+from collections.abc import Iterable, Iterator
 from pathlib import Path
-from typing import Any, Dict, Iterable, Iterator, List
+from typing import Any
 
 
-def leer(rutas: Iterable[Path | str]) -> Iterator[Dict[str, Any]]:
+def leer(rutas: Iterable[Path | str]) -> Iterator[dict[str, Any]]:
     """Las lineas de uno o varios registros, salteando la cabecera y la basura.
 
     Una linea rota no puede cortar la lectura: un registro se lee JUSTO cuando
@@ -44,7 +45,7 @@ def _escalares(valor: Any) -> Iterator[Any]:
         yield valor
 
 
-def cazar(lineas: Iterable[Dict[str, Any]]) -> List[Dict[str, Any]]:
+def cazar(lineas: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:
     """Argumentos que el cliente mando y que no vuelven en ningun escalar.
 
     Es la señal mecanizable que sale del registro CRUDO: un parametro que llego
@@ -91,7 +92,7 @@ def cazar(lineas: Iterable[Dict[str, Any]]) -> List[Dict[str, Any]]:
     return candidatos
 
 
-def rechazos(lineas: Iterable[Dict[str, Any]]) -> List[Dict[str, Any]]:
+def rechazos(lineas: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:
     """Llamadas que salieron bien y trajeron el rechazo adentro.
 
     El tercer camino de la regla 4, y el que ningun framework puede ver: un lote
@@ -115,9 +116,9 @@ def rechazos(lineas: Iterable[Dict[str, Any]]) -> List[Dict[str, Any]]:
     return encontrados
 
 
-def por_sesion(lineas: Iterable[Dict[str, Any]]) -> Dict[str, Dict[str, Any]]:
+def por_sesion(lineas: Iterable[dict[str, Any]]) -> dict[str, dict[str, Any]]:
     """Que hizo cada sesion. La pregunta original, la que motivo todo esto."""
-    cuentas: Dict[str, Dict[str, Any]] = {}
+    cuentas: dict[str, dict[str, Any]] = {}
     for linea in lineas:
         sesion = linea.get("sesion") or "?"
         entrada = cuentas.setdefault(

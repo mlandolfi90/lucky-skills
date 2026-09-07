@@ -9,9 +9,10 @@ import json
 import logging
 import os
 import threading
+from collections.abc import Mapping
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, Mapping
+from typing import Any
 
 from lucky_auditoria import identidad
 from lucky_auditoria.redaccion import Redaccion, cargar
@@ -207,7 +208,7 @@ class Auditor:
 
     # -- lo que se escribe --------------------------------------------------
 
-    def _cabecera(self, modo: str) -> Dict[str, Any]:
+    def _cabecera(self, modo: str) -> dict[str, Any]:
         """Donde el registro declara su alcance. Primera linea, no al arrancar.
 
         Se escribe con la PRIMERA llamada: un servidor que nadie uso no deja
@@ -258,7 +259,7 @@ class Auditor:
         duracion_ms: int | None = None,
         error: str | None = None,
         envoltorio: str | None = None,
-        retorno: Dict[str, Any] | None = None,
+        retorno: dict[str, Any] | None = None,
         respuesta: str | None = None,
     ) -> None:
         """Escribe una linea. Nunca levanta: auditar no puede romper.
@@ -276,7 +277,7 @@ class Auditor:
         if crudo:
             self._avisar_una_vez_del_modo_crudo(ruta)
         sesion = identidad.get_sesion()
-        linea: Dict[str, Any] = {
+        linea: dict[str, Any] = {
             "cuando": datetime.now(timezone.utc).isoformat(),
             "sesion": sesion["id"],
             "pid": sesion["pid"],
@@ -311,7 +312,7 @@ class Auditor:
             linea["retorno"] = retorno
         self._escribir(ruta, linea, cual)
 
-    def _escribir(self, ruta: Path, linea: Dict[str, Any], modo: str) -> None:
+    def _escribir(self, ruta: Path, linea: dict[str, Any], modo: str) -> None:
         try:
             ruta.parent.mkdir(parents=True, exist_ok=True)
             # Con el candado tomado: varios hilos del mismo proceso no pueden
@@ -328,7 +329,7 @@ class Auditor:
 
     # -- el bloque del `check` ---------------------------------------------
 
-    def estado(self) -> Dict[str, Any]:
+    def estado(self) -> dict[str, Any]:
         """Como esta la auditoria, para el `check` que el MCP ya tiene.
 
         Va ahi y no en una herramienta nueva: una dedicada a "como esta la
@@ -342,7 +343,13 @@ class Auditor:
         """
         cual = self.modo()
         ruta = self.ruta()
-        info: Dict[str, Any] = {"modo": cual, "archivo": str(ruta) if ruta else None}
+        info: dict[str, Any] = {"modo": cual, "archivo": str(ruta) if ruta else None}
+        if self.redaccion.problema:
+            # Una redaccion cerrada no rompe nada, y por eso no se nota: el
+            # registro sigue escribiendo -forma de cada argumento y ningun
+            # valor- y `rechazos` queda ciego, porque el retorno tampoco se
+            # anota. El ERROR del arranque es una vez, y nadie mira el log.
+            info["config"] = self.redaccion.problema
         if cual == "apagado":
             return info
         if cual == "crudo":

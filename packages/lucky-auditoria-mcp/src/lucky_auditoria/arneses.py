@@ -23,13 +23,14 @@ un secreto- en vez de revisar caso por caso.
 """
 
 import os
+from collections.abc import Mapping
 from dataclasses import dataclass, field
-from typing import Any, Dict, Mapping, Tuple
+from typing import Any
 
 # Un nombre de variable con cualquiera de estas partes es una credencial. Se
 # prueba por clase: la guarda corre sobre TODO arnes registrado, incluido el que
 # alguien agregue el año que viene desde otro paquete.
-PALABRAS_DE_SECRETO: Tuple[str, ...] = (
+PALABRAS_DE_SECRETO: tuple[str, ...] = (
     "TOKEN",
     "SECRET",
     "KEY",
@@ -56,9 +57,9 @@ class Arnes:
     def presente(self, entorno: Mapping[str, str] | None = None) -> bool:
         return bool((entorno if entorno is not None else os.environ).get(self.testigo))
 
-    def leer(self, entorno: Mapping[str, str] | None = None) -> Dict[str, Any]:
+    def leer(self, entorno: Mapping[str, str] | None = None) -> dict[str, Any]:
         fuente = entorno if entorno is not None else os.environ
-        datos: Dict[str, Any] = {"id": self.id}
+        datos: dict[str, Any] = {"id": self.id}
         for variable, campo in self.campos.items():
             datos[campo] = fuente.get(variable) or None
         return datos
@@ -84,11 +85,11 @@ CLAUDE_CODE = Arnes(
 # no esta catalogado. No inventa nada, y su ausencia de testigo lo deja ultimo.
 DESCONOCIDO = Arnes(id="desconocido", testigo="", campos={})
 
-_INCORPORADOS: Tuple[Arnes, ...] = (CLAUDE_CODE,)
+_INCORPORADOS: tuple[Arnes, ...] = (CLAUDE_CODE,)
 _GRUPO_DE_ENTRADA = "lucky_auditoria.arneses"
 
 
-def _de_afuera() -> Tuple[Arnes, ...]:
+def _de_afuera() -> tuple[Arnes, ...]:
     """Los arneses que declara OTRO paquete, por `entry_points`.
 
     Nunca levanta: un plugin roto no puede impedir que el MCP arranque, y menos
@@ -111,18 +112,18 @@ def _de_afuera() -> Tuple[Arnes, ...]:
     return tuple(encontrados)
 
 
-def catalogo() -> Tuple[Arnes, ...]:
+def catalogo() -> tuple[Arnes, ...]:
     """Todos los arneses conocidos: los de la casa y los que trae el anfitrion."""
     return _INCORPORADOS + _de_afuera()
 
 
-def prohibidas(arneses: Tuple[Arnes, ...] | None = None) -> Dict[str, list]:
+def prohibidas(arneses: tuple[Arnes, ...] | None = None) -> dict[str, list]:
     """Las variables declaradas que se llaman como un secreto. Vacio es lo sano.
 
     La usa la prueba del paquete Y la prueba de cada anfitrion: el que agrega un
     arnes hereda la guarda sin escribirla.
     """
-    culpables: Dict[str, list] = {}
+    culpables: dict[str, list] = {}
     for arnes in arneses if arneses is not None else catalogo():
         malas = [
             v
@@ -134,7 +135,7 @@ def prohibidas(arneses: Tuple[Arnes, ...] | None = None) -> Dict[str, list]:
     return culpables
 
 
-def detectar(entorno: Mapping[str, str] | None = None) -> Dict[str, Any]:
+def detectar(entorno: Mapping[str, str] | None = None) -> dict[str, Any]:
     """Que arnes lanzo este proceso y que le heredo, o `desconocido`."""
     for arnes in catalogo():
         if arnes.testigo and arnes.presente(entorno):

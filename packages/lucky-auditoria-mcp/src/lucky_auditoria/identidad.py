@@ -28,13 +28,13 @@ controla.
 import os
 import uuid
 from datetime import datetime, timezone
-from typing import Any, Dict
+from typing import Any
 
 from lucky_auditoria import arneses
 
 _ACUÑADO = uuid.uuid4().hex[:12]
 _INICIADA_EN = datetime.now(timezone.utc).isoformat()
-_CLIENTE: Dict[str, Any] = {}
+_CLIENTE: dict[str, Any] = {}
 _SESION_DEL_TRANSPORTE: str | None = None
 
 
@@ -73,7 +73,7 @@ def id_de_sesion() -> str:
     return heredado or _ACUÑADO
 
 
-def get_sesion() -> Dict[str, Any]:
+def get_sesion() -> dict[str, Any]:
     """Quien es este proceso. `pid` va aparte del `id` a proposito.
 
     El id sobrevive en los registros escritos; el pid sirve para encontrar el

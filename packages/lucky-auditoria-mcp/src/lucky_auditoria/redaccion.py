@@ -26,8 +26,9 @@ un problema se grita por el log ademas de cerrar la puerta.
 
 import hashlib
 import logging
+from collections.abc import Mapping
 from pathlib import Path
-from typing import Any, Dict, Mapping
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -75,9 +76,9 @@ class Redaccion:
 
     # -- lo que se aplica ---------------------------------------------------
 
-    def describir(self, valor: Any) -> Dict[str, Any]:
+    def describir(self, valor: Any) -> dict[str, Any]:
         """Un argumento no seguro, sin su valor: que forma tenia y cuanto media."""
-        forma: Dict[str, Any] = {"tipo": type(valor).__name__}
+        forma: dict[str, Any] = {"tipo": type(valor).__name__}
         try:
             forma["largo"] = len(valor)
         except TypeError:
@@ -114,7 +115,7 @@ class Redaccion:
 
     def argumentos_de(
         self, herramienta: str, argumentos: Mapping[str, Any] | None
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Los argumentos reducidos a lo que se puede escribir sin filtrar nada."""
         if not argumentos:
             return {}
@@ -127,7 +128,7 @@ class Redaccion:
                 "_opaco": True,
                 "operaciones": len(operaciones) if isinstance(operaciones, list) else None,
             }
-        limpio: Dict[str, Any] = {}
+        limpio: dict[str, Any] = {}
         for clave, valor in argumentos.items():
             if valor is None:
                 continue
@@ -137,7 +138,7 @@ class Redaccion:
                 limpio[clave] = self._valor_seguro(clave, valor)
         return limpio
 
-    def retorno_de(self, datos: Any) -> Dict[str, Any] | None:
+    def retorno_de(self, datos: Any) -> dict[str, Any] | None:
         """Los conteos de un lote, si el retorno es uno. El defecto va AL REVES.
 
         Un argumento no declarado se anota reducido a forma, porque omitirlo
@@ -152,7 +153,7 @@ class Redaccion:
         """
         if not isinstance(datos, dict):
             return None
-        resumen: Dict[str, Any] = {}
+        resumen: dict[str, Any] = {}
         for bloque, campos in self.conteos.items():
             adentro = datos.get(bloque)
             if isinstance(adentro, dict):

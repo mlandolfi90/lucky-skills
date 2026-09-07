@@ -31,3 +31,12 @@ testpaths = ["tests"]
 
 [tool.ruff]
 line-length = 100
+
+[tool.ruff.lint]
+# Se declara la seleccion en vez de heredar el default: el default de ruff se
+# mueve entre versiones, y un paquete que se copia a varios repos no puede
+# depender de con cual ruff lo corrieron.
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["lucky_auditoria"]
