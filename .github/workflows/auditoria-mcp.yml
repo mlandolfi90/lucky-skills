@@ -22,10 +22,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Los dos extremos del rango declarado. En 3.10 la configuracion se lee
-        # con `tomli` y en 3.13 con `tomllib`: sin el piso, ese camino no lo
-        # corre nadie.
-        python: ["3.10", "3.13"]
+        # Que esta medido de verdad, a mano y fuera del CI, que no corrio nunca:
+        #   3.12.10 -> la suite del paquete, en la maquina donde se escribio
+        #   3.13    -> skills-v3-65, en un venv limpio (fue quien encontro que
+        #              `tomli` faltaba en [dev] y dos tests no corrian)
+        #   3.10    -> NADIE. Es el piso declarado y el unico que ejercita el
+        #              import gateado por version. Sigue sin medir.
+        python: ["3.10", "3.12", "3.13"]
         # Los dos, porque el directorio por defecto se resuelve distinto
         # (`%LOCALAPPDATA%` contra `XDG_STATE_HOME`) y ahi vive la regla que
         # saca el registro de los repos ajenos.

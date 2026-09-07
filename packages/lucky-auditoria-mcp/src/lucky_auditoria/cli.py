@@ -15,6 +15,7 @@ _LECTURAS = {
     "cazar": lectores.cazar,
     "rechazos": lectores.rechazos,
     "por-sesion": lectores.por_sesion,
+    "afirmaciones": lectores.afirmaciones,
 }
 
 

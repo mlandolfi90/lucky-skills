@@ -4,20 +4,52 @@ build-backend = "hatchling.build"
 
 [project]
 name = "lucky-auditoria-mcp"
-version = "0.2.0"
+version = "0.3.1"
 description = "Auditoria interna para MCP compartidos: atribuye cada llamada a su sesion sin fugar secretos."
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
 authors = [{ name = "mlandolfi90" }]
+# Versiones EXACTAS, no rangos. Un `>=` afirma compatibilidad con versiones
+# que nadie probo -incluidas las que todavia no existen-, y es la misma familia
+# de defectos que este paquete persigue: la entrega afirmando mas de lo medido.
+# Cada numero de aca es el que corrio la suite.
 dependencies = [
     # `tomllib` entro en 3.11. Abajo de eso hace falta el respaldo, y la
     # configuracion NO es opcional: sin ella el redactor falla cerrado.
-    "tomli>=2.0; python_version < '3.11'",
+    #
+    # Medido a medias, y se dice cual mitad: esta maquina solo tiene 3.12, asi
+    # que el import gateado por version lo corre el CI en su celda de 3.10 -y
+    # ese CI no se ejecuto nunca todavia. Lo que SI esta medido con este numero
+    # es que `tomli` parsea la configuracion igual que `tomllib`, en
+    # `TestElRespaldoDeTomlEnPython310`.
+    "tomli==2.4.1; python_version < '3.11'",
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8", "pytest-asyncio>=0.23", "ruff>=0.6"]
+dev = [
+    "pytest==9.1.1",
+    # Sin marcador de version, a proposito: en 3.12 el paquete NO lo usa, pero
+    # la suite compara `tomli` contra `tomllib` para probar que la misma
+    # configuracion da las mismas reglas en las dos. Con el marcador puesto, esa
+    # comparacion no corria en ningun lado salvo 3.10 -o sea, casi nunca.
+    "tomli==2.4.1",
+    "pytest-asyncio==1.4.0",
+    "ruff==0.16.6",
+    # Se pinea aunque solo lo use la suite: `ruff` cambia su seleccion por
+    # defecto entre versiones, asi que un rango hace que "ruff limpio" quiera
+    # decir cosas distintas segun quien lo corra.
+    # Para la guarda del enganche: un cliente en proceso que hace un
+    # `tools/call` de verdad por toda la pila. No es dependencia del paquete
+    # -el enganche lo importa solo cuando lo usan-, pero sin el la guarda del
+    # gancho es estructural y no prueba que el framework lo llame.
+    # 4.0.3 es la que corrio estas pruebas, y la que arrastra `mcp==2.1.1`.
+    # Las mediciones del paquete son sobre ESA: que el gancho ve los argumentos
+    # pre-validacion, que `is_error` es False sobre un rechazo devuelto, que
+    # `ToolError` envuelve todo, y que el log del framework escribe el valor
+    # rechazado entero.
+    "fastmcp==4.0.3",
+]
 
 [project.scripts]
 lucky-auditoria = "lucky_auditoria.cli:main"

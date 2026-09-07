@@ -137,3 +137,47 @@ class TestLaHuellaDeLaConfigViajaALaCabecera:
 
     def test_una_redaccion_cerrada_no_tiene_huella(self):
         assert Redaccion.cerrada("por la prueba").huella_config is None
+
+
+class TestElRespaldoDeTomlEnPython310:
+    """`tomllib` entro en 3.11; abajo el paquete usa `tomli`, y eso hay que medirlo.
+
+    Esta maquina solo tiene 3.12, asi que el import gateado por version
+    (`except ModuleNotFoundError: import tomli`) NO se ejercita aca: lo corre el
+    CI en su celda de 3.10, y ese CI todavia no se ejecuto nunca.
+
+    Lo que SI se puede medir sin un 3.10 es la otra mitad de la afirmacion: que
+    la version pineada de `tomli` parsea esta configuracion igual que `tomllib`.
+    Si difirieran, un MCP en 3.10 tendria otras listas blancas que el mismo MCP
+    en 3.13 -mismo archivo, otra redaccion- y nadie lo notaria.
+
+    Se declara lo que cubre y lo que no, en vez de dejar la version pineada
+    afirmando mas de lo medido.
+    """
+
+    def test_tomli_parsea_esta_config_igual_que_tomllib(self):
+        import tomli
+        import tomllib
+
+        crudo = CONFIG.encode("utf-8")
+
+        assert tomli.loads(crudo.decode("utf-8")) == tomllib.loads(crudo.decode("utf-8"))
+
+    def test_una_redaccion_cargada_con_tomli_da_las_mismas_reglas(self, tmp_path, monkeypatch):
+        import tomli
+
+        from lucky_auditoria import redaccion as modulo
+
+        ruta = tmp_path / "auditoria.toml"
+        ruta.write_text(CONFIG, encoding="utf-8")
+        con_tomllib = cargar(ruta)
+        monkeypatch.setattr(modulo, "tomllib", tomli)
+        con_tomli = cargar(ruta)
+
+        assert con_tomli.argumentos == con_tomllib.argumentos
+        assert con_tomli.opacas == con_tomllib.opacas
+        assert con_tomli.conteos == con_tomllib.conteos
+        # La huella sale de los BYTES del archivo, no del parseo: tiene que ser
+        # la misma, o dos procesos del mismo MCP declararian configuraciones
+        # distintas en sus cabeceras.
+        assert con_tomli.huella_config == con_tomllib.huella_config

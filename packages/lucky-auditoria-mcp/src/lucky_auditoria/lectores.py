@@ -45,6 +45,25 @@ def _escalares(valor: Any) -> Iterator[Any]:
         yield valor
 
 
+def _respuesta_estructurada(linea: dict[str, Any]) -> Any:
+    """La respuesta parseada de una linea cruda, o None.
+
+    Estructurada y no texto: buscar sobre el texto confunde una mencion con un
+    valor, y eso ya costo un diagnostico en este mismo repo. Sin la respuesta
+    entera no hay contra que comparar, y una respuesta RECORTADA daria falsos
+    positivos -por eso tambien se descarta.
+    """
+    if linea.get("modo") != "crudo":
+        return None
+    texto = linea.get("respuesta")
+    if not texto or linea.get("respuesta_recortada_de"):
+        return None
+    try:
+        return json.loads(texto)
+    except (ValueError, TypeError):
+        return None
+
+
 def cazar(lineas: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:
     """Argumentos que el cliente mando y que no vuelven en ningun escalar.
 
@@ -53,32 +72,38 @@ def cazar(lineas: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:
     en ningun lado de la respuesta.
 
     Produce CANDIDATOS, nunca veredictos. Hay argumentos que legitimamente no
-    vuelven -un `confirm_project_id`, un `format`- y decidir cual es cual
-    exigiria conocer cada verbo. Se tria a mano.
+    vuelven -un `confirm_project_id`, un `format`, un `lineas` que acota y no se
+    refleja- y decidir cual es cual exigiria conocer cada verbo. Un cazador que
+    decidiera solo tendria que conocerlos todos, y seria la misma suposicion que
+    esto viene a evitar.
 
-    La comparacion es por VALOR y no por substring: un `name="R1"` que aparece
-    dentro de la palabra "R10" no es el mismo dato, y contarlo como devuelto
-    taparia justo el caso que se busca.
+    Tres detalles que importan mas que la señal, los tres medidos por
+    lucky-tool-mtk-chr:
+
+    - **Por VALOR, nunca por substring.** Buscar `str(1)` da verdadero contra
+      cualquier `1` suelto y la señal se vuelve inutil para enteros. Y un
+      `name="R1"` que aparece dentro de "R10" no es el mismo dato: contarlo como
+      devuelto taparia justo el caso que se busca.
+    - **Se saltean `None` y los booleanos.** Un booleano no "vuelve": cambia el
+      camino. Compararlo produce ruido garantizado.
+    - **Solo corre si `ok` no es False.** En un rechazo es normal que el
+      argumento no haya tenido efecto, asi que ahi la señal no dice nada.
     """
     candidatos = []
     for linea in lineas:
-        if linea.get("modo") != "crudo":
-            # Sin la respuesta entera no hay contra que comparar, y comparar
-            # contra una respuesta recortada daria falsos positivos.
+        datos = _respuesta_estructurada(linea)
+        if datos is None:
             continue
-        respuesta = linea.get("respuesta")
-        if not respuesta or linea.get("respuesta_recortada_de"):
-            continue
-        try:
-            datos = json.loads(respuesta)
-        except (ValueError, TypeError):
+        if isinstance(datos, dict) and datos.get("ok") is False:
             continue
         vistos = set()
         for escalar in _escalares(datos):
-            if isinstance(escalar, (str, int, float, bool)):
+            if isinstance(escalar, bool) or escalar is None:
+                continue
+            if isinstance(escalar, (str, int, float)):
                 vistos.add(escalar)
         for clave, valor in (linea.get("argumentos") or {}).items():
-            if isinstance(valor, (dict, list)) or valor is None:
+            if valor is None or isinstance(valor, (dict, list, bool)):
                 continue
             if valor not in vistos:
                 candidatos.append(
@@ -90,6 +115,90 @@ def cazar(lineas: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:
                     }
                 )
     return candidatos
+
+
+# Claves que nombran una cuenta. Un cero solo es "efecto vacio" en una de
+# estas: un `puerto: 0` no es un efecto vacio, es un puerto.
+_CLAVES_DE_CONTEO = ("total", "cuantos", "cantidad")
+
+# Umbral ABSOLUTO, no comparado contra otras llamadas al mismo verbo. Comparar
+# contra el historial suena mejor y necesitaria un corpus por verbo: ahi ya es
+# un modelo, no un lector. La medicion: un parser que no entendio nada deja
+# `{"ok": true}` y a lo sumo un campo mas.
+_CLAVES_FLACA = 2
+
+
+def _vacios(respuesta: dict[str, Any]) -> dict[str, Any]:
+    """Las claves de primer nivel que volvieron vacias.
+
+    No es recursivo A PROPOSITO: anidado da demasiado ruido y la señal deja de
+    servir.
+    """
+    encontrados: dict[str, Any] = {}
+    for clave, valor in respuesta.items():
+        if isinstance(valor, list) and not valor:
+            encontrados[clave] = []
+        elif (
+            isinstance(valor, int)
+            and not isinstance(valor, bool)
+            and valor == 0
+            and clave in _CLAVES_DE_CONTEO
+        ):
+            encontrados[clave] = 0
+    return encontrados
+
+
+def afirmaciones(lineas: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Respuestas que dicen que salio bien y no muestran que haya pasado nada.
+
+    La otra mitad de `cazar`, con las definiciones que midio lucky-tool-mtk-chr
+    sobre 39 verbos. Misma familia que todo lo demas: la respuesta afirma mas de
+    lo que paso.
+
+    - **exito con efecto vacio**: `ok: true`, hay claves vacias, y TODAS las
+      listas del retorno estan vacias. Esa ultima condicion es la que separa la
+      señal del ruido: una lista vacia entre cinco llenas es normal.
+    - **respuesta flaca**: `ok: true` con dos claves o menos.
+
+    CANDIDATOS, no veredictos, igual que `cazar`. Lo que encontro donde se
+    midio: tres defectos de "no fallaba, contestaba mal" -una duracion afirmada
+    de 24 h contra un timeout real de 59m58s, un conteo sobre una ventana
+    truncada sin decirlo, y 20 de 200 coincidencias sin decirlo. Los tres se
+    arreglaron REPORTANDO lo que pasaba, nunca cambiando el comportamiento: en
+    el primero, sobrescribir el bloqueo habria dejado que cualquiera lo acorte.
+    """
+    encontradas = []
+    for linea in lineas:
+        respuesta = _respuesta_estructurada(linea)
+        if not isinstance(respuesta, dict) or respuesta.get("ok") is not True:
+            continue
+        señales = []
+        vacios = _vacios(respuesta)
+        listas = [v for v in respuesta.values() if isinstance(v, list)]
+        # TODAS las listas vacias, no algunas: una lista vacia entre cinco
+        # llenas es normal, y sin esta condicion la señal se vuelve ruido.
+        #
+        # La formula que me pasaron era `len(vacios) == len(listas)`, y no dice
+        # lo mismo que su propio comentario: como `vacios` junta tambien los
+        # ceros de las claves de conteo, un `{"ok": true, "hallazgos": [],
+        # "total": 0}` -el caso de manual- da 2 contra 1 y NO se marca. Se
+        # implementa la intencion declarada, que es la que las tres mediciones
+        # respaldan, y la diferencia queda reportada a quien la midio.
+        if listas and all(not x for x in listas):
+            señales.append("exito_con_efecto_vacio")
+        if len(respuesta) <= _CLAVES_FLACA:
+            señales.append("respuesta_flaca")
+        if señales:
+            encontradas.append(
+                {
+                    "cuando": linea.get("cuando"),
+                    "sesion": linea.get("sesion"),
+                    "herramienta": linea.get("herramienta"),
+                    "señales": señales,
+                    "vacios": sorted(vacios),
+                }
+            )
+    return encontradas
 
 
 def rechazos(lineas: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:
