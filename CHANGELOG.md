@@ -2,6 +2,9 @@
 
 Generado por publicar-skill; no editar a mano.
 
+## arquitectura-configuracion 1.1.0 — 2026-09-07 — MINOR
+- 1.0.0 → 1.1.0 · QUALITY=PASS · autorizó human:vikingo
+
 ## auditar-mcp 1.4.0 — 2026-09-07 — MINOR
 - 1.3.0 → 1.4.0 · QUALITY=PASS · autorizó human:vikingo
 
