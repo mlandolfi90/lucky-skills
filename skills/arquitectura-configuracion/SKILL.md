@@ -52,7 +52,16 @@ ven; acá son configuración y se ven, pero no en el código.
   resuelve otra, el mismo código corre sobre otro contrato sin que nada
   falle. Medido: un `fastmcp>=4` probado con 4.0.2 resolvía a 4.0.3 la
   semana siguiente. Subir de versión es un cambio: se mide y se pinea
-  la nueva. Vale para runtime, desarrollo y CI por igual.
+  la nueva. Vale para runtime, desarrollo y CI por igual — también para
+  las herramientas de la suite: `ruff` cambia su selección por defecto
+  entre versiones, así que "ruff limpio" con un rango quiere decir cosas
+  distintas según quién lo corra. Y vale para el intérprete: la versión
+  de Python (o Node) que corrió la suite se declara por nombre, y las
+  demás del rango soportado se declaran sin medir hasta que un CI las
+  corra de verdad. Medido: un paquete declaraba 3.10–3.13, la suite
+  había corrido solo en 3.12.10, y el CI que cubría 3.10 nunca se
+  ejecutó — decir "medido en 3.10 y 3.13" habría sido el mismo defecto
+  una capa más arriba.
 - **Guarda contra literales**: una comprobación mecánica (AST o patrones)
   sobre el código fuente que detecta IPs, puertos, URLs, rutas absolutas
   y tiempos mágicos fuera del cargador. Corre en cada cierre y en
