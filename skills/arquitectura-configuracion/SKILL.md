@@ -45,6 +45,14 @@ ven; acá son configuración y se ven, pero no en el código.
   lista `LOCALES` que quien regenera el archivo preserva. Un interruptor
   que se apaga solo porque un script reescribió el archivo es peor que no
   tenerlo.
+- **Dependencias en la versión exacta donde se probaron**: una
+  dependencia se declara con la versión con la que se probó, evaluó y
+  desplegó (`==`), nunca con un rango. Un rango (`>=4`, `^1.2`) afirma
+  compatibilidad con versiones que nadie midió, y el día que el gestor
+  resuelve otra, el mismo código corre sobre otro contrato sin que nada
+  falle. Medido: un `fastmcp>=4` probado con 4.0.2 resolvía a 4.0.3 la
+  semana siguiente. Subir de versión es un cambio: se mide y se pinea
+  la nueva. Vale para runtime, desarrollo y CI por igual.
 - **Guarda contra literales**: una comprobación mecánica (AST o patrones)
   sobre el código fuente que detecta IPs, puertos, URLs, rutas absolutas
   y tiempos mágicos fuera del cargador. Corre en cada cierre y en

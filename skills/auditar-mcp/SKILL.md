@@ -416,12 +416,18 @@ compartido (`lucky-auditoria`); lo que se mide en cada uno vive en su
 
   | Caso | Estado | Enganche |
   |---|---|---|
-  | Python · fastmcp 4 | medido (gns3, netbox, mtk-chr) | middleware |
-  | Python · `mcp` 1.x | medido (mtk-chr antes del port) | override de `call_tool` |
+  | Python · fastmcp 4.0.2 y 4.0.3 | medido (gns3, netbox, mtk-chr) | middleware |
+  | Python · `mcp` 1.28.1 | medido (mtk-chr antes del port) | override de `call_tool` |
   | Python · `mcp` 2.x | pendiente | middleware nativo |
   | Node · SDK TypeScript | pendiente | paquete hermano, mismo JSONL |
   | stdio | medido | sesión = proceso |
   | streamable-http | medido | `mcp-session-id` en cada línea |
+
+  Las versiones de la tabla son exactas porque lo medido es exacto: el
+  paquete y cada MCP pinean con `==` la versión con la que probaron
+  (arquitectura-configuracion). Un rango afirma compatibilidad con lo
+  que nadie midió; subir de versión es una medición nueva y una fila
+  nueva, no un cambio de rango.
 
 - **R6 — Lo pendiente que se implementa deja saber.** Cuando alguien
   aplica la auditoría sobre una casilla pendiente de R5 —otro framework,
