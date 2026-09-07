@@ -141,10 +141,16 @@ class TestElCheckAvisaSiLaRedaccionQuedoCerrada:
         a = Auditor("mcp-de-prueba", config=tmp_path / "no-existe.toml")
         monkeypatch.setenv(a.variable, str(tmp_path / "reg.jsonl"))
 
-        assert "no se pudo leer" in a.estado()["config"]
+        estado = a.estado()
+        assert estado["redaccion"] == "cerrada"
+        assert "no se pudo leer" in estado["redaccion_motivo"]
 
-    def test_con_la_config_sana_no_hay_ruido(self, auditor):
-        assert "config" not in auditor.estado()
+    def test_con_la_config_sana_lo_dice_igual(self, auditor):
+        # El campo va SIEMPRE. Uno que aparece solo cuando algo anda mal
+        # obliga a saber que puede aparecer: el que lee el `check` sano no se
+        # entera de que existe, y entonces tampoco lo busca.
+        assert auditor.estado()["redaccion"] == "abierta"
+        assert "redaccion_motivo" not in auditor.estado()
 
 
 class TestLaCabeceraDiceSiLaRedaccionREGIA:
