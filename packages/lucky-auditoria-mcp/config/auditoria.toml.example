@@ -1,0 +1,96 @@
+# Que se escribe del borde de este MCP. Copiar a `config/auditoria.toml`.
+#
+# En el repo va la FORMA, nunca un valor: este archivo es el ejemplo y se
+# commitea; el `auditoria.toml` de al lado es del anfitrion y declara SUS
+# campos. Los de abajo son los de un MCP de laboratorio, y estan para mostrar
+# la forma y el razonamiento, no para copiarse tal cual.
+#
+# La superficie se MIDE antes de discutirla: contar los nombres de argumento
+# distintos que existen de verdad suele dar un numero chico, y convierte el
+# debate en una cuenta.
+#
+# Sin este archivo el registro no rompe: la redaccion queda cerrada y se anota
+# la forma de cada argumento y ningun valor. Es el estado seguro, y se grita
+# por el log para que no pase inadvertido.
+
+# --- Argumentos ------------------------------------------------------------
+#
+# Un campo es seguro por nombre + tipo + tope de largo, NO por nombre solo. El
+# tipo lo elige el cliente y el registro anota ANTES de que nadie valide, asi
+# que `lineas = "<secreto>"` donde se esperaba un entero llega al disco si la
+# lista solo mira el nombre. Lo que no coincide con la forma declarada cae a
+# `{tipo, largo}`, sin valor.
+#
+# La lista es por NOMBRE DE CAMPO y vale para todas las herramientas, presentes
+# y futuras. Por eso un nombre corto y generico es peligroso: `x` vale para las
+# 21. Los genericos que se dejan son decisiones con su motivo escrito al lado,
+# no defaults.
+
+[argumentos]
+# El verbo. Es lo que hace legible una linea: sin el, "alguien llamo a project".
+action = { tipo = "str", largo_max = 32 }
+
+# Identificadores y selectores: dicen SOBRE QUE se actuo, que es justo lo que
+# hay que poder reconstruir.
+project_id = { tipo = "str", largo_max = 64 }
+node_name = { tipo = "str", largo_max = 128 }
+link_id = { tipo = "str", largo_max = 64 }
+state_action = { tipo = "str", largo_max = 32 }
+
+# `name` es tan generico como `x` y SE QUEDA, con la cuenta hecha: es el campo
+# que responde la pregunta que motivo todo esto -quien borro tal cosa- y sin el
+# el registro dice que alguien borro algo. Se acepta el riesgo de que una
+# herramienta futura meta algo sensible en un campo llamado `name`, y por eso
+# esta anotado aca en vez de pasar inadvertido.
+name = { tipo = "str", largo_max = 128 }
+
+# Las coordenadas ESTUVIERON y salieron: cualquier parametro llamado `x` en
+# cualquier herramienta futura se habria escrito entero, y donde se dibujo un
+# nodo no ayuda a saber quien hizo que. Se deja el cadaver a la vista para que
+# nadie las vuelva a agregar sin hacer la cuenta.
+# x = { tipo = "int" }
+
+# --- Herramientas opacas ---------------------------------------------------
+#
+# Aca no se escribe ni el NOMBRE de los campos ni el tamaño: en una herramienta
+# de texto libre, el largo de lo que se tipeo mide una password. Se anota solo
+# cuantas operaciones venian.
+
+[herramientas]
+opacas = ["ssh", "console", "http_client", "tftp"]
+
+# --- Huellas ---------------------------------------------------------------
+#
+# Para credenciales que hay que CORRELACIONAR sin guardar: se escribe un
+# sha256 corto en vez del valor. Se aplica en los dos lados o no correlaciona
+# nada, porque una credencial nace en un retorno y se usa en un argumento.
+
+[huellas]
+campos = []
+
+# --- Retorno ---------------------------------------------------------------
+#
+# El defecto va AL REVES que el de argumentos. Un argumento no declarado se
+# anota reducido a forma, porque omitirlo dejaria al registro mintiendo sobre
+# lo que se PIDIO. Un retorno no declarado no se anota ni en forma, porque
+# anotarlo convertiria el registro en una copia del inventario.
+#
+# Solo CONTEOS, nunca nombres: "cuantas fallaron" y "cuales fallaron" tienen
+# precios de exposicion distintos, y la segunda ya vive en la respuesta que el
+# modelo recibe.
+#
+# Esto cubre el TERCER camino de un error: la herramienta termina bien y el
+# rechazo va adentro. Sin esto, un lote con tres fallos de quince se anota
+# "ok" a secas -cierto sobre la llamada, y silenciando que tres no arrancaron.
+
+# Listas o enteros en la raiz del retorno: `origen = "destino"`.
+[retorno]
+failed = "fallaron"
+completed = "salieron"
+total_operations = "total"
+
+# Conteos anidados: `[conteos.<bloque>]`, y adentro `origen = "destino"`.
+[conteos.summary]
+total_items = "total"
+failed = "fallaron"
+succeeded = "salieron"

@@ -1,0 +1,41 @@
+# Un test de fuga que nadie corre no es proteccion: es documentacion de una
+# intencion. Y el que se rompe en silencio es justo el que impedia escribir una
+# password en disco.
+#
+# Scopeado al paquete a proposito: `lucky-skills` es un catalogo de skills y no
+# un repo de Python, asi que este workflow no puede decir nada sobre el resto.
+name: lucky-auditoria-mcp
+
+on:
+  push:
+    paths: ["packages/lucky-auditoria-mcp/**", ".github/workflows/auditoria-mcp.yml"]
+  pull_request:
+    paths: ["packages/lucky-auditoria-mcp/**", ".github/workflows/auditoria-mcp.yml"]
+
+defaults:
+  run:
+    working-directory: packages/lucky-auditoria-mcp
+
+jobs:
+  pruebas:
+    runs-on: ${{ matrix.so }}
+    strategy:
+      fail-fast: false
+      matrix:
+        # Los dos extremos del rango declarado. En 3.10 la configuracion se lee
+        # con `tomli` y en 3.13 con `tomllib`: sin el piso, ese camino no lo
+        # corre nadie.
+        python: ["3.10", "3.13"]
+        # Los dos, porque el directorio por defecto se resuelve distinto
+        # (`%LOCALAPPDATA%` contra `XDG_STATE_HOME`) y ahi vive la regla que
+        # saca el registro de los repos ajenos.
+        so: [ubuntu-latest, windows-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: python -m pip install -e ".[dev]"
+      - run: python -m ruff check src tests
+      - run: python -m pytest -q
