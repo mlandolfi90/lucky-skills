@@ -306,8 +306,11 @@ compartido (`lucky-auditoria`); lo que se mide en cada uno vive en su
 - **R1 — Dónde se guarda.** En un directorio del USUARIO, nunca del
   proyecto: `<estado del usuario>/<mcp>/registro_auditoria/`, donde el
   estado del usuario es `%LOCALAPPDATA%` en Windows, si no
-  `XDG_STATE_HOME`, si no `~/.local/state`; caída al cwd solo si no se
-  puede crear, porque auditar no rompe. Motivo medido (2026-09-07): el
+  `XDG_STATE_HOME`, si no `~/.local/state`. Si no se puede crear, no se
+  escribe y se dice en el log: no hay caída al cwd, porque no escribir
+  tampoco rompe (el escritor ya se traga el fallo) y la caída agrega
+  exactamente el daño que R1 existe para evitar — peor en crudo, cuando el
+  archivo lleva credenciales. Motivo medido (2026-09-07): el
   cwd y `CLAUDE_PROJECT_DIR` de un MCP por stdio son de quien lo LANZÓ,
   no del MCP — `CLAUDE_PROJECT_DIR` identifica al que invocó, y un MCP
   compartido por N sesiones tiene N valores a la vez; a veces ni está. Un
@@ -339,7 +342,16 @@ compartido (`lucky-auditoria`); lo que se mide en cada uno vive en su
   distingue de uno completo), `inicio` y `cwd` medido. Nada de valores de
   configuración ni del entorno fuera del catálogo de arneses.
 - **R4 — Activadores y dónde van.** Uno solo: `<MCP>_AUDITORIA` =
-  vacío/`0` (apagado) · `1` (redactado) · `crudo` · una ruta. En stdio va
+  vacío/`0` (apagado) · `1` (redactado) · `crudo` · una ruta ABSOLUTA.
+  Solo la ruta absoluta cuenta como ruta; cualquier otro valor APAGA y
+  avisa. "Todo lo demás es ruta" resucita R1 por la puerta de atrás: un
+  `false` mal escrito crea un directorio `false` en el cwd — el repo de
+  otro — y una ruta relativa se resuelve contra ese mismo cwd. La
+  asimetría es deliberada: apagado por un typo cuesta un registro que
+  falta y se ve en el log; encendido en el lugar equivocado cuesta
+  credenciales sueltas. Consecuencia explícita: "crudo en una ruta
+  elegida" no se puede expresar, a propósito — el material sensible va
+  donde la regla dice. En stdio va
   en el bloque `env` del registro del cliente (`.mcp.json`); en HTTP, en
   el entorno del servicio (compose, unidad). Nunca en un `.env` que un
   script regenera. Las listas blancas van en `config/auditoria.toml` con
@@ -367,9 +379,14 @@ compartido (`lucky-auditoria`); lo que se mide en cada uno vive en su
   tamaño o edad. El `check` avisa cuando hay crudos con más edad que la
   ventana declarada: hoy nada limpia solo, y por eso se acumulan.
 - **R8 — Bloque `auditoria` del `check`.** Campos fijos, iguales en todo
-  MCP: `modo`, `archivo`, `aviso` (solo en crudo), `acumulado{archivos,
-  crudos, bytes, mas_viejo}`. Si contar falla, informa el tipo de error
-  y no tumba el `check`.
+  MCP: `modo`, `archivo`, `aviso` (solo en crudo), `redaccion`
+  (`abierta|cerrada` con el motivo si está cerrada), `acumulado{archivos,
+  crudos, bytes, mas_viejo}`. La redacción cerrada — el `toml` que no
+  cargó — no rompe nada y sigue escribiendo, pero apaga el tercer camino
+  de error sin apagar el registro: `rechazos` devuelve vacío sobre un
+  registro con fallos adentro, y el ERROR del arranque es una vez y nadie
+  lo mira. Por eso se publica en el `check`. Si contar falla, informa el
+  tipo de error y no tumba el `check`.
 - **R9 — Lectores estándar en el paquete.** Un formato, unos lectores:
   `cazar` (argumento cuyo valor no vuelve en la respuesta — candidatos,
   no veredictos), `rechazos` (retornos con `rechazadas > 0`),
