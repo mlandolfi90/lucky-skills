@@ -153,18 +153,50 @@ class KitDeAuditoria:
         assert list(Path(os.getcwd()).iterdir()) == []
         assert not list(tmp_path.glob("**/*.jsonl"))
 
-    def test_una_palabra_desconocida_no_se_vuelve_un_archivo_en_silencio(
-        self, auditor, monkeypatch, caplog
-    ):
+    def test_una_palabra_desconocida_apaga_y_lo_dice(self, auditor, monkeypatch, caplog):
         # Caso medido: la variable quedo en `crude`, no estaba en la lista, se
         # tomo como RUTA, y la auditoria quedo redactada escribiendo
         # `crude-<sesion>.jsonl` sin que nadie se enterara.
+        #
+        # La primera correccion agrego el aviso y siguio escribiendo, que es la
+        # mitad peor: un aviso que no cambia lo que pasa no es una proteccion.
         monkeypatch.setenv(auditor.variable, "cruod")
         with caplog.at_level("WARNING"):
             modo = auditor.modo()
 
-        assert modo == "redactado"
-        assert any("no es una palabra conocida" in r.message for r in caplog.records)
+        assert modo == "apagado"
+        assert auditor.ruta() is None
+        assert any("APAGADA" in r.message for r in caplog.records)
+
+    def test_una_ruta_RELATIVA_apaga_en_vez_de_escribir_en_el_cwd(
+        self, auditor, monkeypatch, tmp_path
+    ):
+        # Una ruta relativa cuelga el archivo del directorio de trabajo, que un
+        # MCP hereda de quien lo lanzo: es el mismo daño que el directorio por
+        # defecto vino a evitar, pedido por el operador sin querer.
+        monkeypatch.setenv(auditor.variable, "registro/auditoria.jsonl")
+        auditor.registrar(self.herramienta_normal, {})
+
+        assert auditor.ruta() is None
+        assert list(Path(os.getcwd()).iterdir()) == []
+
+    def test_si_no_se_puede_crear_el_directorio_no_se_escribe_en_ningun_lado(
+        self, auditor, monkeypatch
+    ):
+        # Habia una caida al cwd -"mejor el cwd que perder el registro"- y
+        # estaba mal: no escribir no rompe nada, y la caida pone el archivo con
+        # credenciales justo en el repo ajeno.
+        monkeypatch.setenv(auditor.variable, "1")
+
+        def no_se_puede(*_a, **_k):
+            raise OSError("permiso denegado")
+
+        monkeypatch.setattr(Path, "mkdir", no_se_puede)
+        auditor.registrar(self.herramienta_normal, {})
+
+        assert auditor.directorio_por_defecto() is None
+        assert auditor.ruta() is None
+        assert list(Path(os.getcwd()).iterdir()) == []
 
     # -- el nombre del archivo ---------------------------------------------
 

@@ -87,7 +87,17 @@ Uno solo: **`<NOMBRE_DEL_MCP>_AUDITORIA`**.
 | vacío o `0` | apagado, de verdad: ni archivo vacío ni directorio creado |
 | `1` | redactado, en el directorio del usuario |
 | `crudo` | **sin redactar** — ver abajo |
-| una ruta | redactado, ahí |
+| una ruta **absoluta** | redactado, ahí |
+| cualquier otra cosa | **apagado**, y se dice en el log |
+
+Sólo una ruta **absoluta** cuenta como ruta. Un typo o una ruta relativa apagan
+el registro en vez de volverse un archivo colgado del `cwd` —que un MCP hereda
+de quien lo lanzó, y suele ser el repo de otro. La versión anterior avisaba y
+escribía igual, que es la mitad peor de las dos: un aviso que no cambia lo que
+pasa no es una protección, es una nota.
+
+Consecuencia deliberada: **"crudo en una ruta elegida" es inexpresable**. Un
+valor, una decisión.
 
 Va en el bloque `env` del registro del cliente (`.mcp.json` en stdio) o en el
 entorno del servicio (compose, unidad) en HTTP. **Nunca en un `.env` que un
@@ -117,8 +127,14 @@ el `.gitignore` que lo protegía vivía en su propio repo mientras el archivo ca
 en cualquier otro.
 
 No se arregla ensanchando `.gitignore` — eso cubre los repos que uno conoce y
-deja pasar el próximo. Una ruta explícita en la variable sigue mandando: el
+deja pasar el próximo. Una ruta absoluta en la variable sigue mandando: el
 default protege al que no eligió, no le saca la elección al que sí.
+
+**Si ese directorio no se puede crear, no se escribe en ningún lado.** Acá había
+una caída al `cwd` —"mejor el `cwd` que perder el registro"— y estaba mal: no
+escribir no rompe nada, porque el escritor ya se traga sus fallos, mientras que
+la caída pone el archivo con credenciales justo en el repo ajeno del que habla
+el párrafo de arriba. Perder un registro es barato; dejarlo donde no va, no.
 
 `<escritor>` es el id de sesión en stdio (un proceso por sesión) y el pid en
 HTTP (N sesiones por proceso: ponerlas en el nombre daría N archivos abiertos

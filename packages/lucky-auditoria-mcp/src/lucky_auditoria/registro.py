@@ -67,24 +67,6 @@ def tipo_del_error(error: BaseException) -> tuple:
     return real, (envoltorio if envoltorio != real else None)
 
 
-def _parece_una_palabra_mal_escrita(valor: str) -> bool:
-    """Un valor que quiso ser una palabra clave y no lo es.
-
-    Caso medido: la variable quedo en `crude` -el operador queria el modo
-    crudo-, la palabra no estaba en la lista y se tomo como RUTA. La auditoria
-    quedo REDACTADA escribiendo un archivo llamado `crude-<sesion>.jsonl`, y
-    nadie se entero. El agujero no era la palabra faltante sino el respaldo:
-    cualquier palabra suelta se volvia un nombre de archivo plausible, en el
-    modo equivocado y en silencio.
-
-    Una ruta de verdad tiene separador o extension. Una palabra pelada casi
-    siempre es el typo de una clave, y eso hay que decirlo.
-    """
-    if valor.lower() in _PALABRAS:
-        return False
-    return not any(c in valor for c in "/\\.") and " " not in valor
-
-
 class Auditor:
     """Un MCP que audita. Sin nombre no se puede construir.
 
@@ -134,27 +116,43 @@ class Auditor:
         Apagado de verdad quiere decir sin archivo vacio y sin directorio
         creado: escribir en disco sin que nadie lo haya pedido es una decision
         del operador, no del programa.
+
+        **Solo una ruta ABSOLUTA cuenta como ruta.** Cualquier otro valor apaga
+        y lo dice. La version anterior avisaba y escribia igual, que es la mitad
+        peor de las dos: un typo o una ruta relativa se volvia un archivo
+        colgado del cwd -o sea, del repo de quien lanzo el proceso-, que es
+        exactamente el daño que el directorio por defecto vino a evitar. Un
+        aviso que no cambia lo que pasa no es una proteccion, es una nota.
+
+        La consecuencia es deliberada: "crudo en una ruta elegida" queda
+        inexpresable. Un valor, una decision.
         """
         valor = os.environ.get(self.variable, "").strip()
         if valor.lower() in _PALABRAS_CRUDAS:
             return "crudo"
         if valor in _PALABRAS_APAGADO:
             return "apagado"
-        if _parece_una_palabra_mal_escrita(valor) and not self._aviso_palabra_rara_dado:
+        if valor in _PALABRAS_REDACTADO:
+            return "redactado"
+        if Path(valor).is_absolute():
+            return "redactado"
+        if not self._aviso_palabra_rara_dado:
             self._aviso_palabra_rara_dado = True
             logger.warning(
-                "%s=%r no es una palabra conocida y no parece una ruta. Se toma "
-                "como nombre de archivo y la auditoria queda REDACTADA. Si se "
-                "buscaba el modo de depuracion, las palabras son: %s.",
+                "%s=%r no es una palabra conocida ni una ruta ABSOLUTA. La "
+                "auditoria queda APAGADA: una ruta relativa colgaria el archivo "
+                "del directorio de trabajo, que un MCP hereda de quien lo lanzo "
+                "y suele ser el repo de otro. Las palabras son: %s; o una ruta "
+                "absoluta.",
                 self.variable,
                 valor,
-                ", ".join(sorted(_PALABRAS_CRUDAS)),
+                ", ".join(sorted(_PALABRAS_CRUDAS | _PALABRAS_REDACTADO)),
             )
-        return "redactado"
+        return "apagado"
 
     # -- donde escribe ------------------------------------------------------
 
-    def directorio_por_defecto(self) -> Path:
+    def directorio_por_defecto(self) -> Path | None:
         """El directorio del USUARIO, nunca el del proyecto. Y nunca el cwd.
 
         El cwd de un MCP por stdio no es el repo que uno cree: lo hereda de
@@ -167,35 +165,51 @@ class Auditor:
         conoce y deja pasar el proximo. Tampoco atajando el `%TEMP%`, que ataja
         el caso que hace ruido y deja pasar el que hace daño.
 
-        Una ruta explicita en la variable sigue mandando: el default protege al
+        Una ruta absoluta en la variable sigue mandando: el default protege al
         que no eligio, no le saca la eleccion al que si.
+
+        Devuelve None si no se puede crear, y entonces NO se escribe. Aca habia
+        una caida al cwd -"mejor el cwd que perder el registro"- y estaba mal:
+        no escribir no rompe nada, porque el escritor ya se traga sus fallos,
+        mientras que la caida pone el archivo con credenciales justo en el repo
+        ajeno del que este parrafo habla. Perder un registro es barato; dejarlo
+        donde no va, no.
         """
         base = os.environ.get("LOCALAPPDATA") or os.environ.get("XDG_STATE_HOME")
         raiz = Path(base) if base else Path.home() / ".local" / "state"
         destino = raiz / self.nombre / _DIRECTORIO
         try:
             destino.mkdir(parents=True, exist_ok=True)
-        except OSError:
-            # Mejor el cwd que perder el registro: el nombre del archivo avisa
-            # igual, y auditar no puede romper nada.
-            return Path.cwd()
+        except OSError as fallo:
+            logger.warning(
+                "AUDITORIA APAGADA: no se pudo crear %s (%s). No se escribe en "
+                "ningun otro lado a proposito: el directorio de trabajo de un "
+                "MCP es el de quien lo lanzo, y ahi el archivo no va.",
+                destino,
+                type(fallo).__name__,
+            )
+            return None
         return destino
 
     def ruta(self) -> Path | None:
         """Donde escribe ESTE proceso, o None si el registro esta apagado.
 
         El nombre del MCP y la marca de crudo van SIEMPRE, incluso con una ruta
-        explicita: quien escribio y que esta sin redactar son dos cosas, y las
-        dos se leen de un vistazo en un `ls`. Si la ruta configurada ya nombra
-        al MCP, no se repite.
+        elegida: quien escribio y que esta sin redactar son dos cosas, y las dos
+        se leen de un vistazo en un `ls`. Si la ruta configurada ya nombra al
+        MCP, no se repite.
         """
         cual = self.modo()
         if cual == "apagado":
             return None
         valor = os.environ.get(self.variable, "").strip()
         if cual == "crudo" or valor in _PALABRAS_REDACTADO:
-            base = self.directorio_por_defecto() / _ARCHIVO_POR_DEFECTO
+            directorio = self.directorio_por_defecto()
+            if directorio is None:
+                return None
+            base = directorio / _ARCHIVO_POR_DEFECTO
         else:
+            # Ya se sabe absoluta: `modo()` apago todo lo demas.
             base = Path(valor)
             if base.is_dir():
                 base = base / _ARCHIVO_POR_DEFECTO
