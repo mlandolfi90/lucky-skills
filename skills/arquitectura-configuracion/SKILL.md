@@ -100,6 +100,16 @@ regla.
   default, propósito, si es secreto, si es LOCAL) y el archivo real
   ignorado por git. Un archivo de configuración fuera de `/config/` es
   un hallazgo de la guarda, igual que un literal.
+- **C1-bis — Cuando el archivo no se puede mover, `/config/` igual lo
+  explica.** Regla del humano, textual: si el contrato o el software no
+  puede mover el archivo de configuración a `/config/`, igual se coloca
+  en `/config/` su `.example` y su explicación — en `/config/` se tiene
+  que encontrar, sí o sí, cómo configurar (settings) un proyecto. La
+  excepción exime al archivo de mudarse; no exime a `/config/` de ser el
+  único lugar donde se entiende la configuración entera: el `.example`
+  dice qué claves tiene el archivo, y la explicación dice dónde vive de
+  verdad, por qué no puede moverse (quién lo lee ahí: la herramienta, el
+  framework, el runtime) y cómo se genera o se copia desde `/config/`.
 - **C2 — Un solo cargador, con el nombre de la industria.** `config/` es
   también el paquete que carga: expone un único objeto de settings
   tipado y validado al arrancar (`from config import settings`; en
