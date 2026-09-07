@@ -81,7 +81,14 @@ en el MCP que se está construyendo.
 - Un gancho declarado no es un gancho que corre: probarlo en aislamiento.
   Y un test que llama al override directo pasa por definición: la guarda
   invoca el handler REGISTRADO en la tabla de ruteo del servidor, para que
-  falle si el SDK deja de ligarlo.
+  falle si el SDK deja de ligarlo. Si el framework trae un cliente en
+  proceso que hace un `tools/call` real por toda la pila, la guarda
+  "¿el gancho dispara?" se muda del E2E a la suite y cuesta milisegundos.
+- El mismo principio vale para el ACCESO al framework: todo lo que toque
+  su inventario privado pasa por una función, con una guarda (AST) que
+  impide que vuelva a dispersarse. Factura medida al migrar de SDK: el
+  port tocó esa función y cero guardas; 737 de 747 tests en verde en la
+  primera corrida.
 - Todo lo leído del contexto va defensivo (getattr + try): auditar jamás
   rompe una llamada. Del contexto del transporte se saca un campo por
   nombre, nunca el diccionario: los headers HTTP traen `authorization`.
@@ -91,7 +98,12 @@ en el MCP que se está construyendo.
 
 ### 4. Desenlace: un error tiene tres caminos, y el tipo se busca al fondo
 
-- Un error devuelto también es un error. Los caminos son tres: excepción;
+- Un error devuelto también es un error, y es estructural, no una carencia
+  de un SDK: el `is_error` del framework marca SUS excepciones, no los
+  rechazos de la pasarela — un `{"ok": false}` del dominio llega con
+  `is_error=False`, porque ningún framework puede saber que ese retorno es
+  un error. Creerle anota "ok" sobre el 100% de los rechazos. Los caminos
+  son tres: excepción;
   retorno con `is_error` (sin excepción, el código viaja en el contenido);
   y retorno normal que trae el rechazo adentro (`{aplicadas:0,
   rechazadas:3}` — la forma normal de cualquier tool por lote). Los dos
@@ -162,6 +174,11 @@ en el MCP que se está construyendo.
   haber camino del paquete a la distribución; ahí la constante se ata al
   manifiesto (`[project].name`) con una prueba que en una copia falla.
   Segunda fuente válida: el nombre que el servidor declara a sus clientes.
+- Lo que el enganche garantizaba por construcción viaja con él o se vuelve
+  parámetro obligatorio: al mover el enganche (de subclase a middleware)
+  la declaración del nombre se cayó y nada falló — el registro escribió
+  `mcp-sin-nombre-auditoria-…`, forma correcta y origen equivocado. Un
+  middleware sin nombre no se puede construir.
 - JSONL, una línea por llamada; una función que responda dónde escribe
   (los tests la usan). La cabecera se escribe con la primera línea, no al
   arrancar: un servidor que nadie usó no deja rastro.
@@ -224,6 +241,12 @@ en el MCP que se está construyendo.
 - Cada decisión se prueba por reversión: romperla a mano y verificar qué
   test la caza. Una comprobación redundante no es una guarda y no se le
   puede escribir un test.
+- Las guardas se escriben contra la PROPIEDAD, no contra la mitigación
+  propia. "Todos los verbos son corrutinas" dio rojo el día que el
+  framework empezó a correrlos en hilos por su cuenta, con la propiedad
+  cumplida; y borrar esa guarda borraba lo único que avisaría si el
+  trabajo dejara de hacerse. La forma que sobrevive: llamar un verbo por
+  un cliente real y preguntar en qué hilo corrió.
 - Un test que corre una carrera entre las dos condiciones que debería
   separar no es "frágil": a veces mide otra cosa, y envenena un arnés de
   mutación. Se saca la carrera, no se sube el número hasta que ande.
@@ -283,8 +306,10 @@ deniega todo — crear usuarios y entradas ANTES de dejar el admin.
 Tres implementaciones medidas, en tres combinaciones distintas: repo
 `lucky-tool-gns3` (stdio + fastmcp 4; commits `8abbf6f`, `982835c`,
 `3a3f8b8`, `01c11a7`, `e42988c`, `4d9088d`, `189a6b4`), repo
-`lucky-tool-mtk-chr` (streamable-http + SDK `mcp` 1.x; commit `3ccfd57`,
-`docs/retroalimentacion-auditar-mcp.md`), repo `lucky-tool-netbox`
+`lucky-tool-mtk-chr` (streamable-http; nació sobre SDK `mcp` 1.x y migró
+a fastmcp 4 con la misma auditoría — commit `3ccfd57` y su
+`docs/retroalimentacion-auditar-mcp.md`, que separa propiedad de
+accidente del SDK), repo `lucky-tool-netbox`
 (stdio + fastmcp 4, catálogo de arneses; commit `1382090`). Anclar en
 commits, no en rutas. Leer los de gns3 en orden: los que siguen al primero
 son huecos aparecidos después de "terminado".
