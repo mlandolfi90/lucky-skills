@@ -570,6 +570,43 @@ class KitDeAuditoria:
         assert ruta is None
         assert any("APAGADA" in r.message for r in caplog.records)
 
+    def test_sin_proyecto_el_check_LO_DICE_y_no_revienta(
+        self, auditor, monkeypatch
+    ):
+        """El interruptor puesto y ningun lado donde escribir.
+
+        Es el estado legitimo de R1 -no escribir tampoco rompe- y el `check`
+        tiene que decirlo. Hasta 0.5.1 reventaba con un `AttributeError` sobre
+        `ruta.parent`: la herramienta que uno usa JUSTO cuando algo anda mal era
+        la que se caia. No lo caza ninguna guarda de fuga, porque no es una
+        fuga; lo encontro un anfitrion con el interruptor encendido corriendo
+        sin `CLAUDE_PROJECT_DIR`, y solo con la suite entera.
+        """
+        monkeypatch.setenv(auditor.variable, "1")
+        monkeypatch.setattr(identidad, "raiz_del_proyecto", lambda: None)
+
+        estado = auditor.estado()
+
+        assert estado["modo"] == "redactado"
+        assert estado["archivo"] is None
+        assert "no hay donde escribir" in estado["motivo"]
+        # Y no promete una cuenta de archivos que no puede hacer.
+        assert "acumulado" not in estado
+
+    def test_con_proyecto_el_check_SI_cuenta_lo_acumulado(
+        self, auditor, monkeypatch, proyecto
+    ):
+        # El control: si `estado` cortara siempre temprano, el test de arriba
+        # pasaria por la razon equivocada y el `check` perderia lo unico que
+        # avisa del que se olvido el modo crudo prendido hace tres dias.
+        monkeypatch.setenv(auditor.variable, "1")
+        auditor.registrar(self.herramienta_normal, {})
+
+        estado = auditor.estado()
+
+        assert estado["archivo"] is not None
+        assert estado["acumulado"]["archivos"] >= 1
+
     def test_sin_proyecto_el_cwd_queda_intacto(self, auditor, monkeypatch, tmp_path):
         # El control de la de arriba: "no devuelve ruta" y "no escribe" son dos
         # cosas, y la que importa es la segunda.

@@ -465,6 +465,21 @@ class Auditor:
             info["redaccion_motivo"] = self.redaccion.problema
         if cual == "apagado":
             return info
+        if ruta is None:
+            # El interruptor esta PUESTO y no hay donde escribir: desde R1 de
+            # 1.5.0, sin proyecto no se escribe en ningun lado. Es un estado
+            # legitimo -no escribir tampoco rompe- y el `check` tiene que
+            # decirlo, no reventar: hasta 0.5.1 reventaba con un `AttributeError`
+            # sobre `ruta.parent`, justo en la herramienta que uno usa CUANDO
+            # algo anda mal. Lo encontro un anfitrion con el interruptor
+            # encendido corriendo sin `CLAUDE_PROJECT_DIR`.
+            info["archivo"] = None
+            info["motivo"] = (
+                "el interruptor esta puesto pero no hay donde escribir: no se "
+                "pudo determinar el proyecto que llamo, y no se escribe en "
+                "ningun otro lado a proposito"
+            )
+            return info
         if cual == "crudo":
             info["aviso"] = (
                 "SIN REDACTAR: este archivo contiene credenciales de equipos y lo "
