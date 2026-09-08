@@ -2,6 +2,9 @@
 
 Generado por publicar-skill; no editar a mano.
 
+## auditar-mcp 1.6.0 — 2026-09-08 — MINOR
+- 1.5.2 → 1.6.0 · QUALITY=PASS · autorizó human:vikingo
+
 ## auditar-mcp 1.5.2 — 2026-09-08 — PATCH
 - 1.5.1 → 1.5.2 · QUALITY=PASS · autorizó human:vikingo
 
