@@ -137,4 +137,16 @@ def test_el_corral_del_cwd_mueve_a_pytest_fuera_del_repo(tmp_path):
     repo = Path(__file__).resolve().parents[1]
 
     assert Path.cwd() != repo
-    assert Path.cwd().name == "cwd-de-pytest"
+    assert Path.cwd().name.startswith("cwd-de-pytest")
+
+
+def test_el_corral_no_ensucia_el_tmp_path_del_test(tmp_path):
+    """La guarda no puede meterle una carpeta al area de trabajo del test.
+
+    La primera version creaba el corral DENTRO de `tmp_path`, y rompio tres
+    pruebas de un anfitrion que afirman "este directorio quedo vacio": el
+    export se comprobaba contra un `tmp_path` que la guarda ya habia ensuciado.
+    Una guarda que ensucia es la familia de defecto que vino a cazar, y solo
+    aparecio corriendo la suite entera -cada archivo solo pasaba-.
+    """
+    assert list(tmp_path.iterdir()) == [], "la guarda dejo algo en el tmp_path del test"

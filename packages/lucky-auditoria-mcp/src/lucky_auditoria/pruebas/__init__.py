@@ -76,7 +76,7 @@ def _sin_proyecto_heredado(monkeypatch):
     monkeypatch.setattr(identidad, "_RAIZ_DEL_PROYECTO", None, raising=False)
 
 
-def _corral_para_el_cwd(tmp_path, monkeypatch):
+def _corral_para_el_cwd(tmp_path_factory, monkeypatch):
     """Bajo HTTP el destino ES el cwd, y el cwd de pytest es el repo.
 
     Un test de transporte http que se olvide del `chdir` no falla: escribe en
@@ -84,12 +84,17 @@ def _corral_para_el_cwd(tmp_path, monkeypatch):
     hoy arregla ese; esto arregla el proximo, que es la misma leccion que la
     carpeta que se autoignora.
 
+    El corral sale de `tmp_path_factory` y NO de `tmp_path`. La primera version
+    lo creaba adentro del `tmp_path` del test, y ahi rompio tres pruebas de un
+    anfitrion que afirman "este directorio quedo vacio": la guarda les metia una
+    carpeta adentro. Una guarda que ensucia el area de trabajo del test es la
+    misma familia de defecto que vino a cazar, y solo aparecio corriendo la
+    suite ENTERA -sola, cada archivo pasaba-.
+
     El que necesite el cwd de verdad lo declara con su propio
     `monkeypatch.chdir`, que gana por ser posterior.
     """
-    corral = tmp_path / "cwd-de-pytest"
-    corral.mkdir(exist_ok=True)
-    monkeypatch.chdir(corral)
+    monkeypatch.chdir(tmp_path_factory.mktemp("cwd-de-pytest"))
 
 
 def _archivos_de(carpeta: Path) -> set:
@@ -150,8 +155,8 @@ def guardas_del_entorno(raiz_del_anfitrion: Path | None = None) -> dict:
         _sin_proyecto_heredado(monkeypatch)
 
     @pytest.fixture(autouse=True)
-    def _ningun_test_escribe_en_el_cwd_de_pytest(tmp_path, monkeypatch):
-        _corral_para_el_cwd(tmp_path, monkeypatch)
+    def _ningun_test_escribe_en_el_cwd_de_pytest(tmp_path_factory, monkeypatch):
+        _corral_para_el_cwd(tmp_path_factory, monkeypatch)
 
     @pytest.fixture(autouse=True, scope="session")
     def _la_suite_no_ensucia_la_maquina():
