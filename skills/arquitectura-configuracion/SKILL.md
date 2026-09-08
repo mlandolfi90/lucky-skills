@@ -187,6 +187,27 @@ regla.
   lugar por convención propia, se declara como excepción con su motivo
   escrito, no se calla.
 
+- **C9 — Repos que no son nuestros: se trabaja sobre una copia, y la
+  copia lleva nuestro `/config/`.** Regla del humano, textual: en todo
+  repo que trabajamos debe existir la opción de analizar toda su
+  configuración y crear nuestro propio `/config/`, donde nuestros
+  hallazgos se documentan sin modificar el contrato original. La forma
+  de la casa para un repo ajeno es la copia (un fork hecho a mano; no
+  hace falta saber de forks ni ramas): la copia es nuestra, y ahí va
+  `/config/` versionado como en cualquier repo de la casa. Lo que no se
+  toca es el contrato original: su cargador, sus archivos y su
+  precedencia siguen siendo los de ellos, y funcionan igual que antes.
+  Nuestro `/config/` lleva: el `README.md` con el ORIGEN (URL y commit o
+  versión de lo copiado, para saber qué se copió y poder traer cambios
+  después), el mapa de su configuración (dónde vive cada valor, quién lo
+  lee, qué precedencia real tiene, qué secretos exige — por nombre),
+  los `.example` de sus archivos con su explicación (C1-bis), y los
+  hallazgos: literales, drift entre lo que dice su doc y lo que hace su
+  código, riesgos. Nuestras claves nuevas, si las hay, van en nuestro
+  `settings` y con nuestro prefijo; las de ellos no se renombran. La
+  guarda de literales rige sobre lo que NOSOTROS escribimos: lo previo es
+  deuda de ellos, con cuenta declarada, no bloqueo.
+
 ## Flujo
 
 1. Inventariar: correr la guarda en modo informe y listar cada literal
