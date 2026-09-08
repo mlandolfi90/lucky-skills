@@ -464,7 +464,19 @@ compartido (`lucky-auditoria`); lo que se mide en cada uno vive en su
   Por eso va en una LÍNEA DE APERTURA por sesión (R3-bis), no como campo
   de cada línea: es constante por sesión, y como campo se paga N veces y
   se repite N veces. En stdio no hace falta: el proyecto llega por el
-  entorno del hijo y es un hecho, no una afirmación.
+  entorno del hijo y es un hecho, no una afirmación. Pero "es un MCP de
+  stdio" no descarta un repo: la pregunta es si TIENE rama HTTP
+  (`--transport http`, un Dockerfile que lo arranca), no cómo se lo usa
+  hoy. Y antes de que la apertura tenga sentido, el transporte declarado
+  tiene que ser cierto: el paquete lo recibe como parámetro al instalar
+  el enganche, y un consumidor puede pasarlo mal sin que nada falle.
+  Medido (gns3, 3aa75a2): `transporte="stdio"` escrito a mano en el
+  import, mientras el CLI elegía el transporte después; en HTTP el
+  auditor tomaba la rama de stdio, que pide `CLAUDE_PROJECT_DIR`, y un
+  contenedor no lo tiene — no escribía nada, y cada línea habría dicho
+  un transporte falso. El transporte se resuelve donde se ELIGE, no
+  donde se instala el enganche; si el enganche se instala en el import y
+  la elección ocurre después, el auditor lo recibe tarde, no adivinado.
   - Una ruta ABSOLUTA en el activador sigue mandando (R4) — es la única
     forma de elegir otro lugar, y es una elección explícita del operador.
   - Si la carpeta no se puede crear, no se escribe y se dice: no hay
