@@ -57,7 +57,11 @@ en el MCP que se está construyendo.
   modela como catálogo de arneses, cada uno declarando su variable
   testigo, sus campos y su límite. Sumar un arnés no toca código
   compartido. Bajo HTTP el protocolo trae `mcp-session-id` y no hay que
-  acuñar nada.
+  acuñar nada; el espacio de trabajo del cliente, en cambio, hay que
+  PEDIRLO (`roots/list`), y una identidad que se le pide al cliente en el
+  camino de la llamada es una dependencia nueva de ese camino: se
+  resuelve una vez por sesión, con plazo, fuera de la llamada, y se
+  declara qué queda escrito si no contesta (R1-bis).
 - Medir el `cwd` del proceso, no asumirlo: hay lanzadores que lo ponen en
   `%TEMP%` para todos los espacios de trabajo, y entonces no separa nada.
 - El entorno que trae la identidad también trae secretos (tokens del
@@ -428,10 +432,39 @@ compartido (`lucky-auditoria`); lo que se mide en cada uno vive en su
     servidor no tiene montada). Ahí el "proyecto" es el propio servicio:
     `registro_auditoria/` en su directorio de trabajo dentro del
     contenedor, sobre un volumen persistente, con la sesión en cada línea
-    (R2, R6) y el proyecto que llamó — si `roots` lo da — como campo de
-    la línea. Y como el archivo vive en otra máquina, el MCP expone su
-    lectura como herramienta propia (`auditoria`, R9): sin ella nadie del
-    lado del cliente lo ve.
+    (R2, R6) y el proyecto que llamó como AFIRMACIÓN del cliente, una vez
+    por sesión (R1-bis). Y como el archivo vive en otra máquina, el MCP
+    expone su lectura como herramienta propia (`auditoria`, R9): sin ella
+    nadie del lado del cliente lo ve.
+- **R1-bis — El proyecto que llamó, bajo HTTP, se le pide al cliente
+  una vez por sesión, con plazo, y se anota como dicho.** Medido
+  (mtk-chr, 2026-09-08, contra Claude Code real 2.1.263, protocolo
+  2025-11-25, con un MCP de biblioteca estándar y sin fastmcp de por
+  medio): el cliente declara `roots: {listChanged: true}` y responde a
+  `roots/list` con los directorios de trabajo de la sesión, el del
+  proyecto entre ellos. Así que el campo se puede llenar, con cinco
+  límites pegados al dato:
+  - Identifica el ESPACIO DE TRABAJO, no la sesión: dos sesiones sobre
+    el mismo repo dan lo mismo. Decora al `session_id`, no lo reemplaza.
+  - La lista no promete orden: `roots[0]` no es "el proyecto". Leer
+    orden donde no se promete es la misma clase de defecto que leer el
+    nombre del cliente (regla 2). Se anota la lista ENTERA.
+  - Es una afirmación del cliente, no un hecho del servidor: se anota
+    como dicho (`roots_declarados`), nunca como `proyecto` a secas.
+  - Es un pedido SERVIDOR→CLIENTE: cuesta un viaje y exige canal
+    abierto; una sonda esperó 20 s sin respuesta. Una identidad que se
+    le pide al cliente en el camino de la llamada es una dependencia
+    nueva de ese camino, y eso contradice "auditar jamás rompe una
+    llamada" salvo que se resuelva UNA vez por sesión, con plazo corto,
+    fuera del camino de la llamada, y se declare qué queda escrito
+    cuando no contesta (`roots_declarados: null`, con motivo).
+  - `listChanged: true`: pueden cambiar a mitad de sesión. O se honra la
+    notificación reescribiendo la apertura, o se declara que el dato
+    envejece; las dos valen, callarlo no.
+  Por eso va en una LÍNEA DE APERTURA por sesión (R3-bis), no como campo
+  de cada línea: es constante por sesión, y como campo se paga N veces y
+  se repite N veces. En stdio no hace falta: el proyecto llega por el
+  entorno del hijo y es un hecho, no una afirmación.
   - Una ruta ABSOLUTA en el activador sigue mandando (R4) — es la única
     forma de elegir otro lugar, y es una elección explícita del operador.
   - Si la carpeta no se puede crear, no se escribe y se dice: no hay
@@ -454,6 +487,10 @@ compartido (`lucky-auditoria`); lo que se mide en cada uno vive en su
   reglas (sin ella, un argumento recortado no se distingue de uno
   completo) y `valida` dice si se aplicaron o si el toml no cargó y se
   está opacando todo; son dos cosas distintas —, `inicio` y `cwd` medido.
+  Bajo HTTP, además, una línea `tipo:"apertura"` por sesión del cliente,
+  con `sesion` y `roots_declarados` (la lista entera o `null` con
+  motivo, R1-bis): es lo que ata cada sesión del archivo a un espacio de
+  trabajo, y se escribe una vez, no en cada llamada.
   Nada de valores de configuración ni del entorno fuera del catálogo de
   arneses. El `check` (R8) responde "¿cómo está ahora?"; la cabecera
   responde "¿cómo estaba cuando se escribió esto?", que es la pregunta
@@ -483,6 +520,8 @@ compartido (`lucky-auditoria`); lo que se mide en cada uno vive en su
   | Node · SDK TypeScript | pendiente | paquete hermano, mismo JSONL |
   | stdio | medido | sesión = proceso |
   | streamable-http | medido | `mcp-session-id` en cada línea |
+  | `roots/list` bajo HTTP · Claude Code 2.1.263 · protocolo 2025-11-25 | medido (mtk-chr, cliente real) | una vez por sesión, con plazo, línea de apertura (R1-bis) |
+  | `roots/list` · otros clientes | pendiente | mismo contrato; cada cliente se mide |
 
   Las versiones de la tabla son exactas porque lo medido es exacto: el
   paquete y cada MCP pinean con `==` la versión con la que probaron
