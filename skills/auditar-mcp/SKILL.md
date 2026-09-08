@@ -326,6 +326,29 @@ en el MCP que se está construyendo.
   propio archivo de tests con el caso exacto que se escapó (un archivo
   nuevo dentro de una carpeta vieja). La protección existe y nadie
   comprueba que proteja: la misma forma, una capa más arriba.
+- Una guarda que se envía a otros repos no está probada hasta que corre
+  la suite ENTERA de un repo que no es el propio. Medido tres veces
+  seguidas, en tres versiones seguidas del paquete (0.5.0 → 0.5.2), y
+  ninguna la cazó el paquete ni un archivo solo: cada archivo pasaba, y
+  el defecto apareció en la suite completa del anfitrión. Las tres
+  formas, para reconocerlas antes de enviarlas:
+  - Una fixture autouse toca a TODOS los tests, así que su efecto
+    secundario es un cambio de comportamiento global: antes de enviarla,
+    preguntarse qué afirma cada test sobre lo que la guarda toca. El
+    corral del cwd se creaba adentro del `tmp_path` del test, y rompió
+    tres pruebas ajenas que afirman "este directorio quedó vacío"; en el
+    paquete nadie afirmaba nada sobre `tmp_path`.
+  - Un `except` que nombra un tipo protege ese tipo, no el principio que
+    su comentario declara. El `except OSError` decía "que la cuenta
+    falle no puede tumbar un check", y el `check` reventaba igual con un
+    `AttributeError` dos líneas más arriba: interruptor puesto y sin
+    proyecto (un estado legítimo desde R1) no tenía ruta. La herramienta
+    que se usa justo cuando algo anda mal era la que se caía.
+  - El camino por el que aparece no se adivina: lo destapó un script de
+    pruebas del anfitrión que hace `load_dotenv` al importarse, metió el
+    interruptor del operador en el proceso, y el resto de la suite corrió
+    con la auditoría encendida. No es una fuga, así que ninguna guarda de
+    fuga lo mira; lo mira correr la suite ajena entera.
 - Verificar que exista un runner que corra estos tests (CI o equivalente)
   y decirlo si no lo hay. Un test de fuga que nadie corre no es
   protección, es documentación de una intención — y el que se rompe en
