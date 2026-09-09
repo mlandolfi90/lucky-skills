@@ -30,10 +30,6 @@ riesgo, colisiones o deuda:
 OBSERVATION → DIAGNOSIS → CHANGE_KIND → QUALITY/CRISOL → CLOSURE
 ```
 
-Con `CURRENT_KIND=FEATURE` y alcance sin definir, el escalón siguiente es
-`disenar` antes de construir. `CHANGE_ID` viaja a `microfix`, `hotfix` y al
-`cierre`: el recibo final se ata a esta observación por ese id.
-
 No ejecutar pasos vacíos. No rebajar la clasificación para evitar gates:
 rebajar es apagarlos en silencio. Diferir un portón declarado
 (`PORTON=bajo-autorizacion` en `REGLAS.md`, skill `modo-fixes`) no es
@@ -45,8 +41,7 @@ promueven.
 
 1. Capturar alcance `GLOBAL` o `LOCAL`, autor, evidencia y contexto.
 2. Distinguir hecho, expectativa e hipótesis.
-3. Consultar `precedente` (puerta `DIAGNOSTICO`) y diagnosticar antes de
-   escoger una corrección.
+3. Diagnosticar antes de escoger una corrección.
 4. Elegir un solo `NEXT_STEP` y explicar por qué los demás no aplican.
 5. Confirmar TARGET antes de cualquier fase escritora.
 6. Registrar autor y comprobante de cada transición.
@@ -61,7 +56,7 @@ OBSERVED=...
 EXPECTED=...
 DIAGNOSIS=...
 NEXT_STEP=...
-TARGET=CONFIRMED|UNCONFIRMED   (la confirmación; el destino real lo declara microfix/hotfix en su TARGET=)
+TARGET=CONFIRMED|UNCONFIRMED
 AUTHOR=...
 RECEIPT=...
 ```
