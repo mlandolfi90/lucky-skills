@@ -2,6 +2,9 @@
 
 Generado por publicar-skill; no editar a mano.
 
+## auditar-mcp 1.6.2 — 2026-09-09 — PATCH
+- 1.6.1 → 1.6.2 · QUALITY=PASS · autorizó human:vikingo
+
 ## arquitectura-configuracion 1.2.2 — 2026-09-09 — PATCH
 - 1.2.1 → 1.2.2 · QUALITY=PASS · autorizó human:vikingo
 
