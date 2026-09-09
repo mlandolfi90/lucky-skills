@@ -2,6 +2,9 @@
 
 Generado por publicar-skill; no editar a mano.
 
+## logalizar 1.0.1 — 2026-09-09 — PATCH
+- 1.0.0 → 1.0.1 · QUALITY=PASS · autorizó human:vikingo
+
 ## slack-coordinacion 1.3.1 — 2026-09-09 — PATCH
 - 1.3.0 → 1.3.1 · QUALITY=PASS · autorizó human:vikingo
 
