@@ -2,6 +2,9 @@
 
 Generado por publicar-skill; no editar a mano.
 
+## modo-fixes 1.0.0 — 2026-09-09 — INITIAL
+- 1.0.0 → 1.0.0 · QUALITY=PASS · autorizó human:vikingo
+
 ## cierre 1.3.0 — 2026-09-09 — MINOR
 - 1.2.0 → 1.3.0 · QUALITY=PASS · autorizó human:vikingo
 
