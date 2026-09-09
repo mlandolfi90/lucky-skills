@@ -219,8 +219,10 @@ regla.
 3. Mover cada literal al contrato; la clave se nombra por lo que
    gobierna, no por dónde estaba.
 4. Probar la llegada de cada clave por su canal real.
-5. Dejar la guarda permanente en el portón (cierre, arquitectura-verificar)
-   con la cuenta en cero y las excepciones motivadas.
+5. Dejar la guarda permanente en los gates de cierre y de
+   arquitectura-verificar, con la cuenta en cero y las excepciones
+   motivadas. (No es el portón del repo: la guarda corre en cada cierre,
+   no bajo autorización.)
 
 ## Referencia viva
 

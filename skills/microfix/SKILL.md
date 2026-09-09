@@ -20,7 +20,10 @@ Obtener evidencia rápida con el menor cambio útil.
 2. Elegir la unidad más pequeña que concentra la responsabilidad.
 3. Aplicar el cambio sin refactor amplio.
 4. Ejecutar primero la comprobación específica y después las regresiones
-   proporcionales.
+   proporcionales: el test del archivo tocado y la suite local. El portón
+   del repo (mutantes, CI, aceptación) corre según lo que el repo declare;
+   con `PORTON=bajo-autorizacion` (skill `modo-fixes`) no corre por cada
+   microfix y queda `PENDIENTE` en el cierre, a la vista.
 5. Restaurar de inmediato si empeora el estado.
 6. Registrar evidencia, deuda visible y forma de rollback.
 
