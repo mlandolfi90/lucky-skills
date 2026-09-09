@@ -2,6 +2,9 @@
 
 Generado por publicar-skill; no editar a mano.
 
+## revisor-seguridad 1.1.0 — 2026-09-09 — MINOR
+- 1.0.0 → 1.1.0 · QUALITY=PASS · autorizó human:vikingo
+
 ## publicar-skill 2.1.0 — 2026-09-09 — MINOR
 - 2.0.0 → 2.1.0 · QUALITY=PASS · autorizó human:vikingo
 
