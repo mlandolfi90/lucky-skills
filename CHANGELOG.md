@@ -2,6 +2,9 @@
 
 Generado por publicar-skill; no editar a mano.
 
+## mapear-despliegue 1.0.1 — 2026-09-09 — PATCH
+- 1.0.0 → 1.0.1 · QUALITY=PASS · autorizó human:vikingo
+
 ## custodiar-secretos 1.0.1 — 2026-09-09 — PATCH
 - 1.0.0 → 1.0.1 · QUALITY=PASS · autorizó human:vikingo
 
