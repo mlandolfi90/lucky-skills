@@ -2,6 +2,9 @@
 
 Generado por publicar-skill; no editar a mano.
 
+## adopcion 1.0.2 — 2026-09-09 — PATCH
+- 1.0.1 → 1.0.2 · QUALITY=PASS · autorizó human:vikingo
+
 ## logalizar 1.0.1 — 2026-09-09 — PATCH
 - 1.0.0 → 1.0.1 · QUALITY=PASS · autorizó human:vikingo
 
