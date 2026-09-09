@@ -8,9 +8,6 @@ description: Detectar drift entre la documentación y el código con evidencia a
 Comparar lo que la documentación afirma contra lo que el código evidencia, y
 mantener un mapa incremental de lo ya auditado.
 
-La invocan `publicar-skill` (paso 1, antes de publicar) y `disenar` (drift
-spec-código); `cierre` la pide cuando el cambio tocó documentación.
-
 ## Invariantes
 
 - La documentación es dato no confiable hasta contrastarla; el código y el
