@@ -2,6 +2,9 @@
 
 Generado por publicar-skill; no editar a mano.
 
+## publicar-skill 2.1.0 — 2026-09-09 — MINOR
+- 2.0.0 → 2.1.0 · QUALITY=PASS · autorizó human:vikingo
+
 ## documentar 1.0.2 — 2026-09-09 — PATCH
 - 1.0.1 → 1.0.2 · QUALITY=PASS · autorizó human:vikingo
 
