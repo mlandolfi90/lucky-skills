@@ -7,9 +7,6 @@ description: Convertir una intención en un diseño verificable antes de constru
 
 Pensar la solución sobre el estado real, antes de escribir una línea.
 
-La dispara `cambio` cuando `CURRENT_KIND=FEATURE` y el alcance no está
-definido.
-
 ## Invariantes
 
 - Diseñar sobre lo descubierto, no sobre recuerdos: el alcance sale de la
@@ -38,24 +35,17 @@ definido.
 
 ## Flujo
 
-1. Fijar la intención y el resultado esperado en una frase comprobable, y
-   consultar `precedente` (puerta `DISENO`) antes de proponer.
-2. Descubrir la arquitectura real del alcance con `arquitectura-descubrir`
-   (o reusar su `MAPA=` vigente).
+1. Fijar la intención y el resultado esperado en una frase comprobable.
+2. Descubrir la arquitectura real del alcance (o reusar un descubrimiento
+   vigente).
 3. Consultar el mapa de colisiones sobre rutas, símbolos y contratos que el
-   diseño piensa tocar; declarar lo que encuentre. Ante `COLLISION=FOUND`,
-   el diseño no sale `READY` hasta coordinar.
-4. Proponer: fronteras, contratos, unidades a tocar, pruebas y rollback. Si
-   el alcance es un MCP compartido, citar `auditar-mcp`; si es UI, `estilar`;
-   si el repo no tiene `/config/`, `arquitectura-configuracion` antes del
-   primer literal.
+   diseño piensa tocar; declarar lo que encuentre.
+4. Proponer: fronteras, contratos, unidades a tocar, pruebas y rollback.
 5. Persistir el diseño aprobado como spec versionado del repo
    (`docs/specs/<feature>.md` o el `SPECS.md` del proyecto): el spec es la
    fuente y el código su artefacto. Un diseño que muere en el chat no puede
    auditarse después.
-6. Entregar el diseño al ciclo de cambio que lo construirá (`crisol` toma
-   `VERDICT=READY` como `PLAN=PASS` y `BLOCKED` como `PLAN=BLOCK`, y cita el
-   `SPEC=`); el drift
+6. Entregar el diseño al ciclo de cambio que lo construirá; el drift
    spec-código queda bajo la auditoría de documentar.
 
 ## Salida
@@ -68,6 +58,5 @@ COLLISION=NONE|FOUND|UNKNOWN
 CONTRACTS=<afectados|NONE>
 TESTS_PLANNED=...
 ROLLBACK=...
-SPEC=<ruta del spec versionado|NONE>
 VERDICT=READY|BLOCKED
 ```
