@@ -2,6 +2,9 @@
 
 Generado por publicar-skill; no editar a mano.
 
+## cargar-reglas 1.1.0 — 2026-09-09 — MINOR
+- 1.0.0 → 1.1.0 · QUALITY=PASS · autorizó human:vikingo
+
 ## arquitectura-configuracion 1.2.1 — 2026-09-09 — PATCH
 - 1.2.0 → 1.2.1 · QUALITY=PASS · autorizó human:vikingo
 
