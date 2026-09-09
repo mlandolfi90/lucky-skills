@@ -8,6 +8,9 @@ description: Medir qué expone lo construido —puertos, archivos servidos, erro
 Medir lo que pasa, no leer lo que debería pasar. Una configuración que se ve
 bien no es evidencia: el canario sí.
 
+La exige `desplegar` (paso 1) cuando el cambio tocó compose, Dockerfile o el
+servidor, y `cierre` (gate 13) registra su `EXPOSURE=`.
+
 ## Invariantes
 
 - Exposición, no custodia: acá no hay ninguna credencial en la mano. Si el
@@ -61,7 +64,7 @@ CANARIOS_RETIRADOS=YES|NO
 HALLAZGOS=<id:CWE-nnn,...|NONE>
 COVERAGE=<qué quedó sin probar|COMPLETE>
 EXPOSURE=CLEAN|FOUND|UNKNOWN
-HANDOFF=NONE|CUSTODIA|CAMBIO
+HANDOFF=NONE|custodiar-secretos|cambio
 ```
 
 Usar `UNKNOWN` cuando el canario no pudo probarse; una superficie no probada

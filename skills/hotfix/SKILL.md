@@ -11,7 +11,8 @@ Restaurar el comportamiento esperado sin relajar control humano.
 
 - Confirmar incidente, diagnóstico, impacto y TARGET operativo exacto.
 - Definir rollback antes de escribir.
-- Consultar colisiones y cambios activos.
+- Consultar colisiones y cambios activos; ante `COLLISION=FOUND`, coordinar
+  antes de escribir.
 - No usar urgencia para omitir evidencia o autoridad.
 
 ## Ejecutar
@@ -27,15 +28,19 @@ Restaurar el comportamiento esperado sin relajar control humano.
 ## Salida
 
 ```text
+CHANGE_ID=<el de cambio>
 CHANGE_KIND=HOTFIX
 INCIDENT=...
 TARGET=...
 IMPACT=...
-VALIDATION=PASS|FAIL|UNKNOWN
+TESTS=PASS|FAIL|UNKNOWN
 ROLLBACK=READY|APPLIED|UNAVAILABLE
 FOLLOW_UP=NONE|QUALITY|REFACTOR|CRISOL
 RECEIPT=...
 ```
+
+`cierre` toma `CHANGE_ID`, `TESTS` y `ROLLBACK` de esta salida tal cual;
+`FOLLOW_UP=CRISOL` es la entrada de `crisol`.
 
 Crear commit o push únicamente dentro de la autorización explícita.
 

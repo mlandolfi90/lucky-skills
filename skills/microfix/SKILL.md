@@ -10,7 +10,8 @@ Obtener evidencia rápida con el menor cambio útil.
 ## Gates de entrada
 
 - Exigir diagnóstico, resultado esperado y TARGET humano.
-- Consultar el mapa de colisiones.
+- Consultar el mapa de colisiones; ante `COLLISION=FOUND`, coordinar o
+  promover a Crisol antes de escribir, nunca seguir en silencio.
 - Rechazar el fast path si cambia contratos amplios, arquitectura o múltiples
   responsabilidades; promover a Crisol.
 
@@ -33,16 +34,21 @@ build, pero únicamente si ese TARGET y la acción fueron confirmados.
 ## Salida
 
 ```text
+CHANGE_ID=<el de cambio>
 CHANGE_KIND=MICROFIX
 HYPOTHESIS=...
 TARGET=...
 FILES=...
-PROOF=PASS|FAIL|UNKNOWN
-ROLLBACK=...
+TESTS=PASS|FAIL|UNKNOWN
+ROLLBACK=READY|APPLIED|UNAVAILABLE
+ROLLBACK_HOW=<forma de rollback>
 TECH_DEBT=NONE|RECORDED
 PROMOTION=NONE|ACCUMULATE|CRISOL
 RECEIPT=...
 ```
+
+`cierre` toma `CHANGE_ID`, `TESTS` y `ROLLBACK` de esta salida tal cual, con
+el mismo nombre y el mismo enum; `PROMOTION=CRISOL` es la entrada de `crisol`.
 
 Los microfixes pueden acumularse. No declararlos solución estructural sin
 promoción y cierre.

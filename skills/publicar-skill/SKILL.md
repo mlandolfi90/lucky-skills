@@ -18,11 +18,12 @@ Convertir un cambio cerrado en una versión consumible.
 ## Flujo
 
 1. Validar nombre, frontmatter, `manifest.env`, recursos y dependencias.
-   Para una skill nueva, verificar además su colisión de responsabilidad
-   contra el catálogo: ninguna skill vigente cubre el mismo disparador, y
-   todo solapamiento parcial (por ejemplo, profundizar un carril de otra)
-   queda declarado con su justificación. Una skill que ignora su colisión
-   nace vencida, igual que un diseño.
+   Para una skill nueva, exigir el `HANDOFF=PUBLICATION` de `madrina` (con
+   `SIAMESE=NONE|DECLARED`): es su chequeo de colisión de responsabilidad y
+   no se repite acá; sin él, la skill no entra. Para toda skill, exigir el
+   cierre del cambio: `CLOSURE=FINAL` y su `RECEIPT=`, que es el
+   `--closure-receipt` del plan. Y `documentar` sobre los docs del catálogo
+   que el cambio toca: un drift conocido no se publica.
 2. Ejecutar conformidad y canary de la versión propuesta en cada harness
    soportado.
 3. Comparar con la versión vigente.

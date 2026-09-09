@@ -10,7 +10,7 @@ Dictaminar si un cambio respeta las fronteras corroboradas.
 ## Invariantes
 
 - Analizar el diff o plan exacto, no todo el proyecto sin alcance.
-- Usar un mapa vigente de `arquitectura-descubrir`.
+- Usar un mapa vigente de `arquitectura-descubrir`, citando su `MAPA=`.
 - Permanecer en solo lectura.
 - No corregir durante la verificación.
 - Distinguir defecto nuevo, deuda previa y evidencia insuficiente.
@@ -59,7 +59,7 @@ deja de contar. No hay excepción por commit: el gate corre antes de que exista.
 ## Veredicto
 
 ```text
-ARCHITECTURE_VERDICT=PASS|BLOCK|UNKNOWN
+ARCHITECTURE=PASS|BLOCK|UNKNOWN
 NEW_VIOLATIONS=...
 PREEXISTING_DEBT=...
 COLLISION=NONE|FOUND|UNKNOWN
@@ -74,6 +74,6 @@ una decisión de autoridad; no ocultar una condición detrás de la otra.
 ## Delegación
 
 Un subagente solo puede recolectar evidencia acotada para gates aislados. La
-sesión madre decide esos gates y emite `ARCHITECTURE_VERDICT` y
+sesión madre decide esos gates y emite `ARCHITECTURE` y
 `REQUIRED_ACTION`; un subagente no aprueba ni bloquea el cambio completo.
 En contexto subagente, devolver evidencia sin completar `Veredicto`.
