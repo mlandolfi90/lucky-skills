@@ -2,6 +2,9 @@
 
 Generado por publicar-skill; no editar a mano.
 
+## slack-coordinacion 1.3.1 — 2026-09-09 — PATCH
+- 1.3.0 → 1.3.1 · QUALITY=PASS · autorizó human:vikingo
+
 ## auditar-mcp 1.6.2 — 2026-09-09 — PATCH
 - 1.6.1 → 1.6.2 · QUALITY=PASS · autorizó human:vikingo
 
