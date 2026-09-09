@@ -30,13 +30,15 @@ después — la disculpa no revoca la clave.
 ## Flujo
 
 1. Nombrar qué secreto necesita la tarea y dónde vive (gestor, env), por
-   nombre.
+   nombre. Si el repo tiene `.lifecycle/local/DESPLIEGUE.env`
+   (`mapear-despliegue`), el nombre y la ubicación se leen de ahí.
 2. Elegir el patrón de uso que no puede transcribir: proceso único,
    validación de forma muda, comparación por hash.
 3. Ejecutar. Ninguna rama — éxito o error — imprime ni serializa el valor
    ni su objeto contenedor.
 4. Antes de mostrar cualquier salida derivada (logs, diff), barrerla; el
-   barrido se valida con un canario que debe matchear.
+   barrido se valida con un canario que debe matchear. `SWEEP=` es la
+   evidencia que `cierre` (gate 11) cita.
 5. Ante fuga: rotar, purgar, ficha. En ese orden, sin pedir perdón.
 
 ## Salida
