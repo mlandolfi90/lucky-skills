@@ -19,14 +19,8 @@ es un PATCH de esta skill.
 
 ## Invariantes
 
-- Se ejecuta al inicio de sesión en un repo adoptante, antes del trabajo:
-  la invoca `cargar-reglas` como segundo acto de su orden de arranque.
-  Donde el harness soporte hooks de inicio (`configurar-hooks`, evento
-  `SESSION_START`), el hook la recuerda; recuerda, no ejecuta.
-- Lo que esta skill avisa lo ejecuta `adopcion` (una skill por transacción,
-  con sus dependencias) o el comando `actualizar-skills` del repo; nunca
-  esta skill. Una skill del catálogo que el repo nunca adoptó no aparece
-  como atrasada: se ofrece aparte, como disponible.
+- Se ejecuta al inicio de sesión en un repo adoptante, antes del trabajo.
+  Donde el harness soporte hooks de inicio, el hook la recuerda.
 - Compara lo adoptado (`.lifecycle/state/skills/*.env`) contra lo publicado
   en el catálogo, con la semántica SemVer de la casa: PATCH/MINOR nuevo →
   actualización fluida disponible; MAJOR nuevo → adaptación requerida.
