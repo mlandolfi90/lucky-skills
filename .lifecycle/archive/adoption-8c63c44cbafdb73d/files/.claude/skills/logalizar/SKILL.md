@@ -49,9 +49,7 @@ real.
 5. Diagnosticar desde la evidencia: el evento que contradice lo esperado
    señala la unidad culpable, con archivo y línea del emisor.
 6. Cerrar: retirar o promover la instrumentación, y registrar el hallazgo en
-   el ciclo de cambio que corresponda: el evento culpable (archivo:línea) se
-   transcribe como `DIAGNOSIS=` de `cambio`; el `DIAGNOSIS=FOUND|UNRESOLVED`
-   de acá solo dice si se reprodujo.
+   el ciclo de cambio que corresponda.
 
 ## Degradación
 
