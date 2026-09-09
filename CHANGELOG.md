@@ -2,6 +2,9 @@
 
 Generado por publicar-skill; no editar a mano.
 
+## hotfix 1.1.0 — 2026-09-09 — MINOR
+- 1.0.0 → 1.1.0 · QUALITY=PASS · autorizó human:vikingo
+
 ## microfix 1.1.0 — 2026-09-09 — MINOR
 - 1.0.1 → 1.1.0 · QUALITY=PASS · autorizó human:vikingo
 
