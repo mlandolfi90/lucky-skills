@@ -32,7 +32,7 @@ Decidir el estado final de una ejecución a partir de evidencia actual.
     ni hardcodeados. Los secretos viajan por nombre, jamás por valor; para
     comparar un valor se usa su hash, nunca el valor. Un secreto detectado
     bloquea el cierre hasta rotarlo y purgarlo.
-11. Cero literales de configuración nuevos: el diff no introduce hosts,
+12. Cero literales de configuración nuevos: el diff no introduce hosts,
     puertos, URLs, rutas absolutas ni tiempos mágicos fuera del cargador
     único (guarda de arquitectura-configuracion). Los literales previos
     son deuda con su cuenta declarada, no bloqueo; un literal nuevo sin
@@ -49,12 +49,24 @@ Un descarte sin fase escritora puede cerrar con
 `TESTS=NOT_APPLICABLE`; cualquier ejecución escritora exige `TESTS=PASS` para
 un cierre final.
 
+`TESTS=` habla de lo barato (el test dirigido al archivo tocado, la suite
+local); el portón del repo — mutantes, CI, aceptación — se declara aparte en
+`PORTON=`. Con `PORTON=PENDIENTE` el cierre es `CONDITIONAL` y la condición
+es una sola, en `CONDITIONS` con forma fija: `PORTON pendiente: <comando>;
+autoriza human:<id>`. No hay `FINAL` con portón pendiente. `PORTON=CORRIDO`
+exige su resultado leído en esta corrida, no supuesto. `PORTON=NO_APLICA`
+únicamente cuando `REGLAS.md` no declara `PORTON=`: el repo sigue su
+cadencia propia y este campo no la juzga. Un `CONDITIONAL` por portón se
+salda con un cambio propio que corre el portón y cierra `FINAL` con
+`PORTON=CORRIDO`, citando los tramos que salda (skill `modo-fixes`).
+
 ## Salida
 
 ```text
 CLOSURE=FINAL|CONDITIONAL|BLOCKED
 RESULT=...
 TESTS=PASS|FAIL|UNKNOWN|NOT_APPLICABLE
+PORTON=CORRIDO|PENDIENTE|NO_APLICA
 ARCHITECTURE=PASS|BLOCK|UNKNOWN
 COLLISION=NONE|FOUND|UNKNOWN
 ROLLBACK=READY|APPLIED|UNAVAILABLE

@@ -34,10 +34,11 @@ probarse no es verde.
 
 ## Contrato de salida del evaluado
 
-El bloque `## Salida` de `cierre` (`CLOSURE`, `RESULT`, `TESTS`,
+El bloque `## Salida` de `cierre` (`CLOSURE`, `RESULT`, `TESTS`, `PORTON`,
 `ARCHITECTURE`, `COLLISION`, `ROLLBACK`, `CONDITIONS`, `FOLLOW_UP`,
-`DECIDED_BY`, `RECEIPT`). El juez exige como mínimo `CLOSURE`, `RESULT`,
-`TESTS` y `DECIDED_BY`, con enums válidos.
+`DECIDED_BY`, `SABER`, `RECEIPT`). El juez exige como mínimo `CLOSURE`,
+`RESULT`, `TESTS` y `DECIDED_BY`, con enums válidos; las claves que no
+conoce las ignora (`PORTON` entró en 1.3.0, `SABER` en 1.1.0).
 
 ## Nota sobre el secreto de E4
 

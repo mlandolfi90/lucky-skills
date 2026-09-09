@@ -9,5 +9,7 @@
   ya no sean una unidad pequeña.
 - **No es:** ejecutar siempre todas las fases, degradar un hotfix a microfix
   para evadir gates ni refactorizar antes de comprobar una hipótesis rápida.
+  Diferir un [portón](porton.md) declarado bajo autorización no es evadir:
+  queda `PENDIENTE` a la vista y el tramo cierra `CONDITIONAL`.
 - **Ejemplo:** un microfix confirma una utilidad; tres microfixes sobre el mismo
   contrato se promueven a Crisol para factorizar y cerrar la solución.

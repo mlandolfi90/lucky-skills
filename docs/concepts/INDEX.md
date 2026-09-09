@@ -8,6 +8,7 @@
 - [Taxonomía de cambio](change-taxonomy.md)
 - [Escalera](escalera.md)
 - [Cierre](closure.md)
+- [Portón](porton.md)
 - [Autopsia](autopsy.md)
 - [Evento de hook](hook-event.md)
 - [Manifest de skill](skill-manifest.md)
