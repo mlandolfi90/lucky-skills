@@ -30,12 +30,8 @@ riesgo, colisiones o deuda:
 OBSERVATION → DIAGNOSIS → CHANGE_KIND → QUALITY/CRISOL → CLOSURE
 ```
 
-No ejecutar pasos vacíos. No rebajar la clasificación para evitar gates:
-rebajar es apagarlos en silencio. Diferir un portón declarado
-(`PORTON=bajo-autorizacion` en `REGLAS.md`, skill `modo-fixes`) no es
-rebajar: la clasificación se mantiene y el portón queda `PENDIENTE` a la
-vista. Los microfixes acumulados sobre una responsabilidad compartida se
-promueven.
+No ejecutar pasos vacíos. No rebajar la clasificación para evitar gates. Los
+microfixes acumulados sobre una responsabilidad compartida se promueven.
 
 ## Flujo
 
