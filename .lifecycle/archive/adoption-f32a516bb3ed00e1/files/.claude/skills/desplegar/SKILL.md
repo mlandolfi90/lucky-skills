@@ -26,9 +26,7 @@ entorno. Y verde no es prueba — aterrizado sí.
 
 ## Flujo
 
-1. Confirmar cierre del cambio y TARGET del entorno. Un cierre
-   `CONDITIONAL` cuya condición sea `PORTON pendiente` no se despliega: el
-   portón corre y su resultado se lee primero (skill `modo-fixes`). Resolver los accesos
+1. Confirmar cierre del cambio y TARGET del entorno; resolver los accesos
    desde el mapa de despliegue del proyecto (`.lifecycle/local/DESPLIEGUE.env`) si existe —
    sin mapa, los accesos se nombran a mano, nunca se pegan.
 2. Declarar el rollback disponible.
