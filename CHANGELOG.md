@@ -2,6 +2,9 @@
 
 Generado por publicar-skill; no editar a mano.
 
+## autopsia 1.0.1 — 2026-09-09 — PATCH
+- 1.0.0 → 1.0.1 · QUALITY=PASS · autorizó human:vikingo
+
 ## cierre 1.4.0 — 2026-09-09 — MINOR
 - 1.3.0 → 1.4.0 · QUALITY=PASS · autorizó human:vikingo
 
