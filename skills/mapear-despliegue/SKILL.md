@@ -49,7 +49,7 @@ ROLLBACK="<mecanismo>"
 1. Inventariar qué necesita la promoción: secretos, pipeline, plataforma,
    verificación, rollback.
 2. Registrar cada secreto por nombre y ubicación en el gestor; verificar que
-   el nombre existe sin leer su valor.
+   el nombre existe sin leer su valor, bajo `custodiar-secretos`.
 3. Guardar el mapa en `.lifecycle/local/`; compartirlo (export a otra
    sesión, otra máquina o al repo) solo con decisión explícita del humano.
 4. Al desplegar, la sesión resuelve los accesos desde el mapa; ningún valor

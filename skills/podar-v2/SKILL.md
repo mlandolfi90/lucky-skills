@@ -6,7 +6,8 @@ description: Inventariar y retirar restos de enforcement v2 (hooks, gates, insta
 # Podar v2
 
 Que los ámbitos gobernados por v3 dejen de pagar peaje a los vigilantes de v2
-— sin romper los ámbitos donde v2 sigue viva.
+— sin romper los ámbitos donde v2 sigue viva. La señala `adopcion` al
+terminar una adopción v3 donde conviven restos v2; también se invoca a pedido.
 
 ## Invariantes
 

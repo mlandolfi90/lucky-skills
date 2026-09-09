@@ -5,13 +5,17 @@ description: Decidir dónde debe vivir un archivo, módulo, puerto, adaptador o 
 
 # Ubicar cambio
 
-Elegir el destino más pequeño que preserve las fronteras reales.
+Elegir el destino más pequeño que preserve las fronteras reales. La dispara
+el carril Arquitectura de `crisol` o `disenar`.
 
 ## Precondiciones
 
-- Usar un mapa vigente de `arquitectura-descubrir`.
+- Usar un mapa vigente de `arquitectura-descubrir`, citando su `MAPA=`.
 - Definir la responsabilidad única del cambio.
-- Consultar `mapa-colisiones` para las rutas candidatas.
+- Consultar `mapa-colisiones` para las rutas candidatas; ante
+  `COLLISION=FOUND`, el destino no se emite hasta coordinar.
+- Si el repo no tiene `/config/` (`CONTRATO=AUSENTE`), disparar
+  `arquitectura-configuracion` antes de ubicar el primer valor.
 - Mantener el TARGET de escritura sin confirmar hasta que el humano elija.
 
 ## Decidir

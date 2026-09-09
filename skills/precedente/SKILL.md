@@ -5,7 +5,9 @@ description: Buscar precedente antes de resolver de cero: fichas del saber, skil
 
 # Precedente
 
-Contestar "¿esto ya lo resolvió alguien?" antes de resolverlo de cero.
+Contestar "¿esto ya lo resolvió alguien?" antes de resolverlo de cero. La
+invocan `cambio` (paso 3, antes de diagnosticar) y `disenar` (paso 1, antes
+de proponer); no se dispara sola.
 
 ## Invariantes
 

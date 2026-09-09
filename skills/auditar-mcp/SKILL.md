@@ -20,6 +20,10 @@ comparando lo que entró con lo que salió. Frontera con logalizar:
 logalizar mira hacia adentro de una lógica propia; auditar-mcp mira el
 borde — y en una pasarela, el borde es casi todo lo que hay.
 
+La disparan `disenar` (cuando el alcance es un MCP compartido) y `madrina`
+(cuando la criatura es un MCP); su `config/` lo gobierna
+`arquitectura-configuracion`.
+
 Toda regla de abajo nació de una medición en un repo real y varias se
 cayeron al cambiar de transporte o de SDK. Ninguna se aplica sin medirla
 en el MCP que se está construyendo.

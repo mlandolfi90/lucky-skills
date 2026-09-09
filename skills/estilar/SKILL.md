@@ -5,7 +5,8 @@ description: Aplicar el estilo visual vigente leyendo su fuente viva de tokens y
 
 # Estilar
 
-El estilo vive en su repo; esta skill lo trae fresco cada vez.
+El estilo vive en su repo; esta skill lo trae fresco cada vez. La disparan
+`disenar` (paso 4) y el carril Construir de `crisol` cuando el alcance es UI.
 
 ## Fuente
 

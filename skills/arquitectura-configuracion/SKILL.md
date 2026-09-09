@@ -210,6 +210,10 @@ regla.
 
 ## Flujo
 
+Disparo: `disenar` o `arquitectura-ubicar` cuando el repo no tiene `/config/`
+(`CONTRATO=AUSENTE`); `cierre` (gate 12) y `arquitectura-verificar` (gate 12)
+corren la guarda en cada cambio.
+
 1. Inventariar: correr la guarda en modo informe y listar cada literal
    con archivo:línea, y cada archivo de configuración fuera de
    `/config/`.

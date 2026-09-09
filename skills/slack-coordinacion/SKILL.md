@@ -131,6 +131,14 @@ pena leerlo.
   publica por `#nombre` en vez de concluir que no existe. Medido: dos canales
   activos, ninguno listado.
 
+## Frontera
+
+- **Con la mensajería entre sesiones locales.** Un aviso a otra sesión de
+  Claude en la misma máquina va por el direccionamiento directo del harness
+  (SendMessage), no por Slack; Slack es para el humano y para sesiones que
+  no comparten máquina. `delegar` y `paralelizar` gobiernan agentes de esta
+  sesión, no sesiones ajenas.
+
 ## Flujo
 
 ### Revisar

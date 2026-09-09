@@ -19,6 +19,10 @@ Aplicar una transición de skills sin dejar estados mezclados.
   `EXTERNAL_CHANGE_REQUIRED` si la transición lo exige.
 - No mezclar contenido semánticamente. Comparar rutas y huellas.
 - No crear commit salvo autorización humana explícita.
+- Opera sobre el checkout activo, sin crear ni exigir ramas: quien la invoca
+  (`sincronizar`, `actualizar-skills`, el humano) decide la rama.
+- Tras adoptar, ofrecer `configurar-hooks`; si conviven restos v2, señalar
+  `podar-v2`.
 
 ## Preparar
 

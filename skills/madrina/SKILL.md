@@ -34,8 +34,9 @@ Que cada skill nazca sana, con nombre propio y sin hermanas siamesas.
   declara qué ya-construido debería recibirla también. Los huérfanos de
   alcance (artefactos existentes que la mejora alcanza y nadie actualizó)
   quedan listados como seguimiento, no se descubren por accidente.
-- La madrina no publica ni adopta: entrega la criatura sana al ciclo, que
-  tiene sus propias puertas.
+- La madrina no publica ni adopta: entrega la criatura sana al ciclo.
+  `publicar-skill` exige su `HANDOFF=PUBLICATION` en la puerta y no repite
+  el chequeo de siamesas.
 
 ## Flujo
 
