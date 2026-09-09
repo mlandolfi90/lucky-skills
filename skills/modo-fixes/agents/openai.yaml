@@ -1,0 +1,4 @@
+interface:
+  display_name: "Modo fixes"
+  short_description: "Difiere el porton del repo a la autorizacion del humano, con el pendiente a la vista"
+  default_prompt: "Usa $modo-fixes para declarar o consultar si el porton de este repo corre bajo autorizacion en este tramo."
