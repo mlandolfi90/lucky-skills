@@ -19,8 +19,6 @@ Mantener lógica compartida para eventos:
 - `SESSION_END`
 
 El handler asesor devuelve observaciones y siempre conserva la decisión humana.
-`SESSION_START` recuerda el orden de arranque de `cargar-reglas` (reglas,
-`ley-viva`, `sextante`); no lo ejecuta.
 Debe ser idempotente, acotado en tiempo y no contener secretos.
 El runtime autónomo viaja en `scripts/`; no depende del checkout del catálogo
 ni persiste el payload bruto del harness.
@@ -35,9 +33,7 @@ ni persiste el payload bruto del harness.
      `AFTER_FAILURE` no soportado.
    - Claude.ai: `UNSUPPORTED`; no inventar hooks.
 3. Mostrar rutas, eventos, comandos y diff exactos.
-4. Exigir TARGET y autorización antes de instalar o fusionar configuración:
-   la fusión se ejecuta como transacción de `adopcion`, que archiva lo previo
-   y valida el resultado (por eso esta skill la requiere).
+4. Exigir TARGET y autorización antes de instalar o fusionar configuración.
 5. Dejar al humano la revisión o confianza que exija el harness.
 6. Mantener v1 en `ADVISORY`. Enforcement requiere otra versión y una decisión
    humana explícita; no existe un toggle oculto.
