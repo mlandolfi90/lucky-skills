@@ -24,17 +24,6 @@ cumple siempre.
 - Sin `REGLAS.md`, declararlo y seguir con los defaults — nunca inventar
   reglas que el proyecto no escribió.
 
-## Orden de arranque
-
-1. Leer `REGLAS.md` y aplicar sus reglas (esta skill).
-2. Invocar `ley-viva`: comprueba que las skills adoptadas sigan vigentes
-   contra el catálogo y avisa antes de trabajar.
-3. Invocar `sextante` una vez, para dejar el comprobante fresco antes de
-   que cualquier gate lo exija: casi todas las skills lo requieren y ninguna
-   otra dice cuándo corre por primera vez.
-4. `entonar` y `delegar` leen sus defaults (`FORMA=`, `SPAWN=`) de
-   `REGLAS.md`; `modo-fixes` lee `PORTON=`.
-
 ## Formato de REGLAS.md
 
 ```markdown
