@@ -43,13 +43,7 @@ ADAPTERS=...
 HOTSPOTS=...
 UNCERTAINTIES=...
 EVIDENCE=...
-MAPA=<ruta del mapa persistido|recibo:<hash>|CHAT:<fecha UTC>>
 ```
-
-`MAPA=` es el ancla que `arquitectura-ubicar` y `arquitectura-verificar`
-citan como "mapa vigente": una ruta si el humano autorizó persistirlo, el
-recibo o la fecha del veredicto si no. Sin ancla no hay mapa vigente. La
-disparan `disenar` (paso 2) y el carril Arquitectura de `crisol`.
 
 Persistir un mapa solo cuando el humano autorice documentación. Una exploración
 no crea por sí misma nuevas carpetas ni refactors.
