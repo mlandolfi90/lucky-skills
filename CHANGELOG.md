@@ -2,6 +2,9 @@
 
 Generado por publicar-skill; no editar a mano.
 
+## red-de-desarrollo 1.0.0 — 2026-09-10 — INITIAL
+- 1.0.0 → 1.0.0 · QUALITY=PASS · autorizó human:mlandolfi90
+
 ## modo-fixes 1.0.1 — 2026-09-10 — PATCH
 - 1.0.0 → 1.0.1 · QUALITY=PASS · autorizó human:mlandolfi90
 
