@@ -1,0 +1,4 @@
+interface:
+  display_name: "Red de desarrollo"
+  short_description: "Tiende la red de comprobacion del repo: barato en cada push, porton con disparador, manual declarado"
+  default_prompt: "Usa $red-de-desarrollo para inventariar y tender la red de comprobacion de este repo."
