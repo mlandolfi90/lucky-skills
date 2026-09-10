@@ -205,3 +205,100 @@ class TestElRespaldoDeTomlEnPython310:
         # la misma, o dos procesos del mismo MCP declararian configuraciones
         # distintas en sus cabeceras.
         assert con_tomli.huella_config == con_tomllib.huella_config
+
+
+class TestContenedores:
+    """Listas y diccionarios: declarables, y cerrados por omision.
+
+    Antes no se podian declarar: un `tipo = "list"` no degradaba ese campo,
+    cerraba la redaccion entera. El anfitrion no tenia forma de decir "este de
+    aca lo quiero", y hay MCP cuya unica pregunta interesante vive adentro de
+    un contenedor -en uno de escritura, `operations` ES la intencion-.
+    """
+
+    def _reglas(self, tmp_path, cuerpo):
+        ruta = tmp_path / "auditoria.toml"
+        ruta.write_text(cuerpo, encoding="utf-8")
+        return cargar(ruta)
+
+    def test_declarar_el_tipo_no_abre_el_contenido(self, tmp_path):
+        """El defecto, y es el que sostiene la promesa del paquete.
+
+        Una lista blanca por NOMBRE no puede responder por lo anidado: el
+        nombre `operations` no dice nada de lo que el llamador metio en
+        `operations[0]["datos"]`. Por eso abrirlo es una decision escrita y no
+        algo que se hereda por declarar el tipo.
+        """
+        reglas = self._reglas(tmp_path, '[argumentos]\noperations = { tipo = "list" }\n')
+
+        limpio = reglas.argumentos_de("x", {"operations": [{"secreto": "CENTINELA"}]})
+
+        assert limpio == {"operations": {"tipo": "list", "largo": 1}}
+        assert "CENTINELA" not in str(limpio)
+
+    def test_con_contenido_completo_el_anfitrion_lo_abre(self, tmp_path):
+        reglas = self._reglas(
+            tmp_path,
+            '[argumentos]\noperations = { tipo = "list", contenido = "completo" }\n',
+        )
+        pedido = [{"accion": "create", "tipo": "dcim.site"}]
+
+        assert reglas.argumentos_de("x", {"operations": pedido}) == {"operations": pedido}
+
+    def test_un_dict_tambien(self, tmp_path):
+        reglas = self._reglas(
+            tmp_path,
+            '[argumentos]\nfilters = { tipo = "dict", contenido = "completo" }\n',
+        )
+
+        assert reglas.argumentos_de("x", {"filters": {"site": "lab"}}) == {
+            "filters": {"site": "lab"}
+        }
+
+    def test_el_tipo_equivocado_sigue_cayendo_a_forma(self, tmp_path):
+        """Declarar `list` no vuelve seguro a un str que se llame igual."""
+        reglas = self._reglas(
+            tmp_path,
+            '[argumentos]\noperations = { tipo = "list", contenido = "completo" }\n',
+        )
+
+        limpio = reglas.argumentos_de("x", {"operations": "no-soy-una-lista"})
+
+        assert limpio == {"operations": {"tipo": "str", "largo": 16}}
+
+    def test_un_contenedor_enorme_cae_a_forma(self, tmp_path):
+        """Lo que `largo_max` hace con una cadena, y por el mismo motivo.
+
+        Un tope existe para que una linea del registro no se coma el archivo.
+        """
+        reglas = self._reglas(
+            tmp_path,
+            '[argumentos]\noperations = { tipo = "list", contenido = "completo", '
+            "elementos_max = 3 }\n",
+        )
+
+        assert reglas.argumentos_de("x", {"operations": [1, 2, 3]}) == {"operations": [1, 2, 3]}
+        assert reglas.argumentos_de("x", {"operations": [1, 2, 3, 4]}) == {
+            "operations": {"tipo": "list", "largo": 4}
+        }
+
+    def test_un_contenido_desconocido_cierra_la_puerta(self, tmp_path):
+        reglas = self._reglas(
+            tmp_path,
+            '[argumentos]\noperations = { tipo = "list", contenido = "casi" }\n',
+        )
+
+        assert "contenido='casi'" in reglas.problema
+
+    def test_contenido_completo_sobre_un_escalar_cierra_la_puerta(self, tmp_path):
+        """Un ajuste que no hace nada es peor que ninguno.
+
+        En un `str` no hay contenido que abrir, asi que aceptarlo en silencio
+        dejaria al operador creyendo que declaro algo.
+        """
+        reglas = self._reglas(
+            tmp_path,
+            '[argumentos]\naction = { tipo = "str", contenido = "completo" }\n',
+        )
+
+        assert "no tiene contenido que abrir" in reglas.problema
