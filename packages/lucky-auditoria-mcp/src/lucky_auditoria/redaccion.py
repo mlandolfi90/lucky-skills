@@ -37,8 +37,37 @@ try:  # 3.11+
 except ModuleNotFoundError:  # pragma: no cover - depende de la version
     import tomli as tomllib  # type: ignore[no-redef]
 
-_TIPOS = {"str": str, "int": int, "float": float, "bool": bool}
+_ESCALARES = {"str": str, "int": int, "float": float, "bool": bool}
+
+#: Contenedores. Se declaran igual que un escalar, y por omision se anotan como
+#: `{tipo, largo}` -o sea, lo mismo que antes de que existieran-. Lo que cambia
+#: es que ahora se PUEDEN declarar: antes un `tipo = "list"` no degradaba ese
+#: campo, cerraba la redaccion entera, y el anfitrion se quedaba sin forma de
+#: expresar "este de acá lo quiero".
+_CONTENEDORES = {"list": list, "dict": dict}
+
+_TIPOS = {**_ESCALARES, **_CONTENEDORES}
 _LARGO_POR_DEFECTO = 256
+
+#: Cuantos elementos de un contenedor se anotan enteros antes de rendirse y
+#: describirlo. Lo mismo que `largo_max` hace con una cadena: un tope existe
+#: para que una linea del registro no se coma el archivo.
+_ELEMENTOS_POR_DEFECTO = 200
+
+#: Que hacer con lo que hay ADENTRO de un contenedor declarado.
+#:
+#: `forma` es el defecto y es deliberado: una lista blanca por NOMBRE no puede
+#: responder por contenido anidado -el nombre `operations` no dice nada de lo
+#: que el llamador metio en `operations[0]["datos"]["custom_fields"]`-, asi que
+#: abrirlo tiene que ser una decision escrita del anfitrion y no algo que se
+#: hereda por declarar el tipo.
+#:
+#: `completo` la toma: anota el contenedor entero. Existe porque hay MCP cuya
+#: unica pregunta interesante vive adentro de un contenedor -en un MCP de
+#: escritura, `operations` ES la intencion, y sin el el registro dice "alguien
+#: planifico una operacion"-. El precio es que lo anidado no pasa por ninguna
+#: lista blanca. Quien lo escribe lo esta aceptando, y el diff lo muestra.
+_CONTENIDOS = ("forma", "completo")
 
 
 class Redaccion:
@@ -99,6 +128,15 @@ class Redaccion:
             return self.describir(valor)
         if isinstance(valor, bool) is not (esperado is bool):
             return self.describir(valor)
+
+        if esperado in _CONTENEDORES.values():
+            # Declarar el tipo NO abre el contenido: eso lo abre `contenido`.
+            if regla.get("contenido", "forma") != "completo":
+                return self.describir(valor)
+            if len(valor) > regla.get("elementos_max", _ELEMENTOS_POR_DEFECTO):
+                return self.describir(valor)
+            return valor
+
         largo = regla.get("largo_max", _LARGO_POR_DEFECTO)
         if isinstance(valor, str) and len(valor) > largo:
             return self.describir(valor)
@@ -202,6 +240,19 @@ def cargar(ruta: Path | str | None) -> Redaccion:
         for clave, regla in (datos.get("argumentos") or {}).items():
             if not isinstance(regla, dict) or regla.get("tipo") not in _TIPOS:
                 return Redaccion.cerrada(f"el argumento {clave} no declara un tipo valido")
+            contenido = regla.get("contenido", "forma")
+            if contenido not in _CONTENIDOS:
+                return Redaccion.cerrada(
+                    f"el argumento {clave} declara contenido={contenido!r}, y solo "
+                    f"valen {list(_CONTENIDOS)}"
+                )
+            if contenido == "completo" and regla["tipo"] not in _CONTENEDORES:
+                # En un escalar no significa nada, y un ajuste que no hace nada
+                # es peor que ninguno: el operador cree que declaro algo.
+                return Redaccion.cerrada(
+                    f"el argumento {clave} declara contenido=completo sobre un "
+                    f"{regla['tipo']}, que no tiene contenido que abrir"
+                )
             argumentos[clave] = regla
         opacas = frozenset((datos.get("herramientas") or {}).get("opacas") or ())
         huellas = frozenset((datos.get("huellas") or {}).get("campos") or ())

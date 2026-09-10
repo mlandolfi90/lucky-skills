@@ -12,6 +12,10 @@ este archivo si viene de afuera (`entry_points`), que es la unica forma que
 sobrevive al reparto: el paquete no puede iterar sus propios modulos y llamarlo
 extensible, porque entonces extenderlo es tocarlo.
 
+Y EXTENDER uno que ya existe tampoco lo toca: los arneses del anfitrion van
+primero en `catalogo()`, asi que declarar uno con el mismo testigo lo reemplaza.
+Hasta 0.6.0 iban ultimos y no reemplazaban nada; ver `catalogo()`.
+
 ## La lista blanca de variables, y por que existe
 
 El mismo entorno que trae la identidad trae los tokens del arnes. Aca la
@@ -113,8 +117,46 @@ def _de_afuera() -> tuple[Arnes, ...]:
 
 
 def catalogo() -> tuple[Arnes, ...]:
-    """Todos los arneses conocidos: los de la casa y los que trae el anfitrion."""
-    return _INCORPORADOS + _de_afuera()
+    """Todos los arneses conocidos. **Los del anfitrion van primero.**
+
+    El orden importa porque `detectar()` corta en el primero cuyo testigo este
+    presente. Con los incorporados adelante, un anfitrion no podia AGREGARLE un
+    campo a un arnes que ya existe -declaraba el suyo, el de fabrica contestaba
+    primero, y el suyo no corria nunca-. Medido el 2026-09-10 en
+    `lucky-tool-netbox`, que quiso sumar `CLAUDE_CODE_ENTRYPOINT` al arnes de
+    Claude Code: los tres intentos -mismo testigo, otro testigo, otro id-
+    devolvieron el de fabrica.
+
+    Eso contradecia lo que este mismo archivo promete arriba: que sumar un
+    arnes no lo toque. Sumar uno nuevo andaba; extender uno existente, no, y es
+    el caso que mas se pide, porque los campos utiles de un producto se
+    descubren de a uno.
+
+    El precio: un anfitrion puede TAPAR un arnes de fabrica sin querer. Por eso
+    `sombras()` lo nombra y `instalar_auditoria` lo avisa una vez al arrancar.
+    Tapar es legitimo -es el anfitrion, y es su proceso-; taparlo en silencio
+    no, porque lo que cambia es la lista blanca del entorno.
+    """
+    return _de_afuera() + _INCORPORADOS
+
+
+def sombras(arneses: tuple[Arnes, ...] | None = None) -> dict[str, str]:
+    """Que arnes de fabrica quedo tapado por uno del anfitrion, y por cual.
+
+    Tapado = el de fabrica ya no puede contestar, porque otro con el MISMO
+    testigo va antes. Un id repetido con testigo distinto no tapa nada: los dos
+    pueden contestar, cada uno cuando le toca su variable.
+    """
+    delanteros: dict[str, str] = {}
+    tapados: dict[str, str] = {}
+    for arnes in arneses if arneses is not None else catalogo():
+        if not arnes.testigo:
+            continue
+        if arnes.testigo in delanteros:
+            tapados[arnes.id] = delanteros[arnes.testigo]
+        else:
+            delanteros[arnes.testigo] = arnes.id
+    return tapados
 
 
 def prohibidas(arneses: tuple[Arnes, ...] | None = None) -> dict[str, list]:

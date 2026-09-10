@@ -40,11 +40,14 @@ no un incidente. Esto responde "quien y que quiso hacer"; aquello responde "y
 ademas no lo dejo".
 """
 
+import logging
 from typing import Any
 
 from lucky_auditoria import arneses, enganches, identidad, lectores, redaccion
 from lucky_auditoria.arneses import Arnes
 from lucky_auditoria.registro import Auditor, tipo_del_error
+
+_logger = logging.getLogger(__name__)
 
 __all__ = [
     "Arnes",
@@ -58,7 +61,7 @@ __all__ = [
     "tipo_del_error",
 ]
 
-__version__ = "0.5.2"
+__version__ = "0.7.0"
 
 
 def instalar_auditoria(
@@ -101,6 +104,18 @@ def instalar_auditoria(
         version=version,
         commit=commit,
     )
+    for tapado, por in sorted(arneses.sombras().items()):
+        # Una sola vez, al arrancar: lo que cambia es la lista blanca del
+        # entorno, y un anfitrion puede taparla sin haberlo querido. Es aviso,
+        # no error: tapar es su derecho, es su proceso.
+        _logger.warning(
+            "AUDITORIA: el arnes %r del anfitrion tapa al %r del paquete "
+            "(mismo testigo). Las variables que se copian al registro son las "
+            "que declara el del anfitrion.",
+            por,
+            tapado,
+        )
+
     cual = enganche or enganches.detectar(servidor)
     auditor.framework = cual
     if cual == "fastmcp4":

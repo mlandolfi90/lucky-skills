@@ -50,6 +50,26 @@ name = { tipo = "str", largo_max = 128 }
 # nadie las vuelva a agregar sin hacer la cuenta.
 # x = { tipo = "int" }
 
+# --- Contenedores: `list` y `dict` -----------------------------------------
+#
+# Se declaran como cualquier otro tipo, y por omision se anotan como
+# `{tipo, largo}`: declarar el tipo NO abre el contenido. Es deliberado. La
+# lista blanca es por NOMBRE, y un nombre no puede responder por lo anidado:
+# `operations` no dice nada de lo que el llamador metio en
+# `operations[0]["datos"]["custom_fields"]`.
+#
+# `contenido = "completo"` lo abre, y es una decision del anfitrion que queda
+# escrita acá y visible en el diff. Existe porque hay MCP cuya unica pregunta
+# interesante vive adentro de un contenedor: en uno de escritura, `operations`
+# ES la intencion, y sin ella el registro dice "alguien planifico una
+# operacion". El precio es que lo anidado no pasa por ninguna lista blanca.
+#
+# `elementos_max` hace con un contenedor lo que `largo_max` con una cadena: un
+# tope para que una linea del registro no se coma el archivo. Por omision, 200.
+#
+# operations = { tipo = "list", contenido = "completo", elementos_max = 200 }
+# filters    = { tipo = "dict", contenido = "completo" }
+
 # --- Herramientas opacas ---------------------------------------------------
 #
 # Aca no se escribe ni el NOMBRE de los campos ni el tamaño: en una herramienta

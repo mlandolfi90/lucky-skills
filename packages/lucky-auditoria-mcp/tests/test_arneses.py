@@ -99,3 +99,90 @@ class TestDetectar:
         }
 
         assert "no-deberia-salir-de-aca" not in str(detectar(entorno))
+
+
+class TestElArnesDelAnfitrion:
+    """`entry_points` promete extensibilidad; esto mide que la cumpla.
+
+    No habia ninguna prueba de `_de_afuera()` hasta 0.7.0, y por eso el defecto
+    sobrevivio cinco versiones: sumar un arnes NUEVO andaba -y era lo unico que
+    alguien habia probado a mano-, pero EXTENDER uno existente no hacia nada,
+    que es el caso que mas se pide. Lo descubrio `lucky-tool-netbox` queriendo
+    sumarle un campo al arnes de Claude Code.
+    """
+
+    ENTORNO = {
+        "CLAUDE_CODE_SESSION_ID": "sesion-x",
+        "CLAUDE_PROJECT_DIR": "/proyecto",
+        "CLAUDE_CODE_ENTRYPOINT": "claude-vscode",
+    }
+
+    def _con(self, monkeypatch, *propios):
+        monkeypatch.setattr(arneses, "_de_afuera", lambda: propios)
+
+    def test_uno_nuevo_se_suma_al_catalogo(self, monkeypatch):
+        otro = arneses.Arnes(id="otro-producto", testigo="OTRO_ID", campos={})
+        self._con(monkeypatch, otro)
+
+        assert otro in arneses.catalogo()
+        assert arneses.CLAUDE_CODE in arneses.catalogo()
+
+    def test_uno_del_anfitrion_le_gana_al_de_fabrica(self, monkeypatch):
+        """El caso que no andaba: mismo testigo, un campo mas."""
+        mio = arneses.Arnes(
+            id="claude-code",
+            testigo="CLAUDE_CODE_SESSION_ID",
+            campos={
+                "CLAUDE_CODE_SESSION_ID": "sesion",
+                "CLAUDE_PROJECT_DIR": "proyecto",
+                "CLAUDE_CODE_ENTRYPOINT": "entrypoint",
+            },
+        )
+        self._con(monkeypatch, mio)
+
+        leido = arneses.detectar(self.ENTORNO)
+
+        assert leido["entrypoint"] == "claude-vscode"
+        assert leido["sesion"] == "sesion-x"
+
+    def test_sin_anfitrion_el_de_fabrica_sigue_contestando(self, monkeypatch):
+        """La regresion que este cambio podria causar, medida de frente."""
+        self._con(monkeypatch)
+
+        leido = arneses.detectar(self.ENTORNO)
+
+        assert leido["id"] == "claude-code"
+        assert sorted(leido) == ["id", "proyecto", "sesion"]
+
+    def test_tapar_uno_de_fabrica_se_puede_ver(self, monkeypatch):
+        """Tapar es legitimo. Taparlo en silencio no: cambia la lista blanca."""
+        mio = arneses.Arnes(
+            id="mi-claude-code",
+            testigo="CLAUDE_CODE_SESSION_ID",
+            campos={"CLAUDE_CODE_SESSION_ID": "sesion"},
+        )
+        self._con(monkeypatch, mio)
+
+        assert arneses.sombras() == {"claude-code": "mi-claude-code"}
+
+    def test_un_id_repetido_con_otro_testigo_no_tapa_nada(self, monkeypatch):
+        """Los dos pueden contestar, cada uno cuando aparece su variable."""
+        self._con(
+            monkeypatch,
+            arneses.Arnes(id="claude-code", testigo="OTRA_COSA", campos={}),
+        )
+
+        assert arneses.sombras() == {}
+
+    def test_la_guarda_de_secretos_alcanza_al_del_anfitrion(self, monkeypatch):
+        """El que agrega un arnes hereda la guarda sin escribirla."""
+        self._con(
+            monkeypatch,
+            arneses.Arnes(
+                id="descuidado",
+                testigo="ALGO",
+                campos={"MI_API_TOKEN": "token"},
+            ),
+        )
+
+        assert arneses.prohibidas() == {"descuidado": ["MI_API_TOKEN"]}
