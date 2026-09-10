@@ -2,6 +2,9 @@
 
 Generado por publicar-skill; no editar a mano.
 
+## configurar-hooks 1.1.0 — 2026-09-10 — MINOR
+- 1.0.1 → 1.1.0 · QUALITY=PASS · autorizó human:mlandolfi90
+
 ## ley-viva 1.1.0 — 2026-09-10 — MINOR
 - 1.0.1 → 1.1.0 · QUALITY=PASS · autorizó human:mlandolfi90
 
