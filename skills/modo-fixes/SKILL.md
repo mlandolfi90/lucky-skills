@@ -66,6 +66,15 @@ mtk-chr se paralelizó y el portón sigue costando ocho minutos.
   cierre de tramo. Apagar el portón sin declararlo es rebajar un gate, y
   eso lo prohíbe `cambio`. La diferencia entre las dos cosas es la línea
   escrita.
+- **Lo barato no es portón, y no se difiere.** Un CI que corre la suite y el
+  linter en segundos, sin servidor ni credenciales, es lo barato aunque
+  viva en un workflow: sigue corriendo en cada push y sigue frenando.
+  Humano, 2026-09-10: *"esas suites ayudan al desarrollo y cuestan menos que
+  un portón"*. El portón es lo caro que el repo declara en `PORTON=`
+  (mutantes, build de imagen, aceptación contra un servicio real). Medido:
+  en gns3 el modo neutralizó el CI barato (los jobs corrían sin tumbar el
+  run) por leer "guardas y portones" como si fueran lo mismo; no lo son, y
+  el bloque de `REGLAS.md` los separa a propósito.
 - **Se difiere, no se recorta.** El portón corre entero cuando corre.
   Recortar cobertura para ganar minutos paga con lo único que el portón
   aporta. Acelerarlo es otro trabajo, con su propio cambio.
