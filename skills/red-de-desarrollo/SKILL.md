@@ -90,12 +90,14 @@ versiones forman la matriz, dónde suele vivir el portón — y eso está en
   entero, un instalador que lo exige solo, o el flag en cada invocación.
   Medido: netbox `UV_LOCKED="1"` como variable del workflow entero.
 - **Nombres fijos y un mapa en `config/README.md`.** Los workflows se
-  llaman `barato.yml` y `porton.yml`; lo manual se lista en
-  `config/README.md` con su comando. El README dice cuál es cada hilo, qué
-  dispara cada uno y con qué comando se lee. Un repo donde hay que abrir
-  cada workflow para saber qué corre no tiene red tendida: tiene archivos.
-  En retrofit, renombrar; la historia de runs queda bajo el nombre viejo, y
-  se dice.
+  llaman `verificar-barato.yml` y `verificar-porton.yml`: el verbo dice qué
+  hacen y el sufijo, qué hilo son, y los dos juntos en la carpeta se leen
+  como una sola red (humano, 2026-09-10: *"nombres fijos compuestos
+  entendibles"*). Lo manual se lista en `config/README.md` con su comando.
+  El README dice cuál es cada hilo, qué dispara cada uno y con qué comando
+  se lee. Un repo donde hay que abrir cada workflow para saber qué corre no
+  tiene red tendida: tiene archivos. En retrofit, renombrar; la historia de
+  runs queda bajo el nombre viejo, y se dice.
 - **`modo-fixes` consume esta red, no la arma.** `BARATO=`, `PORTON=` y
   `CI=` del bloque `PORTON=bajo-autorizacion` salen de acá; sin red tendida
   ese bloque se escribe a ciegas.
@@ -177,11 +179,11 @@ barato, el run leído, los nombres fijos y el mapa.
    preguntas: ¿da la señal en segundos? ¿necesita servidor, estado o
    secretos reales? Anotar el costo medido de lo caro. Una suite dentro
    del build cae en portón.
-3. Tender el hilo barato con la receta del stack: `barato.yml` en push y
-   PR a las ramas de trabajo, con matriz de extremos, pines exactos, lock
-   exigido y guardas. Sin `continue-on-error`.
-4. Aislar el portón en `porton.yml` (o en el stage del build que ya lo sea),
-   con su disparador y su costo escritos en la cabecera.
+3. Tender el hilo barato con la receta del stack: `verificar-barato.yml`
+   en push y PR a las ramas de trabajo, con matriz de extremos, pines
+   exactos, lock exigido y guardas. Sin `continue-on-error`.
+4. Aislar el portón en `verificar-porton.yml` (o en el stage del build que
+   ya lo sea), con su disparador y su costo escritos en la cabecera.
 5. Declarar lo manual en `config/README.md`: comando, qué toca, a quién se
    avisa.
 6. Escribir el mapa en `config/README.md` y, si el repo usa `modo-fixes`,
