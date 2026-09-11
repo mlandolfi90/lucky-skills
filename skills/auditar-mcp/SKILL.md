@@ -358,7 +358,9 @@ en el MCP que se está construyendo.
     con la auditoría encendida. No es una fuga, así que ninguna guarda de
     fuga lo mira; lo mira correr la suite ajena entera.
 - Verificar que exista un runner que corra estos tests (CI o equivalente)
-  y decirlo si no lo hay. Un test de fuga que nadie corre no es
+  y decirlo si no lo hay; tenderlo es trabajo de `red-de-desarrollo` (hilo
+  barato en cada push, portón aparte, resultado leído), no de esta skill.
+  Un test de fuga que nadie corre no es
   protección, es documentación de una intención — y el que se rompe en
   silencio es el que impedía escribir una password en disco. Y LEER su
   resultado, con el comando, antes de afirmar nada sobre él: medido, un
