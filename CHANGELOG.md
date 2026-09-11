@@ -2,6 +2,9 @@
 
 Generado por publicar-skill; no editar a mano.
 
+## modo-fixes 1.0.2 — 2026-09-11 — PATCH
+- 1.0.1 → 1.0.2 · QUALITY=PASS · autorizó human:mlandolfi90
+
 ## configurar-hooks 1.1.0 — 2026-09-10 — MINOR
 - 1.0.1 → 1.1.0 · QUALITY=PASS · autorizó human:mlandolfi90
 
