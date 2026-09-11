@@ -2,6 +2,9 @@
 
 Generado por publicar-skill; no editar a mano.
 
+## desplegar 1.1.1 — 2026-09-11 — PATCH
+- 1.1.0 → 1.1.1 · QUALITY=PASS · autorizó human:mlandolfi90
+
 ## cierre 1.4.1 — 2026-09-11 — PATCH
 - 1.4.0 → 1.4.1 · QUALITY=PASS · autorizó human:mlandolfi90
 
