@@ -13,7 +13,9 @@ Decidir el estado final de una ejecución a partir de evidencia actual.
 2. El diff contiene solo rutas esperadas.
 3. `mapa-colisiones` no tiene conflictos abiertos (`COLLISION=` es el suyo).
 4. Pruebas específicas y regresiones proporcionales pasan: `TESTS=` se toma
-   de la salida de `microfix` o `hotfix`, mismo nombre y mismo enum.
+   de la salida de `microfix` o `hotfix`, mismo nombre y mismo enum. Qué es
+   lo barato del repo y dónde empieza su portón lo declara la red tendida
+   (`red-de-desarrollo`); `PORTON=` se juzga contra esa red.
 5. Arquitectura y contratos tienen veredicto suficiente: `ARCHITECTURE=` es
    el de `arquitectura-verificar`, tal cual.
 6. Rollback existe o su ausencia fue aceptada.
