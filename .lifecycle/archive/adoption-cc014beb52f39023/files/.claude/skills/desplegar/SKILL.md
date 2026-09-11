@@ -28,9 +28,7 @@ entorno. Y verde no es prueba — aterrizado sí.
 
 1. Confirmar cierre del cambio y TARGET del entorno. Un cierre
    `CONDITIONAL` cuya condición sea `PORTON pendiente` no se despliega: el
-   portón corre y su resultado se lee primero (skill `modo-fixes`). Cuál es
-   el portón de este repo y con qué comando se lee su run lo dice su red
-   tendida (`red-de-desarrollo`). Si el
+   portón corre y su resultado se lee primero (skill `modo-fixes`). Si el
    cambio tocó compose, Dockerfile o el servidor, exigir `EXPOSURE=CLEAN` de
    `revisor-seguridad` antes de disparar. Resolver los accesos
    desde el mapa de despliegue del proyecto (`.lifecycle/local/DESPLIEGUE.env`) si existe —
