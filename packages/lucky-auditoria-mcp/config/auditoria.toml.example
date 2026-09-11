@@ -12,6 +12,13 @@
 # Sin este archivo el registro no rompe: la redaccion queda cerrada y se anota
 # la forma de cada argumento y ningun valor. Es el estado seguro, y se grita
 # por el log para que no pase inadvertido.
+#
+# El bloque tambien puede vivir como tabla `[auditoria]` dentro del
+# `config.toml` unico del MCP (estandar de creacion de MCPs: dos moldes, cero
+# archivos sueltos): `[auditoria.argumentos]`, `[auditoria.herramientas]`, etc.
+# Con la tabla, el resto del archivo no es asunto de este paquete; sin ella,
+# el archivo entero es suyo. En un solo lugar: la tabla y `[argumentos]` en la
+# raiz a la vez cierran la redaccion.
 
 # --- Argumentos ------------------------------------------------------------
 #

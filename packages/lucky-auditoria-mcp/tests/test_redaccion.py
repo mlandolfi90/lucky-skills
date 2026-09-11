@@ -302,3 +302,68 @@ class TestContenedores:
         )
 
         assert "no tiene contenido que abrir" in reglas.problema
+
+
+class TestElBloquePuedeVivirEnUnaSeccionDelTomlUnico:
+    """Entrega 0001 del estandar de creacion de MCPs (2026-09-10): un MCP se
+    configura con un unico `config.toml` y crece agregando tablas, nunca
+    archivos. El bloque de auditoria puede ser la tabla `[auditoria]` de ese
+    archivo; el resto no es asunto de este paquete. Sin la tabla, el archivo
+    entero es suyo, como antes. Y como el archivo unico puede traer
+    credenciales, ningun mensaje de error repite contenido.
+    """
+
+    RAIZ = '[argumentos]\nname = { tipo = "str", largo_max = 10 }\n'
+    ANIDADO = '[auditoria.argumentos]\nname = { tipo = "str", largo_max = 10 }\n'
+    AJENO = '[settings]\npuerto = 8080\n\n[credenciales]\ntoken = "no-es-asunto-nuestro"\n\n'
+
+    def _archivo(self, tmp_path, cuerpo, nombre="config.toml"):
+        ruta = tmp_path / nombre
+        ruta.write_text(cuerpo, encoding="utf-8")
+        return ruta
+
+    def test_el_bloque_bajo_auditoria_carga_igual_que_en_la_raiz(self, tmp_path):
+        en_raiz = cargar(self._archivo(tmp_path, self.RAIZ, "auditoria.toml"))
+        anidado = cargar(self._archivo(tmp_path, self.ANIDADO))
+
+        assert anidado.problema is None
+        assert anidado.argumentos == en_raiz.argumentos
+
+    def test_las_tablas_del_anfitrion_no_son_asunto_del_paquete(self, tmp_path):
+        reglas = cargar(self._archivo(tmp_path, self.AJENO + self.ANIDADO))
+
+        assert reglas.problema is None
+        assert "name" in reglas.argumentos
+
+    def test_una_seccion_desconocida_dentro_de_auditoria_cierra_la_puerta(self, tmp_path):
+        cuerpo = self.ANIDADO + '\n[auditoria.redaccion]\npor_defecto = "completo"\n'
+        reglas = cargar(self._archivo(tmp_path, cuerpo))
+
+        assert "secciones desconocidas en [auditoria]" in reglas.problema
+        assert reglas.argumentos == {}
+
+    def test_el_archivo_viejo_con_argumentos_en_la_raiz_sigue_cargando(self, tmp_path):
+        reglas = cargar(self._archivo(tmp_path, self.RAIZ))
+
+        assert reglas.problema is None
+        assert "name" in reglas.argumentos
+
+    def test_el_bloque_en_dos_lugares_a_la_vez_cierra_la_puerta(self, tmp_path):
+        # [argumentos] en la raiz junto a [auditoria] es una regla que el
+        # operador cree escrita y no rige: cerrada, nombrando la seccion.
+        reglas = cargar(self._archivo(tmp_path, self.RAIZ + "\n" + self.ANIDADO))
+
+        assert "un solo lugar" in reglas.problema
+        assert "argumentos" in reglas.problema
+
+    def test_una_auditoria_que_no_es_tabla_cierra_la_puerta(self, tmp_path):
+        assert "no es una tabla" in cargar(self._archivo(tmp_path, 'auditoria = "si"\n')).problema
+
+    def test_un_error_de_parseo_no_reproduce_contenido_del_archivo(self, tmp_path):
+        secreto = "S3CR3T0-que-jamas-debe-verse"
+        cuerpo = f'[credenciales]\ntoken = "{secreto}"\n\n[auditoria\nroto = 1\n'
+        problema = cargar(self._archivo(tmp_path, cuerpo)).problema
+
+        assert problema is not None
+        assert secreto not in problema
+        assert "token" not in problema

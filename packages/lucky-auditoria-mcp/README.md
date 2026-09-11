@@ -215,7 +215,13 @@ sin valor.
 
 Las listas viven en el `config/auditoria.toml` del **anfitrión**, nunca acá. Si
 el paquete trajera las suyas, el primer MCP que sume una herramienta con un
-argumento nuevo tendría que tocar el paquete de todos.
+argumento nuevo tendría que tocar el paquete de todos. Desde 0.8.0 el bloque
+también puede ser la tabla `[auditoria]` del `config.toml` único del MCP
+(`[auditoria.argumentos]`, `[auditoria.herramientas]`, …): con la tabla, el
+resto del archivo no es asunto del paquete y, como puede traer credenciales,
+ningún mensaje de error repite contenido; sin la tabla, el archivo entero es
+suyo, como siempre. El bloque vive en un solo lugar: la tabla y `[argumentos]`
+en la raíz a la vez cierran la redacción.
 
 El retorno tiene su propia lista, **con el defecto invertido**: un argumento no
 declarado se anota reducido a forma (omitirlo dejaría al registro mintiendo

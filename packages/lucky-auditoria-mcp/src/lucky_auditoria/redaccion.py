@@ -229,11 +229,34 @@ def cargar(ruta: Path | str | None) -> Redaccion:
     except Exception as e:
         return Redaccion.cerrada(f"{camino} no es un TOML valido: {type(e).__name__}")
 
+    donde = ""
+    if "auditoria" in datos:
+        # El bloque puede vivir como tabla [auditoria] dentro del config.toml
+        # unico del anfitrion (estandar de creacion de MCPs, entrega 0001,
+        # 2026-09-10): el resto de ese archivo no es asunto de este paquete y
+        # puede traer credenciales, asi que ningun mensaje repite contenido:
+        # nombres de secciones y claves, nunca valores. Sin la tabla, el
+        # archivo entero es suyo, como siempre. Las dos cosas a la vez son una
+        # regla que el operador cree escrita y no rige: cerrada.
+        bloque = datos["auditoria"]
+        if not isinstance(bloque, dict):
+            return Redaccion.cerrada(f"{camino}: [auditoria] no es una tabla")
+        en_raiz = sorted(set(datos) & _CLAVES)
+        if en_raiz:
+            return Redaccion.cerrada(
+                f"{camino} declara [auditoria] y ademas {en_raiz} en la raiz: "
+                "el bloque vive en un solo lugar"
+            )
+        datos = bloque
+        donde = " en [auditoria]"
+
     sobran = set(datos) - _CLAVES
     if sobran:
         # Una seccion que el paquete no entiende es una regla que el operador
         # cree escrita y no rige. Es exactamente el modo de fallo con nombre.
-        return Redaccion.cerrada(f"{camino} declara secciones desconocidas: {sorted(sobran)}")
+        return Redaccion.cerrada(
+            f"{camino} declara secciones desconocidas{donde}: {sorted(sobran)}"
+        )
 
     try:
         argumentos = {}
