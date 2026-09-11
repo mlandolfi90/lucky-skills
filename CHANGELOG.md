@@ -2,6 +2,9 @@
 
 Generado por publicar-skill; no editar a mano.
 
+## auditar-mcp 1.6.3 — 2026-09-11 — PATCH
+- 1.6.2 → 1.6.3 · QUALITY=PASS · autorizó human:mlandolfi90
+
 ## desplegar 1.1.1 — 2026-09-11 — PATCH
 - 1.1.0 → 1.1.1 · QUALITY=PASS · autorizó human:mlandolfi90
 
