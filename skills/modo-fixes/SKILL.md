@@ -40,6 +40,11 @@ PORTON=bajo-autorizacion
 - CI= <rama que el workflow escucha, o NINGUNA>
 ```
 
+Las tres líneas salen de la red tendida del repo (`red-de-desarrollo`):
+`BARATO=` es su hilo barato, `PORTON=` su portón con disparador escrito y
+`CI=` la rama que ese portón escucha. Sin red tendida el bloque se escribe a
+ciegas; si el repo no la tiene, tenderla es lo primero.
+
 En caliente, en la sesión: "modo fixes on" / "modo fixes off". Lo dicho en
 la sesión vale más que el archivo; un "off" sostenido de forma estable
 propone actualizar la línea, para que la regla no se pierda. En un repo sin
