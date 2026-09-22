@@ -19,6 +19,7 @@ se declara pendiente. Una casilla no pasa de pendiente a medida por prosa.
 import time
 from typing import Any
 
+from lucky_auditoria.rechazos import codigo_de_error
 from lucky_auditoria.registro import Auditor, tipo_del_error
 
 
@@ -88,10 +89,8 @@ def instalar(servidor: Any, auditor: Auditor) -> Auditor:
                 datos = None
         # En 1.x el propio SDK marca el error devuelto en `isError`, y ademas
         # vale el codigo del dominio: los dos son el mismo camino segundo.
-        codigo = None
-        if isinstance(datos, dict) and datos.get("error_code"):
-            codigo = str(datos["error_code"])
-        elif getattr(getattr(resultado, "root", resultado), "isError", False):
+        codigo = codigo_de_error(datos)
+        if codigo is None and getattr(getattr(resultado, "root", resultado), "isError", False):
             codigo = "IS_ERROR"
         auditor.registrar(
             herramienta,

@@ -26,9 +26,14 @@ receta R1–R11 de la skill `auditar-mcp` 1.2.2.
 ```toml
 # pyproject.toml del MCP anfitrión
 dependencies = [
-    "lucky-auditoria-mcp @ git+https://github.com/mlandolfi90/lucky-skills@auditoria-mcp-v0.5.2#subdirectory=packages/lucky-auditoria-mcp",
+    "lucky-auditoria-mcp @ https://github.com/mlandolfi90/lucky-skills/archive/refs/tags/auditoria-mcp-v0.9.0.tar.gz#subdirectory=packages/lucky-auditoria-mcp",
 ]
 ```
+
+Por el archivo del tag, no por `git+https`: el pin `git+https://...@auditoria-mcp-v0.9.0`
+también vale, pero necesita `git` en la imagen y una `python:3.12-slim` no lo
+trae —medido por lucky-tool-mtk-chr: `Cannot find command 'git'`—. El tarball
+lo instala `pip` solo. Las dos formas apuntan al mismo commit etiquetado.
 
 ## Retrofit en tres pasos
 
@@ -201,6 +206,24 @@ escribir tampoco rompe, porque el escritor ya se traga sus fallos.
 `<escritor>` es el id de sesión en stdio (un proceso por sesión) y el pid en
 HTTP (N sesiones por proceso: ponerlas en el nombre daría N archivos abiertos
 para una colisión que no existe).
+
+**Bajo HTTP, el id de sesión de cada línea es el `mcp-session-id` con el que el
+cliente hizo esa llamada** (desde 0.9.0). El servidor lo acuña en el
+`initialize` y el cliente lo devuelve en cada pedido; el enganche lo lee del
+pedido y lo anota en el contexto de la tarea que atiende ESA llamada, no en el
+proceso, así que dos clientes concurrentes no se pisan. Hasta 0.8.0 la función
+que lo hacía existía y nadie la llamaba: 43 routers con una credencial salían
+con un solo id (medido por lucky-tool-mtk-chr, ficha CAP-7824fd652563). Un
+cliente que no devuelve la cabecera —el transporte en memoria, y
+`fastmcp.Client(url)` de fastmcp 4.0.3— sigue saliendo con el id del proceso:
+no se inventa uno por pedido, que sería peor.
+
+**Un retorno `{"ok": false, ...}` es un rechazo** (desde 0.9.0), aunque no
+traiga `error_code`: se anota `resultado: "error"` con la categoría booleana que
+lo acompaña como código (`{"ok": false, "bloqueado_por_candado": true}` →
+`bloqueado_por_candado`) o `rechazo_del_verbo` cuando no hay ninguna. Antes sólo
+se reconocía `error_code` y el resto quedaba `ok`, mientras el lector del propio
+paquete ya contaba `ok: false` como fracaso: escritor y lector no coincidían.
 
 ## Qué se escribe, y qué no
 

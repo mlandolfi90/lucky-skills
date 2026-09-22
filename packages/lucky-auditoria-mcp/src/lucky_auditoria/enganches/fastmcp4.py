@@ -26,6 +26,7 @@ from typing import Any
 from fastmcp.server.middleware import Middleware
 
 from lucky_auditoria import identidad
+from lucky_auditoria.rechazos import codigo_de_error
 from lucky_auditoria.registro import Auditor, tipo_del_error
 
 
@@ -79,19 +80,39 @@ def _datos_de(texto: str | None) -> Any:
 def _codigo_de_error(datos: Any) -> str | None:
     """El codigo si la herramienta DEVOLVIO un error en vez de levantarlo.
 
-    Es el segundo de los tres caminos, y es estructural: el `is_error` del
-    framework marca SUS excepciones, no los rechazos de la pasarela. Un
-    `{"ok": false}` del dominio llega con `is_error=False`, porque ningun
-    framework puede saber que ese retorno es un error. Creerle anota "ok" sobre
-    el 100% de los rechazos -medido: un `node create` con `NODE_NAME_TAKEN`
-    quedaba como `resultado: "ok"`.
-
-    Se anota solo el CODIGO, que es un nombre de enum. Nunca el mensaje ni el
-    contexto, que arrastran los argumentos.
+    Medido: un `node create` con `NODE_NAME_TAKEN` quedaba como
+    `resultado: "ok"`. Las formas que se reconocen y por que viven en
+    `rechazos.py`, compartido con el enganche de mcp 1.x.
     """
-    if isinstance(datos, dict) and datos.get("error_code"):
-        return str(datos["error_code"])
-    return None
+    return codigo_de_error(datos)
+
+
+def _sesion_del_transporte(contexto: Any) -> str | None:
+    """El `mcp-session-id` con el que el cliente hizo ESTA llamada.
+
+    Solo vale bajo HTTP: el servidor lo acuña en el `initialize` y el cliente
+    lo devuelve en cada pedido, y es lo unico que distingue a los N clientes
+    que atiende un mismo proceso. Se lee del pedido -la cabecera, o el id que
+    el SDK ya le puso a la conexion-, y NO de `Context.session_id`: medido con
+    fastmcp 4.0.3, esa propiedad inventa un UUID nuevo por pedido cuando la
+    cabecera falta (y bajo stdio o en memoria siempre falta), con lo que cada
+    llamada saldria como una sesion distinta, peor que el id del proceso. Sin
+    cabecera se devuelve None y la sesion sigue siendo el proceso. Todo con
+    `getattr`: auditar no puede romper una llamada.
+    """
+    try:
+        fastmcp_context = getattr(contexto, "fastmcp_context", None)
+        conexion = getattr(getattr(fastmcp_context, "session", None), "_connection", None)
+        del_sdk = getattr(conexion, "session_id", None)
+        if del_sdk:
+            return str(del_sdk)
+        pedido = getattr(getattr(fastmcp_context, "request_context", None), "request", None)
+        cabeceras = getattr(pedido, "headers", None)
+        if cabeceras is None:
+            return None
+        return cabeceras.get("mcp-session-id") or None
+    except Exception:
+        return None
 
 
 class AuditoriaMiddleware(Middleware):
@@ -117,6 +138,19 @@ class AuditoriaMiddleware(Middleware):
         self._cliente_anotado = True
 
     async def on_call_tool(self, context, call_next):
+        # Bajo HTTP el id es de la sesion que hizo ESTA llamada y se anota en
+        # el contexto de la tarea que la atiende, no en el proceso: dos
+        # clientes concurrentes no se pisan. Se suelta pase lo que pase.
+        marca = None
+        if self.auditor.transporte != "stdio":
+            marca = identidad.anotar_sesion_del_transporte(_sesion_del_transporte(context))
+        try:
+            return await self._auditar_llamada(context, call_next)
+        finally:
+            if marca is not None:
+                identidad.olvidar_sesion_del_transporte(marca)
+
+    async def _auditar_llamada(self, context, call_next):
         self._anotar_cliente_una_vez(context)
         params = getattr(context, "message", None)
         herramienta = getattr(params, "name", "?")

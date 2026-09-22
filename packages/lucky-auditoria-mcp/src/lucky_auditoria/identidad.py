@@ -25,6 +25,7 @@ no, se acuña uno aca, que es el unico componente 1:1 con la sesion que uno
 controla.
 """
 
+import contextvars
 import os
 import uuid
 from datetime import datetime, timezone
@@ -35,7 +36,14 @@ from lucky_auditoria import arneses
 _ACUÑADO = uuid.uuid4().hex[:12]
 _INICIADA_EN = datetime.now(timezone.utc).isoformat()
 _CLIENTE: dict[str, Any] = {}
-_SESION_DEL_TRANSPORTE: str | None = None
+# Por llamada, no por proceso: bajo HTTP dos sesiones se atienden a la vez y una
+# global del modulo se pisa entre la anotacion y el `await` de la herramienta,
+# con lo que la linea sale con el id de la sesion equivocada (medido por
+# lucky-tool-mtk-chr sobre 0.8.0, ficha CAP-7824fd652563). Un ContextVar viaja
+# con la tarea que atiende ESA llamada y no con el proceso.
+_SESION_DEL_TRANSPORTE: contextvars.ContextVar[str | None] = contextvars.ContextVar(
+    "lucky_auditoria_sesion_del_transporte", default=None
+)
 _RAIZ_DEL_PROYECTO: str | None = None
 
 
@@ -77,21 +85,31 @@ def raiz_del_proyecto() -> str | None:
     return del_arnes or _RAIZ_DEL_PROYECTO
 
 
-def anotar_sesion_del_transporte(identificador: str | None) -> None:
+def anotar_sesion_del_transporte(identificador: str | None) -> contextvars.Token:
     """El `mcp-session-id` de HTTP, que manda sobre todo lo demas.
 
     Es el unico caso donde la sesion NO es el proceso: un servidor HTTP atiende
     varias, y el id tiene que cambiar por llamada. El enganche lo pone antes de
-    registrar.
+    registrar, para ESA llamada, y lo suelta con `olvidar_sesion_del_transporte`
+    al terminar. Hasta 0.8.0 esta funcion existia y nadie la llamaba: todas las
+    sesiones HTTP salian con el id del proceso.
     """
-    global _SESION_DEL_TRANSPORTE
-    _SESION_DEL_TRANSPORTE = identificador or None
+    return _SESION_DEL_TRANSPORTE.set(identificador or None)
+
+
+def olvidar_sesion_del_transporte(marca: contextvars.Token) -> None:
+    """Deshace la anotacion de esa llamada. Nunca levanta."""
+    try:
+        _SESION_DEL_TRANSPORTE.reset(marca)
+    except (ValueError, RuntimeError):
+        pass
 
 
 def id_de_sesion() -> str:
     """El id que se escribe en cada linea, por orden de confianza."""
-    if _SESION_DEL_TRANSPORTE:
-        return _SESION_DEL_TRANSPORTE
+    del_transporte = _SESION_DEL_TRANSPORTE.get()
+    if del_transporte:
+        return del_transporte
     heredado = arneses.detectar().get("sesion")
     return heredado or _ACUÑADO
 
