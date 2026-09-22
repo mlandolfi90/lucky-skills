@@ -603,7 +603,18 @@ compartido (`lucky-auditoria`); lo que se mide en cada uno vive en su
   medir la superficie para llenarlo. El kit de pruebas del paquete
   (fuga en dos modos, `chdir`, handler registrado, reversión) dice si
   quedó bien. Los tres MCP vivos son los primeros retrofits: la
-  extracción se prueba contra ellos antes de llamarse estándar.
+  extracción se prueba contra ellos antes de llamarse estándar. Dos
+  cosas que el retrofit cambia sin que se vea, y se dicen: (a) el
+  interruptor pasa a llamarse `<NOMBRE_DEL_PAQUETE>_AUDITORIA` —
+  `MTK_AUDITORIA` se vuelve `LUCKY_TOOL_MTK_CHR_AUDITORIA`— y el
+  operador que sigue exportando el nombre viejo tiene el registro
+  apagado sin aviso; el retrofit frena el arranque si el nombre viejo
+  aparece en el entorno, y lo dice, hasta que el operador migre
+  (decidido en mtk-chr, 2026-09-22). (b) El pin del paquete va por el
+  archivo del tag
+  (`https://github.com/mlandolfi90/lucky-skills/archive/refs/tags/auditoria-mcp-v<versión>.tar.gz#subdirectory=packages/lucky-auditoria-mcp`),
+  no por `git+https`: una imagen `python:3.12-slim` no trae `git` y el
+  `pip install` muere con `Cannot find command 'git'` (medido en mtk-chr).
 - **R11 — El paquete lleva el motor; cada repo lleva sus datos.** Las
   listas blancas, las opacas, las huellas y el catálogo de arneses son
   datos del MCP anfitrión (`config/`), nunca del paquete: si el paquete
