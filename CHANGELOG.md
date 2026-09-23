@@ -2,6 +2,9 @@
 
 Generado por publicar-skill; no editar a mano.
 
+## cierre 1.5.1 — 2026-09-23 — PATCH
+- 1.5.0 → 1.5.1 · QUALITY=PASS · autorizó human:vikingo
+
 ## memoria-del-taller 1.0.0 — 2026-09-23 — INITIAL
 - 1.0.0 → 1.0.0 · QUALITY=PASS · autorizó human:vikingo
 
