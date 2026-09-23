@@ -29,9 +29,11 @@ Decidir el estado final de una ejecución a partir de evidencia actual.
    negativas nadie se entera de que una guía enseña algo equivocado. No
    haber consultado nada es una respuesta válida y se declara.
 10. Si la corrida dejó un aprendizaje reutilizable (síntoma→acción) o una
-    sospecha sin evidencia dura, proponerlo al saber como ficha o señal por
-    su herramienta (`saber_proponer_ficha`, `saber_senal`), citando el mismo
-    recibo. Sin saber disponible, declararlo.
+    sospecha sin evidencia dura, proponerlo al saber como ficha o señal
+    (verbos `proponer` y `senalar` de `memoria-del-taller`, que sabe con qué
+    herramienta se hace en este stack), citando el mismo recibo. Sin saber
+    disponible, declararlo. Reportar lo consultado del punto 9 es el verbo
+    `reportar` de la misma skill.
 11. Cero fuga de secretos, sin excepción: el diff, los logs, los recibos y
     el transcript no contienen claves, tokens ni credenciales — ni en claro
     ni hardcodeados. Los secretos viajan por nombre, jamás por valor; para
