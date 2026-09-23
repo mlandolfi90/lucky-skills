@@ -1,0 +1,103 @@
+// CÓMO SE ENCIENDE UNA SKILL — Y, SOBRE TODO, CÓMO NO.
+//
+// `madrina` exige que el disparador sea NEGABLE: ante una tarea cualquiera
+// tenés que poder contestar "no, este no es el momento" sin ponerte a discutir.
+// Un disparador que nunca es falso no es un disparador: es un default
+// encubierto, y la skill va a estorbar en todo el camino.
+//
+// Este archivo agrupa los 37 disparadores reales —leídos del `description` de
+// cada SKILL.md, no inventados— en las seis formas que toman. La `description`
+// de cada caja dice las dos mitades: qué la prende y qué la deja apagada.
+//
+// Una skill puede colgar de más de una condición. Eso no es un error del
+// modelo: `modo-fixes` se enciende por la línea de REGLAS.md O porque el
+// humano lo pide, y las dos son verdad.
+
+model {
+
+  pedido = disparador 'El humano la nombra' {
+    description 'Se prende porque alguien la pidió, con su nombre o con lo que hace. SE NIEGA SOLA: si nadie la nombró, no entra. Es la forma más limpia, porque la negación no requiere criterio.'
+  }
+
+  repo = disparador 'Una línea del repo la declara' {
+    description 'Se prende porque un archivo versionado lo dice: REGLAS.md, PORTON=, restos de v2. SE NIEGA leyendo el archivo: sin la línea, no hay instancia. La negación es verificable y no opina.'
+  }
+
+  llamada = disparador 'La invoca otra skill' {
+    description 'No se dispara sola: la llama un paso de otra skill. SE NIEGA si esa skill no corrió. El riesgo propio de esta forma es quedar huérfana cuando la invocante cambia de paso.'
+  }
+
+  estado = disparador 'El punto del camino la enciende' {
+    description 'Se prende por dónde está el trabajo: hay diagnóstico, se terminó de implementar, el cierre salió FINAL, algo falló. SE NIEGA mirando el punto: si el trabajo no llegó ahí, no entra.'
+  }
+
+  contenido = disparador 'Lo que se está tocando la enciende' {
+    description 'Se prende por lo que hay en el diff o en el comando: una credencial, un literal de config, UI, un compose, un MCP. SE NIEGA mirando el contenido, no la intención.'
+  }
+
+  automatico = disparador 'Corre sola, sin que nadie la llame' {
+    description 'Se prende con el arranque de la sesión. NO SE PUEDE NEGAR: corre siempre. Es la única forma que la invariante de madrina no cubre, y por eso su costo tiene que ser casi cero y su salida silenciosa cuando no hay nada que decir.'
+  }
+
+  sin_declarar = disparador 'No declara ningún momento' {
+    description 'Su description dice QUÉ hace y nunca CUÁNDO. No se puede negar un disparador que no está escrito, así que la skill no tiene cómo no estorbar. Medido el 2026-09-23 sobre los 37 SKILL.md: pasa en una.'
+  }
+
+  // ── El humano la nombra ────────────────────────────────────────────────
+  pedido -[enciende]-> transversales.entonar 'nombra una forma, o pregunta cuáles hay'
+  pedido -[enciende]-> transversales.delegar 'nombra un régimen, o antes de lanzar agentes'
+  pedido -[enciende]-> transversales.slack_coordinacion 'pide conversar o reportar en Slack'
+  pedido -[enciende]-> ubicarse.sextante 'dice "Sextante" o "ubicame"'
+  pedido -[enciende]-> escalon.crisol 'pide Crisol'
+  pedido -[enciende]-> construir.modo_fixes 'dice "modo fixes on"'
+  pedido -[enciende]-> catalogo.adopcion 'pide adoptar, migrar o cambiar de versión'
+  pedido -[enciende]-> catalogo.configurar_hooks 'pide instalar o revisar los ganchos'
+  pedido -[enciende]-> catalogo.sincronizar 'lo pide explícitamente'
+
+  // ── Una línea del repo la declara ──────────────────────────────────────
+  repo -[enciende]-> arranque.cargar_reglas 'el proyecto tiene REGLAS.md'
+  repo -[enciende]-> construir.modo_fixes 'REGLAS.md dice PORTON=bajo-autorizacion'
+  repo -[enciende]-> catalogo.podar_v2 'quedan restos de enforcement v2'
+  repo -[enciende]-> construir.red_de_desarrollo 'repo nuevo, o suite que solo corre a mano'
+
+  // ── La invoca otra skill ───────────────────────────────────────────────
+  llamada -[enciende]-> ubicarse.precedente 'cambio paso 3, disenar paso 1 — nunca sola'
+  llamada -[enciende]-> cerrar.arq_verificar 'cierre gate 5, sin condición'
+  llamada -[enciende]-> ubicarse.mapa_colisiones 'cierre check 3'
+  llamada -[enciende]-> ubicarse.sextante 'cuando un gate exige comprobante'
+
+  // ── El punto del camino la enciende ────────────────────────────────────
+  estado -[enciende]-> diagnosticar.cambio 'hay un fallo o mejora y no hay escalón elegido'
+  estado -[enciende]-> diagnosticar.logalizar 'correr el código a mano no reproduce el fallo'
+  estado -[enciende]-> escalon.disenar 'alcance, contratos o pruebas sin definir'
+  estado -[enciende]-> escalon.microfix 'diagnóstico y TARGET confirmados, cabe chico'
+  estado -[enciende]-> escalon.crisol 'el cambio no cabe seguro en una sola unidad'
+  estado -[enciende]-> escalon.hotfix 'algo roto en un TARGET confirmado'
+  estado -[enciende]-> cerrar.cierre 'se terminó de implementar o recuperar'
+  estado -[enciende]-> cerrar.autopsia 'fallo repetido, rollback o cierre condicionado'
+  estado -[enciende]-> entregar.desplegar 'el cierre salió FINAL y tiene que llegar a un servidor'
+  estado -[enciende]-> catalogo.publicar_skill 'hay cambios terminados para promover'
+  estado -[enciende]-> catalogo.sincronizar 'se acaba de publicar'
+  estado -[enciende]-> construir.paralelizar 'alcances disjuntos y volumen que lo amerita'
+  estado -[enciende]-> transversales.documentar 'el cambio puede dejar manuales mintiendo'
+  estado -[enciende]-> ubicarse.arq_descubrir 'la estructura no está corroborada'
+  estado -[enciende]-> ubicarse.arq_ubicar 'ya corroborada, y hay que crear o mover estructura'
+  estado -[enciende]-> ubicarse.consultar_catalogo 'falta conocimiento que un catálogo público cubre'
+
+  // ── Lo que se está tocando la enciende ─────────────────────────────────
+  contenido -[enciende]-> construir.custodiar_secretos 'el comando o el archivo lleva una credencial'
+  contenido -[enciende]-> construir.arq_configuracion 'aparece un literal de host, puerto o ruta'
+  contenido -[enciende]-> construir.estilar 'lo que se toca es UI'
+  contenido -[enciende]-> construir.auditar_mcp 'es un MCP con backend compartido'
+  contenido -[enciende]-> entregar.revisor_seguridad 'se tocó compose, Dockerfile o el servidor'
+  contenido -[enciende]-> cerrar.arq_verificar 'cambian estructura, contratos o varias unidades'
+  contenido -[enciende]-> ubicarse.mapa_colisiones 'plan multiarchivo, o ramas de otros actores'
+  contenido -[enciende]-> catalogo.madrina 'lo que se va a escribir es una skill'
+
+  // ── Corre sola ─────────────────────────────────────────────────────────
+  automatico -[enciende]-> arranque.ley_viva 'cada arranque de sesión, y cada 15 minutos'
+
+  // ── Sin momento declarado ──────────────────────────────────────────────
+  sin_declarar -[enciende]-> entregar.mapear_despliegue 'su description no dice cuándo usarla'
+
+}

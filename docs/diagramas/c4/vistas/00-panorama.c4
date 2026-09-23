@@ -1,0 +1,30 @@
+// LA VISTA DE ENTRADA.
+// El camino y sus vueltas. Sin skills adentro: para eso están las de fase.
+//
+// POR QUÉ NO ESTÁ EL HUMANO ACÁ, decidido mirando el PNG exportado:
+// sus cuatro flechas `usa` y las tres de las transversales no van a una fase
+// vecina, van a fases lejanas. El layout las mandaba a rodear POR AFUERA de
+// toda la figura —el PNG salía de 5950 px de ancho— y dejaba sus etiquetas
+// flotando en el vacío negro, lejos de la flecha a la que pertenecían.
+// Viven ahora en `vistas/05-autorizaciones.c4`, donde se leen todas juntas.
+
+views {
+
+  view index {
+    title 'Panorama — de una observación a un deploy'
+    description 'Las fases y cómo se encadenan. Verde es el camino normal; rojo cortado es la vuelta para atrás. Quién autoriza qué está en la vista "Dónde hace falta el humano".'
+
+    include
+      arranque,
+      ubicarse,
+      diagnosticar,
+      escalon,
+      construir,
+      cerrar,
+      entregar,
+      recibo
+
+    autoLayout TopBottom
+  }
+
+}

@@ -1,0 +1,74 @@
+// QUÉ CLASES DE COSA HAY, Y CÓMO SE VEN.
+//
+// Este archivo no tiene contenido: ningún nombre de skill vive acá.
+// Tocalo para cambiar formas, colores o agregar una etiqueta nueva.
+// Los nombres están en modelo/, el camino en modelo/99-flujo.c4.
+
+specification {
+
+  // Quien decide. No es una skill.
+  element actor {
+    style {
+      shape person
+      color secondary
+    }
+  }
+
+  // Un tramo del camino. Agrupa skills; es lo que se ve en el panorama.
+  element fase {
+    style {
+      shape rectangle
+      color muted
+    }
+  }
+
+  // Una skill del catálogo. Una caja = un SKILL.md.
+  element skill {
+    style {
+      shape rectangle
+      color primary
+    }
+  }
+
+  // Lo que queda escrito y se puede volver a leer meses después.
+  element evidencia {
+    style {
+      shape storage
+      color green
+    }
+  }
+
+  // El camino normal: una fase lleva a la siguiente.
+  relationship sigue {
+    color green
+  }
+
+  // Se la invoca desde donde haga falta, sin salir de la fase.
+  relationship usa {
+    color gray
+    line dotted
+  }
+
+  // UNA CONDICIÓN DE ENCENDIDO. No es una skill ni una fase: es lo que tiene
+  // que ser cierto para que una skill entre. Su description dice también cómo
+  // se NIEGA, que es la mitad que nadie escribe.
+  element disparador {
+    style {
+      shape rectangle
+      color amber
+    }
+  }
+
+  // Vuelve para atrás: algo no cerró y reentra como observación.
+  relationship vuelve {
+    color red
+    line dashed
+  }
+
+  // Qué enciende una skill. Nace en la condición, no en la skill: una skill
+  // no se invoca sola, algo la prende.
+  relationship enciende {
+    color amber
+  }
+
+}

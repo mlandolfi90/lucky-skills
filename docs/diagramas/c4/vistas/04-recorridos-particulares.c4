@@ -1,0 +1,60 @@
+// LOS RECORRIDOS QUE SE REPRODUCEN, además del camino feliz.
+//
+// CRITERIO para que algo viva acá y no sea una vista normal:
+// tiene que tener un ORDEN REAL — primero esto, después aquello.
+// Solo las vistas `dynamic` traen el botón Start y la pestaña Sequence.
+//
+// Por eso las `*_detalle` NO están acá: contestan "qué skills viven en esta
+// fase", y eso no tiene orden. Ponerles Start sería inventar una secuencia
+// que no existe.
+
+views {
+
+  // 1. Lo que pasa cuando un tramo NO cierra del todo.
+  //    Era el caso invisible del dibujo: CONDITIONAL no terminaba ni reabría.
+  dynamic view recorrido_conditional {
+    title 'Un CONDITIONAL, de punta a punta'
+    description 'El tramo funciona pero falta algo —típicamente el portón—. No termina y tampoco vuelve al embudo: espera al humano.'
+
+    construir -> cerrar 'lo barato en verde, el portón sin correr'
+    humano -> cerrar 've el PORTON=PENDIENTE y autoriza correrlo'
+    cerrar -> construir 'modo-fixes salda la condición: corre el portón y se lee el run'
+    construir -> cerrar 'ahora sí, con el portón corrido'
+    cerrar -> entregar 'FINAL: puede salir'
+
+    autoLayout TopBottom
+  }
+
+  // 2. El escalón elegido no alcanzó. Es la vuelta más frecuente del taller.
+  dynamic view recorrido_promocion {
+    title 'El cambio creció: promoción a Crisol'
+    description 'El escalón se elige con lo que se sabe ANTES de escribir. Escribiendo se descubre que el cambio era más grande.'
+
+    // Todos los pasos al MISMO nivel (fases). Antes el paso 4 bajaba a nivel
+    // de skill (microfix -> crisol) y quedaba dibujado ARRIBA, dentro del
+    // recuadro del escalón: al leer de arriba abajo salía 1, 4, 2, 3, 5.
+    // La promoción se cuenta en la etiqueta, que es donde se entiende.
+    diagnosticar -> escalon 'parece chico: entra como microfix'
+    escalon -> construir 'se empieza a escribir'
+    construir -> escalon 'el alcance supera al escalón: microfix se promueve a Crisol'
+    escalon -> construir 'ahora por carriles separados'
+    construir -> cerrar 'cada tramo cierra con su recibo'
+
+    autoLayout TopBottom
+  }
+
+  // 3. El ciclo del Taller. Da la vuelta completa y vuelve a empezar.
+  dynamic view recorrido_catalogo {
+    title 'Una skill, de que nace a que la adopta la flota'
+    description 'El ciclo propio del catálogo. Los pasos que exigen al humano están dichos en la etiqueta.'
+
+    catalogo.madrina -> catalogo.publicar_skill 'nace sana: una responsabilidad, nombre único, disparador negable'
+    catalogo.publicar_skill -> catalogo.sincronizar 'el humano autoriza commit, tag y push; recién ahí hay versión'
+    catalogo.sincronizar -> catalogo.adopcion 'se le avisa a cada repo registrado; ninguno se toca solo'
+    catalogo.adopcion -> catalogo.configurar_hooks 'el humano del repo confirma el plan, y quedan los ganchos'
+    catalogo -> arranque 'en la próxima sesión, ley-viva ya la ve vigente'
+
+    autoLayout TopBottom
+  }
+
+}

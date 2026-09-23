@@ -1,0 +1,42 @@
+// FASE 2 — Ubicarse.
+// Medir el terreno antes de opinar. NADA de esto escribe: son todas de lectura.
+//
+// Acá viven arquitectura-descubrir y arquitectura-ubicar, que antes estaban en
+// "construir". Fue un error: `disenar` (fase escalón, o sea ANTES de construir)
+// las declara en su REQUIRES, y una fase no puede exigir otra posterior.
+// Además ninguna de las dos escribe: leen y deciden dónde iría algo.
+
+model {
+
+  ubicarse = fase 'Ubicarse' {
+    description 'Dónde estoy parado, qué se decidió antes, quién más toca esto, y qué forma tiene lo que hay. Todo de solo lectura.'
+
+    sextante = skill 'sextante' {
+      description 'Estado real: local, remoto, runtime y capacidades. De acá sale el comprobante que los portones exigen.'
+    }
+
+    precedente = skill 'precedente' {
+      description 'Busca si esto ya se resolvió: fichas del saber, skills del catálogo, estructura corroborada.'
+    }
+
+    mapa_colisiones = skill 'mapa-colisiones' {
+      description 'Quién más está tocando este alcance: rutas, símbolos, contratos, ramas de otros actores.'
+    }
+
+    consultar_catalogo = skill 'consultar-catalogo' {
+      description 'Lee catálogos externos como referencia viva. Solo lectura, nunca copia.'
+    }
+
+    arq_descubrir = skill 'arquitectura-descubrir' {
+      description 'Reconstruye la arquitectura real del repo sin escribir una línea.'
+    }
+
+    arq_ubicar = skill 'arquitectura-ubicar' {
+      description 'Decide dónde debe vivir un archivo, módulo, puerto o adaptador. Decide, todavía no crea.'
+    }
+
+    precedente -[usa]-> consultar_catalogo 'si el precedente no está en casa'
+    arq_descubrir -[sigue]-> arq_ubicar 'con la estructura corroborada, dónde va lo nuevo'
+  }
+
+}

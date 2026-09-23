@@ -1,0 +1,65 @@
+// EL CAMINO.
+//
+// Acá y solo acá se declara cómo se encadenan las fases.
+// Para cambiar el orden del flujo, se toca ESTE archivo — no los de modelo/,
+// que solo dicen qué skill vive en cada fase.
+
+model {
+
+  // -- El camino normal, de punta a punta --
+  humano       -[sigue]-> arranque      'abre la sesión'
+  arranque     -[sigue]-> ubicarse      'con las reglas del repo cargadas'
+  ubicarse     -[sigue]-> diagnosticar  'sabiendo dónde está parado y quién más toca esto'
+  diagnosticar -[sigue]-> escalon       'con UNA clase de cambio elegida'
+  escalon      -[sigue]-> construir     'con el TARGET confirmado'
+  construir    -[sigue]-> cerrar        'con lo barato en verde'
+  cerrar       -[sigue]-> entregar      'solo si el cierre salió FINAL'
+
+  // -- Las vueltas para atrás: lo que NO sale derecho --
+  //
+  // Ésta faltaba, y es la más frecuente de todas: el escalón se elige con lo
+  // que se sabe ANTES de escribir, y escribiendo se descubre que el cambio era
+  // más grande. La escalera lo declara así: se promueve "cada vez que el
+  // alcance, riesgo, colisiones o deuda superan al escalón actual"
+  // (docs/concepts/escalera.md). Un microfix que crece se vuelve Crisol.
+  construir -[vuelve]-> escalon      'el cambio resultó más grande: se promueve el escalón'
+
+  // Ésta también faltaba. Un CONDITIONAL no termina y tampoco reabre el
+  // diagnóstico: queda esperando que el humano autorice, se salda la condición
+  // —típicamente el portón, con modo-fixes— y recién ahí cierra FINAL.
+  // Sin esta flecha, CONDITIONAL quedaba colgado sin salida en el dibujo.
+  cerrar    -[vuelve]-> construir    'CONDITIONAL: el humano autoriza y se salda la condición'
+
+  construir -[vuelve]-> ubicarse     'apareció una colisión que no estaba en el mapa'
+  cerrar    -[vuelve]-> diagnosticar 'BLOCKED: reentra como observación nueva'
+  entregar  -[vuelve]-> diagnosticar 'no aterrizó: vuelve al embudo'
+
+  // -- Quién autoriza qué --
+  humano -[usa]-> escalon  'elige el escalón cuando la sesión duda'
+  humano -[usa]-> cerrar   'autoriza lo que quedó CONDITIONAL'
+  humano -[usa]-> entregar 'el deploy no se hace sin su palabra'
+  humano -[usa]-> catalogo 'ninguna skill se sella ni se adopta sin él'
+
+  // -- La evidencia --
+  cerrar -[sigue]-> recibo 'deja el recibo del tramo'
+
+  // -- Las transversales entran donde haga falta --
+  transversales -[usa]-> ubicarse
+  transversales -[usa]-> construir
+  transversales -[usa]-> cerrar
+
+  // -- El catálogo fabrica lo que el flujo usa --
+  catalogo -[usa]-> arranque 'ley-viva avisa si lo adoptado quedó viejo'
+  cerrar   -[usa]-> catalogo 'una skill del catálogo cierra y recién ahí se publica'
+
+}
+
+// NOTA SOBRE DOS REQUIRES QUE APUNTAN "HACIA ADELANTE", y por qué no son un error
+// del dibujo:
+//   crisol (escalón)     REQUIRES arquitectura-verificar (cerrar)
+//   modo-fixes (construir) REQUIRES cierre (cerrar)
+// REQUIRES es dependencia de CONTRATO —qué skill tiene que estar adoptada para
+// que ésta funcione—, no orden temporal. Crisol es un orquestador: contiene
+// carriles que llegan hasta el cierre. Y modo-fixes necesita el campo PORTON=
+// que cierre declara, aunque corra antes. Los demás REQUIRES sí respetan el
+// orden de fases; éstos dos son los únicos que no, y es a propósito.

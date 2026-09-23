@@ -1,0 +1,66 @@
+// UNA VISTA POR FASE: qué skills viven adentro de cada caja del panorama.
+//
+// REGLA APRENDIDA MIRANDO LAS IMÁGENES, no leyendo el modelo:
+// estas vistas incluyen SOLO su propia fase (`include *`) y nada más.
+//
+// En una pasada anterior se les sumaron fases vecinas y el actor `humano`
+// para que "mostraran más". Exportadas a PNG, las cuatro que recibieron ese
+// agregado —escalon, cerrar, entregar, transversales— pasaron a ser las
+// cuatro únicas difíciles de leer del set: las etiquetas de las flechas
+// cruzadas caían ENCIMA del texto de las cajas, tapándolo. Las cinco que
+// quedaron intactas se entienden todas.
+//
+// Moraleja: un hueco de información se tapa con una vista nueva, no metiendo
+// el vecino adentro. Las autorizaciones viven ahora en `vistas/05-autorizaciones.c4`.
+
+views {
+
+  view arranque_detalle of arranque {
+    title 'Arranque — qué rige, y si está al día'
+    include *
+    autoLayout LeftRight
+  }
+
+  view ubicarse_detalle of ubicarse {
+    title 'Ubicarse — medir antes de opinar, sin escribir nada'
+    include *
+    autoLayout LeftRight
+  }
+
+  view diagnosticar_detalle of diagnosticar {
+    title 'Diagnosticar — el embudo por donde entra todo'
+    include *
+    autoLayout LeftRight
+  }
+
+  view escalon_detalle of escalon {
+    title 'El escalón — se entra por uno, y se sube si el cambio crece'
+    include *
+    autoLayout LeftRight
+  }
+
+  view construir_detalle of construir {
+    title 'Construir — lo que efectivamente escribe'
+    include *
+    autoLayout LeftRight
+  }
+
+  view cerrar_detalle of cerrar {
+    title 'Cerrar — el veredicto con evidencia'
+    include *
+    autoLayout LeftRight
+  }
+
+  view entregar_detalle of entregar {
+    title 'Entregar — solo con el cierre en FINAL'
+    include *
+    autoLayout LeftRight
+  }
+
+  view transversales_detalle of transversales {
+    title 'Transversales — sin momento propio, se llaman desde donde haga falta'
+    include *
+    autoLayout LeftRight
+  }
+
+}

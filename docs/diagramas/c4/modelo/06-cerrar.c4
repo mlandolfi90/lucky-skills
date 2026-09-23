@@ -1,0 +1,44 @@
+// FASE 6 — Cerrar.
+// Todo tramo termina en un recibo. No hay forma de terminar sin pasar por acá.
+//
+// `arquitectura-verificar` vive acá y no en construir: su veredicto es el
+// campo ARCHITECTURE= que cierre consume "tal cual" (skills/cierre/SKILL.md:19),
+// y su propio disparador dice "antes del cierre". Verifica lo escrito, no lo escribe.
+
+model {
+
+  cerrar = fase 'Cerrar' {
+    description 'Veredicto con evidencia: FINAL, CONDITIONAL o BLOCKED. Un CONDITIONAL siempre nombra su condición.'
+
+    arq_verificar = skill 'arquitectura-verificar' {
+      description 'Contrasta el diff contra la arquitectura real, SOLID y atomicidad. Su veredicto es el ARCHITECTURE= del cierre.'
+    }
+
+    cierre = skill 'cierre' {
+      description 'PORTÓN. Comprueba TARGET, alcance, pruebas, arquitectura, colisiones, rollback y autorizaciones. La citan 15 de las 37.'
+    }
+
+    autopsia = skill 'autopsia' {
+      description 'Por qué pasó, cómo se detectó y qué lo evita la próxima. La invoca `cierre` antes de emitir su salida — también en un FINAL, si hubo un fallo repetido en la corrida.'
+    }
+
+    arq_verificar -[sigue]-> cierre 'el veredicto arquitectónico entra al cierre tal cual'
+
+    // La condición es la que declara skills/cierre/SKILL.md:56, textual.
+    //
+    // CORRECCIÓN del 2026-09-23. Una pasada anterior de este mismo archivo
+    // sacó "fallo repetido" de acá, argumentando que era el disparador de la
+    // promoción de microfix a Crisol. Era falso: la promoción se cuenta por
+    // microfixes repetidos SOBRE EL MISMO CONTRATO (escalera.md), no por
+    // fallos. "Fallo repetido" es de `autopsia` y siempre lo fue — está en su
+    // description y en su cuerpo desde 1.0.0; el que no lo nombraba era
+    // `cierre`, que es la única skill que podría notarlo.
+    //
+    // Y por eso la flecha es `usa` y no `vuelve`: un cierre FINAL también
+    // puede llevar autopsia. No es un reingreso por fracaso, es una
+    // invocación dentro de la fase. El verde dice que al final funcionó, no
+    // que nada falló en el camino.
+    cierre -[usa]-> autopsia 'si CONDITIONAL, BLOCKED, ROLLBACK=APPLIED o un fallo repetido'
+  }
+
+}

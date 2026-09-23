@@ -1,0 +1,25 @@
+// FASE 7 — Entregar.
+// Solo se entra con el cierre en FINAL. Un CONDITIONAL con portón pendiente no se despliega.
+
+model {
+
+  entregar = fase 'Entregar' {
+    description 'Llevar lo cerrado a donde corre de verdad, con prueba positiva de aterrizaje.'
+
+    revisor_seguridad = skill 'revisor-seguridad' {
+      description 'Mide qué expone lo construido —puertos, archivos servidos, errores, imágenes— probando con canarios.'
+    }
+
+    mapear_despliegue = skill 'mapear-despliegue' {
+      description 'El mapa de accesos del deploy: qué credenciales hacen falta y dónde viven. Nombres siempre, valores jamás.'
+    }
+
+    desplegar = skill 'desplegar' {
+      description 'Promoción por CI hasta el TARGET declarado, con prueba positiva de que aterrizó.'
+    }
+
+    revisor_seguridad -[sigue]-> desplegar 'si no expone nada que no deba'
+    mapear_despliegue -[usa]-> desplegar 'le dice por dónde va la promoción'
+  }
+
+}

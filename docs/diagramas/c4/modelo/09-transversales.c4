@@ -1,0 +1,34 @@
+// LAS TRANSVERSALES.
+// No tienen lugar fijo en el camino: se llaman desde donde haga falta.
+// Meterlas en una fase daría un orden que no existe.
+//
+// `auditar-mcp` se fue de acá a construir: tenía un momento declarado
+// ("usar al construir o revisar un MCP"), así que no era transversal.
+// `documentar` entró: la invocan publicar-skill (catálogo), disenar (escalón)
+// y cierre (cerrar) — tres fases distintas, o sea ningún momento propio.
+
+model {
+
+  transversales = fase 'Transversales' {
+    description 'Se invocan en cualquier punto. Ninguna tiene momento propio: dibujarlas dentro de una fase daría un orden que no existe.'
+
+    entonar = skill 'entonar' {
+      description 'El tono con que la sesión le habla al humano, desde un registro vivo de formas versionadas.'
+    }
+
+    delegar = skill 'delegar' {
+      description 'El régimen de spawn de agentes que el humano eligió. Sin régimen declarado, no se lanzan agentes.'
+    }
+
+    slack_coordinacion = skill 'slack-coordinacion' {
+      description 'Coordina esta sesión con las otras sesiones del taller por Slack.'
+    }
+
+    documentar = skill 'documentar' {
+      description 'Detecta drift entre el manual y el código con evidencia archivo:línea, y corrige solo con aprobación.'
+    }
+
+    delegar -[usa]-> slack_coordinacion 'el trabajo delegado se coordina'
+  }
+
+}

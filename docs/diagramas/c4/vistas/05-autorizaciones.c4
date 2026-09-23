@@ -1,0 +1,32 @@
+// DÓNDE HACE FALTA EL HUMANO.
+//
+// Esta vista existe por una razón concreta: en el panorama, las cuatro flechas
+// del humano y las tres de las transversales daban la vuelta por afuera de
+// toda la figura —el PNG salía de 5950 px de ancho— y sus etiquetas quedaban
+// flotando en el vacío, lejos de la flecha a la que pertenecían.
+//
+// Sacarlas del panorama y juntarlas acá resuelve las dos cosas: el panorama
+// queda con el camino y sus vueltas, y las autorizaciones se leen todas juntas,
+// que además es como se consultan.
+
+views {
+
+  view autorizaciones {
+    title 'Dónde hace falta el humano'
+    description 'Los cuatro momentos en que el ciclo se detiene hasta que alguien dice que sí. Ninguna skill los saltea.'
+
+    include humano, escalon, cerrar, entregar, catalogo
+
+    autoLayout LeftRight
+  }
+
+  view alcance_transversales {
+    title 'Las transversales, y dónde entran'
+    description 'No tienen momento propio. Estas son las fases desde donde se las invoca.'
+
+    include transversales, ubicarse, construir, cerrar
+
+    autoLayout LeftRight
+  }
+
+}

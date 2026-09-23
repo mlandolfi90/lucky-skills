@@ -1,0 +1,25 @@
+// FASE 3 — Diagnosticar.
+// El embudo por donde entra todo.
+//
+// `logalizar` vive acá, no en construir: su propio disparador dice
+// "Usar EN DIAGNÓSTICO cuando correr el código a mano no reproduce el fallo".
+// Instrumentar logs no es construir la solución: es conseguir el dato que
+// falta para poder diagnosticar.
+
+model {
+
+  diagnosticar = fase 'Diagnosticar' {
+    description 'Separar el hecho de la expectativa y de la hipótesis, y elegir UNA clase de cambio. Sin esto no se toca el repo.'
+
+    cambio = skill 'cambio' {
+      description 'Registra la observación, la diagnostica y clasifica el siguiente escalón. 24 de las 37 skills la nombran.'
+    }
+
+    logalizar = skill 'logalizar' {
+      description 'Instrumenta el alcance con eventos de log para cazar en runtime lo que la reproducción local no muestra.'
+    }
+
+    cambio -[usa]-> logalizar 'si corriendo el código a mano el fallo no aparece'
+  }
+
+}

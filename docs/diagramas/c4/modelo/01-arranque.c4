@@ -1,0 +1,20 @@
+// FASE 1 — Arranque de sesión.
+// Antes de tocar nada: qué rige acá, y si lo que rige está al día.
+
+model {
+
+  arranque = fase 'Arranque de sesión' {
+    description 'Qué rige en este repo, y si está al día. Dos skills, y ninguna escribe nada.'
+
+    cargar_reglas = skill 'cargar-reglas' {
+      description 'Carga el REGLAS.md del repo y lo sostiene toda la sesión. Es el primer acto.'
+    }
+
+    ley_viva = skill 'ley-viva' {
+      description 'Compara lo adoptado contra el catálogo publicado y avisa si algo quedó atrás. Nunca actualiza por su cuenta.'
+    }
+
+    cargar_reglas -[sigue]-> ley_viva '¿y lo adoptado sigue vigente?'
+  }
+
+}

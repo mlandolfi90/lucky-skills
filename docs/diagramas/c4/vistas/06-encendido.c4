@@ -1,0 +1,125 @@
+// QUÉ PRENDE CADA SKILL, Y QUÉ LA DEJA APAGADA.
+//
+// CRITERIO DE FACTORIZACIÓN, aprendido mirando los PNG de la pasada anterior:
+// una vista por condición, y NADA del vecino adentro. Cuando a una vista se le
+// suman cajas que no son suyas, las etiquetas de las flechas cruzadas caen
+// encima del texto y la vista deja de leerse. Un hueco se tapa con una vista
+// nueva, no metiendo el vecino.
+//
+// Por eso el índice muestra las siete condiciones SIN skills: se ve la forma
+// del asunto. Las skills aparecen en la vista de su condición.
+
+views {
+
+  view encendido {
+    title 'Cómo se enciende una skill — las seis formas, y el hueco'
+    description 'Las condiciones que prenden una skill. La de cada caja dice también cómo se NIEGA, que es lo que madrina exige y lo que casi nunca se escribe. La séptima no es una forma: es una skill que no declaró la suya.'
+
+    include pedido, repo, llamada, estado, contenido, automatico, sin_declarar
+
+    autoLayout TopBottom
+  }
+
+  view encendido_pedido {
+    title 'Las que espera que las nombres'
+    description 'Nueve. Se niegan solas: si no las nombraste, no entran. Es la forma más limpia, porque negar no cuesta criterio.'
+    include pedido,
+      transversales.entonar,
+      transversales.delegar,
+      transversales.slack_coordinacion,
+      ubicarse.sextante,
+      escalon.crisol,
+      construir.modo_fixes,
+      catalogo.adopcion,
+      catalogo.configurar_hooks,
+      catalogo.sincronizar
+    autoLayout LeftRight
+  }
+
+  view encendido_repo {
+    title 'Las que enciende una línea del repo'
+    description 'Cuatro. La negación es verificable y no opina: abrís el archivo y la línea está o no está.'
+    include repo,
+      arranque.cargar_reglas,
+      construir.modo_fixes,
+      catalogo.podar_v2,
+      construir.red_de_desarrollo
+    autoLayout LeftRight
+  }
+
+  view encendido_llamada {
+    title 'Las que no se disparan solas'
+    description 'Cuatro. Las llama un paso de otra skill. Su riesgo propio es quedar huérfanas si la invocante cambia de paso: nadie se entera, simplemente dejan de correr.'
+    include llamada,
+      ubicarse.precedente,
+      cerrar.arq_verificar,
+      ubicarse.mapa_colisiones,
+      ubicarse.sextante
+    autoLayout LeftRight
+  }
+
+  view encendido_estado {
+    title 'Las que enciende el punto del camino'
+    description 'Dieciséis, la forma más común. Se niegan mirando dónde está el trabajo: si no llegó a ese punto, no entran.'
+    include estado,
+      diagnosticar.cambio,
+      diagnosticar.logalizar,
+      escalon.disenar,
+      escalon.microfix,
+      escalon.crisol,
+      escalon.hotfix,
+      cerrar.cierre,
+      cerrar.autopsia,
+      entregar.desplegar,
+      catalogo.publicar_skill,
+      catalogo.sincronizar,
+      construir.paralelizar,
+      transversales.documentar,
+      ubicarse.arq_descubrir,
+      ubicarse.arq_ubicar,
+      ubicarse.consultar_catalogo
+    autoLayout LeftRight
+  }
+
+  view encendido_contenido {
+    title 'Las que enciende lo que estás tocando'
+    description 'Ocho. Se niegan mirando el diff o el comando, no la intención. Son las que más se olvidan, porque nadie las pide: aparecen solas en el contenido.'
+    include contenido,
+      construir.custodiar_secretos,
+      construir.arq_configuracion,
+      construir.estilar,
+      construir.auditar_mcp,
+      entregar.revisor_seguridad,
+      cerrar.arq_verificar,
+      ubicarse.mapa_colisiones,
+      catalogo.madrina
+    autoLayout LeftRight
+  }
+
+  view encendido_sin_negacion {
+    title 'Las dos que no se pueden negar'
+    description 'Una corre sola en cada arranque; la otra nunca declaró su momento. Son casos distintos: la primera es una decisión de diseño con un costo que hay que mantener bajo; la segunda es un hueco.'
+    include automatico, arranque.ley_viva,
+      sin_declarar, entregar.mapear_despliegue
+    autoLayout LeftRight
+  }
+
+  // LA SECUENCIA. Es lo único que tiene orden real, y por eso es `dynamic`:
+  // trae el botón Start y la pestaña Sequence. No es el recorrido de un cambio
+  // —eso vive en 03 y 04— sino el orden en que una sesión se va preguntando
+  // qué skill corresponde.
+  dynamic view secuencia_de_encendido {
+    title 'En qué orden se pregunta una sesión qué skill entra'
+    description 'De lo que no se puede negar a lo que hay que ir a mirar. Cada paso es una pregunta distinta, y la respuesta "no" es una respuesta válida en todos menos el primero.'
+
+    automatico -> arranque.ley_viva 'sin preguntar: corre al arrancar, y calla si no hay nada que decir'
+    repo -> arranque.cargar_reglas '¿el repo declara reglas? se lee el archivo, no se adivina'
+    pedido -> transversales.entonar '¿el humano nombró algo? lo dicho en sesión manda'
+    estado -> diagnosticar.cambio '¿en qué punto está el trabajo? de ahí sale el escalón'
+    contenido -> construir.custodiar_secretos '¿qué hay en el diff? esta se enciende sola, nadie la pide'
+    llamada -> cerrar.arq_verificar 'al final, las que invoca el cierre desde sus gates'
+
+    autoLayout TopBottom
+  }
+
+}

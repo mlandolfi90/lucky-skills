@@ -1,0 +1,13 @@
+// EL CICLO DEL TALLER, aparte del flujo de un cambio.
+// Es el que fabrica las skills que el flujo usa.
+
+views {
+
+  view catalogo_detalle of catalogo {
+    title 'El ciclo del catálogo — nacer, sellar, avisar, adoptar'
+    description 'Da la vuelta completa: madrina, publicar-skill, sincronizar, adopcion. Los pasos con #autoriza no se dan sin el humano.'
+    include *
+    autoLayout LeftRight
+  }
+
+}

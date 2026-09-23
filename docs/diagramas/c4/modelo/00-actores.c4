@@ -1,0 +1,16 @@
+// Quién decide, y qué queda escrito.
+
+model {
+
+  humano = actor 'El humano' {
+    description 'Decide y autoriza. Ninguna skill escribe, publica ni despliega sin su palabra explícita.'
+  }
+
+  // OJO con la palabra: el catálogo usa "recibo" para DOS cosas distintas.
+  // Ésta es la del cierre. La otra es el "Comprobante" de docs/concepts/receipt.md
+  // —el snapshot de Sextante con su RECEIPT_HASH—, que es otra cosa.
+  recibo = evidencia 'El recibo del cierre' {
+    description 'Qué se hizo, qué se midió, qué quedó pendiente y quién lo autorizó. NO es el comprobante de Sextante (receipt.md, RECEIPT_HASH).'
+  }
+
+}

@@ -1,0 +1,638 @@
+<title>Recorrido del ciclo</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+:root{
+  --ground:#f4f3f0; --panel:#fffefc; --rail:#e8e5df;
+  --ink:#16181d; --ink-2:#4a4e57; --ink-3:#797e89;
+  --amber:#a35a00; --amber-soft:#f5e6d0; --amber-line:#d9a55e;
+  --ok:#1f6b45; --ok-soft:#dcefe3;
+  --warn:#8a6100; --warn-soft:#f7ead0;
+  --stop:#a32017; --stop-soft:#f6dedb;
+  --edge:#dcd8d1; --focus:#a35a00;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,Segoe UI,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  color-scheme:dark;
+  --ground:#101216; --panel:#181b21; --rail:#23272f;
+  --ink:#eceef2; --ink-2:#a9aeb8; --ink-3:#767c87;
+  --amber:#e8a655; --amber-soft:#2e2517; --amber-line:#7a5824;
+  --ok:#5fc48d; --ok-soft:#16281f;
+  --warn:#d8ad4e; --warn-soft:#2a2314;
+  --stop:#e98077; --stop-soft:#2c1917;
+  --edge:#2b2f38; --focus:#e8a655;
+}}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --ground:#101216; --panel:#181b21; --rail:#23272f;
+  --ink:#eceef2; --ink-2:#a9aeb8; --ink-3:#767c87;
+  --amber:#e8a655; --amber-soft:#2e2517; --amber-line:#7a5824;
+  --ok:#5fc48d; --ok-soft:#16281f;
+  --warn:#d8ad4e; --warn-soft:#2a2314;
+  --stop:#e98077; --stop-soft:#2c1917;
+  --edge:#2b2f38; --focus:#e8a655;
+}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font-family:var(--sans);margin:0;line-height:1.5}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:20px 40px}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px;border-radius:3px}
+
+header.top{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;
+  border-bottom:1px solid var(--edge);padding-bottom:14px;margin-bottom:22px}
+header.top h1{font-size:19px;font-weight:600;margin:0;letter-spacing:-.01em}
+header.top .sub{color:var(--ink-3);font-size:13px;margin-right:auto}
+.btn{font:inherit;font-size:12.5px;padding:6px 12px;border-radius:5px;cursor:pointer;
+  border:1px solid var(--edge);background:var(--panel);color:var(--ink-2)}
+.btn:hover{border-color:var(--amber-line);color:var(--ink)}
+.btn[disabled]{opacity:.4;cursor:not-allowed}
+
+.cols{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:26px;align-items:start}
+@media (max-width:860px){.cols{grid-template-columns:1fr;gap:22px}}
+
+.step{background:var(--panel);border:1px solid var(--edge);border-radius:8px;padding:22px}
+.eyebrow{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:13px}
+.fase{font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--amber);background:var(--amber-soft);
+  border:1px solid var(--amber-line);border-radius:3px;padding:3px 7px}
+.skillchip{font-family:var(--mono);font-size:11px;color:var(--ink-3);
+  border:1px dashed var(--edge);border-radius:3px;padding:3px 7px}
+.step h2{font-size:22px;line-height:1.28;margin:0 0 10px;font-weight:600;
+  letter-spacing:-.015em;text-wrap:balance}
+.cuerpo{color:var(--ink-2);font-size:14.5px;margin:0 0 20px;max-width:62ch}
+code{font-family:var(--mono);font-size:.9em;
+  background:var(--rail);padding:1px 4px;border-radius:3px;color:var(--ink)}
+
+.opciones{display:flex;flex-direction:column;gap:9px}
+.op{display:block;width:100%;text-align:left;font:inherit;cursor:pointer;
+  background:var(--panel);border:1px solid var(--edge);border-left:3px solid var(--amber-line);
+  border-radius:6px;padding:13px 15px;transition:border-color .12s,background .12s}
+.op:hover{border-color:var(--amber-line);background:var(--amber-soft)}
+.op .lab{font-weight:600;font-size:14.5px;display:block;margin-bottom:3px;color:var(--ink)}
+.op .det{color:var(--ink-3);font-size:13px;display:block;line-height:1.45}
+.op .det code{background:none;padding:0;color:var(--ink-2)}
+
+.nota{margin-top:18px;padding:12px 14px;border-radius:6px;font-size:13px;line-height:1.5;
+  background:var(--warn-soft);border:1px solid var(--amber-line);color:var(--ink-2)}
+.nota b{color:var(--ink)}
+.nota code{background:none;padding:0}
+.nota.stop{background:var(--stop-soft);border-color:var(--stop)}
+.nota.ok{background:var(--ok-soft);border-color:var(--ok)}
+
+.veredicto{font-family:var(--mono);font-size:26px;font-weight:600;letter-spacing:-.01em;margin:0 0 6px}
+.v-FINAL{color:var(--ok)} .v-CONDITIONAL{color:var(--warn)} .v-BLOCKED{color:var(--stop)}
+.porque{font-size:14px;color:var(--ink-2);margin:0 0 14px;max-width:62ch}
+ul.porque{padding-left:20px}
+ul.porque li{margin-bottom:5px}
+
+aside{position:sticky;top:calc(env(safe-area-inset-top,0px) + 14px);
+  display:flex;flex-direction:column;gap:16px}
+@media (max-width:860px){aside{position:static}}
+.caja{background:var(--panel);border:1px solid var(--edge);border-radius:8px;overflow:hidden}
+.caja h3{font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--ink-3);margin:0;padding:11px 15px;
+  border-bottom:1px solid var(--edge);background:var(--rail)}
+.recibo{font-family:var(--mono);font-size:12.5px;line-height:1.75;padding:13px 15px;
+  margin:0;overflow-x:auto;white-space:pre;font-variant-numeric:tabular-nums}
+.recibo .k{color:var(--ink-3)}
+.recibo .v{color:var(--ink);font-weight:500}
+.recibo .v.g{color:var(--ok)} .recibo .v.w{color:var(--warn)} .recibo .v.r{color:var(--stop)}
+.vacio{color:var(--ink-3);font-size:13px;padding:13px 15px;margin:0;font-style:italic}
+
+.trail{list-style:none;margin:0;padding:8px 0}
+.trail li{font-size:12.5px;padding:5px 15px;color:var(--ink-2);
+  display:flex;gap:9px;align-items:baseline;line-height:1.45}
+.trail .n{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);min-width:15px}
+.trail .q{color:var(--ink-3)}
+.trail .a{color:var(--ink);font-weight:500}
+
+footer{margin-top:30px;padding-top:16px;border-top:1px solid var(--edge);
+  color:var(--ink-3);font-size:12.5px;line-height:1.6;max-width:70ch}
+footer code{background:none;padding:0}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <h1>Recorrido del ciclo</h1>
+    <span class="sub">Un caso, paso a paso. Cada decisión escribe su línea.</span>
+    <button class="btn" id="atras" type="button">&larr; Atr&aacute;s</button>
+    <button class="btn" id="reiniciar" type="button">Volver a empezar</button>
+  </header>
+
+  <div class="cols">
+    <main class="step" id="paso" aria-live="polite"></main>
+    <aside>
+      <div class="caja">
+        <h3>El recibo, hasta ac&aacute;</h3>
+        <div id="recibo"></div>
+      </div>
+      <div class="caja">
+        <h3>Lo que decidiste</h3>
+        <div id="trail"></div>
+      </div>
+    </aside>
+  </div>
+
+  <footer>
+    Las preguntas, las opciones y los portones salen de los <code>SKILL.md</code> del cat&aacute;logo,
+    no de una interpretaci&oacute;n: los trece checks y los estados son los de <code>skills/cierre/SKILL.md</code>,
+    y la regla de que no hay <code>FINAL</code> con port&oacute;n pendiente es la de <code>modo-fixes</code>.
+    El veredicto no se elige: se calcula, igual que
+    <code>adapters/reference_python/change_lifecycle/records.py:147</code>, que rechaza un
+    <code>FINAL</code> cuyos portones no habilitan. Medido sobre el cat&aacute;logo del 2026-09-23, 37 skills.
+  </footer>
+</div>
+
+<script>
+"use strict";
+
+var PASOS = {
+
+arranque: {
+  fase:"Arranque", skill:"ley-viva",
+  q:"La sesión arranca y <code>ley-viva</code> ya corrió, sin que la llames.",
+  cuerpo:"Es la única skill que no se puede negar: se dispara sola en cada arranque y cada 15 minutos. Compara lo adoptado en este repo contra el catálogo publicado. Nunca actualiza por su cuenta — avisa y espera.",
+  ops:[
+    {lab:"Avisa que hay versión nueva de una skill adoptada",
+     det:"<code>UPDATE_AVAILABLE</code>. Avisar no es actualizar: la transición la pedís vos.",
+     to:"actualizar"},
+    {lab:"Dice que lo adoptado está al día",
+     det:"<code>CURRENCY=VERIFIED</code>. Seguís sin ruido.",
+     to:"reglas"}
+  ]
+},
+
+actualizar: {
+  fase:"Arranque", skill:"actualizar-skills · adopcion",
+  q:"Hay una versión nueva. ¿La tomás ahora o seguís con lo que tenés?",
+  cuerpo:"Adoptar abre su propio cambio: exige Sextante, TARGET confirmado por vos, plan exacto con hash, archivo de lo que reemplaza y rollback. No es un paso al costado del trabajo, es trabajo.",
+  ops:[
+    {lab:"Adoptar ahora, antes de tocar nada",
+     det:"Lo que sigue corre con la versión nueva. El costo es un cambio entero por delante.",
+     to:"reglas", escribe:{NOTA_ARRANQUE:"adoptado antes de trabajar"}},
+    {lab:"Seguir con lo adoptado; queda anotado",
+     det:"Válido. El aviso vuelve en cada arranque hasta que lo saldes.",
+     to:"reglas", escribe:{NOTA_ARRANQUE:"version nueva pendiente"}}
+  ]
+},
+
+reglas: {
+  fase:"Arranque", skill:"cargar-reglas",
+  q:"¿Este repo declara un <code>REGLAS.md</code>?",
+  cuerpo:"Se lee el archivo, no se adivina. Ahí vive lo que hace de portón en este repo, qué es lo barato, y qué rama escucha el CI. Sin el archivo, no hay instancia: la skill no entra y no estorba.",
+  ops:[
+    {lab:"Sí, y declara <code>PORTON=bajo-autorizacion</code>",
+     det:"El portón caro (mutantes, CI, aceptación) no corre por cada tramo. Entra <code>modo-fixes</code>.",
+     to:"target", escribe:{PORTON_DECLARADO:"bajo-autorizacion"}},
+    {lab:"Sí, pero no declara <code>PORTON=</code>",
+     det:"El repo sigue su cadencia propia. <code>PORTON=NO_APLICA</code> y este campo no la juzga.",
+     to:"target", escribe:{PORTON_DECLARADO:"ninguno"}},
+    {lab:"No hay <code>REGLAS.md</code>",
+     det:"No tiene red tendida: tiene archivos sueltos. <code>red-de-desarrollo</code> es la que la tiende.",
+     to:"target", escribe:{PORTON_DECLARADO:"ninguno"}}
+  ]
+},
+
+target: {
+  fase:"Arranque", skill:"regla global · sextante",
+  q:"Antes de editar código: ¿dónde corre?",
+  cuerpo:"Es tu regla global, no una del catálogo: target ambiguo o desconocido se pregunta y se espera, jamás se asume. <code>pc-local</code> no es el default.",
+  ops:[
+    {lab:"Un VPS remoto — <code>paas:&lt;proyecto&gt;/&lt;app&gt;@dev</code>",
+     det:"El default de desarrollo del taller.", to:"observacion", escribe:{WHERE:"paas:dev"}},
+    {lab:"<code>docker-local</code>",
+     det:"Contenedor Linux fiel en esta máquina.", to:"observacion", escribe:{WHERE:"docker-local"}},
+    {lab:"<code>pc-local</code>, porque lo pediste explícitamente",
+     det:"Sólo con pedido explícito. Nunca por descarte.", to:"observacion", escribe:{WHERE:"pc-local"}},
+    {lab:"No lo sé todavía",
+     det:"Entonces no se edita. Corre <code>sextante</code> y se pregunta.",
+     to:"sextante_primero"}
+  ]
+},
+
+sextante_primero: {
+  fase:"Ubicarse", skill:"sextante",
+  q:"Sin TARGET no se escribe. Se mide primero.",
+  cuerpo:"<code>sextante</code> ubica el estado real: local, remoto, runtime y capacidades. De ahí sale el comprobante que los portones exigen más adelante. No escribe nada.",
+  ops:[
+    {lab:"Medido, y el humano confirmó el TARGET",
+     det:"Recién ahora se puede escribir.", to:"observacion", escribe:{WHERE:"confirmado tras sextante"}}
+  ]
+},
+
+observacion: {
+  fase:"Diagnosticar", skill:"cambio · precedente",
+  q:"Entra algo. ¿Qué es?",
+  cuerpo:"Todo entra por el mismo embudo. Antes de resolver de cero, <code>precedente</code> pregunta si esto ya lo resolvió alguien: fichas del saber, skills del catálogo, estructura ya corroborada. De acá sale el escalón, y el escalón no se elige por gusto.",
+  ops:[
+    {lab:"Algo está roto ahora, en un TARGET confirmado",
+     det:"Es un incidente: restaurar servicio primero, con validación y rollback inmediatos.",
+     to:"hotfix", escribe:{ESCALON:"hotfix"}},
+    {lab:"Un fallo con diagnóstico, y cabe en una responsabilidad chica",
+     det:"Mínimo, reversible, comprobable.", to:"porton", escribe:{ESCALON:"microfix"}},
+    {lab:"Una feature o refactor cuyo alcance todavía no está definido",
+     det:"Primero se diseña: alcance, contratos y pruebas antes de escribir.",
+     to:"porton", escribe:{ESCALON:"disenar"}},
+    {lab:"No cabe seguro en una sola unidad",
+     det:"Crisol: se parte en tramos, carriles separados, verificación independiente.",
+     to:"porton", escribe:{ESCALON:"crisol"}}
+  ]
+},
+
+hotfix: {
+  fase:"Escalón", skill:"hotfix",
+  q:"Hotfix. El servicio primero, la explicación después.",
+  cuerpo:"Un hotfix no enciende <code>modo-fixes</code> y no se degrada a microfix para evadir gates. Cuando el servicio vuelve, el cambio sigue abierto: falta la autopsia.",
+  ops:[
+    {lab:"Servicio restaurado, con rollback listo",
+     det:"Sigue al cierre como cualquier otro tramo.", to:"contenido", escribe:{ROLLBACK:"READY"}},
+    {lab:"Hubo que revertir",
+     det:"<code>ROLLBACK=APPLIED</code>. Eso ya pide autopsia, pase lo que pase en el cierre.",
+     to:"contenido", escribe:{ROLLBACK:"APPLIED"}}
+  ]
+},
+
+porton: {
+  fase:"Construir", skill:"modo-fixes",
+  q:"¿Corre el portón de este tramo?",
+  cuerpo:"El portón es la comprobación cara que el repo declara: mutantes, CI, aceptación. Diferirlo bajo autorización <b>no es evadirlo</b> — queda <code>PENDIENTE</code> a la vista y el tramo cierra <code>CONDITIONAL</code>. Lo barato, en cambio, es obligatorio siempre.",
+  ops:[
+    {lab:"Sí: se corrió y se leyó el resultado",
+     det:"<code>PORTON=CORRIDO</code> exige el resultado leído en esta corrida, nunca supuesto.",
+     to:"contenido", escribe:{PORTON:"CORRIDO"}},
+    {lab:"No: queda diferido, con el pendiente a la vista",
+     det:"<code>PORTON=PENDIENTE</code>. La sesión no pregunta: lo deja visible y espera.",
+     to:"contenido", escribe:{PORTON:"PENDIENTE"}},
+    {lab:"El repo no declara portón",
+     det:"<code>PORTON=NO_APLICA</code>. Sólo válido si <code>REGLAS.md</code> no lo declara.",
+     to:"contenido", escribe:{PORTON:"NO_APLICA"}}
+  ]
+},
+
+contenido: {
+  fase:"Construir", skill:"se encienden solas",
+  q:"¿Qué hay en el diff?",
+  cuerpo:"Estas no las pide nadie: se encienden por lo que estás tocando. Se niegan mirando el contenido, no la intención — y son las que más se olvidan, justamente porque nadie las pide.",
+  ops:[
+    {lab:"Una credencial, un token, una clave",
+     det:"<code>custodiar-secretos</code>. Ningún valor toca el chat, los logs ni el código: viajan por nombre.",
+     to:"cierre_tests", escribe:{SWEEP:"corrido"}},
+    {lab:"Un host, un puerto, una ruta absoluta, un tiempo mágico",
+     det:"<code>arquitectura-configuracion</code>. Un literal nuevo sin motivo escrito al lado bloquea el cierre.",
+     to:"cierre_tests", escribe:{LITERALES:"justificados"}},
+    {lab:"Se tocó compose, Dockerfile o el servidor",
+     det:"<code>revisor-seguridad</code> mide qué expone, probando con canarios.",
+     to:"exposicion"},
+    {lab:"Nada de eso",
+     det:"Ninguna se enciende. Se niegan solas, que es como tiene que ser.",
+     to:"cierre_tests"}
+  ]
+},
+
+exposicion: {
+  fase:"Entregar", skill:"revisor-seguridad",
+  q:"¿Qué encontraron los canarios?",
+  cuerpo:"No mide intenciones: prueba. Puertos, archivos servidos, errores que hablan de más, imágenes. La diferencia con leer el compose es la misma de siempre — leer la configuración es leer un proxy; el canario toca la cosa.",
+  ops:[
+    {lab:"Nada expuesto",
+     det:"<code>EXPOSURE=CLEAN</code>.", to:"cierre_tests", escribe:{EXPOSURE:"CLEAN"}},
+    {lab:"Encontró algo",
+     det:"<code>EXPOSURE=FOUND</code>. El hallazgo va a <code>FOLLOW_UP</code> y el cierre no es <code>FINAL</code>.",
+     to:"cierre_tests", escribe:{EXPOSURE:"FOUND"}}
+  ]
+},
+
+cierre_tests: {
+  fase:"Cerrar", skill:"cierre · check 4",
+  q:"Lo barato: ¿pasa?",
+  cuerpo:"El test dirigido al archivo tocado y la suite local. Y cuando el cambio agrega o toca una guarda, la reversión a mano: quitarla y ver que la prueba falla. Una guarda que nadie rompió a propósito no se sabe si mide.",
+  ops:[
+    {lab:"Verde",
+     det:"<code>TESTS=PASS</code>.", to:"cierre_arq", escribe:{TESTS:"PASS"}},
+    {lab:"Rojo",
+     det:"No hay cierre. Se vuelve a construir hasta que esté verde.",
+     to:"rojo"},
+    {lab:"Fue un descarte, sin fase escritora",
+     det:"<code>TESTS=NOT_APPLICABLE</code>. Cualquier ejecución que escribe exige <code>PASS</code>.",
+     to:"cierre_arq", escribe:{TESTS:"NOT_APPLICABLE"}}
+  ]
+},
+
+rojo: {
+  fase:"Construir", skill:"—",
+  q:"Rojo. No hay cierre que emitir.",
+  cuerpo:"Esto no es un veredicto, es volver al banco. Y es exactamente el motivo por el que en 142 cierres reales del taller nunca apareció un <code>TESTS=FAIL</code>: el fallo pasa adentro de la sesión, se arregla, y recién después se cierra. El recibo guarda el estado final, nunca el camino.",
+  ops:[
+    {lab:"Arreglado; ahora está verde",
+     det:"Volvés al check 4 con el mismo tramo.", to:"cierre_arq", escribe:{TESTS:"PASS"}}
+  ]
+},
+
+cierre_arq: {
+  fase:"Cerrar", skill:"arquitectura-verificar · check 5",
+  q:"Arquitectura y contratos: ¿hay veredicto suficiente?",
+  cuerpo:"<code>ARCHITECTURE=</code> es el veredicto de <code>arquitectura-verificar</code>, tal cual, sin reinterpretar. Es el campo que más discrimina del taller: de 142 cierres, 99 <code>PASS</code>, 42 <code>NOT_APPLICABLE</code>, 1 <code>UNKNOWN</code>.",
+  ops:[
+    {lab:"Verificado y en orden",
+     det:"<code>ARCHITECTURE=PASS</code>.", to:"cierre_colision", escribe:{ARCHITECTURE:"PASS"}},
+    {lab:"No cambió estructura ni contratos",
+     det:"<code>NOT_APPLICABLE</code>. Habilita <code>FINAL</code> igual que <code>PASS</code>.",
+     to:"cierre_colision", escribe:{ARCHITECTURE:"NOT_APPLICABLE"}},
+    {lab:"No se verificó, o el veredicto no alcanza",
+     det:"<code>UNKNOWN</code>. Falta el veredicto — no lo hay en contra. Es una condición saldable.",
+     to:"cierre_colision", escribe:{ARCHITECTURE:"UNKNOWN"}},
+    {lab:"Se verificó y la arquitectura dice que no",
+     det:"<code>BLOCK</code>. No es que falte el veredicto: el veredicto está y es negativo. No se salda corriendo algo — se rehace.",
+     to:"cierre_colision", escribe:{ARCHITECTURE:"BLOCK"}}
+  ]
+},
+
+cierre_colision: {
+  fase:"Cerrar", skill:"mapa-colisiones · check 3",
+  q:"¿Alguien más está tocando este alcance?",
+  cuerpo:"Rutas, símbolos, contratos, ramas de otros actores. En 142 cierres esto disparó una sola vez — lo cual es un aviso en sí mismo: un chequeo que siempre sale igual se empieza a leer como ruido justo en el caso donde importa.",
+  ops:[
+    {lab:"Nadie más",
+     det:"<code>COLLISION=NONE</code>.", to:"veredicto", escribe:{COLLISION:"NONE"}},
+    {lab:"Hay solapamiento abierto",
+     det:"<code>COLLISION=FOUND</code>. Con esto no hay <code>FINAL</code>.",
+     to:"veredicto", escribe:{COLLISION:"FOUND"}}
+  ]
+},
+
+saldar: {
+  fase:"Cerrar", skill:"modo-fixes · arquitectura-verificar",
+  q:"Saldar la condición es un cambio propio, no un apéndice de este.",
+  cuerpo:"Se abre como cualquier otro: observación, se corre lo que faltaba, y cierra <code>FINAL</code> citando los tramos que salda. No se edita el cierre viejo — el recibo es inmutable, y un tramo que cerró <code>CONDITIONAL</code> queda para siempre diciendo que cerró así.",
+  ops:[
+    {lab:"Se corrió lo que faltaba, y salió bien",
+     det:"El resultado se lee en esta corrida, nunca se supone.",
+     to:"veredicto", salda:true},
+    {lab:"Se corrió y encontró algo",
+     det:"Entonces el portón hizo su trabajo: era señal sobre el cambio, no trámite.",
+     to:"porton_encontro"}
+  ]
+},
+
+porton_encontro: {
+  fase:"Diagnosticar", skill:"cambio",
+  q:"El portón encontró algo. Eso no es un fracaso del portón.",
+  cuerpo:"Es el único caso en que diferirlo tuvo un costo visible, y también la prueba de que medía. Lo que sigue no es arreglar de apuro: es una observación nueva que entra por el embudo, con su propio escalón.",
+  ops:[
+    {lab:"Entra como observación nueva",
+     det:"Vuelve al embudo. El tramo anterior sigue <code>CONDITIONAL</code> hasta que se salde.",
+     to:"observacion"}
+  ]
+},
+
+pendiente_queda: {
+  fase:"Cerrar", skill:"modo-fixes",
+  q:"El pendiente queda a la vista, y eso es un estado válido.",
+  cuerpo:"Se anota en <code>.lifecycle/state/modo-fixes.env</code>, versionado: viaja con la rama, lo ve otra sesión y lo ves vos en el diff. <code>PENDIENTES=1</code>. La sesión no vuelve a preguntar — espera a que lo pidas. Diferir no es evadir mientras el pendiente se vea; el día que deja de verse, sí lo es.",
+  ops:[
+    {lab:"Probar otro caso desde el principio",
+     det:"El recibo se limpia y arranca de nuevo.", to:"__reinicio__"}
+  ]
+},
+
+autopsia: {
+  fase:"Cerrar", skill:"autopsia",
+  q:"La autopsia: qué pasó, y sobre todo por qué no se vio antes.",
+  cuerpo:"Reconstruye hechos, causa raíz, <b>brecha de detección</b>, corrección y la prevención mínima que evita repetirlo. La brecha es la parte que más rinde: no es qué se rompió, sino qué tenía que haberlo avisado y no lo hizo. Conviene un subagente independiente, porque quien lo escribió tiene el mismo punto ciego.<br><br>No hace falta que el cierre haya fracasado: se invoca también ante <b>un fallo repetido</b> en una corrida que terminó verde. No cada rojo — eso es desarrollo normal —: el que volvió, porque un rojo que vuelve es evidencia de que la corrección no tocó la causa.",
+  ops:[
+    {lab:"Escrita: causa, brecha y prevención mínima",
+     det:"La prevención sale como observación nueva, no como parche dentro de este cambio.",
+     to:"aprendizaje", escribe:{FOLLOW_UP:"autopsia escrita"}}
+  ]
+},
+
+aprendizaje: {
+  fase:"Cerrar", skill:"cierre · checks 9 y 10",
+  q:"¿Esto le sirve a alguien más, o se pierde con la sesión?",
+  cuerpo:"Si quedó un síntoma→acción reutilizable, va al saber como ficha; si es una sospecha sin evidencia dura, como señal. Y si consultaste una ficha, hay que decir qué pasó con ella — <b>una ficha que no sirvió vale tanto como una que sirvió</b>: sin citas negativas, nadie se entera de que una guía enseña algo equivocado.",
+  ops:[
+    {lab:"Va al saber como ficha o señal",
+     det:"Medido: el saber tiene 48 fichas nacidas de algo que salió mal, y 83 de 101 nunca registraron un uso.",
+     to:"observacion", escribe:{SABER:"ficha propuesta"}},
+    {lab:"No dejó nada reutilizable",
+     det:"Respuesta válida, y se declara. No haber consultado nada también.",
+     to:"observacion", escribe:{SABER:"NONE"}}
+  ]
+},
+
+desplegar: {
+  fase:"Entregar", skill:"desplegar",
+  q:"Sale. Pero el deploy no termina cuando el comando vuelve.",
+  cuerpo:"Termina con <b>prueba positiva de aterrizaje</b>: que el sha vivo sea el nuevo, leído del destino. Un <code>rc=0</code> no alcanza — un push sin nada que pushear también devuelve cero. Es la ficha <code>FALSO-VERDE-009</code> del saber, y la aprendieron a los golpes.",
+  ops:[
+    {lab:"Aterrizó: el sha vivo es el nuevo",
+     det:"Leído del destino, no supuesto.", to:"fin"},
+    {lab:"El comando salió bien pero el sha vivo sigue siendo el viejo",
+     det:"Justo el falso verde. No aterrizó, y ahora hay algo roto en un TARGET confirmado.",
+     to:"observacion", escribe:{ROLLBACK:"APPLIED"}}
+  ]
+},
+
+fin: {
+  fase:"El ciclo", skill:"—",
+  q:"Cerró la vuelta.",
+  cuerpo:"De una observación a un deploy con prueba de aterrizaje, y el recibo de la derecha es lo que quedó escrito — lo único que alguien va a poder leer de esto dentro de seis meses. Fijate qué <b>no</b> guarda: cuánto tardaste, qué se rompió en el medio, cuántas veces volviste atrás. El recibo guarda el estado final, nunca el camino.",
+  ops:[
+    {lab:"Probar otro caso",
+     det:"Cambiá una decisión y mirá cómo cambia el veredicto.", to:"__reinicio__"}
+  ]
+}
+
+};
+
+var ORDEN = ["WHERE","ESCALON","PORTON_DECLARADO","PORTON","TESTS","ARCHITECTURE",
+             "COLLISION","ROLLBACK","SWEEP","EXPOSURE","LITERALES","NOTA_ARRANQUE",
+             "CLOSURE","CONDITIONS","FOLLOW_UP"];
+var TONO = {PASS:"g",NONE:"g",CLEAN:"g",FINAL:"g",CORRIDO:"g",READY:"g",
+            PENDIENTE:"w",CONDITIONAL:"w",UNKNOWN:"w",NOT_APPLICABLE:"",
+            FOUND:"r",BLOCKED:"r",APPLIED:"r",FAIL:"r"};
+
+var actual, recibo, trail, pila;
+
+/* La diferencia entre CONDITIONAL y BLOCKED no es "qué tan grave es".
+   La declara `skills/cierre/SKILL.md`, sección Estados, y es esta:
+     CONDITIONAL = resultado útil logrado, con una condición EXPLICITA Y
+                   COMPROBABLE pendiente. Se salda y cierra FINAL.
+     BLOCKED     = no puede afirmarse éxito NI CONTINUAR CON SEGURIDAD.
+   Por eso `dura` no quiere decir "importante": quiere decir que no hay una
+   condición que puedas saldar y seguir. */
+function calcularVeredicto(r){
+  var frenos = [];
+  if(r.TESTS && r.TESTS !== "PASS" && r.TESTS !== "NOT_APPLICABLE")
+    frenos.push({campo:"TESTS", val:r.TESTS,
+      por:"una ejecución escritora exige <code>TESTS=PASS</code>, y sin verde no hay nada que afirmar",
+      dura:true});
+  if(r.ARCHITECTURE === "BLOCK")
+    frenos.push({campo:"ARCHITECTURE", val:"BLOCK",
+      por:"la arquitectura dice que no, y seguir no es seguro",
+      dura:true});
+  if(r.ARCHITECTURE === "UNKNOWN")
+    frenos.push({campo:"ARCHITECTURE", val:"UNKNOWN",
+      por:"falta el veredicto, no lo hay en contra: correr <code>arquitectura-verificar</code> sobre este diff",
+      dura:false, cond:"falta ARCHITECTURE: correr arquitectura-verificar"});
+  if(r.COLLISION && r.COLLISION !== "NONE")
+    frenos.push({campo:"COLLISION", val:r.COLLISION,
+      por:"otro actor está en el mismo alcance; escribir encima no es continuar con seguridad",
+      dura:true});
+  if(r.EXPOSURE === "FOUND")
+    frenos.push({campo:"EXPOSURE", val:"FOUND",
+      por:"el hallazgo de <code>revisor-seguridad</code> va a <code>FOLLOW_UP</code> y el cierre no es <code>FINAL</code>",
+      dura:false, cond:"EXPOSURE=FOUND: el hallazgo, en FOLLOW_UP"});
+  if(r.PORTON === "PENDIENTE")
+    frenos.push({campo:"PORTON", val:"PENDIENTE",
+      por:"no hay <code>FINAL</code> con el portón sin correr; se difiere, no se recorta",
+      dura:false, cond:"PORTON pendiente: <comando>; autoriza human:<id>"});
+
+  if(!frenos.length) return {v:"FINAL", frenos:frenos};
+  var duro = frenos.some(function(f){ return f.dura; });
+  return {v: duro ? "BLOCKED" : "CONDITIONAL", frenos:frenos};
+}
+
+function pintarRecibo(){
+  var caja = document.getElementById("recibo");
+  var claves = ORDEN.filter(function(k){ return recibo[k] !== undefined; });
+  if(!claves.length){
+    caja.innerHTML = '<p class="vacio">Todavía no decidiste nada. Cada elección escribe su línea acá.</p>';
+    return;
+  }
+  var ancho = Math.max.apply(null, claves.map(function(k){ return k.length; }));
+  caja.innerHTML = '<pre class="recibo">' + claves.map(function(k){
+    var v = recibo[k];
+    var t = TONO[v] || "";
+    return '<span class="k">' + k + new Array(ancho - k.length + 1).join(" ") +
+           '</span> <span class="v ' + t + '">' + v + '</span>';
+  }).join("\n") + '</pre>';
+}
+
+function pintarTrail(){
+  var caja = document.getElementById("trail");
+  if(!trail.length){
+    caja.innerHTML = '<p class="vacio">El camino que tomes se va listando acá.</p>';
+    return;
+  }
+  caja.innerHTML = '<ol class="trail">' + trail.map(function(t, i){
+    return '<li><span class="n">' + (i+1) + '</span><span><span class="q">' + t.q +
+           '</span><br><span class="a">' + t.a + '</span></span></li>';
+  }).join("") + '</ol>';
+}
+
+function sinEtiquetas(s){
+  var d = document.createElement("div");
+  d.innerHTML = s;
+  return d.textContent;
+}
+
+function pintarVeredicto(){
+  var r = calcularVeredicto(recibo);
+  recibo.CLOSURE = r.v;
+  var conds = r.frenos.filter(function(f){ return f.cond; }).map(function(f){ return f.cond; });
+  if(conds.length) recibo.CONDITIONS = conds.join(" · ");
+  else delete recibo.CONDITIONS;
+  if(r.v !== "FINAL" || recibo.ROLLBACK === "APPLIED") recibo.FOLLOW_UP = "autopsia";
+
+  var lista = r.frenos.length
+    ? '<p class="porque">La página no te deja emitir <code>FINAL</code>, y no es una opinión: es la misma comprobación que hace <code>records.py:147</code>. Lo frenó esto:</p><ul class="porque">'
+      + r.frenos.map(function(f){
+          return '<li><code>' + f.campo + '=' + f.val + '</code> — ' + f.por + '.</li>';
+        }).join("") + '</ul>'
+    : '<p class="porque">Los cuatro portones habilitan. Este es el único camino por el que sale un <code>FINAL</code>, y es el que tomaron 141 de los 142 cierres reales del taller.</p>';
+
+  var sigue;
+  if(r.v === "FINAL"){
+    sigue = '<div class="nota ok"><b>Qué sigue.</b> Con el cierre en <code>FINAL</code> puede salir: <code>desplegar</code> lo lleva a su entorno por promoción de CI, con prueba positiva de aterrizaje. Un <code>CONDITIONAL</code> cuya condición sea un portón pendiente no se despliega.</div>';
+  } else if(r.v === "CONDITIONAL"){
+    sigue = '<div class="nota"><b>Qué sigue.</b> El tramo funciona pero falta algo. No termina y tampoco reabre: queda a la vista y espera a que vos pidas correr el portón. Cuando lo autorices, esa corrida es <b>un cambio propio</b> que cierra <code>FINAL</code> con <code>PORTON=CORRIDO</code>, citando los tramos que salda.</div>';
+  } else {
+    sigue = '<div class="nota stop"><b>Qué sigue.</b> No hay cierre. Un <code>BLOCKED</code> pide <code>autopsia</code>: causa raíz, brecha de detección, corrección y la prevención mínima que evita repetirlo. No es buscar culpables.</div>';
+  }
+
+  /* El veredicto NO es el final del recorrido: es una bifurcación más.
+     Un FINAL puede salir, un CONDITIONAL se salda, un BLOCKED abre autopsia
+     y vuelve a entrar como observación. El ciclo, para ser ciclo, cierra. */
+  var sigo = r.v === "FINAL"
+    ? [{lab:"Desplegarlo", det:"<code>desplegar</code> lo lleva a su entorno por promoción de CI, con prueba positiva de aterrizaje.", to:"desplegar"},
+       {lab:"Antes: en el camino hubo un rojo que volvió", det:"Un cierre <code>FINAL</code> también lleva autopsia. El verde dice que al final funcionó, no que nada falló en el camino.", to:"autopsia"}]
+    : r.v === "CONDITIONAL"
+    ? [{lab:"Saldar la condición ahora", det:"La corrida que la salda es <b>un cambio propio</b>, no un apéndice de este.", to:"saldar"},
+       {lab:"Dejarla pendiente, a la vista", det:"Válido. La sesión no pregunta: espera a que vos lo pidas.", to:"pendiente_queda"}]
+    : [{lab:"Abrir la autopsia", det:"Es lo que el estado pide. No es buscar culpables.", to:"autopsia"}];
+
+  document.getElementById("paso").innerHTML =
+    '<div class="eyebrow"><span class="fase">Veredicto</span><span class="skillchip">cierre</span></div>' +
+    '<p class="veredicto v-' + r.v + '">CLOSURE=' + r.v + '</p>' + lista + sigue +
+    '<div class="nota"><b>Y una cosa que el recibo no guarda.</b> Todo esto es <i>declarado</i>: el adaptador comprueba que los campos sean coherentes entre sí, pero nunca corre los tests. <code>TESTS=PASS</code> dice de dónde leíste el verde — y un verde leído de un proxy, el exit de un pipe o un stage del CI que vino cacheado, no es un verde.</div>' +
+    '<h2 style="font-size:16px;margin:24px 0 10px">¿Y ahora?</h2>' +
+    '<div class="opciones">' + sigo.map(function(o, i){
+      return '<button class="op" type="button" data-sigo="' + i + '"><span class="lab">' + o.lab +
+             '</span><span class="det">' + o.det + '</span></button>';
+    }).join("") + '</div>';
+
+  Array.prototype.forEach.call(document.querySelectorAll("[data-sigo]"), function(b){
+    b.addEventListener("click", function(){
+      var o = sigo[+b.dataset.sigo];
+      pila.push({id:"__veredicto__", recibo:Object.assign({}, recibo), trail:trail.slice()});
+      trail.push({q:"Veredicto: " + r.v, a:o.lab});
+      ir(o.to);
+    });
+  });
+
+  pintarRecibo();
+  document.getElementById("atras").disabled = pila.length === 0;
+}
+
+function ir(id){
+  var p = PASOS[id];
+  if(!p){ pintarVeredicto(); return; }
+  actual = id;
+  document.getElementById("paso").innerHTML =
+    '<div class="eyebrow"><span class="fase">' + p.fase + '</span>' +
+    '<span class="skillchip">' + p.skill + '</span></div>' +
+    '<h2>' + p.q + '</h2><p class="cuerpo">' + p.cuerpo + '</p>' +
+    '<div class="opciones">' + p.ops.map(function(o, i){
+      return '<button class="op" type="button" data-i="' + i + '"><span class="lab">' + o.lab +
+             '</span><span class="det">' + o.det + '</span></button>';
+    }).join("") + '</div>';
+
+  Array.prototype.forEach.call(document.querySelectorAll("[data-i]"), function(b){
+    b.addEventListener("click", function(){
+      var o = p.ops[+b.dataset.i];
+      if(o.to === "__reinicio__"){ reiniciar(); return; }
+      pila.push({id:actual, recibo:Object.assign({}, recibo), trail:trail.slice()});
+      if(o.escribe) Object.assign(recibo, o.escribe);
+      /* Saldar toca SOLO lo que estaba pendiente: no inventa campos que
+         este recorrido nunca escribió. */
+      if(o.salda){
+        if(recibo.PORTON === "PENDIENTE") recibo.PORTON = "CORRIDO";
+        if(recibo.ARCHITECTURE === "UNKNOWN") recibo.ARCHITECTURE = "PASS";
+        if(recibo.EXPOSURE === "FOUND") recibo.EXPOSURE = "CLEAN";
+      }
+      trail.push({q:sinEtiquetas(p.q), a:sinEtiquetas(o.lab)});
+      pintarRecibo(); pintarTrail();
+      if(o.to === "veredicto") pintarVeredicto(); else ir(o.to);
+    });
+  });
+
+  document.getElementById("atras").disabled = pila.length === 0;
+  pintarRecibo(); pintarTrail();
+}
+
+function reiniciar(){
+  recibo = {}; trail = []; pila = [];
+  ir("arranque");
+}
+
+document.getElementById("reiniciar").addEventListener("click", reiniciar);
+document.getElementById("atras").addEventListener("click", function(){
+  var prev = pila.pop();
+  if(!prev) return;
+  recibo = prev.recibo; trail = prev.trail;
+  ir(prev.id);
+});
+
+reiniciar();
+</script>

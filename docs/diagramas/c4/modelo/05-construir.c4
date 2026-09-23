@@ -1,0 +1,54 @@
+// FASE 5 — Construir.
+// Lo que efectivamente escribe. Siete skills.
+//
+// Antes esta fase tenía once y era la más cargada del dibujo, con cuatro cajas
+// sueltas sin una sola flecha. Se corrigió moviendo a donde les toca:
+//   arquitectura-descubrir, arquitectura-ubicar -> ubicarse (no escriben)
+//   logalizar                                   -> diagnosticar (su disparador)
+//   documentar                                  -> transversales (sin momento fijo)
+// y trayendo auditar-mcp, que estaba como transversal teniendo un momento
+// declarado: "usar al construir o revisar un MCP".
+
+model {
+
+  construir = fase 'Construir' {
+    description 'Escribir el cambio, con la configuración en su único lugar, los secretos por nombre y la red de comprobación tendida.'
+
+    // -- Dónde vive cada valor --
+    arq_configuracion = skill 'arquitectura-configuracion' {
+      description 'Dónde vive cada configuración, y cuál es la única fuente de cada valor.'
+    }
+
+    custodiar_secretos = skill 'custodiar-secretos' {
+      description 'PORTÓN. Ningún valor toca el chat, los logs ni el código: a la sesión se le pasan NOMBRES de secretos, jamás valores.'
+    }
+
+    // -- Cómo se comprueba --
+    red_de_desarrollo = skill 'red-de-desarrollo' {
+      description 'Tiende los tres hilos: lo barato en cada push, el portón con disparador escrito, lo manual declarado con su comando.'
+    }
+
+    modo_fixes = skill 'modo-fixes' {
+      description 'Difiere el portón a la autorización del humano, dejando el pendiente a la vista. Diferir no es evadir.'
+    }
+
+    // -- Cómo queda escrito --
+    estilar = skill 'estilar' {
+      description 'Aplica el estilo visual vigente leyendo su fuente de tokens, nunca de memoria.'
+    }
+
+    paralelizar = skill 'paralelizar' {
+      description 'Reparte el trabajo en carriles disjuntos, conservando el criterio en la sesión madre.'
+    }
+
+    auditar_mcp = skill 'auditar-mcp' {
+      description 'Construye la auditoría interna de un MCP para atribuir cada llamada a su sesión.'
+    }
+
+    arq_configuracion -[usa]-> custodiar_secretos 'si el valor es una credencial, va por nombre'
+    red_de_desarrollo -[sigue]-> modo_fixes 'si el portón cuesta caro y el humano lo difiere'
+    auditar_mcp -[usa]-> red_de_desarrollo 'la auditoría también se comprueba'
+    paralelizar -[usa]-> estilar 'los carriles escriben con el mismo estilo'
+  }
+
+}

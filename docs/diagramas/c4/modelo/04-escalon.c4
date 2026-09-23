@@ -1,0 +1,30 @@
+// FASE 4 — Elegir el escalón.
+// Cuatro caminos excluyentes: se entra por uno solo.
+// La regla es el escalón MÍNIMO que resuelve con seguridad y evidencia.
+
+model {
+
+  escalon = fase 'Elegir el escalón' {
+    description 'El escalón mínimo que puede resolverlo con seguridad. Se sube cuando el alcance lo supera, nunca se baja para evadir un portón.'
+
+    microfix = skill 'microfix' {
+      description 'Cabe en una responsabilidad pequeña, es reversible y se comprueba. El escalón por defecto.'
+    }
+
+    hotfix = skill 'hotfix' {
+      description 'Algo está roto en un TARGET confirmado. Urgencia con validación y rollback inmediatos, sin saltarse el recibo.'
+    }
+
+    disenar = skill 'disenar' {
+      description 'El alcance, los contratos o las pruebas todavía no están definidos. Se decide la forma antes de codear.'
+    }
+
+    crisol = skill 'crisol' {
+      description 'No cabe seguro en una sola unidad. Se parte en tramos, con carriles separados y verificación independiente.'
+    }
+
+    microfix -[vuelve]-> crisol 'tres microfixes sobre el mismo contrato se promueven'
+    disenar -[sigue]-> crisol 'el diseño ya no cabe en un tramo'
+  }
+
+}

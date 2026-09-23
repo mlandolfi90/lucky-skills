@@ -1,0 +1,24 @@
+// EL FLUJO, PASO A PASO Y NUMERADO.
+// Una vista dinámica: se lee de arriba abajo como un relato.
+// Para cambiar el relato se toca solo este archivo.
+
+views {
+
+  dynamic view recorrido {
+    title 'El recorrido de un cambio, paso a paso'
+    description 'El camino feliz completo, numerado. Las vueltas para atrás están en el panorama.'
+
+    humano -> arranque 'trae algo que hacer'
+    arranque -> ubicarse 'las reglas del repo ya rigen'
+    ubicarse -> diagnosticar 'terreno medido, colisiones vistas'
+    diagnosticar -> escalon 'una sola clase de cambio, con evidencia'
+    escalon -> construir 'el escalón mínimo que resuelve'
+    construir -> cerrar 'lo barato en verde'
+    cerrar -> recibo 'queda escrito qué se hizo y qué quedó pendiente'
+    cerrar -> entregar 'FINAL: puede salir'
+    humano -> entregar 'autoriza el deploy'
+
+    autoLayout TopBottom
+  }
+
+}

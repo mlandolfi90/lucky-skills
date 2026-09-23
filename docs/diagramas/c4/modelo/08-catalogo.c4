@@ -1,0 +1,42 @@
+// EL CICLO DEL CATÁLOGO.
+// No es una fase del flujo de un cambio: es el ciclo propio del Taller,
+// que fabrica las skills que el flujo usa. Se cierra sobre sí mismo.
+
+model {
+
+  catalogo = fase 'El ciclo del catálogo' {
+    description 'Cómo nace, se sella, se avisa y se adopta una skill. Da la vuelta completa y vuelve a empezar.'
+
+    madrina = skill 'madrina' {
+      description 'Que la skill nazca sana: una sola responsabilidad, nombre único, disparador negable, sin hermanas siamesas.'
+    }
+
+    publicar_skill = skill 'publicar-skill' {
+      description 'Valida y sella una versión: propone el SemVer, corre los gates, y solo con autorización hace commit y tag.'
+    }
+
+    sincronizar = skill 'sincronizar' {
+      description 'Compara el catálogo con los repos registrados y propone. Nunca escribe en un repo ajeno por su cuenta.'
+    }
+
+    adopcion = skill 'adopcion' {
+      description 'Instala o actualiza una skill en un repo confirmado: plan exacto, hash confirmado, archivo de lo reemplazado, rollback.'
+    }
+
+    configurar_hooks = skill 'configurar-hooks' {
+      description 'Deja los ganchos del harness como asesores. Nunca habilita enforcement sin autorización.'
+    }
+
+    podar_v2 = skill 'podar-v2' {
+      description 'Retira los restos del enforcement v2 de los ámbitos que ya se rigen por v3.'
+    }
+
+    // La vuelta completa.
+    madrina -[sigue]-> publicar_skill 'la criatura sana entra al ciclo'
+    publicar_skill -[sigue]-> sincronizar 'hay versión nueva: avisar a la flota'
+    sincronizar -[sigue]-> adopcion 'cada repo decide si la toma'
+    adopcion -[sigue]-> configurar_hooks 'y deja los ganchos puestos'
+    adopcion -[usa]-> podar_v2 'si quedaban restos de v2'
+  }
+
+}
