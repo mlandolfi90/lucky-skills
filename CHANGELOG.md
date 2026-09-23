@@ -2,6 +2,9 @@
 
 Generado por publicar-skill; no editar a mano.
 
+## cierre 1.5.0 — 2026-09-23 — MINOR
+- 1.4.1 → 1.5.0 · QUALITY=PASS · autorizó human:vikingo
+
 ## auditar-mcp 1.6.4 — 2026-09-22 — PATCH
 - 1.6.3 → 1.6.4 · QUALITY=PASS · autorizó human:mlandolfi90
 
