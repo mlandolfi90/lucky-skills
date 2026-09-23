@@ -3,7 +3,7 @@
 El diagrama del **camino**: de una observación hasta un deploy, y el ciclo aparte
 con el que el Taller fabrica las skills que ese camino usa.
 
-No confundir con [`docs/diagrams/skills-interconexion.drawio`](../../diagrams/skills-interconexion.drawio),
+No confundir con [`docs/diagramas/skills-interconexion.drawio`](../skills-interconexion.drawio),
 que dibuja otra cosa: el grafo de `REQUIRES` entre las 37 skills. Aquel dice
 **qué skill necesita cuál**; éste dice **en qué orden se usan**.
 
