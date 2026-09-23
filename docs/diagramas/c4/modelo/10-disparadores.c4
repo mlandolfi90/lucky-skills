@@ -5,7 +5,7 @@
 // Un disparador que nunca es falso no es un disparador: es un default
 // encubierto, y la skill va a estorbar en todo el camino.
 //
-// Este archivo agrupa los 37 disparadores reales —leídos del `description` de
+// Este archivo agrupa los 38 disparadores reales —leídos del `description` de
 // cada SKILL.md, no inventados— en las seis formas que toman. La `description`
 // de cada caja dice las dos mitades: qué la prende y qué la deja apagada.
 //
@@ -40,7 +40,7 @@ model {
   }
 
   sin_declarar = disparador 'No declara ningún momento' {
-    description 'Su description dice QUÉ hace y nunca CUÁNDO. No se puede negar un disparador que no está escrito, así que la skill no tiene cómo no estorbar. Medido el 2026-09-23 sobre los 37 SKILL.md: pasa en una.'
+    description 'Su description dice QUÉ hace y nunca CUÁNDO. No se puede negar un disparador que no está escrito, así que la skill no tiene cómo no estorbar. Medido el 2026-09-23 sobre los 38 SKILL.md: pasa en una.'
   }
 
   // ── El humano la nombra ────────────────────────────────────────────────
@@ -65,6 +65,7 @@ model {
   llamada -[enciende]-> cerrar.arq_verificar 'cierre gate 5, sin condición'
   llamada -[enciende]-> ubicarse.mapa_colisiones 'cierre check 3'
   llamada -[enciende]-> ubicarse.sextante 'cuando un gate exige comprobante'
+  llamada -[enciende]-> transversales.memoria_del_taller 'la llaman precedente, cierre y autopsia — nunca sola'
 
   // ── El punto del camino la enciende ────────────────────────────────────
   estado -[enciende]-> diagnosticar.cambio 'hay un fallo o mejora y no hay escalón elegido'

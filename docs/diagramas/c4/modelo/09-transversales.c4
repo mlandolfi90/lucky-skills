@@ -28,6 +28,12 @@ model {
       description 'Detecta drift entre el manual y el código con evidencia archivo:línea, y corrige solo con aprobación.'
     }
 
+    // Transversal porque la llaman desde dos fases distintas: precedente al
+    // ubicarse, cierre y autopsia al cerrar. No tiene momento propio.
+    memoria_del_taller = skill 'memoria-del-taller' {
+      description 'Habla con la memoria de fichas del taller por verbos —buscar, leer, proponer, señalar, reportar— contra la herramienta que el stack declare. Hoy es saber; cambiarla no toca a ninguna otra skill.'
+    }
+
     delegar -[usa]-> slack_coordinacion 'el trabajo delegado se coordina'
   }
 

@@ -49,12 +49,13 @@ views {
 
   view encendido_llamada {
     title 'Las que no se disparan solas'
-    description 'Cuatro. Las llama un paso de otra skill. Su riesgo propio es quedar huérfanas si la invocante cambia de paso: nadie se entera, simplemente dejan de correr.'
+    description 'Cinco. Las llama un paso de otra skill. Su riesgo propio es quedar huérfanas si la invocante cambia de paso: nadie se entera, simplemente dejan de correr.'
     include llamada,
       ubicarse.precedente,
       cerrar.arq_verificar,
       ubicarse.mapa_colisiones,
-      ubicarse.sextante
+      ubicarse.sextante,
+      transversales.memoria_del_taller
     autoLayout LeftRight
   }
 

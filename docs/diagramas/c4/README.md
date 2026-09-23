@@ -77,7 +77,7 @@ a -[vuelve]-> b 'algo no cerró'            // rojo cortado
   desaparecieron del modelo en silencio, sin error visible. Por eso acá no hay
   ninguna etiqueta, y lo que hubieran marcado (portón, autoriza) está dicho en
   la `description`. Si alguien las hace andar, que lo anote acá.
-- **El modelo se comprueba contra el repo**, no a ojo. Las 37 cajas son las 37
+- **El modelo se comprueba contra el repo**, no a ojo. Las 38 cajas son las 38
   carpetas de `skills/`: ni una inventada ni una faltante, verificado el
   2026-09-23. Al agregar una skill al catálogo, este modelo queda corto — y no
   avisa solo.
@@ -95,24 +95,24 @@ contestaba: **qué prende cada skill y, sobre todo, qué la deja apagada.**
 `madrina` exige que el disparador sea *negable* — que ante una tarea cualquiera
 se pueda contestar "no, este no es el momento" sin ponerse a discutir. Un
 disparador que nunca es falso es un default encubierto. Las siete cajas agrupan
-los 37 disparadores reales, leídos del `description` de cada `SKILL.md`:
+los 38 disparadores reales, leídos del `description` de cada `SKILL.md`:
 
 | forma | cuántas | cómo se niega |
 |---|---|---|
 | el humano la nombra | 9 | si no la nombraste, no entra |
 | una línea del repo la declara | 4 | abrís el archivo: está o no está |
-| la invoca otra skill | 4 | si la invocante no corrió, no entra |
+| la invoca otra skill | 5 | si la invocante no corrió, no entra |
 | el punto del camino | 16 | si el trabajo no llegó ahí, no entra |
 | lo que se está tocando | 8 | se mira el diff, no la intención |
 | corre sola | 1 | **no se puede negar** |
 | sin momento declarado | 1 | **no se puede negar: no está escrito** |
 
-Las 43 flechas cubren las 37 skills; varias cuelgan de más de una condición, y
+Las 44 flechas cubren las 38 skills; varias cuelgan de más de una condición, y
 eso no es un error: `modo-fixes` se enciende por la línea de `REGLAS.md` **o**
 porque el humano lo pide, y las dos son verdad.
 
 Los dos últimos renglones de la tabla son hallazgos, no formas. `ley-viva` corre
 sola por diseño —y por eso su costo tiene que ser casi cero y su salida silenciosa
 cuando no hay nada que decir—. `mapear-despliegue` es otra cosa: su `description`
-dice qué hace y nunca cuándo, así que no hay cómo negarla. Es el único caso en 37.
+dice qué hace y nunca cuándo, así que no hay cómo negarla. Es el único caso en 38.
 
