@@ -53,8 +53,15 @@ Decidir el estado final de una ejecución a partir de evidencia actual.
   comprobable pendiente.
 - `BLOCKED`: no puede afirmarse éxito o continuar con seguridad.
 
-`CONDITIONAL`, `BLOCKED` o `ROLLBACK=APPLIED` piden `autopsia`; se anota en
-`FOLLOW_UP`.
+`CONDITIONAL`, `BLOCKED`, `ROLLBACK=APPLIED` o **un fallo repetido en esta
+corrida** invocan `autopsia` antes de emitir la salida. Se invoca, no se
+anota para después: la causa raíz y la brecha de detección las sabe esta
+sesión, y con ella se van.
+
+Un cierre `FINAL` también puede llevar autopsia. La condición es sobre la
+corrida, no sobre el veredicto: `autopsia` analiza una ejecución *después de
+corregirla*, y un rojo que volvió es evidencia de que la corrección no tocó
+la causa. No cada rojo —eso es desarrollo normal—: el que se repite.
 
 Un descarte sin fase escritora puede cerrar con
 `TESTS=NOT_APPLICABLE`; cualquier ejecución escritora exige `TESTS=PASS` para

@@ -5,9 +5,13 @@ description: Analizar una ejecución después de corregirla o revertirla. Usar a
 
 # Autopsia
 
-Aprender de la ejecución sin retrasar la recuperación. La dispara `cierre`
-(`CLOSURE=CONDITIONAL|BLOCKED` o `ROLLBACK=APPLIED`, anotado en `FOLLOW_UP`)
-o un fallo repetido.
+Aprender de la ejecución sin retrasar la recuperación. La invoca `cierre`
+antes de emitir su salida, ante `CLOSURE=CONDITIONAL|BLOCKED`,
+`ROLLBACK=APPLIED` o un fallo repetido en la corrida; no se dispara sola.
+
+Ese último caso es el que más rinde y el que más se pierde: un cierre
+`FINAL` también puede llevar autopsia. El verde dice que al final funcionó,
+no que nada falló en el camino.
 
 ## Invariantes
 
