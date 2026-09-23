@@ -1,0 +1,4 @@
+interface:
+  display_name: "Memoria del taller"
+  short_description: "Habla con la memoria de fichas por verbos, sea cual sea la herramienta"
+  default_prompt: "Usa $memoria-del-taller para buscar, leer, proponer, senalar o reportar una ficha."
