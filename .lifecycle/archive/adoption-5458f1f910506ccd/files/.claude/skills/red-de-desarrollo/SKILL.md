@@ -1,7 +1,6 @@
 ---
 name: red-de-desarrollo
-description: >-
-  Tender la red de comprobación de un repo: lo barato en cada push, lo caro con disparador escrito, lo manual declarado, el resultado leído. Usar en un repo nuevo o ante una suite que solo corre a mano.
+description: Tender la red de comprobación de un repo: lo barato en cada push, lo caro con disparador escrito, lo manual declarado, el resultado leído. Usar en un repo nuevo o ante una suite que solo corre a mano.
 ---
 
 # Red de desarrollo
