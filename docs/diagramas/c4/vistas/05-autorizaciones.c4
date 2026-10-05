@@ -8,6 +8,10 @@
 // Sacarlas del panorama y juntarlas acá resuelve las dos cosas: el panorama
 // queda con el camino y sus vueltas, y las autorizaciones se leen todas juntas,
 // que además es como se consultan.
+//
+// `invoca` (una skill que llama a otra de OTRA fase) se excluye en cada vista
+// de este archivo: esas llamadas traían cajas de otra fase. Viven en
+// vistas/07-invocaciones.c4.
 
 views {
 
@@ -17,6 +21,7 @@ views {
 
     include humano, escalon, cerrar, entregar, catalogo
 
+    exclude * -> * where kind is invoca
     autoLayout LeftRight
   }
 
@@ -26,6 +31,7 @@ views {
 
     include transversales, ubicarse, construir, cerrar
 
+    exclude * -> * where kind is invoca
     autoLayout LeftRight
   }
 

@@ -1,0 +1,80 @@
+// QUIÉN INVOCA A QUIÉN, CRUZANDO DE FASE.
+//
+// Los archivos de fase dicen qué hay adentro; 99-flujo.c4, cómo se encadenan
+// las fases. Acá van las llamadas de una skill a otra que vive en otra fase.
+//
+// QUÉ ENTRA: A -[invoca]-> B cuando, como parte de su propio flujo, A corre B
+// o lee su salida, y lo dice el SKILL.md de A. QUÉ NO ENTRA:
+//   - el paso de una fase a la siguiente: eso es `sigue`, en 99-flujo.c4,
+//     aunque una skill nombre a la del escalón que viene;
+//   - una mención que marca jurisdicción («eso lo dice X»);
+//   - un REQUIRES sin ninguna línea que muestre para qué se usa;
+//   - una declaración de un solo lado: B dice que A la llama y A no lo dice.
+// Las dos últimas son arreglos de skills, no del dibujo: están en
+// docs/investigacion/pasos-skills-2026-10-05.md.
+//
+// Salieron de contrastar el modelo contra el catálogo el 2026-10-05: primero
+// lo que ya estaba a la vista, después un barrido de las 38 SKILL.md (66
+// menciones entre fases sin flecha, juzgadas una por una).
+//
+// Van con `invoca` y no con `usa` a propósito: las demás vistas las excluyen,
+// y se leen juntas en vistas/07-invocaciones.c4.
+
+model {
+
+  // -- crisol: sus carriles --
+  escalon.crisol -[invoca]-> ubicarse.arq_descubrir 'carril Arquitectura'
+  escalon.crisol -[invoca]-> ubicarse.arq_ubicar 'carril Arquitectura'
+  escalon.crisol -[invoca]-> cerrar.arq_verificar 'carril Arquitectura: su ARCHITECTURE= se vuelca tal cual'
+  escalon.crisol -[invoca]-> ubicarse.mapa_colisiones 'carril Colisiones'
+  escalon.crisol -[invoca]-> construir.paralelizar 'sólo con carriles independientes'
+  escalon.crisol -[invoca]-> transversales.delegar 'declara el régimen vigente antes de asignar carriles'
+  escalon.crisol -[invoca]-> cerrar.cierre 'carril Cerrar; bajo modo-fixes, CONDITIONAL hasta que corra el portón'
+  escalon.crisol -[invoca]-> cerrar.autopsia 'mismo fallo sin hipótesis nueva: restaura y pide autopsia'
+
+  // -- disenar: sus pasos --
+  escalon.disenar -[invoca]-> ubicarse.precedente 'paso 1: consulta precedente (puerta DISENO)'
+  escalon.disenar -[invoca]-> ubicarse.arq_descubrir 'paso 2: el alcance sale de la arquitectura real'
+  escalon.disenar -[invoca]-> ubicarse.mapa_colisiones 'paso 3: COLLISION=FOUND frena el READY'
+  escalon.disenar -[invoca]-> construir.auditar_mcp 'paso 4: si el alcance es un MCP compartido'
+  escalon.disenar -[invoca]-> construir.estilar 'paso 4: si el alcance es UI'
+  escalon.disenar -[invoca]-> construir.arq_configuracion 'paso 4: si el repo no tiene /config/'
+  escalon.disenar -[invoca]-> transversales.documentar 'el drift spec-código queda bajo su auditoría'
+
+  // -- el mapa de colisiones como puerta de entrada --
+  escalon.microfix -[invoca]-> ubicarse.mapa_colisiones 'gate de entrada: COLLISION=FOUND coordina o promueve'
+  escalon.hotfix -[invoca]-> ubicarse.mapa_colisiones 'gate de entrada: COLLISION=FOUND se coordina antes de escribir'
+  construir.paralelizar -[invoca]-> ubicarse.mapa_colisiones 'comprueba alcances disjuntos antes de lanzar'
+  diagnosticar.logalizar -[invoca]-> ubicarse.mapa_colisiones 'antes de instrumentar, sobre las rutas a tocar'
+
+  // -- precedente y la memoria del taller --
+  diagnosticar.cambio -[invoca]-> ubicarse.precedente 'paso 3: consulta precedente (puerta DIAGNOSTICO)'
+  ubicarse.precedente -[invoca]-> transversales.memoria_del_taller 'paso 3: consulta el saber por síntoma'
+  cerrar.cierre -[invoca]-> transversales.memoria_del_taller 'checks 9 y 10: reporta lo consultado y propone fichas'
+  cerrar.autopsia -[invoca]-> transversales.memoria_del_taller 'paso 7: propone el hallazgo al saber como ficha'
+
+  // -- la guarda de literales de configuración --
+  ubicarse.arq_ubicar -[invoca]-> construir.arq_configuracion 'si CONTRATO=AUSENTE, antes de ubicar el primer valor'
+  cerrar.cierre -[invoca]-> construir.arq_configuracion 'gate 12: guarda de literales nuevos'
+  cerrar.arq_verificar -[invoca]-> construir.arq_configuracion 'gate 12: la guarda corre sobre el diff'
+
+  // -- lo que cierre consume de otras skills --
+  cerrar.cierre -[invoca]-> ubicarse.mapa_colisiones 'check 3: sin conflictos abiertos (COLLISION=)'
+  cerrar.cierre -[invoca]-> escalon.microfix 'check 4: TESTS= sale de su salida'
+  cerrar.cierre -[invoca]-> escalon.hotfix 'check 4: TESTS= sale de su salida'
+  cerrar.cierre -[invoca]-> construir.custodiar_secretos 'gate 11: su SWEEP= es la evidencia'
+  cerrar.cierre -[invoca]-> entregar.revisor_seguridad 'gate 13: si corrió, EXPOSURE=CLEAN'
+  entregar.revisor_seguridad -[invoca]-> construir.custodiar_secretos 'si el barrido encuentra un secreto: HANDOFF'
+  ubicarse.arq_descubrir -[invoca]-> cerrar.arq_verificar 'su MAPA= vigente es el que verificar cita'
+
+  // -- la entrega --
+  entregar.desplegar -[invoca]-> construir.red_de_desarrollo 'el portón y su comando salen de la red tendida'
+  construir.custodiar_secretos -[invoca]-> entregar.mapear_despliegue 'si hay DESPLIEGUE.env, los nombres salen de ahí'
+
+  // -- arranque y catálogo --
+  arranque.cargar_reglas -[invoca]-> ubicarse.sextante 'paso 3 del arranque: deja el comprobante fresco'
+  catalogo.sincronizar -[invoca]-> ubicarse.sextante 'por repo, antes de adoptar'
+  catalogo.adopcion -[invoca]-> ubicarse.sextante 'consume un comprobante con WRITE_GATE=PASS'
+  catalogo.publicar_skill -[invoca]-> transversales.documentar 'paso 1: un drift conocido no se publica'
+
+}

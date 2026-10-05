@@ -17,7 +17,7 @@ model {
     }
 
     delegar = skill 'delegar' {
-      description 'El régimen de spawn de agentes que el humano eligió. Sin régimen declarado, no se lanzan agentes.'
+      description 'El régimen de spawn de agentes que el humano eligió. Ningún agente sale sin resolverlo: sin régimen ni default, se declara REGIMEN=NONE.'
     }
 
     slack_coordinacion = skill 'slack-coordinacion' {
@@ -34,7 +34,6 @@ model {
       description 'Habla con la memoria de fichas del taller por verbos —buscar, leer, proponer, señalar, reportar— contra la herramienta que el stack declare. Hoy es saber; cambiarla no toca a ninguna otra skill.'
     }
 
-    delegar -[usa]-> slack_coordinacion 'el trabajo delegado se coordina'
   }
 
 }

@@ -63,7 +63,7 @@ model {
   // ── La invoca otra skill ───────────────────────────────────────────────
   llamada -[enciende]-> ubicarse.precedente 'cambio paso 3, disenar paso 1 — nunca sola'
   llamada -[enciende]-> cerrar.arq_verificar 'cierre gate 5, sin condición'
-  llamada -[enciende]-> ubicarse.mapa_colisiones 'cierre check 3'
+  llamada -[enciende]-> ubicarse.mapa_colisiones 'cierre check 3, microfix y hotfix (gate de entrada), disenar paso 3, crisol, paralelizar, arquitectura-ubicar'
   llamada -[enciende]-> ubicarse.sextante 'cuando un gate exige comprobante'
   llamada -[enciende]-> transversales.memoria_del_taller 'la llaman precedente, cierre y autopsia — nunca sola'
 
@@ -80,7 +80,7 @@ model {
   estado -[enciende]-> catalogo.publicar_skill 'hay cambios terminados para promover'
   estado -[enciende]-> catalogo.sincronizar 'se acaba de publicar'
   estado -[enciende]-> construir.paralelizar 'alcances disjuntos y volumen que lo amerita'
-  estado -[enciende]-> transversales.documentar 'el cambio puede dejar manuales mintiendo'
+  estado -[enciende]-> transversales.documentar 'el cambio puede dejar manuales mintiendo, o antes de publicar'
   estado -[enciende]-> ubicarse.arq_descubrir 'la estructura no está corroborada'
   estado -[enciende]-> ubicarse.arq_ubicar 'ya corroborada, y hay que crear o mover estructura'
   estado -[enciende]-> ubicarse.consultar_catalogo 'falta conocimiento que un catálogo público cubre'
@@ -90,7 +90,7 @@ model {
   contenido -[enciende]-> construir.arq_configuracion 'aparece un literal de host, puerto o ruta'
   contenido -[enciende]-> construir.estilar 'lo que se toca es UI'
   contenido -[enciende]-> construir.auditar_mcp 'es un MCP con backend compartido'
-  contenido -[enciende]-> entregar.revisor_seguridad 'se tocó compose, Dockerfile o el servidor'
+  contenido -[enciende]-> entregar.revisor_seguridad 'se tocó compose, Dockerfile o el servidor, o se va a exponer un servicio'
   contenido -[enciende]-> cerrar.arq_verificar 'cambian estructura, contratos o varias unidades'
   contenido -[enciende]-> ubicarse.mapa_colisiones 'plan multiarchivo, o ramas de otros actores'
   contenido -[enciende]-> catalogo.madrina 'lo que se va a escribir es una skill'

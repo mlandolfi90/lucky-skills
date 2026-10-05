@@ -35,7 +35,7 @@ model {
     madrina -[sigue]-> publicar_skill 'la criatura sana entra al ciclo'
     publicar_skill -[sigue]-> sincronizar 'hay versión nueva: avisar a la flota'
     sincronizar -[sigue]-> adopcion 'cada repo decide si la toma'
-    adopcion -[sigue]-> configurar_hooks 'y deja los ganchos puestos'
+    adopcion -[usa]-> configurar_hooks 'tras adoptar, ofrece dejar los ganchos'
     adopcion -[usa]-> podar_v2 'si quedaban restos de v2'
   }
 

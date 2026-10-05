@@ -15,7 +15,7 @@ model {
     }
 
     cierre = skill 'cierre' {
-      description 'PORTÓN. Comprueba TARGET, alcance, pruebas, arquitectura, colisiones, rollback y autorizaciones. La citan 15 de las 37.'
+      description 'PORTÓN. Comprueba TARGET, alcance, pruebas, arquitectura, colisiones, rollback y autorizaciones.'
     }
 
     autopsia = skill 'autopsia' {

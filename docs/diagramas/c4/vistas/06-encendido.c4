@@ -8,6 +8,10 @@
 //
 // Por eso el índice muestra las siete condiciones SIN skills: se ve la forma
 // del asunto. Las skills aparecen en la vista de su condición.
+//
+// `invoca` (una skill que llama a otra de OTRA fase) se excluye en cada vista
+// de este archivo: esas llamadas traían cajas de otra fase. Viven en
+// vistas/07-invocaciones.c4.
 
 views {
 
@@ -17,6 +21,7 @@ views {
 
     include pedido, repo, llamada, estado, contenido, automatico, sin_declarar
 
+    exclude * -> * where kind is invoca
     autoLayout TopBottom
   }
 
@@ -33,6 +38,7 @@ views {
       catalogo.adopcion,
       catalogo.configurar_hooks,
       catalogo.sincronizar
+    exclude * -> * where kind is invoca
     autoLayout LeftRight
   }
 
@@ -44,6 +50,7 @@ views {
       construir.modo_fixes,
       catalogo.podar_v2,
       construir.red_de_desarrollo
+    exclude * -> * where kind is invoca
     autoLayout LeftRight
   }
 
@@ -56,6 +63,7 @@ views {
       ubicarse.mapa_colisiones,
       ubicarse.sextante,
       transversales.memoria_del_taller
+    exclude * -> * where kind is invoca
     autoLayout LeftRight
   }
 
@@ -79,6 +87,7 @@ views {
       ubicarse.arq_descubrir,
       ubicarse.arq_ubicar,
       ubicarse.consultar_catalogo
+    exclude * -> * where kind is invoca
     autoLayout LeftRight
   }
 
@@ -94,6 +103,7 @@ views {
       cerrar.arq_verificar,
       ubicarse.mapa_colisiones,
       catalogo.madrina
+    exclude * -> * where kind is invoca
     autoLayout LeftRight
   }
 
@@ -102,6 +112,7 @@ views {
     description 'Una corre sola en cada arranque; la otra nunca declaró su momento. Son casos distintos: la primera es una decisión de diseño con un costo que hay que mantener bajo; la segunda es un hueco.'
     include automatico, arranque.ley_viva,
       sin_declarar, entregar.mapear_despliegue
+    exclude * -> * where kind is invoca
     autoLayout LeftRight
   }
 

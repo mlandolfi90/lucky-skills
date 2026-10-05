@@ -12,7 +12,7 @@ model {
     description 'Separar el hecho de la expectativa y de la hipótesis, y elegir UNA clase de cambio. Sin esto no se toca el repo.'
 
     cambio = skill 'cambio' {
-      description 'Registra la observación, la diagnostica y clasifica el siguiente escalón. 24 de las 37 skills la nombran.'
+      description 'Registra la observación, la diagnostica y clasifica el siguiente escalón.'
     }
 
     logalizar = skill 'logalizar' {

@@ -12,54 +12,66 @@
 //
 // Moraleja: un hueco de información se tapa con una vista nueva, no metiendo
 // el vecino adentro. Las autorizaciones viven ahora en `vistas/05-autorizaciones.c4`.
+//
+// `invoca` (una skill que llama a otra de OTRA fase) se excluye en cada vista
+// de este archivo: esas llamadas traían cajas de otra fase. Viven en
+// vistas/07-invocaciones.c4.
 
 views {
 
   view arranque_detalle of arranque {
     title 'Arranque — qué rige, y si está al día'
     include *
+    exclude * -> * where kind is invoca
     autoLayout LeftRight
   }
 
   view ubicarse_detalle of ubicarse {
     title 'Ubicarse — medir antes de opinar, sin escribir nada'
     include *
+    exclude * -> * where kind is invoca
     autoLayout LeftRight
   }
 
   view diagnosticar_detalle of diagnosticar {
     title 'Diagnosticar — el embudo por donde entra todo'
     include *
+    exclude * -> * where kind is invoca
     autoLayout LeftRight
   }
 
   view escalon_detalle of escalon {
     title 'El escalón — se entra por uno, y se sube si el cambio crece'
     include *
+    exclude * -> * where kind is invoca
     autoLayout LeftRight
   }
 
   view construir_detalle of construir {
     title 'Construir — lo que efectivamente escribe'
     include *
+    exclude * -> * where kind is invoca
     autoLayout LeftRight
   }
 
   view cerrar_detalle of cerrar {
     title 'Cerrar — el veredicto con evidencia'
     include *
+    exclude * -> * where kind is invoca
     autoLayout LeftRight
   }
 
   view entregar_detalle of entregar {
     title 'Entregar — solo con el cierre en FINAL'
     include *
+    exclude * -> * where kind is invoca
     autoLayout LeftRight
   }
 
   view transversales_detalle of transversales {
     title 'Transversales — sin momento propio, se llaman desde donde haga falta'
     include *
+    exclude * -> * where kind is invoca
     autoLayout LeftRight
   }
 

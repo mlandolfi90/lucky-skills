@@ -7,6 +7,10 @@
 // toda la figura —el PNG salía de 5950 px de ancho— y dejaba sus etiquetas
 // flotando en el vacío negro, lejos de la flecha a la que pertenecían.
 // Viven ahora en `vistas/05-autorizaciones.c4`, donde se leen todas juntas.
+//
+// `invoca` (una skill que llama a otra de OTRA fase) se excluye en cada vista
+// de este archivo: esas llamadas traían cajas de otra fase. Viven en
+// vistas/07-invocaciones.c4.
 
 views {
 
@@ -24,6 +28,7 @@ views {
       entregar,
       recibo
 
+    exclude * -> * where kind is invoca
     autoLayout TopBottom
   }
 

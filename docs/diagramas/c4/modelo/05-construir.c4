@@ -48,7 +48,6 @@ model {
     arq_configuracion -[usa]-> custodiar_secretos 'si el valor es una credencial, va por nombre'
     red_de_desarrollo -[sigue]-> modo_fixes 'si el portón cuesta caro y el humano lo difiere'
     auditar_mcp -[usa]-> red_de_desarrollo 'la auditoría también se comprueba'
-    paralelizar -[usa]-> estilar 'los carriles escriben con el mismo estilo'
   }
 
 }

@@ -49,6 +49,15 @@ specification {
     line dotted
   }
 
+  // Una skill invoca a otra que vive en OTRA fase, o consume su salida: el
+  // carril de crisol, el paso de disenar, el gate de cierre. Es distinta de
+  // `usa` para que el panorama y las vistas de fase la puedan dejar afuera:
+  // ahí ensucia. Tiene su vista propia, vistas/07-invocaciones.c4.
+  relationship invoca {
+    color blue
+    line dotted
+  }
+
   // UNA CONDICIÓN DE ENCENDIDO. No es una skill ni una fase: es lo que tiene
   // que ser cierto para que una skill entre. Su description dice también cómo
   // se NIEGA, que es la mitad que nadie escribe.

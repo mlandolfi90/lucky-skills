@@ -14,6 +14,11 @@ likec4 serve docs/diagramas/c4        # navegador, con recarga en caliente al ed
 likec4 export png docs/diagramas/c4 -o /tmp/salida
 ```
 
+Para el MCP de LikeC4, pasale esta carpeta: `likec4 mcp --stdio docs/diagramas/c4`.
+Medido el 2026-10-05: lanzado desde la raíz del espacio de trabajo y sin
+carpeta, tardó 78 s en contestar, y Claude Code corta a los 30 s; apuntado
+acá, contestó en 8.
+
 Las vistas, de más general a más detallada:
 
 | vista | qué muestra |
@@ -22,6 +27,10 @@ Las vistas, de más general a más detallada:
 | `recorrido` | El camino feliz, numerado paso a paso |
 | `*_detalle` | Qué skills viven dentro de cada fase |
 | `catalogo_detalle` | El ciclo propio del Taller |
+| `recorrido_conditional`, `recorrido_promocion`, `recorrido_catalogo` | Tres recorridos particulares, paso a paso |
+| `autorizaciones`, `alcance_transversales` | Dónde hace falta el humano, y desde dónde se llama a las transversales |
+| `encendido`, `encendido_*` | Qué prende cada skill, y qué la deja apagada |
+| `invocaciones_crisol`, `invocaciones_disenar`, `invocaciones_cierre`, `invocaciones_consultas` | Quién llama a quién cuando cruza de fase |
 
 ## Cómo está partido, y por qué
 
@@ -31,13 +40,17 @@ Cada archivo contesta **una** pregunta, para que un cambio toque un solo lugar:
 specification.c4          Qué clases de cosa hay y cómo se ven. Cero contenido.
 modelo/00-actores.c4      Quién decide y qué queda escrito.
 modelo/01..09-*.c4        Qué skills viven en cada fase. Una fase, un archivo.
+modelo/10-disparadores.c4 Qué prende cada skill, y cómo se niega.
+modelo/11-invocaciones.c4 Quién llama a quién cuando cruza de fase.
 modelo/99-flujo.c4        EL CAMINO: cómo se encadenan las fases entre sí.
 vistas/*.c4               Qué se dibuja y con qué layout.
 ```
 
 La separación que más rinde es la de `99-flujo.c4`: los archivos de fase dicen
-**qué hay adentro**, y solo ese dice **cómo se conecta**. Reordenar el flujo no
-obliga a tocar ninguna skill, y agregar una skill no obliga a tocar el flujo.
+**qué hay adentro**, y solo ese dice **cómo se conectan las fases**. Reordenar el
+flujo no obliga a tocar ninguna skill, y agregar una skill no obliga a tocar el
+flujo. Las llamadas de una skill a otra que vive en otra fase van aparte, en
+`11-invocaciones.c4`.
 
 ## Recetas
 
@@ -61,13 +74,28 @@ línea.
 
 **Cambiar colores o formas.** Solo `specification.c4`.
 
-**Relaciones.** Hay tres clases declaradas, y el color las distingue sin leer:
+**Una skill que llama a otra de otra fase.** Una línea `-[invoca]->` en
+`modelo/11-invocaciones.c4`. Si alguna de las dos no figura todavía en la vista
+de `vistas/07-invocaciones.c4` que le toca (la de quien llama), sumarla a su
+lista: ahí los nodos van nombrados uno por uno (ver abajo por qué), y cada vista
+saca las salientes de las cajas que en ella son sólo destino.
+
+**Relaciones.** Hay cinco clases declaradas, y el color las distingue sin leer:
 
 ```likec4
-a -[sigue]-> b 'el camino normal'          // verde
-a -[usa]-> b 'se la invoca desde acá'      // gris punteado
-a -[vuelve]-> b 'algo no cerró'            // rojo cortado
+a -[sigue]-> b 'el camino normal'                  // verde
+a -[usa]-> b 'la llama sin salir de la fase'       // gris punteado
+a -[invoca]-> b 'la llama desde otra fase'         // azul punteado
+a -[vuelve]-> b 'algo no cerró'                    // rojo cortado
+d -[enciende]-> b 'la condición que la prende'     // ámbar
 ```
+
+`invoca` no se dibuja en el panorama ni en las vistas de fase, de encendido o
+de autorizaciones: cada una la saca con `exclude * -> * where kind is invoca`.
+Medido el 2026-10-05: sin esa línea, el panorama ganaba cinco flechas y cada
+vista de fase, cajas de otras fases. Se lee en las cuatro vistas
+`invocaciones_*`, partidas por quién llama. Qué cuenta como `invoca` y qué no
+está escrito arriba de `modelo/11-invocaciones.c4`.
 
 ## Tres cosas medidas, para no repetir el tropiezo
 

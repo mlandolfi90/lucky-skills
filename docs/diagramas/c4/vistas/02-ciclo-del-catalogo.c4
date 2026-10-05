@@ -1,5 +1,9 @@
 // EL CICLO DEL TALLER, aparte del flujo de un cambio.
 // Es el que fabrica las skills que el flujo usa.
+//
+// `invoca` (una skill que llama a otra de OTRA fase) se excluye en cada vista
+// de este archivo: esas llamadas traían cajas de otra fase. Viven en
+// vistas/07-invocaciones.c4.
 
 views {
 
@@ -7,6 +11,7 @@ views {
     title 'El ciclo del catálogo — nacer, sellar, avisar, adoptar'
     description 'Da la vuelta completa: madrina, publicar-skill, sincronizar, adopcion. Los pasos con #autoriza no se dan sin el humano.'
     include *
+    exclude * -> * where kind is invoca
     autoLayout LeftRight
   }
 

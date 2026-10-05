@@ -1,0 +1,114 @@
+// QUIÉN INVOCA A QUIÉN, CRUZANDO DE FASE.
+//
+// Las demás vistas excluyen `invoca` a propósito: una llamada a otra fase les
+// metía cajas ajenas, y la regla de la casa es tapar ese hueco con una vista
+// nueva, no metiendo al vecino (ver 01-por-fase.c4). Estas son esas vistas,
+// partidas en cuatro por quién llama: todas juntas no se leían, y crisol con
+// disenar en la misma cruzaba las flechas hasta tapar las etiquetas.
+//
+// Sólo muestran `invoca`. Los `usa`, `sigue` y `vuelve` entre estas mismas
+// skills ya se leen en la vista de su fase.
+//
+// Las cajas van nombradas una por una: `crisol ->` sola manda la flecha a la
+// FASE de destino, no a la skill. Y como LikeC4 dibuja toda flecha entre dos
+// cajas incluidas, cada vista saca las salientes de las cajas que en ella son
+// sólo destino: esas llamadas son de otra vista. Una skill nueva que entre a
+// esta trama se suma a la lista de la vista que le toca.
+
+views {
+
+  view invocaciones_crisol {
+    title 'Los carriles de crisol, en otras fases'
+    description 'Crisol no construye solo: cada carril llama a una skill de otra fase, y el cierre de cada tramo pasa por cierre o, si el fallo se repite, por autopsia.'
+    include
+      escalon.crisol,
+      ubicarse.arq_descubrir,
+      ubicarse.arq_ubicar,
+      ubicarse.mapa_colisiones,
+      construir.paralelizar,
+      cerrar.arq_verificar,
+      cerrar.cierre,
+      cerrar.autopsia,
+      transversales.delegar
+    exclude * -> * where kind is not invoca
+    exclude
+      ubicarse.arq_descubrir ->,
+      ubicarse.arq_ubicar ->,
+      construir.paralelizar ->,
+      cerrar.arq_verificar ->,
+      cerrar.cierre ->,
+      cerrar.autopsia ->
+    autoLayout LeftRight
+  }
+
+  view invocaciones_disenar {
+    title 'Los pasos de disenar, y la puerta de microfix y hotfix'
+    description 'disenar consulta precedente, la arquitectura y el mapa antes de proponer, y según el alcance llama a quien corresponde. microfix y hotfix miran el mapa de colisiones antes de escribir.'
+    include
+      escalon.disenar,
+      escalon.microfix,
+      escalon.hotfix,
+      ubicarse.precedente,
+      ubicarse.arq_descubrir,
+      ubicarse.mapa_colisiones,
+      construir.auditar_mcp,
+      construir.estilar,
+      construir.arq_configuracion,
+      transversales.documentar
+    exclude * -> * where kind is not invoca
+    exclude
+      ubicarse.precedente ->,
+      ubicarse.arq_descubrir ->
+    autoLayout LeftRight
+  }
+
+  view invocaciones_cierre {
+    title 'Lo que el cierre lee de otras fases'
+    description 'Cada check y cada gate del cierre consume la salida de otra skill: el mapa de colisiones, las pruebas del escalón, el barrido de secretos, la guarda de configuración, la exposición y el saber.'
+    include
+      cerrar.cierre,
+      cerrar.arq_verificar,
+      cerrar.autopsia,
+      entregar.revisor_seguridad,
+      ubicarse.arq_descubrir,
+      ubicarse.mapa_colisiones,
+      escalon.microfix,
+      escalon.hotfix,
+      construir.custodiar_secretos,
+      construir.arq_configuracion,
+      transversales.memoria_del_taller
+    exclude * -> * where kind is not invoca
+    exclude
+      escalon.microfix ->,
+      escalon.hotfix ->,
+      construir.custodiar_secretos ->
+    autoLayout LeftRight
+  }
+
+  view invocaciones_consultas {
+    title 'Lo que se consulta desde otra fase'
+    description 'Antes de diagnosticar, instrumentar, ubicar, adoptar o desplegar, la skill consulta a otra: precedente, el mapa de colisiones, el sextante, la guarda de configuración, la red tendida.'
+    include
+      diagnosticar.cambio,
+      diagnosticar.logalizar,
+      ubicarse.precedente,
+      ubicarse.mapa_colisiones,
+      ubicarse.arq_ubicar,
+      ubicarse.sextante,
+      construir.paralelizar,
+      construir.arq_configuracion,
+      construir.custodiar_secretos,
+      construir.red_de_desarrollo,
+      transversales.memoria_del_taller,
+      transversales.documentar,
+      arranque.cargar_reglas,
+      catalogo.sincronizar,
+      catalogo.adopcion,
+      catalogo.publicar_skill,
+      entregar.desplegar,
+      entregar.mapear_despliegue
+    exclude * -> * where kind is not invoca
+    autoLayout LeftRight
+  }
+
+}

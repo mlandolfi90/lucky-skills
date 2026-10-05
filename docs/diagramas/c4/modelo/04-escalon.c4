@@ -24,6 +24,7 @@ model {
     }
 
     microfix -[vuelve]-> crisol 'tres microfixes sobre el mismo contrato se promueven'
+    hotfix -[vuelve]-> crisol 'FOLLOW_UP=CRISOL: el seguimiento se promueve a Crisol'
     disenar -[sigue]-> crisol 'el diseño ya no cabe en un tramo'
   }
 

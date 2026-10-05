@@ -37,6 +37,7 @@ model {
 
     precedente -[usa]-> consultar_catalogo 'si el precedente no está en casa'
     arq_descubrir -[sigue]-> arq_ubicar 'con la estructura corroborada, dónde va lo nuevo'
+    arq_ubicar -[usa]-> mapa_colisiones 'rutas candidatas: COLLISION=FOUND frena el destino'
   }
 
 }
