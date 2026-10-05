@@ -1,0 +1,4 @@
+# Los mensajes no se versionan (decisión del 2026-10-05, puede cambiar).
+# Ver docs/concepts/buzon.md.
+inbox/
+outbox/

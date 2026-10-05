@@ -32,6 +32,7 @@
 - [Lifecycle](lifecycle.md)
 - [Huella local](local-fingerprint.md)
 - [Detalle de observación](observation-detail.md)
+- [Buzón](buzon.md)
 
 Cada concepto se define una sola vez. Las skills y contratos deben enlazarlo, no
 reescribirlo.
