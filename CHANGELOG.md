@@ -2,6 +2,9 @@
 
 Generado por publicar-skill; no editar a mano.
 
+## precedente 1.0.2 — 2026-10-05 — PATCH
+- 1.0.1 → 1.0.2 · QUALITY=PASS · autorizó human:vikingo
+
 ## cierre 1.5.1 — 2026-09-23 — PATCH
 - 1.5.0 → 1.5.1 · QUALITY=PASS · autorizó human:vikingo
 
