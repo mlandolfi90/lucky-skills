@@ -1,6 +1,7 @@
 ---
 name: precedente
-description: Buscar precedente antes de resolver de cero: fichas del saber, skills del catálogo, estructura corroborada del repo. Usar sólo al entrar a diagnosticar un fallo o a diseñar.
+description: >-
+  Buscar precedente antes de resolver de cero: fichas del saber, skills del catálogo, estructura corroborada del repo. Usar sólo al entrar a diagnosticar un fallo o a diseñar.
 ---
 
 # Precedente
