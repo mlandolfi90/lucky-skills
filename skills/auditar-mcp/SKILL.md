@@ -20,9 +20,8 @@ comparando lo que entró con lo que salió. Frontera con logalizar:
 logalizar mira hacia adentro de una lógica propia; auditar-mcp mira el
 borde — y en una pasarela, el borde es casi todo lo que hay.
 
-La disparan `disenar` (cuando el alcance es un MCP compartido) y `madrina`
-(cuando la criatura es un MCP); su `config/` lo gobierna
-`arquitectura-configuracion`.
+La dispara `disenar` (cuando el alcance es un MCP compartido); su `config/`
+lo gobierna `arquitectura-configuracion`.
 
 Toda regla de abajo nació de una medición en un repo real y varias se
 cayeron al cambiar de transporte o de SDK. Ninguna se aplica sin medirla
@@ -469,8 +468,10 @@ compartido (`lucky-auditoria`); lo que se mide en cada uno vive en su
     envejece; las dos valen, callarlo no.
   Por eso va en una LÍNEA DE APERTURA por sesión (R3-bis), no como campo
   de cada línea: es constante por sesión, y como campo se paga N veces y
-  se repite N veces. En stdio no hace falta: el proyecto llega por el
-  entorno del hijo y es un hecho, no una afirmación. Pero "es un MCP de
+  se repite N veces. En stdio no hace falta cuando el arnés trae el
+  proyecto por el entorno del hijo (Claude Code): ahí es un hecho, no
+  una afirmación; un cliente que no lo trae ni declara `roots`, como
+  Codex (R5), se cubre con la ruta ABSOLUTA de R4. Pero "es un MCP de
   stdio" no descarta un repo: la pregunta es si TIENE rama HTTP
   (`--transport http`, un Dockerfile que lo arranca), no cómo se lo usa
   hoy. Y antes de que la apertura tenga sentido, el transporte declarado
@@ -491,11 +492,13 @@ compartido (`lucky-auditoria`); lo que se mide en cada uno vive en su
   `<mcp>` derivado del paquete o atado al manifiesto por prueba;
   `<escritor>` = id de sesión en stdio, pid en HTTP.
 - **R3 — Qué guarda.** Una línea JSON por llamada: `cuando` (ISO 8601
-  UTC), `sesion`, `pid`, `arnes{id, proyecto}`, `cliente`, `herramienta`,
-  `argumentos` (lista blanca por forma), `retorno` (su propia lista
-  blanca), `resultado` ok|error, `error` (código o tipo del fondo),
-  `duracion_ms`, `modo`. En crudo, además: argumentos tal cual y
-  respuesta entera con tope de 20 KB, diciendo de cuánto se cortó.
+  UTC), `sesion`, `pid`, `arnes` (el `id`, los campos que su arnés
+  declara en el catálogo de la regla 2 y siempre `proyecto`, `null` si
+  no se conoce: `{id, sesion, proyecto}` en Claude Code), `cliente`, `herramienta`, `argumentos` (lista blanca por
+  forma), `retorno` (su propia lista blanca), `resultado` ok|error,
+  `error` (código o tipo del fondo), `duracion_ms`, `modo`. En crudo,
+  además: argumentos tal cual y respuesta entera con tope de 20 KB,
+  diciendo de cuánto se cortó.
 - **R3-bis — Cabecera.** Primera línea del archivo, escrita con la
   primera llamada (no al arrancar). Es donde el registro declara su
   alcance: `tipo:"cabecera"`, versión del esquema de las líneas, quién
@@ -514,13 +517,16 @@ compartido (`lucky-auditoria`); lo que se mide en cada uno vive en su
   responde "¿cómo estaba cuando se escribió esto?", que es la pregunta
   que se hace seis meses después, cuando ya no hay a quién llamar.
 - **R4 — Activadores y dónde van.** Uno solo: `<MCP>_AUDITORIA` =
-  vacío/`0` (apagado) · `1` (redactado) · `crudo` · una ruta ABSOLUTA.
-  Solo la ruta absoluta cuenta como ruta; cualquier otro valor APAGA y
-  avisa. "Todo lo demás es ruta" resucita R1 por la puerta de atrás: un
-  `false` mal escrito crea un directorio `false` en el cwd — el repo de
-  otro — y una ruta relativa se resuelve contra ese mismo cwd. La
-  asimetría es deliberada: apagado por un typo cuesta un registro que
-  falta y se ve en el log; encendido en el lugar equivocado cuesta
+  vacío, `0`, `false` o `no` (apagado) · `1`, `true`, `si` o `yes`
+  (redactado) · `crudo`, `crude`, `debug` o `raw` (crudo) · una ruta
+  ABSOLUTA (redactado, en ese lugar). Son las palabras que acepta el
+  paquete, en minúscula: con mayúsculas solo reconoce las del crudo, y
+  las demás apagan y avisan. Solo la ruta absoluta cuenta como ruta;
+  cualquier otro valor APAGA y avisa. "Todo lo demás es ruta" resucita
+  R1 por la puerta de atrás: un typo como `flase` colgaría un archivo
+  del cwd — el repo de otro — y una ruta relativa se resuelve contra
+  ese mismo cwd. La asimetría es deliberada: apagado por un typo cuesta un
+  registro que falta y se ve en el log; encendido en el lugar equivocado cuesta
   credenciales sueltas. Consecuencia explícita: "crudo en una ruta
   elegida" no se puede expresar, a propósito — el material sensible va
   donde la regla dice. En stdio va
@@ -539,6 +545,8 @@ compartido (`lucky-auditoria`); lo que se mide en cada uno vive en su
   | stdio | medido | sesión = proceso |
   | streamable-http | medido | `mcp-session-id` en cada línea |
   | `roots/list` bajo HTTP · Claude Code 2.1.263 · protocolo 2025-11-25 | medido (mtk-chr, cliente real) | una vez por sesión, con plazo, línea de apertura (R1-bis) |
+  | `roots/list` bajo stdio · Claude Code 2.1.289 (`claude -p`) · protocolo 2025-11-25 | medido (SecondBrian, 2026-10-04; ficha CAP-6deeec8d2c5b) | declara `roots` y responde los directorios de trabajo de la sesión: en la medición, el proyecto y un directorio adicional de la configuración del usuario. No se toma el primero por el proyecto (R1-bis); el proyecto ya llega por `CLAUDE_PROJECT_DIR` (R1) |
+  | `roots/list` bajo stdio · Codex 0.160.0 (`codex exec`) · protocolo 2025-06-18 | medido (SecondBrian, 2026-10-04; ficha CAP-6deeec8d2c5b) | no declara `roots` ni hereda el entorno: pasa 20 variables fijas y el bloque `env` de su configuración, sin el proyecto. La ruta ABSOLUTA de R4 va en ese bloque; sin ella, se apaga y avisa (R1) |
   | `roots/list` · otros clientes | pendiente | mismo contrato; cada cliente se mide |
 
   Las versiones de la tabla son exactas porque lo medido es exacto: el
@@ -578,7 +586,8 @@ compartido (`lucky-auditoria`); lo que se mide en cada uno vive en su
   tipo de error y no tumba el `check`.
 - **R9 — Lectores estándar en el paquete.** Un formato, unos lectores:
   `cazar` (argumento cuyo valor no vuelve en la respuesta — candidatos,
-  no veredictos), `rechazos` (retornos con `rechazadas > 0`),
+  no veredictos), `rechazos` (retornos con `fallaron > 0`: es el nombre
+  del molde `config/auditoria.toml.example`, y el lector no mira otro),
   `por-sesion`. Sin ellos cada MCP reinventa el `jq`. Bajo HTTP los
   mismos lectores se exponen como herramienta del propio MCP
   (`auditoria`: `estado`, `listar`, `leer` con filtro por sesión,
