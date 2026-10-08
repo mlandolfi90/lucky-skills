@@ -108,6 +108,12 @@ por sesión (`identidad.py:38`, `enganches/fastmcp4.py:130`, en el tag
 
 ### Paso 3. auditar-mcp 1.6.5: la receta dice lo que hace el paquete
 
+**Primera parte publicada** el 2026-10-08 (`skill-auditar-mcp-v1.6.5`):
+S-09, S-10 y S-31, la línea 23 sin `madrina`, y dos filas nuevas en R5 con
+la evidencia de S-15 (ficha `CAP-6deeec8d2c5b`), más R1-bis ajustado para
+que no contradiga la fila de Codex. La segunda parte va en otra versión,
+después del paquete 0.10.0.
+
 - Ya ciertas con 0.9.0: S-09 (R4 nombra todos los valores del activador),
   S-10 (R3: `arnes{id, sesion, proyecto}`) y S-31 (R9: `fallaron`).
 - Después de publicar 0.10.0: S-11, S-22, S-26 y S-29, porque describen
@@ -124,7 +130,7 @@ arregla.
 | Lo que dice | Dónde | La otra | Recomendación |
 |---|---|---|---|
 | documentar: «`cierre` la pide cuando el cambio tocó documentación» | `documentar/SKILL.md:12` | cierre 1.5.1 no nombra a documentar | Quitar la frase de documentar (PATCH). Sumarle un gate a cierre endurece todos los cierres, y el encendido por estado ya cubre el caso. |
-| auditar-mcp: «la disparan `disenar` y `madrina`» | `auditar-mcp/SKILL.md:23` | madrina no la nombra, y hace skills, no MCPs | Quitarla de auditar-mcp, dentro del paso 3. |
+| auditar-mcp: «la disparan `disenar` y `madrina`» | `auditar-mcp/SKILL.md:23` | madrina no la nombra, y hace skills, no MCPs | Hecho: auditar-mcp 1.6.5 ya no la nombra (paso 3). |
 | estilar: «el carril Construir de `crisol` cuando el alcance es UI» | `estilar/SKILL.md:9` | crisol no nombra a estilar | Quitarla de estilar (PATCH): disenar ya la llama en su paso 4. |
 | delegar: `paralelizar` corre bajo el régimen activo | `delegar/SKILL.md:40-44` | paralelizar no nombra a delegar | Acá la frase es correcta. Sumarla a paralelizar (PATCH): antes de lanzar, resuelve el régimen de delegar; sin régimen activo ni default del proyecto, declara `REGIMEN=NONE` y manda el harness (`delegar/SKILL.md:36-38`). |
 | arquitectura-ubicar: «la dispara el carril Arquitectura de `crisol` o `disenar`» | `arquitectura-ubicar/SKILL.md:8-9` | disenar no la nombra: su paso 2 llama a arquitectura-descubrir | Quitar «o `disenar`» de arquitectura-ubicar (PATCH), salvo que disenar deba ubicar lo nuevo; en ese caso, sumárselo a disenar como paso. |
@@ -214,7 +220,9 @@ para cada una. `proponer` publica; `señalar` deja la ficha para revisión.
 ## 5. Lo que queda abierto en el buzón
 
 - 11 sugerencias de SecondBrian quedaron en «falta evidencia». Cada una dice
-  qué medir, y se reabren cuando llegue la medición.
+  qué medir, y se reabren cuando llegue la medición. El 2026-10-08 llegaron
+  dos fichas: la de S-15 entró en auditar-mcp 1.6.5, y la de S-01 todavía
+  espera un segundo servidor no Python. Quedan 10.
 - Las respuestas están en `docs/buzon/outbox/` y en el `inbox/` de cada
   destino. La decisión de cada sugerencia está debajo de ella, en
   `docs/buzon/inbox/`.
