@@ -118,6 +118,12 @@ después del paquete 0.10.0.
   S-10 (R3: `arnes{id, sesion, proyecto}`) y S-31 (R9: `fallaron`).
 - Después de publicar 0.10.0: S-11, S-22, S-26 y S-29, porque describen
   conducta nueva del paquete.
+- En esa misma versión, la fila de Claude Code bajo stdio en R5 pasa a citar
+  `CAP-39324677da1f`, que corrige a `CAP-6deeec8d2c5b`, y dice qué devuelve
+  `roots/list`: el proyecto más los `additionalDirectories` de los settings
+  que carga. Lo midió SecondBrian el 2026-10-08 (commit `4a6a321`): con los
+  settings de usuario da dos raíces, y sin ellos, una. Que `--add-dir` también
+  sume raíces no está medido.
 - En el mismo PATCH, quitar «y `madrina` (cuando la criatura es un MCP)» de
   `SKILL.md:23`. Es la segunda fila del paso 4.
 
