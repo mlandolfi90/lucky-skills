@@ -101,6 +101,23 @@ por sesión (`identidad.py:38`, `enganches/fastmcp4.py:130`, en el tag
     corregido (S-28).
   - `identidad.py` y el enganche fastmcp4: bajo HTTP, el cliente se toma de
     la sesión en cada llamada (mtk-chr).
+- De la quinta tanda de mtk-chr (2026-10-09, buzón
+  `20261009T205949Z-lucky-tool-mtk-chr-directo`), decidido por la operadora:
+  - U: `escritor()` pregunta `if _SESION_DEL_TRANSPORTE:`, que es la
+    variable de contexto y no su valor, y da siempre verdadero. Bajo stdio el
+    archivo sale firmado con el pid, contra R2 (`identidad.py:146`).
+  - S: el paquete escribe la línea `tipo:"apertura"` con `roots_declarados`,
+    una vez por sesión bajo HTTP, como piden R1-bis y R3-bis. Hoy no la
+    escribe ni la escribió nunca, y anota en `arnes.proyecto` la raíz que
+    vino de `roots`, que R1-bis prohíbe. Manda la receta.
+  - T: `verificar_enganche` con fastmcp 4 sólo mira la lista
+    `servidor.middleware`. Que el kit haga un `tools/call` real por un
+    cliente en proceso. Va con V: el primer camino de error se prueba por el
+    middleware, no llamando a `registrar`.
+  - R: el kit avisa si falta `[retorno]` o `[conteos]`, sin fallar: un MCP
+    sin herramientas por lote no los necesita.
+  - W: que una herramienta opaca pueda dejar ver campos declarados, como
+    `escribe` en `chr_comando_crudo`.
 - Cada arreglo con su test y su reversión a mano. Para mtk-chr, un caso del kit
   con dos clientes de nombre distinto.
 - MINOR: cambia la forma de salida de `por-sesion` y lo que significa la ruta
@@ -124,6 +141,10 @@ después del paquete 0.10.0.
   que carga. Lo midió SecondBrian el 2026-10-08 (commit `4a6a321`): con los
   settings de usuario da dos raíces, y sin ellos, una. Que `--add-dir` también
   sume raíces no está medido.
+- También en esa versión (Q, mtk-chr): la salida tiene que poder decir un
+  cumplimiento parcial, como `CAMINOS_DE_ERROR=2/3` o `REDACCION` sin
+  `WHITELIST_RETORNO`. Hoy sólo escribe el caso completo. Cuántos campos
+  pide el método es de MapaObjetivo (H-91).
 - En el mismo PATCH, quitar «y `madrina` (cuando la criatura es un MCP)» de
   `SKILL.md:23`. Es la segunda fila del paso 4.
 
