@@ -23,6 +23,13 @@ publicación, que es lo que la versiona y la hace reversible.
 - **En caliente**: cuando el humano nombra otra forma, rige desde ese
   momento, en la misma sesión, sin reinicio. El cambio se confirma en una
   línea.
+- **Pedido de una vez**: si el humano pide otra forma para una sola
+  respuesta, esa respuesta va en esa forma y la siguiente vuelve a la que
+  regía. No es un cambio: la forma vigente queda como estaba. Volver no es
+  cambiarse sola, porque el humano lo pidió así. Se avisa en una línea, en la
+  misma respuesta. Si no queda claro si el pedido es para una vez o para
+  quedarse, se toma como de una vez, salvo que la forma pedida diga otra
+  cosa.
 - **Sin forma activa no se impone nada.** Si el humano no eligió y el
   proyecto no declara un default, la sesión habla como el harness manda.
   `FORMA=NONE` es estado válido.
@@ -46,7 +53,9 @@ publicación, que es lo que la versiona y la hace reversible.
 2. Leer el archivo de la forma en el registro y aplicar sus reglas a cada
    respuesta al humano desde ese momento.
 3. Ante un pedido de cambio: leer la forma nueva, confirmar el cambio en una
-   línea, y seguir en ella.
+   línea, y seguir en ella. Ante un pedido de una vez: leer la forma pedida,
+   contestar esa respuesta en ella, avisarlo en una línea, y volver a la
+   forma vigente en la respuesta siguiente.
 4. Ante "¿qué formas hay?": listar el registro con id, versión y una línea
    por forma.
 5. Si el contenido no entra sano en la forma, declarar la degradación y
@@ -55,13 +64,14 @@ publicación, que es lo que la versiona y la hace reversible.
 ## Salida
 
 **Se emite sólo cuando la skill actúa**: al activar una forma, al cambiarla,
-al listar el registro o al declarar una degradación. Bajo una forma ya
+al usarla para una sola respuesta, al listar el registro o al declarar una
+degradación. Bajo una forma ya
 vigente y estable no se emite nada — un recibo que aparece en cada respuesta
 gasta los tokens que la forma vino a ahorrar, y deja de leerse.
 
 ```text
 FORMA=<id@version|NONE>
-CAMBIO=SI|NO
+CAMBIO=SI|NO|UNA_VEZ
 FORMAS_DISPONIBLES=<n>
 DEGRADACION=<declarada|NONE>
 ```
