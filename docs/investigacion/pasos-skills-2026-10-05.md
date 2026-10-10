@@ -118,6 +118,13 @@ por sesión (`identidad.py:38`, `enganches/fastmcp4.py:130`, en el tag
     sin herramientas por lote no los necesita.
   - W: que una herramienta opaca pueda dejar ver campos declarados, como
     `escribe` en `chr_comando_crudo`.
+- De mtk-chr, el 2026-10-10 (buzón `20261010T002121Z-lucky-tool-mtk-chr-directo`):
+  `estado()` da como `acumulado.mas_viejo` el mínimo de los mtime
+  (`registro.py:493-503`). En un archivo que sólo crece, eso es la última
+  escritura. Se informan dos fechas, cada una con su nombre: la primera línea
+  de cada archivo, que es lo más viejo, y la última escritura, que es lo que
+  mira la retención. mtk-chr tiene una prueba que se pone roja cuando se
+  arregle (`tests/test_estado_dice.py`).
 - Cada arreglo con su test y su reversión a mano. Para mtk-chr, un caso del kit
   con dos clientes de nombre distinto.
 - MINOR: cambia la forma de salida de `por-sesion` y lo que significa la ruta
