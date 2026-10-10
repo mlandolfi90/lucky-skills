@@ -7,6 +7,9 @@ test que la cace no esta protegida, este donde este escrita.
 """
 
 import json
+import os
+import time
+from datetime import datetime, timezone
 from pathlib import Path
 
 import pytest
@@ -14,6 +17,8 @@ from conftest import CONFIG
 
 from lucky_auditoria import Auditor, identidad
 from lucky_auditoria.registro import MAX_RESPUESTA, tipo_del_error
+
+CENTINELA = "centinela-del-registro-7c1e"
 
 
 @pytest.fixture
@@ -30,7 +35,8 @@ def auditor(tmp_path, monkeypatch):
     proyecto.mkdir()
     monkeypatch.setattr(identidad, "raiz_del_proyecto", lambda: str(proyecto))
     a = Auditor("mcp-de-prueba", config=config, version="1.2.3", commit="abc123")
-    monkeypatch.setenv(a.variable, str(tmp_path / "reg.jsonl"))
+    # Una CARPETA: desde 0.10.0 la ruta absoluta es siempre carpeta (S-11).
+    monkeypatch.setenv(a.variable, str(tmp_path / "registro"))
     return a
 
 
@@ -202,3 +208,158 @@ class TestElPaqueteDiceUnaSolaVersion:
         manifiesto = tomli.loads((raiz / "pyproject.toml").read_text(encoding="utf-8"))
 
         assert manifiesto["project"]["version"] == lucky_auditoria.__version__
+
+
+# --- 0.10.0 -----------------------------------------------------------------
+
+
+class TestLasPalabrasDelInterruptorNoDistinguenMayusculas:
+    """S-22: hasta 0.9.0 `CRUDO` no era una palabra: se tomaba como ruta
+    RELATIVA y la auditoria se apagaba, con el operador pidiendo encender."""
+
+    @pytest.mark.parametrize(
+        ("palabra", "modo"),
+        [
+            ("CRUDO", "crudo"),
+            ("Debug", "crudo"),
+            ("TRUE", "redactado"),
+            ("Si", "redactado"),
+            ("FALSE", "apagado"),
+            ("No", "apagado"),
+        ],
+    )
+    def test_cualquier_caja(self, auditor, monkeypatch, palabra, modo):
+        monkeypatch.setenv(auditor.variable, palabra)
+
+        assert auditor.modo() == modo
+
+
+class TestRegistrarNoLevantaPorNada:
+    """S-19: "nunca levanta" cubria la escritura y no el cuerpo entero."""
+
+    def test_un_fallo_al_armar_la_ruta_tampoco_levanta(self, auditor, monkeypatch, caplog):
+        def revienta():
+            raise ValueError(CENTINELA)
+
+        monkeypatch.setattr(auditor, "ruta", revienta)
+        with caplog.at_level("WARNING"):
+            # Si esto levanta, auditar tumbo la llamada que auditaba.
+            auditor.registrar("x", {})
+
+        assert "ValueError" in caplog.text
+        assert CENTINELA not in caplog.text, "el mensaje de la excepcion se copio al log"
+
+    def test_el_check_tampoco(self, auditor, monkeypatch):
+        def revienta():
+            raise ValueError(CENTINELA)
+
+        monkeypatch.setattr(auditor, "ruta", revienta)
+        estado = auditor.estado()
+
+        assert estado["archivo"] is None
+        assert "ValueError" in estado["motivo"]
+        assert CENTINELA not in str(estado)
+
+    def test_un_id_de_sesion_que_no_sirve_de_nombre_no_sale_de_la_carpeta(
+        self, auditor, monkeypatch, tmp_path
+    ):
+        # El id viene del entorno. Con un separador, `Path.with_name` levantaba.
+        monkeypatch.setattr(identidad, "id_de_sesion", lambda: "../../afuera")
+        auditor.registrar("x", {})
+
+        ruta = auditor.ruta()
+        assert ruta.exists() and ruta.parent == tmp_path / "registro"
+        assert "afuera" not in ruta.name
+        # La linea sigue llevando el id tal cual: el nombre es lo que se protege.
+        assert _lineas(auditor)[-1]["sesion"] == "../../afuera"
+
+
+class TestElArchivoLoFirmaElTransporte:
+    """U: bajo stdio firma la sesion (R2), bajo HTTP el pid. Hasta 0.9.0
+    `if _SESION_DEL_TRANSPORTE:` preguntaba por el objeto `ContextVar`, que
+    siempre es verdadero, y bajo stdio todo archivo salia firmado con el pid."""
+
+    def test_stdio_firma_con_la_sesion(self, auditor, monkeypatch):
+        monkeypatch.setattr(identidad, "id_de_sesion", lambda: "sesion-de-stdio")
+        assert auditor.transporte == "stdio"
+
+        nombre = auditor.ruta().name
+        assert "sesion-de-stdio" in nombre
+        assert f"pid{os.getpid()}" not in nombre
+
+    def test_http_firma_con_el_pid(self, auditor, monkeypatch):
+        monkeypatch.setattr(identidad, "id_de_sesion", lambda: "sesion-de-http")
+        auditor.transporte = "http"
+
+        nombre = auditor.ruta().name
+        assert f"pid{os.getpid()}" in nombre
+        assert "sesion-de-http" not in nombre
+
+
+class TestUnaCabeceraQueFalloSeReintenta:
+    def test_la_llamada_siguiente_la_escribe(self, auditor, monkeypatch):
+        """S-21: hasta 0.9.0 se marcaba escrita ANTES de escribirla. Si
+        escribirla fallaba, el archivo quedaba entero sin cabecera: sin MCP,
+        sin esquema y sin la huella de la redaccion."""
+        original = auditor._cabecera
+        intentos = []
+
+        def falla_la_primera(modo):
+            intentos.append(modo)
+            if len(intentos) == 1:
+                raise OSError("disco lleno")
+            return original(modo)
+
+        monkeypatch.setattr(auditor, "_cabecera", falla_la_primera)
+        auditor.registrar("x", {})
+        auditor.registrar("y", {})
+
+        lineas = _lineas(auditor)
+        assert lineas[0]["tipo"] == "cabecera"
+        assert [x.get("herramienta") for x in lineas[1:]] == ["y"]
+
+
+class TestElCheckDaDosFechas:
+    def test_mas_viejo_es_la_primera_linea_y_no_la_ultima_escritura(self, auditor):
+        """X, de lucky-tool-mtk-chr: hasta 0.9.0 `mas_viejo` era el menor
+        mtime, y en un archivo que solo crece el mtime es la ULTIMA escritura:
+        con un solo archivo, "lo mas viejo" era lo recien escrito."""
+        auditor.registrar("x", {})
+        propio = auditor.ruta()
+        firma = identidad.escritor(auditor.transporte)
+
+        def hermano(nombre, primera, mtime):
+            otro = propio.with_name(propio.name.replace(firma, nombre))
+            otro.write_text(json.dumps({"tipo": "cabecera", "cuando": primera}) + "\n", "utf-8")
+            os.utime(otro, (mtime, mtime))
+
+        # El de contenido mas viejo, tocado hace un minuto. `Z` como lo escribe
+        # un hermano TypeScript.
+        hermano("viejo", "2026-01-01T00:00:00Z", time.time() - 60)
+        # Y el mas quieto, con contenido mas nuevo.
+        marzo = datetime(2026, 3, 1, tzinfo=timezone.utc)
+        hermano("quieto", "2026-09-01T00:00:00+00:00", marzo.timestamp())
+
+        acumulado = auditor.estado()["acumulado"]
+
+        assert acumulado["archivos"] == 3
+        assert acumulado["mas_viejo"] == "2026-01-01T00:00:00+00:00"
+        assert acumulado["escritura_mas_vieja"] == marzo.isoformat()
+
+
+class TestElCheckAvisaSinRetornoNiConteos:
+    """R, de lucky-tool-mtk-chr: sin `[retorno]` ni `[conteos]` un rechazo
+    adentro de una respuesta exitosa se anota ok. Aviso, no falla: un MCP sin
+    herramientas por lote no los necesita."""
+
+    def test_sin_las_dos_secciones_avisa(self, tmp_path, monkeypatch):
+        config = tmp_path / "solo-argumentos.toml"
+        config.write_text('[argumentos]\naction = { tipo = "str" }\n', encoding="utf-8")
+        a = Auditor("mcp-sin-lotes", config=config)
+        # Apagado incluso: la configuracion se juzga igual.
+        monkeypatch.setenv(a.variable, "0")
+
+        assert "sin [retorno] ni [conteos]" in a.estado()["redaccion_aviso"]
+
+    def test_con_retorno_no_avisa(self, auditor):
+        assert "redaccion_aviso" not in auditor.estado()

@@ -236,7 +236,8 @@ class KitDeAuditoria:
         # paso escribiendo estas mismas guardas. El peligro se mudo, no
         # desaparecio: ahora lo cubre la guarda de sesion del anfitrion.
         auditor = self.construir(tmp_path)
-        monkeypatch.setenv(auditor.variable, str(tmp_path / "registro.jsonl"))
+        # Una CARPETA: desde 0.10.0 la ruta absoluta es siempre carpeta (S-11).
+        monkeypatch.setenv(auditor.variable, str(tmp_path / "registro"))
         return auditor
 
     def _texto(self, auditor) -> str:
@@ -291,17 +292,47 @@ class KitDeAuditoria:
         assert set(anotado) == {"_opaco", "operaciones"}
         assert "largo" not in texto
 
-    def test_el_mensaje_de_una_excepcion_no_se_copia(self, auditor):
-        # El texto de una excepcion arrastra lo que se le paso a la herramienta.
-        # Por eso se anota el TIPO, no el mensaje.
-        auditor.registrar(
-            self.herramienta_normal,
-            {},
-            resultado="error",
-            error=type(ValueError(CENTINELA)).__name__,
-        )
+    def test_el_mensaje_de_una_excepcion_no_se_copia(self, auditor, monkeypatch):
+        """El texto de una excepcion arrastra lo que se le paso a la herramienta.
+        Por eso se anota el TIPO, no el mensaje.
 
-        assert CENTINELA not in self._texto(auditor)
+        Por el middleware y no llamando a `registrar` (V, de lucky-tool-mtk-chr):
+        hasta 0.9.0 este test le pasaba a `registrar` el tipo ya resuelto, o sea
+        que probaba lo que el propio test le daba. Ahora una herramienta levanta
+        de verdad, adentro de un servidor de usar y tirar con el auditor del
+        anfitrion, y el registro tiene que sacar el tipo del fondo sin el texto.
+        No toca el servidor del anfitrion ni ninguna de sus herramientas.
+        """
+        pytest.importorskip("fastmcp")
+        from fastmcp import Client, FastMCP
+
+        from lucky_auditoria.enganches import fastmcp4
+
+        # El cliente en proceso se anota como el cliente del proceso: que no
+        # le quede a las pruebas que siguen.
+        monkeypatch.setattr(identidad, "_CLIENTE", {})
+        mcp = FastMCP("sonda-del-kit")
+
+        @mcp.tool
+        def explotar(dato: str) -> str:
+            raise ValueError(f"el mensaje arrastra: {CENTINELA}")
+
+        fastmcp4.instalar(mcp, auditor)
+
+        async def llamar():
+            async with Client(mcp) as cliente:
+                try:
+                    await cliente.call_tool("explotar", {"dato": "x"})
+                except Exception:
+                    pass
+
+        _correr(llamar)
+
+        texto = self._texto(auditor)
+        assert CENTINELA not in texto
+        linea = json.loads(texto.splitlines()[-1])
+        assert (linea["herramienta"], linea["resultado"]) == ("explotar", "error")
+        assert linea["error"] == "ValueError", "el tipo tiene que ser el del fondo"
 
     # -- el interruptor -----------------------------------------------------
 
@@ -363,12 +394,42 @@ class KitDeAuditoria:
     # -- el nombre del archivo ---------------------------------------------
 
     def test_las_marcas_van_aunque_la_ruta_sea_explicita(self, auditor, monkeypatch, tmp_path):
-        destino = tmp_path / "elegido.jsonl"
+        destino = tmp_path / "elegida"
         monkeypatch.setenv(auditor.variable, str(destino))
 
-        nombre = auditor.ruta().name
-        assert nombre.startswith(auditor.nombre), "falta el nombre del MCP"
-        assert "elegido" in nombre, "se perdio la eleccion del operador"
+        ruta = auditor.ruta()
+        assert ruta.name.startswith(auditor.nombre), "falta el nombre del MCP"
+        assert ruta.parent == destino, "se perdio la eleccion del operador"
+
+    def test_la_ruta_ABSOLUTA_es_una_carpeta_que_se_protege_sola(
+        self, auditor, monkeypatch, tmp_path
+    ):
+        """S-11: hasta 0.9.0 la ruta elegida que todavia no existia se tomaba
+        como nombre de ARCHIVO, y el registro caia en la carpeta de arriba -con
+        `<boveda>/registro_auditoria` recien configurada, en la raiz de la
+        boveda-. Y la carpeta elegida no recibia su `.gitignore`.
+        """
+        destino = tmp_path / "boveda" / "registro_auditoria"
+        monkeypatch.setenv(auditor.variable, str(destino))
+        auditor.registrar(self.herramienta_normal, {})
+
+        escritos = [p for p in (tmp_path / "boveda").rglob("*.jsonl")]
+        assert escritos and all(p.parent == destino for p in escritos), escritos
+        marca = destino / ".gitignore"
+        assert marca.exists() and marca.read_text(encoding="utf-8").strip().endswith("*")
+
+    def test_una_carpeta_elegida_que_YA_TIENE_COSAS_no_recibe_gitignore(
+        self, auditor, monkeypatch, tmp_path
+    ):
+        """El control de la de arriba: una carpeta con cosas es de alguien, y un
+        `.gitignore` con `*` le esconderia a git todo lo que tiene."""
+        destino = tmp_path / "repo-de-alguien"
+        destino.mkdir()
+        (destino / "suyo.txt").write_text("no es del registro", encoding="utf-8")
+        monkeypatch.setenv(auditor.variable, str(destino))
+        auditor.registrar(self.herramienta_normal, {})
+
+        assert not (destino / ".gitignore").exists()
 
     def test_el_default_no_es_el_cwd(self, auditor, monkeypatch, tmp_path):
         # El cwd de un MCP por stdio lo hereda de quien lo lanzo: es `%TEMP%` o
@@ -674,6 +735,75 @@ class KitDeAuditoria:
         assert auditor.redaccion.huella_config
 
 
+#: La herramienta que pide la sonda de `verificar_enganche`. Ningun MCP tiene
+#: una asi, y eso es lo que la hace segura: el pedido recorre toda la cadena
+#: hasta el gancho y ninguna herramienta del anfitrion corre.
+SONDA = "__lucky_auditoria_sonda__"
+
+
+def _correr(fabrica):
+    """Corre una corrutina desde un test comun o desde uno async.
+
+    En un test comun no hay loop andando y alcanza `asyncio.run`. Adentro de un
+    test async el loop del test esta andando y `asyncio.run` levanta: ahi la
+    corrutina va a un hilo propio, con su propio loop.
+    """
+    import asyncio
+
+    try:
+        asyncio.get_running_loop()
+    except RuntimeError:
+        return asyncio.run(fabrica())
+    from concurrent.futures import ThreadPoolExecutor
+
+    with ThreadPoolExecutor(max_workers=1) as hilo:
+        return hilo.submit(lambda: asyncio.run(fabrica())).result()
+
+
+def _sondear(servidor, gancho) -> None:
+    """Un `tools/call` de verdad, por un cliente en proceso, contra `SONDA` (T).
+
+    Dato de lucky-tool-mtk-chr: el «Unknown tool» tambien pasa por el gancho y
+    deja su linea de error. Mientras dura, el `registrar` del auditor es un
+    espia: no se escribe nada en disco. Y se devuelve lo que la llamada toca
+    -el cliente anotado del proceso-, para que la sonda no deje rastro.
+    """
+    from fastmcp import Client
+
+    auditor = gancho.auditor
+    vistas: list = []
+    previo = auditor.__dict__.get("registrar")
+    cliente_previo = dict(identidad._CLIENTE)
+    anotado_previo = gancho._cliente_anotado
+
+    def espia(herramienta, *_a, **k):
+        vistas.append((herramienta, k.get("resultado")))
+
+    async def llamar():
+        async with Client(servidor) as cliente:
+            try:
+                await cliente.call_tool(SONDA, {})
+            except Exception:
+                pass
+
+    auditor.registrar = espia
+    try:
+        _correr(llamar)
+    finally:
+        if previo is None:
+            auditor.__dict__.pop("registrar", None)
+        else:
+            auditor.registrar = previo
+        identidad._CLIENTE.clear()
+        identidad._CLIENTE.update(cliente_previo)
+        gancho._cliente_anotado = anotado_previo
+    assert (SONDA, "error") in vistas, (
+        "el middleware de auditoria esta en la lista y un tools/call de verdad "
+        "no paso por el: o el framework no lo llama, o un middleware anterior "
+        f"corta el pedido antes que el (registro vio {vistas})"
+    )
+
+
 def verificar_enganche(servidor) -> None:
     """Que el gancho este en la TABLA DE RUTEO, no solo declarado.
 
@@ -681,6 +811,12 @@ def verificar_enganche(servidor) -> None:
     fastmcp 4.0.2 nunca dispara. Y un test que llama al override directo pasa
     por definicion: hay que preguntarle al servidor que va a ejecutar de verdad,
     para que falle el dia que el SDK deje de ligarlo.
+
+    Con fastmcp 4 la lista `servidor.middleware` solo prueba lo DECLARADO, y
+    hasta 0.9.0 era lo unico que se miraba (T, de lucky-tool-mtk-chr). Desde
+    0.10.0 ademas se hace un pedido de verdad: ver `_sondear`. Como cualquier
+    `Client(mcp)` de la suite, levanta el servidor en proceso, con su lifespan.
+    Se llama igual desde un test comun o desde uno async.
     """
     from lucky_auditoria import enganches
 
@@ -689,10 +825,12 @@ def verificar_enganche(servidor) -> None:
         from lucky_auditoria.enganches.fastmcp4 import AuditoriaMiddleware
 
         instalados = list(getattr(servidor, "middleware", []) or [])
-        assert any(isinstance(m, AuditoriaMiddleware) for m in instalados), (
+        ganchos = [m for m in instalados if isinstance(m, AuditoriaMiddleware)]
+        assert ganchos, (
             "el middleware de auditoria no esta en la lista del servidor: "
             f"hay {[type(m).__name__ for m in instalados]}"
         )
+        _sondear(servidor, ganchos[0])
         return
     from mcp.types import CallToolRequest
 

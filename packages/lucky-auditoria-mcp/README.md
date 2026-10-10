@@ -26,11 +26,11 @@ receta R1–R11 de la skill `auditar-mcp` 1.2.2.
 ```toml
 # pyproject.toml del MCP anfitrión
 dependencies = [
-    "lucky-auditoria-mcp @ https://github.com/mlandolfi90/lucky-skills/archive/refs/tags/auditoria-mcp-v0.9.0.tar.gz#subdirectory=packages/lucky-auditoria-mcp",
+    "lucky-auditoria-mcp @ https://github.com/mlandolfi90/lucky-skills/archive/refs/tags/auditoria-mcp-v0.10.0.tar.gz#subdirectory=packages/lucky-auditoria-mcp",
 ]
 ```
 
-Por el archivo del tag, no por `git+https`: el pin `git+https://...@auditoria-mcp-v0.9.0`
+Por el archivo del tag, no por `git+https`: el pin `git+https://...@auditoria-mcp-v0.10.0`
 también vale, pero necesita `git` en la imagen y una `python:3.12-slim` no lo
 trae —medido por lucky-tool-mtk-chr: `Cannot find command 'git'`—. El tarball
 lo instala `pip` solo. Las dos formas apuntan al mismo commit etiquetado.
@@ -113,17 +113,44 @@ Hacen tres cosas, y ninguna es higiene:
 Vienen en el paquete y no como receta a copiar por el mismo motivo por el que
 existe el kit: un modismo que hay que reescribir en cada repo se reescribe mal.
 
+Y la guarda del enganche, sobre el servidor armado:
+
+```python
+from lucky_auditoria.pruebas import verificar_enganche
+
+def test_la_auditoria_esta_enganchada():
+    verificar_enganche(mcp)
+```
+
+Con fastmcp 4 la lista de middlewares sólo prueba que el gancho está
+**declarado**. Desde 0.10.0 además hace un `tools/call` de verdad, por un
+cliente en proceso, contra una herramienta que no existe
+(`__lucky_auditoria_sonda__`): recorre toda la cadena, no corre ninguna
+herramienta del anfitrión y no escribe en disco. Levanta el servidor con su
+lifespan, como cualquier `Client(mcp)` de la suite, y anda igual desde un test
+común o uno async. El kit, por su lado, prueba el camino de la excepción por el
+middleware y no llamando a `registrar`.
+
 ## El interruptor
 
 Uno solo: **`<NOMBRE_DEL_MCP>_AUDITORIA`**.
 
 | Valor | Qué hace |
 |---|---|
-| vacío o `0` | apagado, de verdad: ni archivo vacío ni directorio creado |
-| `1` | redactado, donde dice la tabla de abajo |
-| `crudo` | **sin redactar** — ver abajo |
-| una ruta **absoluta** | redactado, ahí |
+| vacío, `0`, `false` o `no` | apagado, de verdad: ni archivo vacío ni directorio creado |
+| `1`, `true`, `si` o `yes` | redactado, donde dice la tabla de abajo |
+| `crudo`, `crude`, `debug` o `raw` | **sin redactar** — ver abajo |
+| una **carpeta absoluta** | redactado, en esa carpeta |
 | cualquier otra cosa | **apagado**, y se dice en el log |
+
+Las palabras no distinguen mayúsculas desde 0.10.0: hasta 0.9.0 `CRUDO` o
+`Si` no eran palabras, se tomaban como ruta relativa y la auditoría se apagaba,
+con el operador pidiendo encenderla.
+
+La ruta absoluta es **siempre una carpeta**, exista o no (desde 0.10.0). Hasta
+0.9.0, si todavía no existía se tomaba como nombre de archivo y el registro caía
+en la carpeta de arriba. Una carpeta nueva o vacía recibe su `.gitignore`; una
+que ya tiene cosas es de alguien, y no se le esconde nada.
 
 Sólo una ruta **absoluta** cuenta como ruta. Un typo o una ruta relativa apagan
 el registro en vez de volverse un archivo colgado del `cwd` —que un MCP hereda
@@ -159,8 +186,8 @@ archivo en el lugar equivocado.
 | stdio | sin proyecto | **no se escribe**, y se avisa una vez por proceso |
 | http | ambos | `./registro_auditoria/` del servicio, en el contenedor |
 
-Una ruta absoluta en la variable manda sobre todo esto —salvo en crudo, que no
-se puede pedir por ruta: se pide por palabra, a propósito.
+Una carpeta absoluta en la variable manda sobre todo esto —salvo en crudo, que
+no se puede pedir por ruta: se pide por palabra, a propósito.
 
 **Una sola carpeta por proyecto, sea cual sea el modo.** Es una decisión del
 humano, cerrada: así se ubica por proyecto y se limpia por proyecto, y los
@@ -188,11 +215,24 @@ existía, acumulando lo que nadie iba a buscar.
 **Bajo HTTP el `cwd` sí se usa, y es lo correcto**: el servidor es un contenedor
 de larga vida, su directorio de trabajo es suyo y no lo heredó de ningún
 proyecto. Está medido que ahí no hay otra opción: `CLAUDE_PROJECT_DIR` da cero
-coincidencias, y `roots` es una petición asíncrona al cliente que depende de que
-la declare, hay que cachearla por sesión, y devuelve una URI que el servidor casi
-seguro no tiene montada. El proyecto que llamó, si `roots` lo da, va como **campo
-de la línea**. Ahí no hay aviso: en stdio la ausencia de proyecto es señal, en
-HTTP sería ruido constante, y un aviso que suena siempre deja de leerse.
+coincidencias, y `roots` **no se pide**: SEP-2577 (2026-07-28) lo deprecó al
+retirar los pedidos servidor→cliente, y una sonda medida por lucky-tool-mtk-chr
+colgó 20 s. Bajo HTTP el registro queda sin dato del espacio de trabajo, y lo
+dice: desde 0.10.0 cada sesión abre con **una línea de apertura**, antes de su
+primera llamada:
+
+```json
+{"tipo": "apertura", "cuando": "...", "sesion": "<mcp-session-id>",
+ "cliente": {"name": "...", "version": "..."},
+ "roots_declarados": null, "roots_motivo": "no se piden: ..."}
+```
+
+`sesion` y `cliente` separan sesiones, no proyectos. El `cwd` no se anota: es
+del servidor, y anotarlo mentiría. Ahí no hay aviso: en stdio la ausencia de
+proyecto es señal, en HTTP sería ruido constante, y un aviso que suena siempre
+deja de leerse. La apertura sube el esquema de la cabecera a **2**: un lector de
+0.9.0 la contaría como una llamada, y los de 0.10.0 avisan si leen un esquema
+más nuevo que el suyo.
 
 **Bajo stdio el `cwd` no se usa nunca.** Es lo que el lanzador le dejó al hijo
 —medido en `%TEMP%` y en el repo de otro—, no una propiedad del proyecto. El
@@ -205,7 +245,11 @@ escribir tampoco rompe, porque el escritor ya se traga sus fallos.
 
 `<escritor>` es el id de sesión en stdio (un proceso por sesión) y el pid en
 HTTP (N sesiones por proceso: ponerlas en el nombre daría N archivos abiertos
-para una colisión que no existe).
+para una colisión que no existe). Lo decide el transporte declarado desde
+0.10.0: hasta 0.9.0 la pregunta miraba el objeto `ContextVar` —que siempre es
+verdadero— y bajo stdio todo archivo salía firmado con el pid. Un id de sesión
+que no sirve de nombre de archivo firma con el id acuñado del proceso; la línea
+sigue llevando el id tal cual.
 
 **Bajo HTTP, el id de sesión de cada línea es el `mcp-session-id` con el que el
 cliente hizo esa llamada** (desde 0.9.0). El servidor lo acuña en el
@@ -217,6 +261,10 @@ con un solo id (medido por lucky-tool-mtk-chr, ficha CAP-7824fd652563). Un
 cliente que no devuelve la cabecera —el transporte en memoria, y
 `fastmcp.Client(url)` de fastmcp 4.0.3— sigue saliendo con el id del proceso:
 no se inventa uno por pedido, que sería peor.
+
+**El cliente de cada línea es el de SU sesión** (desde 0.10.0). Hasta 0.9.0 se
+anotaba una vez por proceso, y bajo HTTP todas las sesiones salían con el nombre
+del primer cliente que llamó.
 
 **Un retorno `{"ok": false, ...}` es un rechazo** (desde 0.9.0), aunque no
 traiga `error_code`: se anota `resultado: "error"` con la categoría booleana que
@@ -252,9 +300,39 @@ sobre lo que se *pidió*); un retorno no declarado no se anota ni en forma
 (anotarlo convertiría el registro en una copia del inventario). Misma palabra,
 decisión opuesta según el lado.
 
-Ante cualquier problema de configuración la redacción queda **cerrada** —forma y
-ningún valor— y se grita por el log. Es lo opuesto a lo que sale por descuido,
-que es una lista escrita y sin efecto.
+Una herramienta **opaca** (`[herramientas] opacas`) no deja ni los nombres de
+sus campos ni el largo de lo tipeado, que mide una password. Desde 0.10.0 puede
+dejar ver campos declarados:
+
+```toml
+[argumentos]
+escribe = { tipo = "bool" }
+
+[herramientas]
+opacas = ["chr_comando_crudo"]
+
+[herramientas.visibles]
+chr_comando_crudo = ["escribe"]
+```
+
+Un campo visible pasa sólo si coincide con su forma de `[argumentos]` (o como
+huella, si está en `[huellas]`); si no coincide, no se anota ni descrito, porque
+describirlo sería anotar su largo. Un visible sobre una herramienta que no es
+opaca, o sin forma declarada, cierra la redacción: un ajuste que no hace nada
+es peor que ninguno, porque el operador cree que declaró algo.
+
+Ante cualquier problema de configuración la redacción queda **cerrada** y se
+grita por el log. Cerrada, **toda herramienta es opaca**: ni valores, ni
+nombres, ni largos (desde 0.10.0; hasta 0.9.0 anotaba la forma, y una
+herramienta de texto libre dejaba sus campos y sus largos: la cerrada salía
+menos privada que la abierta). Es lo opuesto a lo que sale por descuido, que es
+una lista escrita y sin efecto.
+
+Desde 0.10.0 también se miran las claves de **adentro** de cada sección: `opaca`
+por `opacas`, `largo` por `largo_max`, un tope que no es entero positivo
+(`largo_max = "500"`) o una lista que no es lista (`opacas = "ssh"`) cierran la
+redacción. Hasta 0.9.0 cargaban, y la regla que el operador creía escrita no
+regía. Conviene revisar el `toml` propio al actualizar.
 
 ## Un error tiene tres caminos
 
@@ -268,6 +346,10 @@ El tercero no tiene señal de protocolo y es el más común: es la forma normal 
 cualquier tool por lote. El `is_error` del framework marca **sus** excepciones,
 no los rechazos de la pasarela — creerle anota `ok` sobre el 100% de los
 rechazos.
+
+Sin `[retorno]` ni `[conteos]` el tercer camino no se ve. Desde 0.10.0 el
+`check` lo avisa en `redaccion_aviso`, sin cerrar nada: un MCP sin herramientas
+por lote no los necesita.
 
 Del error se anota el **tipo o el código**, jamás el mensaje, que arrastra los
 argumentos. Y se busca al fondo de la cadena: fastmcp 4 envuelve todo en
@@ -291,6 +373,12 @@ Como ese WARNING es una vez por proceso y nadie mira el log, lo que de verdad lo
 recuerda es el **acumulado** del `estado()`. Medido: once archivos crudos y
 44 KB en un día sin que nadie lo notara, horas después de borrar quince.
 
+El acumulado trae **dos fechas** desde 0.10.0: `mas_viejo`, la primera línea
+del archivo más viejo —lo más viejo de verdad—, y `escritura_mas_vieja`, la
+última escritura del archivo más quieto, que es la que mira la retención. Hasta
+0.9.0 `mas_viejo` era el menor mtime, y en un archivo que sólo crece el mtime es
+la última escritura: con un solo archivo, "lo más viejo" era lo recién escrito.
+
 Es el punto donde auditar se vuelve *logalizar* y hereda sus obligaciones:
 temporal, con fecha de apagado, se borra al terminar.
 
@@ -301,15 +389,37 @@ Bajo **stdio** el archivo está en el disco del que llamó, y el CLI alcanza:
 ```bash
 lucky-auditoria por-sesion  <proyecto>/registro_auditoria/*.jsonl
 lucky-auditoria rechazos    ...
-lucky-auditoria cazar       <estado>/registro_auditoria/<proyecto>/*CRUDA*.jsonl
+lucky-auditoria cazar       <proyecto>/registro_auditoria/*CRUDA*.jsonl
 ```
+
+Los comodines los expande el CLI desde 0.10.0, así que valen igual en
+PowerShell y en cmd, que los pasan tal cual. La salida es siempre UTF-8, también
+por un pipe en Windows: antes salía en la página de códigos de la consola, y un
+carácter que esa página no tiene tumbaba la salida.
+
+`por-sesion` cuenta cada sesión y, adentro, **cada MCP** (desde 0.10.0): todos
+los MCP de un proyecto escriben en la misma carpeta, y hasta 0.9.0 dos `buscar`
+de dos MCP salían como uno. El MCP sale de la cabecera de cada archivo:
+
+```json
+{"<sesion>": {"llamadas": 3, "errores": 1, "proyecto": "...",
+              "desde": "...", "hasta": "...",
+              "mcps": {"<mcp>": {"llamadas": 3, "errores": 1,
+                                 "herramientas": {"buscar": 3},
+                                 "desde": "...", "hasta": "..."}}}}
+```
+
+`desde` y `hasta` son el mínimo y el máximo, no la primera y la última línea
+leída: con dos archivos, `desde` llegó a quedar después de `hasta`.
 
 `cazar` es la que paga el paquete: "argumento que el cliente mandó y cuyo valor
 no aparece en ningún escalar de la respuesta", comparando por **valor** y no por
 substring (buscar `str(1)` da verdadero contra cualquier `1` suelto, y la señal
 se vuelve inútil para enteros). Se saltean `None` y los booleanos —un booleano no
 "vuelve", cambia el camino— y no corre sobre rechazos, donde es normal que el
-argumento no haya tenido efecto.
+argumento no haya tenido efecto. Desde 0.10.0 tampoco sobre una línea con
+`resultado: "error"`, ni `cazar` ni `afirmaciones`: un MCP que marca el fracaso
+con `isError` y no con `ok: false` recibía sus propios errores como candidatos.
 
 `afirmaciones` es la otra mitad, medida por `lucky-tool-mtk-chr` sobre 39 verbos:
 **éxito con efecto vacío** (`ok: true` con todas las listas vacías — todas, no
@@ -385,9 +495,7 @@ logueando `?token=<JWT>` en claro.
 
 Las versiones de la tabla son exactas a propósito, y las del `pyproject.toml` están
 pineadas con `==`: un rango afirma compatibilidad con versiones que nadie probó,
-incluidas las que todavía no existen. Las versiones del `pyproject.toml` están pineadas con `==`: un rango afirma
-compatibilidad con versiones que nadie probó, incluidas las que todavía no
-existen. A mano, la suite corrió sólo en **Python 3.12.10**, en dos venv
+incluidas las que todavía no existen. A mano, la suite corrió sólo en **Python 3.12.10**, en dos venv
 distintos de la misma máquina — que no son dos entornos. Lo demás lo mide el CI
 (`.github/workflows/auditoria-mcp.yml`), y hay que **leerlo**:
 `gh run list --workflow auditoria-mcp.yml`.

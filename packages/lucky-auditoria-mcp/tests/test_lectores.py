@@ -150,8 +150,9 @@ class TestPorSesion:
 
         assert cuentas["aaa"]["llamadas"] == 2
         assert cuentas["aaa"]["errores"] == 1
-        assert cuentas["aaa"]["herramientas"] == {"project": 2}
-        assert cuentas["aaa"]["hasta"] == "2"
+        # Sin cabecera no se sabe de que MCP es: queda bajo "?".
+        assert cuentas["aaa"]["mcps"]["?"]["herramientas"] == {"project": 2}
+        assert (cuentas["aaa"]["desde"], cuentas["aaa"]["hasta"]) == ("1", "2")
         assert set(cuentas) == {"aaa", "bbb"}
 
 
@@ -294,3 +295,101 @@ class TestCazarSalteaLoQueNoVuelve:
         _escribir(registro, [_cruda({"otra": "cosa"}, {"nombre": "R1"})])
 
         assert [c["argumento"] for c in lectores.cazar(lectores.leer([registro]))] == ["nombre"]
+
+
+# --- 0.10.0 -----------------------------------------------------------------
+
+
+def _escribir_de(ruta, mcp, lineas, esquema=2):
+    """Un registro con la cabecera que escribe el paquete: dice de que MCP es."""
+    with ruta.open("w", encoding="utf-8") as f:
+        f.write(json.dumps({"tipo": "cabecera", "esquema": esquema, "mcp": {"nombre": mcp}}) + "\n")
+        for linea in lineas:
+            f.write(json.dumps(linea) + "\n")
+    return ruta
+
+
+def _llamada(herramienta, resultado, cuando, sesion="s"):
+    return {"sesion": sesion, "herramienta": herramienta, "resultado": resultado, "cuando": cuando}
+
+
+class TestUnErrorAnotadoNoEsCandidato:
+    """S-13: un MCP que marca el fracaso con `isError` y no con `ok: false`
+    recibia sus propios errores como candidatos de `cazar` y `afirmaciones`."""
+
+    def test_cazar_saltea_la_linea_de_error(self, registro):
+        _escribir(registro, [{**_cruda({"nodos": []}, {"name": "R9"}), "resultado": "error"}])
+
+        assert lectores.cazar(lectores.leer([registro])) == []
+
+    def test_cazar_SI_mira_la_misma_linea_si_salio_ok(self, registro):
+        # El control: sin este, el de arriba pasa con un `cazar` que no caza.
+        _escribir(registro, [{**_cruda({"nodos": []}, {"name": "R9"}), "resultado": "ok"}])
+
+        assert [c["argumento"] for c in lectores.cazar(lectores.leer([registro]))] == ["name"]
+
+    def test_afirmaciones_tambien(self, registro):
+        vacia = _cruda({"ok": True, "hallazgos": [], "total": 0})
+        _escribir(registro, [{**vacia, "resultado": "error"}, {**vacia, "resultado": "ok"}])
+
+        assert len(lectores.afirmaciones(lectores.leer([registro]))) == 1
+
+
+class TestCadaLineaSabeDeQueMcpEs:
+    def test_la_apertura_no_es_una_llamada_y_el_mcp_sale_de_la_cabecera(self, registro):
+        _escribir_de(
+            registro,
+            "mcp-uno",
+            [{"tipo": "apertura", "sesion": "s", "roots_declarados": None}, {"herramienta": "x"}],
+        )
+
+        assert [(x["herramienta"], x["mcp"]) for x in lectores.leer([registro])] == [
+            ("x", "mcp-uno")
+        ]
+
+    def test_dos_mcp_en_la_misma_sesion_no_se_mezclan(self, tmp_path):
+        """S-29: todos los MCP de un proyecto escriben en la misma carpeta, y
+        hasta 0.9.0 dos `buscar` de dos MCP salian como `{"buscar": 2}`. Y
+        `desde` y `hasta` salian del ORDEN DE LECTURA: con dos archivos,
+        `desde` quedo despues de `hasta`."""
+        uno = _escribir_de(
+            tmp_path / "uno.jsonl",
+            "mcp-uno",
+            [_llamada("buscar", "ok", "2026-10-10T10:00:09+00:00")],
+        )
+        dos = _escribir_de(
+            tmp_path / "dos.jsonl",
+            "mcp-dos",
+            [_llamada("buscar", "error", "2026-10-10T10:00:05+00:00")],
+        )
+
+        sesion = lectores.por_sesion(lectores.leer([uno, dos]))["s"]
+
+        assert (sesion["llamadas"], sesion["errores"]) == (2, 1)
+        assert sesion["mcps"]["mcp-uno"]["herramientas"] == {"buscar": 1}
+        assert sesion["mcps"]["mcp-dos"]["herramientas"] == {"buscar": 1}
+        assert sesion["mcps"]["mcp-dos"]["errores"] == 1
+        assert sesion["desde"] == "2026-10-10T10:00:05+00:00"
+        assert sesion["hasta"] == "2026-10-10T10:00:09+00:00"
+
+
+class TestUnEsquemaMasNuevoAvisa:
+    """S-30: un lector viejo sobre un registro nuevo leia mal en silencio."""
+
+    def test_avisa_y_sigue_leyendo(self, registro):
+        from lucky_auditoria.registro import ESQUEMA
+
+        _escribir_de(registro, "m", [{"herramienta": "x"}], esquema=ESQUEMA + 1)
+
+        with pytest.warns(UserWarning, match="esquema"):
+            assert [x["herramienta"] for x in lectores.leer([registro])] == ["x"]
+
+    def test_el_esquema_que_conoce_no_avisa(self, registro):
+        import warnings
+
+        from lucky_auditoria.registro import ESQUEMA
+
+        _escribir_de(registro, "m", [{"herramienta": "x"}], esquema=ESQUEMA)
+        with warnings.catch_warnings():
+            warnings.simplefilter("error")
+            assert len(list(lectores.leer([registro]))) == 1

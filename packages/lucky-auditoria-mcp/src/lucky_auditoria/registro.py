@@ -21,7 +21,23 @@ logger = logging.getLogger(__name__)
 
 # Version del esquema de las lineas. Va en la cabecera: un lector que encuentra
 # un numero que no conoce puede decirlo en vez de leer mal.
-ESQUEMA = 1
+#
+# 2 desde 0.10.0: bajo HTTP aparece una linea `tipo: "apertura"` por sesion. Un
+# lector de 0.9.0 solo salteaba la cabecera y la contaria como una llamada.
+ESQUEMA = 2
+
+# Por que la apertura NO pide `roots/list`, con lo que se pierde dicho al lado.
+# Lo decidio y lo midio lucky-tool-mtk-chr el 2026-09-10, con la misma linea en
+# su codigo propio: `roots` esta deprecado por SEP-2577 (2026-07-28), que retiro
+# los pedidos servidor->cliente, y pedirlo cuesta un viaje que puede colgar (una
+# sonda espero 20 s el 2026-09-08). R1-bis admite la lista entera o `null` CON
+# EL MOTIVO ESCRITO: esta es la segunda rama, no una omision.
+ROOTS_MOTIVO = (
+    "no se piden: `roots` esta deprecado por SEP-2577 (2026-07-28), que retiro los "
+    "pedidos servidor->cliente, y pedirlo puede colgar. Bajo HTTP el registro queda "
+    "sin dato de espacio de trabajo: `sesion` y `cliente` separan sesiones, no "
+    "proyectos. El `cwd` de este proceso es del SERVIDOR y anotarlo mentiria."
+)
 
 _ARCHIVO_POR_DEFECTO = "auditoria.jsonl"
 _DIRECTORIO = "registro_auditoria"
@@ -54,6 +70,26 @@ MAX_RESPUESTA = 20_000
 # (`a.__cause__ = b; b.__cause__ = a`) colgaria el servidor, y el registro no
 # puede ser el que tumba lo que audita.
 MAX_CAUSAS = 10
+
+
+def _primera_fecha(archivo: Path) -> datetime | None:
+    """El `cuando` de la primera linea de un registro, o None si no se lee.
+
+    Se lee una sola linea: el `check` cuenta un directorio entero y no puede
+    tardar lo que tarda leer el registro. Una primera linea rota no tumba nada.
+    """
+    try:
+        with archivo.open(encoding="utf-8") as f:
+            primera = f.readline()
+        cuando = json.loads(primera).get("cuando")
+        # `Z` es como lo escribe un hermano TypeScript (S-01), y `fromisoformat`
+        # no lo entiende antes de 3.11.
+        if cuando.endswith("Z"):
+            cuando = cuando[:-1] + "+00:00"
+        fecha = datetime.fromisoformat(cuando)
+    except Exception:
+        return None
+    return fecha if fecha.tzinfo else fecha.replace(tzinfo=timezone.utc)
 
 
 def tipo_del_error(error: BaseException) -> tuple:
@@ -113,6 +149,10 @@ class Auditor:
         self.redaccion: Redaccion = cargar(config)
         self._candado = threading.Lock()
         self._cabecera_escrita: set = set()
+        # (archivo, sesion) que ya tienen su linea de apertura. Por archivo y no
+        # solo por sesion: si la sesion pasa a otro archivo -crudo y redactado-,
+        # ese archivo tiene que poder leerse solo.
+        self._sesiones_abiertas: set = set()
         self._aviso_crudo_dado = False
         self._aviso_palabra_rara_dado = False
         self._aviso_sin_proyecto_dado = False
@@ -140,13 +180,18 @@ class Auditor:
 
         La consecuencia es deliberada: "crudo en una ruta elegida" queda
         inexpresable. Un valor, una decision.
+
+        Las palabras no distinguen mayusculas. Hasta 0.9.0 solo las del crudo:
+        un `TRUE` o un `Si` apagaban con el aviso de palabra rara, que es el
+        operador pidiendo encender y el registro apagandose (S-22).
         """
         valor = os.environ.get(self.variable, "").strip()
-        if valor.lower() in _PALABRAS_CRUDAS:
+        palabra = valor.lower()
+        if palabra in _PALABRAS_CRUDAS:
             return "crudo"
-        if valor in _PALABRAS_APAGADO:
+        if palabra in _PALABRAS_APAGADO:
             return "apagado"
-        if valor in _PALABRAS_REDACTADO:
+        if palabra in _PALABRAS_REDACTADO:
             return "redactado"
         if Path(valor).is_absolute():
             return "redactado"
@@ -228,10 +273,21 @@ class Auditor:
         destino = self._destino(self.modo() == "crudo")
         if destino is None:
             return None
+        return self._preparar(destino)
+
+    def _preparar(self, destino: Path) -> Path | None:
+        """Crea la carpeta y la protege, o None si no se puede.
+
+        Se protege cuando nace o cuando esta vacia: una carpeta que ya tiene
+        cosas es de alguien, y un `.gitignore` con `*` adentro le esconderia a
+        git todo lo que tiene. Lo comparten la carpeta por defecto y la ruta
+        ABSOLUTA que eligio el operador (S-11): hasta 0.9.0 la elegida no pasaba
+        por aca y quedaba sin proteger.
+        """
         try:
-            nueva = not destino.exists()
+            protegerla = not destino.exists() or not any(destino.iterdir())
             destino.mkdir(parents=True, exist_ok=True)
-            if nueva:
+            if protegerla:
                 self._autoignorar(destino)
         except OSError as fallo:
             logger.warning(
@@ -281,29 +337,29 @@ class Auditor:
 
         El nombre del MCP y la marca de crudo van SIEMPRE, incluso con una ruta
         elegida: quien escribio y que esta sin redactar son dos cosas, y las dos
-        se leen de un vistazo en un `ls`. Si la ruta configurada ya nombra al
-        MCP, no se repite.
+        se leen de un vistazo en un `ls`.
+
+        La ruta ABSOLUTA es siempre una CARPETA (S-11). Hasta 0.9.0, si todavia
+        no existia se tomaba como nombre de archivo, y el registro terminaba en
+        la carpeta de arriba: con `<boveda>/registro_auditoria` recien
+        configurada, eso era la raiz de la boveda.
         """
         cual = self.modo()
         if cual == "apagado":
             return None
         valor = os.environ.get(self.variable, "").strip()
-        if cual == "crudo" or valor in _PALABRAS_REDACTADO:
+        if cual == "crudo" or valor.lower() in _PALABRAS_REDACTADO:
             directorio = self.directorio_por_defecto()
-            if directorio is None:
-                return None
-            base = directorio / _ARCHIVO_POR_DEFECTO
         else:
             # Ya se sabe absoluta: `modo()` apago todo lo demas.
-            base = Path(valor)
-            if base.is_dir():
-                base = base / _ARCHIVO_POR_DEFECTO
-        sufijo = base.suffix or ".jsonl"
+            directorio = self._preparar(Path(valor))
+        if directorio is None:
+            return None
+        base = directorio / _ARCHIVO_POR_DEFECTO
         marca = "CRUDA-" if cual == "crudo" else ""
-        raiz = base.stem
-        if self.nombre not in raiz:
-            raiz = f"{self.nombre}-{raiz}"
-        return base.with_name(f"{raiz}-{marca}{identidad.escritor()}{sufijo}")
+        return base.with_name(
+            f"{self.nombre}-{base.stem}-{marca}{identidad.escritor(self.transporte)}.jsonl"
+        )
 
     # -- lo que se escribe --------------------------------------------------
 
@@ -374,7 +430,39 @@ class Auditor:
         argumento que se mando Y lo que el servidor contesto en la MISMA linea
         es lo que permite descubrir que un parametro llego y se descarto en
         silencio. Separados no se cruzan.
+
+        "Nunca levanta" cubre TODO el cuerpo y no solo la escritura (S-19):
+        hasta 0.9.0 `ruta()` corria afuera del `try`, y un id de sesion que no
+        servia de nombre de archivo tumbaba la llamada que se estaba auditando.
         """
+        try:
+            self._registrar(
+                herramienta,
+                argumentos,
+                resultado=resultado,
+                duracion_ms=duracion_ms,
+                error=error,
+                envoltorio=envoltorio,
+                retorno=retorno,
+                respuesta=respuesta,
+            )
+        except Exception as fallo:
+            # El tipo y no el mensaje: el texto de una excepcion puede arrastrar
+            # lo que se le paso a la herramienta.
+            logger.warning("No se pudo registrar la auditoria: %s", type(fallo).__name__)
+
+    def _registrar(
+        self,
+        herramienta: str,
+        argumentos: Mapping[str, Any] | None,
+        *,
+        resultado: str,
+        duracion_ms: int | None,
+        error: str | None,
+        envoltorio: str | None,
+        retorno: dict[str, Any] | None,
+        respuesta: str | None,
+    ) -> None:
         ruta = self.ruta()
         if ruta is None:
             return
@@ -419,22 +507,60 @@ class Auditor:
             # operaciones de adentro. Un lote con tres fallos de quince es una
             # llamada que salio bien y tres cosas que no.
             linea["retorno"] = retorno
-        self._escribir(ruta, linea, cual)
+        apertura = self._apertura(sesion) if self.transporte != "stdio" else None
+        self._escribir(ruta, linea, cual, apertura)
 
-    def _escribir(self, ruta: Path, linea: dict[str, Any], modo: str) -> None:
+    def _apertura(self, sesion: dict[str, Any]) -> dict[str, Any]:
+        """La linea que abre cada sesion bajo HTTP (R1-bis, R3-bis).
+
+        Bajo HTTP un proceso atiende muchas sesiones y la cabecera es una por
+        ARCHIVO, asi que no puede decir quien es cada una. Esta linea si: una por
+        sesion, antes de su primera llamada. Lleva el cliente de ESA sesion y
+        `roots_declarados` en null con el motivo (ver `ROOTS_MOTIVO`). Bajo stdio
+        no hace falta: el proceso es la sesion, y la cabecera ya lo dice.
+
+        Hasta 0.9.0 no existia en el paquete: la habia escrito lucky-tool-mtk-chr
+        en su codigo propio el 2026-09-10, y se perdio al pasarse al paquete.
+        """
+        return {
+            "tipo": "apertura",
+            "cuando": datetime.now(timezone.utc).isoformat(),
+            "sesion": sesion["id"],
+            "cliente": sesion["cliente"],
+            "roots_declarados": None,
+            "roots_motivo": ROOTS_MOTIVO,
+        }
+
+    def _escribir(
+        self,
+        ruta: Path,
+        linea: dict[str, Any],
+        modo: str,
+        apertura: dict[str, Any] | None = None,
+    ) -> None:
         try:
             ruta.parent.mkdir(parents=True, exist_ok=True)
             # Con el candado tomado: varios hilos del mismo proceso no pueden
             # partirse una linea entre ellos.
             with self._candado, ruta.open("a", encoding="utf-8") as f:
                 if ruta not in self._cabecera_escrita:
-                    self._cabecera_escrita.add(ruta)
                     f.write(
                         json.dumps(self._cabecera(modo), ensure_ascii=False, default=str) + "\n"
                     )
+                    # Despues de escribirla, no antes (S-21): si escribirla
+                    # falla, la llamada siguiente la vuelve a intentar en vez
+                    # de dejar el archivo entero sin cabecera.
+                    self._cabecera_escrita.add(ruta)
+                if apertura is not None:
+                    clave = (ruta, apertura["sesion"])
+                    if clave not in self._sesiones_abiertas:
+                        f.write(json.dumps(apertura, ensure_ascii=False, default=str) + "\n")
+                        self._sesiones_abiertas.add(clave)
                 f.write(json.dumps(linea, ensure_ascii=False, default=str) + "\n")
         except Exception as fallo:
-            logger.warning("No se pudo escribir la auditoria en %s: %s", ruta, fallo)
+            logger.warning(
+                "No se pudo escribir la auditoria en %s: %s", ruta, type(fallo).__name__
+            )
 
     # -- el bloque del `check` ---------------------------------------------
 
@@ -451,18 +577,37 @@ class Auditor:
         horas despues de borrar quince.
         """
         cual = self.modo()
-        ruta = self.ruta()
+        try:
+            ruta = self.ruta()
+        except Exception as fallo:
+            # Lo mismo que en `registrar` (S-19): el `check` es lo que uno usa
+            # JUSTO cuando algo anda mal, y no puede ser lo que se cae.
+            return {
+                "modo": cual,
+                "archivo": None,
+                "motivo": f"no se pudo armar la ruta del registro: {type(fallo).__name__}",
+            }
         info: dict[str, Any] = {"modo": cual, "archivo": str(ruta) if ruta else None}
         # Siempre, no solo cuando hay problema. Una clave que aparece nada mas
         # cuando algo anda mal obliga a saber que puede aparecer: quien lee el
         # `check` sano no se entera de que existe, y entonces tampoco la busca.
         # Una redaccion cerrada no rompe nada -el registro sigue escribiendo,
-        # forma y ningun valor- pero apaga el tercer camino de error sin apagar
+        # con los argumentos opacos- pero apaga el tercer camino de error sin apagar
         # el registro: `rechazos` devuelve vacio sobre un registro con fallos
         # adentro. El ERROR del arranque es una vez, y nadie mira el log.
         info["redaccion"] = "cerrada" if self.redaccion.problema else "abierta"
         if self.redaccion.problema:
             info["redaccion_motivo"] = self.redaccion.problema
+        elif not self.redaccion.retorno and not self.redaccion.conteos:
+            # Aviso y no falla (R, de lucky-tool-mtk-chr): sin `[retorno]` ni
+            # `[conteos]` el tercer camino de error no se ve y `rechazos` sale
+            # siempre vacio. Un MCP sin herramientas por lote no los necesita,
+            # asi que cerrar la redaccion por esto castigaria al que esta bien.
+            info["redaccion_aviso"] = (
+                "sin [retorno] ni [conteos]: un rechazo adentro de una respuesta "
+                "exitosa se anota ok, y el lector `rechazos` sale siempre vacio. "
+                "Un MCP sin herramientas por lote no los necesita."
+            )
         if cual == "apagado":
             return info
         if ruta is None:
@@ -491,12 +636,22 @@ class Auditor:
             archivos = sorted(directorio.glob("*auditoria-*.jsonl"))
             crudos = [a for a in archivos if "CRUDA-" in a.name]
             edades = [a.stat().st_mtime for a in archivos]
+            primeras = [f for f in (_primera_fecha(a) for a in archivos) if f is not None]
             info["acumulado"] = {
                 "directorio": str(directorio),
                 "archivos": len(archivos),
                 "crudos": len(crudos),
                 "bytes": sum(a.stat().st_size for a in archivos),
-                "mas_viejo": (
+                # Dos fechas, cada una con su nombre (X, de lucky-tool-mtk-chr).
+                # Hasta 0.9.0 `mas_viejo` era el menor mtime, y en un archivo
+                # que solo crece el mtime es la ULTIMA escritura: con un solo
+                # archivo, "lo mas viejo" era lo recien escrito. Ahora es la
+                # primera linea de cada archivo, que es lo mas viejo de verdad.
+                "mas_viejo": min(primeras).isoformat() if primeras else None,
+                # Y la que mira la retencion (R7): cuanto hace que no se toca el
+                # archivo mas quieto. Se borra por la ultima escritura, no por
+                # la primera.
+                "escritura_mas_vieja": (
                     datetime.fromtimestamp(min(edades), timezone.utc).isoformat()
                     if edades
                     else None

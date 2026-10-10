@@ -141,17 +141,29 @@ class AuditoriaMiddleware(Middleware):
         # Bajo HTTP el id es de la sesion que hizo ESTA llamada y se anota en
         # el contexto de la tarea que la atiende, no en el proceso: dos
         # clientes concurrentes no se pisan. Se suelta pase lo que pase.
-        marca = None
+        #
+        # El cliente, igual (P): bajo HTTP se lee en CADA llamada, de la sesion
+        # que la hizo. Hasta 0.9.0 se anotaba una vez por proceso, y todas las
+        # sesiones salian con el nombre del primer cliente que llamo.
+        marca = cliente = None
         if self.auditor.transporte != "stdio":
             marca = identidad.anotar_sesion_del_transporte(_sesion_del_transporte(context))
+            nombre, version, declara_roots = _cliente_de_la_sesion(context)
+            cliente = identidad.anotar_cliente_de_la_llamada(
+                nombre, version, declara_roots=declara_roots
+            )
         try:
             return await self._auditar_llamada(context, call_next)
         finally:
+            if cliente is not None:
+                identidad.olvidar_cliente_de_la_llamada(cliente)
             if marca is not None:
                 identidad.olvidar_sesion_del_transporte(marca)
 
     async def _auditar_llamada(self, context, call_next):
-        self._anotar_cliente_una_vez(context)
+        if self.auditor.transporte == "stdio":
+            # Bajo stdio un proceso es un cliente: alcanza con una vez.
+            self._anotar_cliente_una_vez(context)
         params = getattr(context, "message", None)
         herramienta = getattr(params, "name", "?")
         argumentos = getattr(params, "arguments", None)

@@ -78,6 +78,7 @@ class Redaccion:
         *,
         argumentos: Mapping[str, Mapping[str, Any]] | None = None,
         opacas: frozenset = frozenset(),
+        visibles: Mapping[str, frozenset] | None = None,
         huellas: frozenset = frozenset(),
         retorno: Mapping[str, str] | None = None,
         conteos: Mapping[str, Mapping[str, str]] | None = None,
@@ -86,6 +87,7 @@ class Redaccion:
     ) -> None:
         self.argumentos = dict(argumentos or {})
         self.opacas = opacas
+        self.visibles = dict(visibles or {})
         self.huellas = huellas
         self.retorno = dict(retorno or {})
         self.conteos = {k: dict(v) for k, v in (conteos or {}).items()}
@@ -97,8 +99,8 @@ class Redaccion:
         """Nada declarado seguro. Es el estado ante cualquier duda."""
         logger.error(
             "AUDITORIA: no se pudo leer la configuracion de redaccion (%s). "
-            "Se registra la FORMA de los argumentos y ningun valor. Revisar "
-            "config/auditoria.toml.",
+            "Se registra cada llamada con sus argumentos opacos: ni valores, ni "
+            "nombres, ni largos. Revisar config/auditoria.toml.",
             problema,
         )
         return cls(problema=problema)
@@ -157,15 +159,37 @@ class Redaccion:
         """Los argumentos reducidos a lo que se puede escribir sin filtrar nada."""
         if not argumentos:
             return {}
+        if self.problema is not None:
+            # Con la redaccion CERRADA toda herramienta es opaca (S-26). Hasta
+            # 0.9.0 la cerrada solo miraba `opacas`, que queda vacia, y la
+            # herramienta de texto libre anotaba sus campos y sus largos: la
+            # cerrada salia MENOS privada que la abierta, justo en las que mas
+            # importan. Sin conteo de operaciones: cerrada no sabe cual es.
+            return {"_opaco": True}
         if herramienta in self.opacas:
             # Ni los nombres de los campos. En una herramienta de texto libre
             # (ssh, console, http, tftp) el largo de lo tipeado mide una
             # password: son opacas hasta en el tamaño.
             operaciones = argumentos.get("operations")
-            return {
+            opaco: dict[str, Any] = {
                 "_opaco": True,
                 "operaciones": len(operaciones) if isinstance(operaciones, list) else None,
             }
+            # Salvo los campos que el anfitrion declaro VISIBLES (W, pedido de
+            # lucky-tool-mtk-chr: el `escribe` de `chr_comando_crudo`). Pasan
+            # solo si coinciden con su forma declarada en `[argumentos]`; si no,
+            # no se anotan ni descritos, porque describir es anotar el largo.
+            for campo in sorted(self.visibles.get(herramienta, ())):
+                if campo not in argumentos or argumentos[campo] is None:
+                    continue
+                valor = argumentos[campo]
+                if campo in self.huellas:
+                    opaco[campo] = self.huella(valor)
+                    continue
+                seguro = self._valor_seguro(campo, valor)
+                if seguro is valor:
+                    opaco[campo] = valor
+            return opaco
         limpio: dict[str, Any] = {}
         for clave, valor in argumentos.items():
             if valor is None:
@@ -213,6 +237,22 @@ class Redaccion:
 # -- carga -------------------------------------------------------------------
 
 _CLAVES = {"argumentos", "herramientas", "huellas", "retorno", "conteos"}
+
+# Lo que vale ADENTRO de cada seccion (S-24). Hasta 0.9.0 solo se miraba el
+# primer nivel: `opaca` por `opacas` o `largo` por `largo_max` cargaban, y la
+# regla que el operador creia escrita no regia.
+_CLAVES_DEL_ARGUMENTO = {"tipo", "largo_max", "contenido", "elementos_max"}
+_CLAVES_DE_HERRAMIENTAS = {"opacas", "visibles"}
+_CLAVES_DE_HUELLAS = {"campos"}
+
+
+def _es_tope(valor: Any) -> bool:
+    """Un entero positivo de verdad. `True` es un `int` en Python y no es un tope."""
+    return isinstance(valor, int) and not isinstance(valor, bool) and valor > 0
+
+
+def _lista_de_nombres(valor: Any) -> bool:
+    return isinstance(valor, list) and all(isinstance(v, str) for v in valor)
 
 
 def cargar(ruta: Path | str | None) -> Redaccion:
@@ -263,6 +303,18 @@ def cargar(ruta: Path | str | None) -> Redaccion:
         for clave, regla in (datos.get("argumentos") or {}).items():
             if not isinstance(regla, dict) or regla.get("tipo") not in _TIPOS:
                 return Redaccion.cerrada(f"el argumento {clave} no declara un tipo valido")
+            sobran = set(regla) - _CLAVES_DEL_ARGUMENTO
+            if sobran:
+                return Redaccion.cerrada(
+                    f"el argumento {clave} tiene claves desconocidas: {sorted(sobran)}"
+                )
+            for tope in ("largo_max", "elementos_max"):
+                # S-23: un `largo_max = "500"` cargaba, y la primera llamada
+                # levantaba `TypeError` al comparar adentro de `registrar`.
+                if tope in regla and not _es_tope(regla[tope]):
+                    return Redaccion.cerrada(
+                        f"el argumento {clave} declara {tope} que no es un entero positivo"
+                    )
             contenido = regla.get("contenido", "forma")
             if contenido not in _CONTENIDOS:
                 return Redaccion.cerrada(
@@ -277,16 +329,68 @@ def cargar(ruta: Path | str | None) -> Redaccion:
                     f"{regla['tipo']}, que no tiene contenido que abrir"
                 )
             argumentos[clave] = regla
-        opacas = frozenset((datos.get("herramientas") or {}).get("opacas") or ())
-        huellas = frozenset((datos.get("huellas") or {}).get("campos") or ())
+
+        herramientas = datos.get("herramientas") or {}
+        huellas_ = datos.get("huellas") or {}
+        for seccion, valida, valor in (
+            ("herramientas", _CLAVES_DE_HERRAMIENTAS, herramientas),
+            ("huellas", _CLAVES_DE_HUELLAS, huellas_),
+        ):
+            if not isinstance(valor, dict):
+                return Redaccion.cerrada(f"[{seccion}] no es una tabla")
+            sobran = set(valor) - valida
+            if sobran:
+                return Redaccion.cerrada(
+                    f"[{seccion}] tiene claves desconocidas: {sorted(sobran)}"
+                )
+        for seccion, valor in (
+            ("herramientas.opacas", herramientas.get("opacas", [])),
+            ("huellas.campos", huellas_.get("campos", [])),
+        ):
+            if not _lista_de_nombres(valor):
+                # `opacas = "buscar"` cargaba como un conjunto de LETRAS.
+                return Redaccion.cerrada(f"{seccion} no es una lista de nombres")
+        opacas = frozenset(herramientas.get("opacas", ()))
+        huellas = frozenset(huellas_.get("campos", ()))
+
+        # W: campos que una herramienta opaca deja ver. Cada uno tiene que
+        # estar declarado en `[argumentos]` con su forma, y la herramienta tiene
+        # que ser opaca: en cualquier otro caso el ajuste no hace nada, y uno
+        # que no hace nada es peor que ninguno, porque el operador cree que
+        # declaro algo.
+        visibles_crudos = herramientas.get("visibles", {})
+        if not isinstance(visibles_crudos, dict):
+            return Redaccion.cerrada("[herramientas.visibles] no es una tabla")
+        visibles = {}
+        for herramienta, campos in visibles_crudos.items():
+            if not _lista_de_nombres(campos):
+                return Redaccion.cerrada(
+                    f"[herramientas.visibles] {herramienta} no es una lista de nombres"
+                )
+            if herramienta not in opacas:
+                return Redaccion.cerrada(
+                    f"[herramientas.visibles] declara {herramienta}, que no es opaca"
+                )
+            sin_forma = sorted(c for c in campos if c not in argumentos and c not in huellas)
+            if sin_forma:
+                return Redaccion.cerrada(
+                    f"[herramientas.visibles] {herramienta} deja ver {sin_forma} sin "
+                    "declararlos en [argumentos]"
+                )
+            visibles[herramienta] = frozenset(campos)
+
         retorno = dict(datos.get("retorno") or {})
         conteos = {k: dict(v) for k, v in (datos.get("conteos") or {}).items()}
+        nombres = list(retorno.values()) + [d for v in conteos.values() for d in v.values()]
+        if not all(isinstance(n, str) for n in nombres):
+            return Redaccion.cerrada("[retorno] y [conteos] nombran sus destinos con texto")
     except (AttributeError, TypeError, ValueError) as e:
         return Redaccion.cerrada(f"{camino} tiene una forma inesperada: {type(e).__name__}")
 
     return Redaccion(
         argumentos=argumentos,
         opacas=opacas,
+        visibles=visibles,
         huellas=huellas,
         retorno=retorno,
         conteos=conteos,

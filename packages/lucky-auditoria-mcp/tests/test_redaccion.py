@@ -94,9 +94,17 @@ class TestFallaCerradoSinRomperElArranque:
         reglas = cargar(None)
 
         assert reglas.problema is not None
-        assert reglas.argumentos_de("x", {"action": "list"}) == {
-            "action": {"tipo": "str", "largo": 4}
-        }
+        assert reglas.argumentos_de("x", {"action": "list"}) == {"_opaco": True}
+
+    def test_cerrada_toda_herramienta_es_opaca_hasta_en_los_nombres(self):
+        """S-26: hasta 0.9.0 la cerrada anotaba `{campo: {tipo, largo}}`. Con
+        `opacas` vacia, una herramienta de texto libre dejaba el nombre de cada
+        campo y el largo de lo tipeado, que mide una password: la cerrada salia
+        menos privada que la abierta."""
+        anotado = cargar(None).argumentos_de("ssh", {"comando": "secreto", "host": "r1"})
+
+        assert anotado == {"_opaco": True}
+        assert not {"comando", "host", "largo"} & set(str(anotado).split("'"))
 
     def test_un_toml_roto_queda_cerrado_y_no_levanta(self, tmp_path):
         ruta = tmp_path / "roto.toml"
@@ -367,3 +375,126 @@ class TestElBloquePuedeVivirEnUnaSeccionDelTomlUnico:
         assert problema is not None
         assert secreto not in problema
         assert "token" not in problema
+
+
+# --- 0.10.0 -----------------------------------------------------------------
+
+
+def _toml(tmp_path, texto):
+    ruta = tmp_path / "auditoria.toml"
+    ruta.write_text(texto, encoding="utf-8")
+    return ruta
+
+
+class TestLosTopesSonEnterosPositivos:
+    """S-23: un `largo_max = "500"` cargaba, y la primera llamada levantaba
+    `TypeError` al comparar adentro de `registrar`."""
+
+    @pytest.mark.parametrize("tope", ['"500"', "0", "-1", "true", "2.5"])
+    def test_largo_max(self, tmp_path, tope):
+        ruta = _toml(tmp_path, f'[argumentos]\nname = {{ tipo = "str", largo_max = {tope} }}\n')
+
+        assert "entero positivo" in (cargar(ruta).problema or "")
+
+    def test_elementos_max(self, tmp_path):
+        ruta = _toml(
+            tmp_path,
+            "[argumentos]\n"
+            'lista = { tipo = "list", contenido = "completo", elementos_max = "3" }\n',
+        )
+
+        assert "entero positivo" in (cargar(ruta).problema or "")
+
+    def test_un_tope_sano_carga(self, tmp_path):
+        # El control: sin esto, una carga que cerrara siempre pasaria arriba.
+        ruta = _toml(tmp_path, '[argumentos]\nname = { tipo = "str", largo_max = 500 }\n')
+
+        assert cargar(ruta).problema is None
+
+
+class TestLasClavesDeAdentroTambienSeMiran:
+    """S-24: hasta 0.9.0 solo se miraba el primer nivel. `opaca` por `opacas`
+    o `largo` por `largo_max` cargaban, y la regla que el operador creia
+    escrita no regia."""
+
+    @pytest.mark.parametrize(
+        ("texto", "pista"),
+        [
+            ('[argumentos]\nname = { tipo = "str", largo = 32 }\n', "claves desconocidas"),
+            ('[herramientas]\nopaca = ["ssh"]\n', "claves desconocidas"),
+            ('[huellas]\ncampo = ["token"]\n', "claves desconocidas"),
+            ('herramientas = "ssh"\n', "no es una tabla"),
+            ('[herramientas]\nopacas = "ssh"\n', "no es una lista de nombres"),
+            ('[huellas]\ncampos = "token"\n', "no es una lista de nombres"),
+            ('[retorno]\nfailed = 3\n', "con texto"),
+        ],
+    )
+    def test_una_clave_mal_escrita_cierra(self, tmp_path, texto, pista):
+        assert pista in (cargar(_toml(tmp_path, texto)).problema or "")
+
+
+class TestUnaOpacaDejaVerLoDeclarado:
+    """W, pedido de lucky-tool-mtk-chr: el `escribe` de `chr_comando_crudo`.
+    Una opaca no deja ni los nombres; los campos declarados visibles pasan
+    solo si coinciden con su forma de `[argumentos]`, o como huella."""
+
+    TOML = """
+[argumentos]
+escribe = { tipo = "bool" }
+modo = { tipo = "str", largo_max = 8 }
+
+[herramientas]
+opacas = ["chr_comando_crudo"]
+
+[herramientas.visibles]
+chr_comando_crudo = ["escribe", "modo", "token"]
+
+[huellas]
+campos = ["token"]
+"""
+
+    @pytest.fixture
+    def reglas(self, tmp_path):
+        reglas = cargar(_toml(tmp_path, self.TOML))
+        assert reglas.problema is None, reglas.problema
+        return reglas
+
+    def test_lo_declarado_se_ve_y_lo_demas_no(self, reglas):
+        anotado = reglas.argumentos_de(
+            "chr_comando_crudo",
+            {"comando": "/user add password=x", "escribe": False, "modo": "ro", "token": "abc"},
+        )
+
+        assert anotado["_opaco"] is True
+        assert anotado["escribe"] is False and anotado["modo"] == "ro"
+        assert anotado["token"] == reglas.huella("abc")
+        assert "comando" not in anotado and "password" not in str(anotado)
+
+    def test_fuera_de_su_forma_no_se_anota_ni_descrito(self, reglas):
+        # Describirlo seria anotar su largo, que es lo que una opaca esconde.
+        anotado = reglas.argumentos_de(
+            "chr_comando_crudo", {"escribe": "si", "modo": "x" * 50}
+        )
+
+        assert set(anotado) == {"_opaco", "operaciones"}
+
+    @pytest.mark.parametrize(
+        ("visibles", "pista"),
+        [
+            ('otra = ["escribe"]', "no es opaca"),
+            ('chr_comando_crudo = ["comando"]', "sin declararlos"),
+            ('chr_comando_crudo = "escribe"', "no es una lista de nombres"),
+        ],
+    )
+    def test_un_visible_que_no_haria_nada_cierra(self, tmp_path, visibles, pista):
+        texto = self.TOML.replace('chr_comando_crudo = ["escribe", "modo", "token"]', visibles)
+
+        assert pista in (cargar(_toml(tmp_path, texto)).problema or "")
+
+    def test_visibles_que_no_es_una_tabla_cierra(self, tmp_path):
+        texto = (
+            '[argumentos]\nescribe = { tipo = "bool" }\n'
+            '[herramientas]\nopacas = ["c"]\nvisibles = ["escribe"]\n'
+        )
+
+        assert "no es una tabla" in (cargar(_toml(tmp_path, texto)).problema or "")

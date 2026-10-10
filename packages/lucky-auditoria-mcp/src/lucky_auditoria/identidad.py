@@ -27,6 +27,7 @@ controla.
 
 import contextvars
 import os
+import re
 import uuid
 from datetime import datetime, timezone
 from typing import Any
@@ -44,7 +45,16 @@ _CLIENTE: dict[str, Any] = {}
 _SESION_DEL_TRANSPORTE: contextvars.ContextVar[str | None] = contextvars.ContextVar(
     "lucky_auditoria_sesion_del_transporte", default=None
 )
+# El cliente de ESTA llamada, por el mismo motivo que la sesion (P, pedido de
+# lucky-tool-mtk-chr el 2026-10-05): bajo HTTP `_CLIENTE` es del proceso, y
+# todas las sesiones salian con el nombre del primer cliente que llamo.
+_CLIENTE_DE_LA_LLAMADA: contextvars.ContextVar[dict[str, Any] | None] = contextvars.ContextVar(
+    "lucky_auditoria_cliente_de_la_llamada", default=None
+)
 _RAIZ_DEL_PROYECTO: str | None = None
+
+# Lo que puede ir en un nombre de archivo sin sorpresas en ningun sistema.
+_NOMBRE_SEGURO = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,127}")
 
 
 def anotar_cliente(
@@ -63,12 +73,40 @@ def anotar_cliente(
         _CLIENTE["declara_roots"] = True
 
 
+def anotar_cliente_de_la_llamada(
+    nombre: str | None, version: str | None = None, *, declara_roots: bool = False
+) -> contextvars.Token:
+    """El cliente que hizo ESTA llamada, bajo HTTP. Se suelta al terminar.
+
+    Bajo stdio no hace falta -un proceso, un cliente- y alcanza con
+    `anotar_cliente`. Bajo HTTP cada sesion trae el suyo, y una global del
+    proceso le ponia a todas el nombre de la primera.
+    """
+    cliente: dict[str, Any] = {}
+    if nombre:
+        cliente["name"] = nombre
+    if version:
+        cliente["version"] = version
+    if declara_roots:
+        cliente["declara_roots"] = True
+    return _CLIENTE_DE_LA_LLAMADA.set(cliente or None)
+
+
+def olvidar_cliente_de_la_llamada(marca: contextvars.Token) -> None:
+    """Deshace la anotacion de esa llamada. Nunca levanta."""
+    try:
+        _CLIENTE_DE_LA_LLAMADA.reset(marca)
+    except (ValueError, RuntimeError):
+        pass
+
+
 def anotar_raiz_del_proyecto(ruta: str | None) -> None:
     """La raiz que el cliente declaro por `roots`, cuando el arnes no la dio.
 
-    La pide el ENGANCHE, que es el que tiene la sesion a mano, y no este modulo:
-    preguntar por el protocolo es una llamada al cliente, y la identidad tiene
-    que poder responderse sin red. Se anota una vez y queda.
+    Es para stdio, donde R1 la usa para saber EN QUE CARPETA escribir. Bajo HTTP
+    no se usa: ahi lo que el cliente declara va a la linea de apertura como
+    dicho (R1-bis), nunca como `proyecto` a secas. El paquete no la llama solo;
+    la llama el anfitrion que tiene los `roots` a mano.
     """
     global _RAIZ_DEL_PROYECTO
     _RAIZ_DEL_PROYECTO = ruta or None
@@ -131,18 +169,35 @@ def get_sesion() -> dict[str, Any]:
         # los `roots` del protocolo. Bajo HTTP es el unico lugar donde puede
         # ir: la carpeta es del servidor, que no es de ningun proyecto.
         "arnes": {**arneses.detectar(), "proyecto": raiz_del_proyecto()},
-        "cliente": dict(_CLIENTE) or None,
+        "cliente": _CLIENTE_DE_LA_LLAMADA.get() or dict(_CLIENTE) or None,
     }
 
 
-def escritor() -> str:
+def escritor(transporte: str | None = None) -> str:
     """Quien firma el ARCHIVO, que no es siempre quien firma la linea.
 
     Bajo stdio, sesion == proceso y el id de sesion nombra bien al archivo. Bajo
     HTTP hay N sesiones por proceso: ponerlas en el nombre daria N archivos
     abiertos para una colision que no existe, porque el candado de hilos ya
     ordena a los escritores de un proceso. Ahi firma el pid.
+
+    Lo decide el TRANSPORTE que declaro el anfitrion (U). Hasta 0.9.0 lo decidia
+    `if _SESION_DEL_TRANSPORTE:`, que pregunta por el objeto `ContextVar` -y un
+    objeto siempre es verdadero- en vez de por su valor: bajo stdio todo
+    archivo salia firmado con el pid, contra R2. Sin transporte declarado se
+    mira el VALOR de la sesion de esta llamada.
+
+    El id de sesion va al nombre solo si sirve de nombre (S-19): viene del
+    entorno, y con un separador `Path.with_name` levantaba. Si no sirve, firma
+    el acuñado; la linea sigue llevando el id tal cual.
     """
-    if _SESION_DEL_TRANSPORTE:
+    if transporte is not None:
+        http = transporte != "stdio"
+    else:
+        http = _SESION_DEL_TRANSPORTE.get() is not None
+    if http:
         return f"pid{os.getpid()}"
-    return id_de_sesion()
+    sesion = id_de_sesion()
+    if _NOMBRE_SEGURO.fullmatch(sesion):
+        return sesion
+    return _ACUÑADO

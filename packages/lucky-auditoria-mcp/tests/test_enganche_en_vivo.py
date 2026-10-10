@@ -94,6 +94,43 @@ class TestElGanchoDisparaDeVerdad:
         verificar_enganche(mcp)
 
 
+class TestVerificarEngancheHaceUnPedidoDeVerdad:
+    """T, de lucky-tool-mtk-chr: con fastmcp 4 `verificar_enganche` solo miraba
+    la lista de middlewares, o sea lo DECLARADO. Desde 0.10.0 hace ademas un
+    `tools/call` por un cliente en proceso."""
+
+    def test_caza_un_gancho_que_esta_en_la_lista_y_no_audita(self, servidor, monkeypatch):
+        from lucky_auditoria.enganches import fastmcp4
+
+        mcp, _ = servidor
+
+        async def de_paso(self, context, call_next):
+            return await call_next(context)
+
+        monkeypatch.setattr(fastmcp4.AuditoriaMiddleware, "on_call_tool", de_paso)
+
+        with pytest.raises(AssertionError, match="no paso por el"):
+            verificar_enganche(mcp)
+
+    def test_no_deja_rastro(self, servidor, monkeypatch):
+        # Ni linea en disco, ni el espia puesto, ni el cliente de la sonda
+        # anotado como el del proceso.
+        mcp, auditor = servidor
+        monkeypatch.setattr(identidad, "_CLIENTE", {})
+
+        verificar_enganche(mcp)
+
+        assert "registrar" not in vars(auditor)
+        assert identidad._CLIENTE == {}
+        assert not auditor.ruta().exists()
+
+    async def test_anda_desde_un_test_async(self, servidor):
+        # Adentro del loop de un test async, `asyncio.run` levanta: la sonda
+        # corre en su propio hilo.
+        mcp, _ = servidor
+        verificar_enganche(mcp)
+
+
 class TestDondeEscribeEnLaCadena:
     async def test_el_registro_anota_ANTES_de_que_el_framework_valide(self, servidor):
         """La medicion que pidio mtk-chr, y la unica que contesta la pregunta.

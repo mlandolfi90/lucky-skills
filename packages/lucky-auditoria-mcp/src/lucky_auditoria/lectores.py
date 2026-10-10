@@ -5,18 +5,34 @@ preguntas encima. `cazar` es la que paga el paquete entero.
 """
 
 import json
+import warnings
 from collections.abc import Iterable, Iterator
 from pathlib import Path
 from typing import Any
 
+from lucky_auditoria.registro import ESQUEMA
+
 
 def leer(rutas: Iterable[Path | str]) -> Iterator[dict[str, Any]]:
-    """Las lineas de uno o varios registros, salteando la cabecera y la basura.
+    """Las lineas de LLAMADA de uno o varios registros, sin la basura.
 
     Una linea rota no puede cortar la lectura: un registro se lee JUSTO cuando
     algo anduvo mal, y a veces lo que anduvo mal fue el disco.
+
+    Las lineas con `tipo` -la cabecera de cada archivo y, bajo HTTP, la apertura
+    de cada sesion- no son llamadas y no se devuelven. De la cabecera se toman
+    dos cosas:
+
+    - **El MCP que escribio el archivo** (S-29), que se le pega a cada linea
+      como `mcp`: las lineas no lo dicen, y todos los MCP de un proyecto
+      escriben en la misma carpeta, asi que sin esto dos `buscar` de dos MCP se
+      leian como uno solo.
+    - **El esquema** (S-30): si es mas nuevo que el que este lector conoce, se
+      avisa en vez de leer mal en silencio. Se avisa y se sigue: un aviso, no un
+      freno.
     """
     for ruta in rutas:
+        mcp = None
         try:
             with Path(ruta).open(encoding="utf-8") as f:
                 for linea in f:
@@ -27,8 +43,23 @@ def leer(rutas: Iterable[Path | str]) -> Iterator[dict[str, Any]]:
                         dato = json.loads(linea)
                     except ValueError:
                         continue
-                    if isinstance(dato, dict) and dato.get("tipo") != "cabecera":
-                        yield dato
+                    if not isinstance(dato, dict):
+                        continue
+                    if dato.get("tipo") == "cabecera":
+                        mcp = (dato.get("mcp") or {}).get("nombre")
+                        esquema = dato.get("esquema")
+                        if isinstance(esquema, int) and esquema > ESQUEMA:
+                            warnings.warn(
+                                f"{ruta}: esquema {esquema}, y este lector conoce hasta "
+                                f"el {ESQUEMA}. Lo que lea puede estar mal.",
+                                stacklevel=2,
+                            )
+                        continue
+                    if dato.get("tipo") is not None:
+                        continue
+                    if mcp and "mcp" not in dato:
+                        dato["mcp"] = mcp
+                    yield dato
         except OSError:
             continue
 
@@ -88,9 +119,16 @@ def cazar(lineas: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:
       camino. Compararlo produce ruido garantizado.
     - **Solo corre si `ok` no es False.** En un rechazo es normal que el
       argumento no haya tenido efecto, asi que ahi la señal no dice nada.
+
+    Y desde 0.10.0 (S-13), tampoco sobre una linea con `resultado: "error"`:
+    el enganche ya decidio que fue un fracaso, aunque la respuesta lo marque con
+    `isError` y no con `ok: false`. Hasta 0.9.0 a esos MCP les devolvia sus
+    propios errores como candidatos.
     """
     candidatos = []
     for linea in lineas:
+        if linea.get("resultado") == "error":
+            continue
         datos = _respuesta_estructurada(linea)
         if datos is None:
             continue
@@ -195,6 +233,10 @@ def afirmaciones(lineas: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:
     """
     encontradas = []
     for linea in lineas:
+        # El mismo criterio que `cazar` (S-13): un error que el enganche ya
+        # anoto no es una afirmacion de exito.
+        if linea.get("resultado") == "error":
+            continue
         respuesta = _respuesta_estructurada(linea)
         if not isinstance(respuesta, dict) or _es_un_fracaso(respuesta):
             continue
@@ -251,8 +293,33 @@ def rechazos(lineas: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:
     return encontrados
 
 
+def _contar(entrada: dict[str, Any], linea: dict[str, Any]) -> None:
+    """Suma una llamada a una entrada, con `desde` y `hasta` como MINIMO y MAXIMO.
+
+    Hasta 0.9.0 eran la primera y la ultima `cuando` en el ORDEN DE LECTURA (S-29):
+    con dos archivos, `desde` (10:00:09) quedo despues de `hasta` (10:00:05).
+    Las `cuando` son ISO 8601 en UTC, y asi se comparan como texto.
+    """
+    entrada["llamadas"] += 1
+    if linea.get("resultado") == "error":
+        entrada["errores"] += 1
+    cuando = linea.get("cuando")
+    if cuando:
+        if entrada["desde"] is None or cuando < entrada["desde"]:
+            entrada["desde"] = cuando
+        if entrada["hasta"] is None or cuando > entrada["hasta"]:
+            entrada["hasta"] = cuando
+
+
 def por_sesion(lineas: Iterable[dict[str, Any]]) -> dict[str, dict[str, Any]]:
-    """Que hizo cada sesion. La pregunta original, la que motivo todo esto."""
+    """Que hizo cada sesion, y en cada MCP. La pregunta que motivo todo esto.
+
+    Desde 0.10.0 (S-29) las herramientas se cuentan POR MCP, adentro de la
+    sesion: todos los MCP de un proyecto escriben en la misma carpeta, y hasta
+    0.9.0 dos `buscar` de dos MCP salian como `{"buscar": 2}`. Las cuentas de la
+    sesion -llamadas, errores, desde, hasta- siguen siendo de la sesion entera.
+    El MCP sale de la cabecera de cada archivo (ver `leer`); sin ella, `?`.
+    """
     cuentas: dict[str, dict[str, Any]] = {}
     for linea in lineas:
         sesion = linea.get("sesion") or "?"
@@ -261,18 +328,18 @@ def por_sesion(lineas: Iterable[dict[str, Any]]) -> dict[str, dict[str, Any]]:
             {
                 "llamadas": 0,
                 "errores": 0,
-                "herramientas": {},
                 "proyecto": (linea.get("arnes") or {}).get("proyecto"),
-                "desde": linea.get("cuando"),
-                "hasta": linea.get("cuando"),
+                "desde": None,
+                "hasta": None,
+                "mcps": {},
             },
         )
-        entrada["llamadas"] += 1
-        if linea.get("resultado") == "error":
-            entrada["errores"] += 1
+        _contar(entrada, linea)
+        del_mcp = entrada["mcps"].setdefault(
+            linea.get("mcp") or "?",
+            {"llamadas": 0, "errores": 0, "herramientas": {}, "desde": None, "hasta": None},
+        )
+        _contar(del_mcp, linea)
         herramienta = linea.get("herramienta") or "?"
-        entrada["herramientas"][herramienta] = entrada["herramientas"].get(herramienta, 0) + 1
-        cuando = linea.get("cuando")
-        if cuando:
-            entrada["hasta"] = cuando
+        del_mcp["herramientas"][herramienta] = del_mcp["herramientas"].get(herramienta, 0) + 1
     return cuentas

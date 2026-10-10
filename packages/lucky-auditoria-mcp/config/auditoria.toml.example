@@ -9,9 +9,12 @@
 # distintos que existen de verdad suele dar un numero chico, y convierte el
 # debate en una cuenta.
 #
-# Sin este archivo el registro no rompe: la redaccion queda cerrada y se anota
-# la forma de cada argumento y ningun valor. Es el estado seguro, y se grita
-# por el log para que no pase inadvertido.
+# Sin este archivo el registro no rompe: la redaccion queda cerrada y toda
+# herramienta se anota opaca, sin valores, nombres ni largos. Es el estado
+# seguro, y se grita por el log para que no pase inadvertido. Cierra tambien
+# una clave mal escrita ADENTRO de una seccion (`opaca` por `opacas`, `largo`
+# por `largo_max`) o un tope que no es entero positivo: hasta 0.9.0 cargaban
+# igual, y la regla que uno creia escrita no regia.
 #
 # El bloque tambien puede vivir como tabla `[auditoria]` dentro del
 # `config.toml` unico del MCP (estandar de creacion de MCPs: dos moldes, cero
@@ -85,6 +88,15 @@ name = { tipo = "str", largo_max = 128 }
 
 [herramientas]
 opacas = ["ssh", "console", "http_client", "tftp"]
+
+# Una opaca puede dejar ver campos DECLARADOS (desde 0.10.0). Pasan solo si
+# coinciden con su forma de `[argumentos]` -o como huella, si estan en
+# `[huellas]`-; si no coinciden, no se anotan ni descritos, porque describir es
+# anotar el largo. Un visible sobre una herramienta que no es opaca, o sin forma
+# declarada, cierra la redaccion: un ajuste que no hace nada es peor que ninguno.
+#
+# [herramientas.visibles]
+# ssh = ["action"]
 
 # --- Huellas ---------------------------------------------------------------
 #

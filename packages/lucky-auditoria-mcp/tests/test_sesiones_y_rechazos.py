@@ -52,9 +52,18 @@ def _servidor(tmp_path, monkeypatch, transporte):
     return mcp, auditor
 
 
-def _lineas(auditor):
+def _todas(auditor):
     texto = auditor.ruta().read_text(encoding="utf-8")
-    return [json.loads(x) for x in texto.splitlines() if '"tipo": "cabecera"' not in x]
+    return [json.loads(x) for x in texto.splitlines()]
+
+
+def _lineas(auditor):
+    """Las llamadas: sin la cabecera ni las aperturas, que llevan `tipo`."""
+    return [x for x in _todas(auditor) if "tipo" not in x]
+
+
+def _aperturas(auditor):
+    return [x for x in _todas(auditor) if x.get("tipo") == "apertura"]
 
 
 def _puerto_libre() -> int:
@@ -111,8 +120,9 @@ class _ClienteQueDevuelveLaSesion:
     clientes de mtk si lo devuelven.
     """
 
-    def __init__(self, url):
+    def __init__(self, url, nombre="prueba"):
         self.url = url
+        self.nombre = nombre
         self.sesion = None
         self._n = 0
 
@@ -120,7 +130,7 @@ class _ClienteQueDevuelveLaSesion:
         self._http = httpx2.AsyncClient(timeout=10)
         r = await self._rpc("initialize", {
             "protocolVersion": "2025-06-18", "capabilities": {},
-            "clientInfo": {"name": "prueba", "version": "0"},
+            "clientInfo": {"name": self.nombre, "version": "0"},
         })
         self.sesion = r.headers.get("mcp-session-id")
         assert self.sesion, "el servidor no acuño mcp-session-id en el initialize"
@@ -174,6 +184,65 @@ class TestBajoHttpCadaSesionTieneSuId:
         # Cada cliente con UN id, que es el que negocio, y distinto del otro.
         assert por_cliente == {"A": {sesiones["A"]}, "B": {sesiones["B"]}}, por_cliente
         assert sesiones["A"] != sesiones["B"]
+
+    async def test_cada_sesion_abre_con_UNA_linea_de_apertura(self, tmp_path, monkeypatch):
+        """S, el diseño de lucky-tool-mtk-chr (80162b1): una linea por sesion
+        con `roots_declarados: null` y su motivo. No se piden los roots
+        -SEP-2577 los deprecó y una sonda colgó 20 s- y no se anota el cwd, que
+        bajo HTTP es del servidor."""
+        mcp, auditor = _servidor(tmp_path, monkeypatch, "http")
+
+        async def cliente(url, veces):
+            async with _ClienteQueDevuelveLaSesion(url) as c:
+                for i in range(veces):
+                    await c.call_tool("leer", {"name": f"x-{i}"})
+                return c.sesion
+
+        async with _servido_por_http(mcp) as url:
+            sesiones = await asyncio.gather(cliente(url, 3), cliente(url, 2))
+
+        aperturas = _aperturas(auditor)
+        assert sorted(a["sesion"] for a in aperturas) == sorted(sesiones)
+        for apertura in aperturas:
+            assert apertura["roots_declarados"] is None
+            assert "SEP-2577" in apertura["roots_motivo"]
+            assert not {"cwd", "proyecto", "argumentos"} & set(apertura)
+        # Y antes de la primera llamada de su sesion, no despues. La cabecera
+        # lleva la sesion de la primera llamada del archivo: se la saltea.
+        todas = [x for x in _todas(auditor) if x.get("tipo") != "cabecera"]
+        for sesion in sesiones:
+            de_esta = [x for x in todas if x.get("sesion") == sesion]
+            assert de_esta[0].get("tipo") == "apertura"
+
+    async def test_cada_linea_con_el_cliente_de_SU_sesion(self, tmp_path, monkeypatch):
+        """P, de lucky-tool-mtk-chr: hasta 0.9.0 el cliente se anotaba una vez
+        por proceso, y bajo HTTP todas las sesiones salian con el nombre del
+        primer cliente que llamo."""
+        mcp, auditor = _servidor(tmp_path, monkeypatch, "http")
+        monkeypatch.setattr(identidad, "_CLIENTE", {})
+
+        async def cliente(url, nombre):
+            async with _ClienteQueDevuelveLaSesion(url, nombre=nombre) as c:
+                for i in range(2):
+                    await c.call_tool("leer", {"name": f"{nombre}-{i}"})
+
+        async with _servido_por_http(mcp) as url:
+            await asyncio.gather(cliente(url, "claude-code"), cliente(url, "codex"))
+
+        lineas = _lineas(auditor)
+        assert len(lineas) == 4
+        for linea in lineas:
+            assert linea["cliente"] == linea["argumentos"]["name"].rsplit("-", 1)[0], linea
+        # Y no queda anotado como cliente del proceso: es de la llamada.
+        assert identidad._CLIENTE == {}
+
+    async def test_bajo_stdio_no_hay_linea_de_apertura(self, tmp_path, monkeypatch):
+        # El control: bajo stdio un proceso es una sesion y la cabecera alcanza.
+        mcp, auditor = _servidor(tmp_path, monkeypatch, "stdio")
+        async with Client(mcp) as c:
+            await c.call_tool("leer", {"name": "x"})
+
+        assert _aperturas(auditor) == []
 
     async def test_el_id_no_queda_pegado_al_proceso(self, tmp_path, monkeypatch):
         mcp, auditor = _servidor(tmp_path, monkeypatch, "http")
