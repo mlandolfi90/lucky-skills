@@ -2,6 +2,9 @@
 
 Generado por publicar-skill; no editar a mano.
 
+## entonar 1.2.0 — 2026-10-10 — MINOR
+- 1.1.1 → 1.2.0 · QUALITY=PASS · autorizó human:vikingo
+
 ## auditar-mcp 1.6.5 — 2026-10-08 — PATCH
 - 1.6.4 → 1.6.5 · QUALITY=PASS · autorizó human:vikingo
 
