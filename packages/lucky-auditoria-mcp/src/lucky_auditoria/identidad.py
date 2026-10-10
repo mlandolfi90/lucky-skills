@@ -149,10 +149,12 @@ def id_del_pedido() -> str | None:
 def anotar_raiz_del_proyecto(ruta: str | None) -> None:
     """La raiz que el cliente declaro por `roots`, cuando el arnes no la dio.
 
-    Es para stdio, donde R1 la usa para saber EN QUE CARPETA escribir. Bajo HTTP
-    no se usa: ahi lo que el cliente declara va a la linea de apertura como
-    dicho (R1-bis), nunca como `proyecto` a secas. El paquete no la llama solo;
-    la llama el anfitrion que tiene los `roots` a mano.
+    Es para stdio, donde R1 la usa para saber EN QUE CARPETA escribir. El
+    paquete no la llama solo, ni la llamo nunca: la llama el anfitrion que tiene
+    los `roots` a mano. Bajo HTTP no hay que llamarla: los `roots` no se piden
+    (SEP-2577) y la linea de apertura lo dice con `roots_declarados: null`. Si
+    un anfitrion la llamara igual, la raiz terminaria en el `arnes.proyecto` de
+    cada linea, como `proyecto` a secas, que R1-bis prohibe.
     """
     global _RAIZ_DEL_PROYECTO
     _RAIZ_DEL_PROYECTO = ruta or None
