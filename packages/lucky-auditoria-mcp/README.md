@@ -533,8 +533,9 @@ distintos de la misma máquina — que no son dos entornos. Lo demás lo mide el
 (`.github/workflows/auditoria-mcp.yml`), y hay que **leerlo**:
 `gh run list --workflow auditoria-mcp.yml`.
 
-Estado al 2026-09-07, leído de los runs: **3.10, 3.12 y 3.13 en verde**, en
-`ubuntu-latest` y `windows-latest`.
+Estado al 2026-10-10, leído de los runs de 0.10.0 (el último, `38030615528`,
+sobre `44c0aa5`): **3.10, 3.12 y 3.13 en verde**, en `ubuntu-latest` y
+`windows-latest`.
 
 Este párrafo se corrigió dos veces, en direcciones opuestas, y las dos quedan
 escritas porque son la razón de la regla:
