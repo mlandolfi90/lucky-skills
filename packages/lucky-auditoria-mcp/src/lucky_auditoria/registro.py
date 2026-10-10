@@ -72,6 +72,27 @@ MAX_RESPUESTA = 20_000
 MAX_CAUSAS = 10
 
 
+def _sin_credenciales(destino: str) -> str:
+    """El destino es un LUGAR: sin `usuario:clave@`, sin `?consulta` ni `#ancla`.
+
+    Lo declara el anfitrion y va a la cabecera de cada archivo, que circula mas
+    que la configuracion de la que salio: una URL de conexion copiada tal cual
+    se llevaria la clave puesta. Se recorta y se avisa, sin repetir lo recortado.
+    """
+    esquema, separador, resto = destino.partition("://")
+    if not separador:
+        esquema, resto = "", destino
+    resto = resto.split("#", 1)[0].split("?", 1)[0]
+    autoridad, barra, camino = resto.partition("/")
+    limpio = f"{esquema}{separador}{autoridad.rsplit('@', 1)[-1]}{barra}{camino}"
+    if limpio != destino:
+        logger.warning(
+            "AUDITORIA: el destino declarado traia usuario, clave, consulta o ancla; "
+            "se anota sin eso. Declararlo como lugar, no como URL de conexion."
+        )
+    return limpio
+
+
 def _primera_fecha(archivo: Path) -> datetime | None:
     """El `cuando` de la primera linea de un registro, o None si no se lee.
 
@@ -135,17 +156,24 @@ class Auditor:
         framework: str | None = None,
         version: str | None = None,
         commit: str | None = None,
+        destino: str | None = None,
     ) -> None:
         if not nombre or not str(nombre).strip():
             raise ValueError(
                 "lucky-auditoria: `nombre` es obligatorio. Sale del manifiesto del "
                 "MCP anfitrion (`[project].name`), nunca de una constante copiada."
             )
+        if destino is not None and not isinstance(destino, str):
+            raise TypeError(
+                "lucky-auditoria: `destino` es el sistema al que habla este MCP, como "
+                "texto (`routeros://chr-lab:22`)."
+            )
         self.nombre = str(nombre).strip().lower().replace("_", "-").replace(" ", "-")
         self.transporte = transporte
         self.framework = framework
         self.version = version
         self.commit = commit
+        self.destino = _sin_credenciales(destino) if destino else None
         self.redaccion: Redaccion = cargar(config)
         self._candado = threading.Lock()
         self._cabecera_escrita: set = set()
@@ -377,6 +405,10 @@ class Auditor:
             "esquema": ESQUEMA,
             "cuando": datetime.now(timezone.utc).isoformat(),
             "mcp": {"nombre": self.nombre, "version": self.version, "commit": self.commit},
+            # A que sistema van las llamadas (Z1; plano de construccion, F06 y
+            # R-081): en la cabecera porque el proceso habla con UN destino.
+            # Siempre presente: `null` dice que el anfitrion no lo declaro.
+            "destino": self.destino,
             "pid": sesion["pid"],
             "sesion": sesion["id"],
             "arnes": sesion["arnes"],
@@ -496,6 +528,11 @@ class Auditor:
             linea["respuesta"] = recortada
             if len(respuesta) > MAX_RESPUESTA:
                 linea["respuesta_recortada_de"] = len(respuesta)
+        pedido = identidad.id_del_pedido()
+        if pedido:
+            # El id que le puso el borde (Z2): cruza esta linea con su L1 y su
+            # L2, que es donde quedan la llegada y el pedido cortado a mitad.
+            linea["id_pedido"] = pedido
         if duracion_ms is not None:
             linea["duracion_ms"] = duracion_ms
         if error:

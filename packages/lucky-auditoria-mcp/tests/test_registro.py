@@ -23,6 +23,10 @@ CENTINELA = "centinela-del-registro-7c1e"
 
 @pytest.fixture
 def auditor(tmp_path, monkeypatch):
+    return _construir(tmp_path, monkeypatch)
+
+
+def _construir(tmp_path, monkeypatch, **extra):
     config = tmp_path / "auditoria.toml"
     config.write_text(CONFIG, encoding="utf-8")
     # El PROYECTO va a `tmp_path`, y no alcanza con apuntar la variable a un
@@ -32,9 +36,9 @@ def auditor(tmp_path, monkeypatch):
     # su `%LOCALAPPDATA%`; el peligro se mudo, no desaparecio-. Paso, y lo
     # encontro barrer los tests de a uno mirando el disco, no leerlos.
     proyecto = tmp_path / "proyecto"
-    proyecto.mkdir()
+    proyecto.mkdir(exist_ok=True)
     monkeypatch.setattr(identidad, "raiz_del_proyecto", lambda: str(proyecto))
-    a = Auditor("mcp-de-prueba", config=config, version="1.2.3", commit="abc123")
+    a = Auditor("mcp-de-prueba", config=config, version="1.2.3", commit="abc123", **extra)
     # Una CARPETA: desde 0.10.0 la ruta absoluta es siempre carpeta (S-11).
     monkeypatch.setenv(a.variable, str(tmp_path / "registro"))
     return a
@@ -363,3 +367,73 @@ class TestElCheckAvisaSinRetornoNiConteos:
 
     def test_con_retorno_no_avisa(self, auditor):
         assert "redaccion_aviso" not in auditor.estado()
+
+
+class TestElDestinoVaEnLaCabecera:
+    """Z1, de lucky-tool-mtk-chr (plano de construccion, F06 y R-081): ni el
+    evento ni la cabecera decian a que sistema iban las llamadas. Un proceso que
+    habla con un solo destino lo declara una vez, y va en la cabecera."""
+
+    def test_el_destino_declarado(self, tmp_path, monkeypatch):
+        a = _construir(tmp_path, monkeypatch, destino="routeros://chr-lab:22")
+        a.registrar("x", {})
+
+        assert _lineas(a)[0]["destino"] == "routeros://chr-lab:22"
+
+    def test_sin_destino_la_cabecera_lo_dice_con_null(self, auditor):
+        auditor.registrar("x", {})
+
+        cabecera = _lineas(auditor)[0]
+        assert "destino" in cabecera and cabecera["destino"] is None
+
+    @pytest.mark.parametrize(
+        ("declarado", "queda"),
+        [
+            (f"ssh://admin:{CENTINELA}@10.0.0.1:22/r?token={CENTINELA}", "ssh://10.0.0.1:22/r"),
+            (f"admin:{CENTINELA}@10.0.0.1", "10.0.0.1"),
+            (f"https://api.local/v1#{CENTINELA}", "https://api.local/v1"),
+        ],
+    )
+    def test_un_destino_con_credenciales_se_anota_como_lugar(
+        self, tmp_path, monkeypatch, declarado, queda
+    ):
+        a = _construir(tmp_path, monkeypatch, destino=declarado)
+        a.registrar("x", {})
+
+        assert _lineas(a)[0]["destino"] == queda
+        assert CENTINELA not in a.ruta().read_text(encoding="utf-8")
+
+    def test_un_destino_que_no_es_texto_no_se_construye(self):
+        with pytest.raises(TypeError):
+            Auditor("mcp-de-prueba", destino=42)
+
+
+class TestElIdDelPedidoVaEnLaLinea:
+    """Z2, de lucky-tool-mtk-chr (plano de construccion, paso 6, y R-039): la
+    auditoria escribe al cierre; la llegada y el pedido cortado a mitad los
+    anota el log del borde, L1 y L2, con un id por pedido. Con ese id en la
+    linea, los dos se cruzan."""
+
+    def test_el_id_que_anoto_el_borde(self, auditor):
+        marca = identidad.anotar_id_del_pedido("a1b2c3")
+        try:
+            auditor.registrar("x", {})
+        finally:
+            identidad.olvidar_id_del_pedido(marca)
+        auditor.registrar("y", {})
+
+        lineas = _lineas(auditor)
+        assert lineas[1]["id_pedido"] == "a1b2c3"
+        assert "id_pedido" not in lineas[2], "el id de un pedido quedo pegado al siguiente"
+
+    def test_un_id_sin_forma_de_id_no_se_anota_y_se_avisa(self, auditor, monkeypatch, caplog):
+        monkeypatch.setattr(identidad, "_aviso_id_raro_dado", False)
+        with caplog.at_level("WARNING"):
+            marca = identidad.anotar_id_del_pedido("x" * 500)
+            try:
+                auditor.registrar("x", {})
+            finally:
+                identidad.olvidar_id_del_pedido(marca)
+
+        assert "id_pedido" not in _lineas(auditor)[-1]
+        assert "id de pedido" in caplog.text

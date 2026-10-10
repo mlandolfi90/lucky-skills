@@ -73,6 +73,7 @@ def instalar_auditoria(
     version: str | None = None,
     commit: str | None = None,
     enganche: str | None = None,
+    destino: str | None = None,
 ) -> Auditor:
     """Engancha la auditoria en el unico punto por donde pasa todo `tools/call`.
 
@@ -86,12 +87,14 @@ def instalar_auditoria(
         nombre: como se llama este MCP. Obligatorio; da el archivo, el
             directorio y la variable de entorno `<NOMBRE>_AUDITORIA`.
         config: ruta del `auditoria.toml` del anfitrion. Sin el, la redaccion
-            queda cerrada -forma y ningun valor-, que es el estado seguro.
+            queda cerrada -toda herramienta opaca-, que es el estado seguro.
         transporte: `stdio` (una sesion por proceso) o `http` (N por proceso).
             Cambia quien firma el archivo, no quien firma la linea.
         version, commit: del anfitrion, para la cabecera. Sirven para distinguir
             dos procesos que corren codigo distinto y se reportan iguales.
         enganche: forzar uno (`fastmcp4`, `mcp1x`) en vez de detectarlo.
+        destino: el sistema al que habla este MCP (`routeros://chr-lab:22`),
+            para la cabecera. Como lugar: usuario, clave y consulta se recortan.
 
     Returns:
         El `Auditor`, para que el `check` del MCP publique su `estado()`.
@@ -103,6 +106,7 @@ def instalar_auditoria(
         framework=enganche,
         version=version,
         commit=commit,
+        destino=destino,
     )
     for tapado, por in sorted(arneses.sombras().items()):
         # Una sola vez, al arrancar: lo que cambia es la lista blanca del

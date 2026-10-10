@@ -26,6 +26,7 @@ controla.
 """
 
 import contextvars
+import logging
 import os
 import re
 import uuid
@@ -51,6 +52,15 @@ _SESION_DEL_TRANSPORTE: contextvars.ContextVar[str | None] = contextvars.Context
 _CLIENTE_DE_LA_LLAMADA: contextvars.ContextVar[dict[str, Any] | None] = contextvars.ContextVar(
     "lucky_auditoria_cliente_de_la_llamada", default=None
 )
+# El id que el BORDE del anfitrion le pone a cada pedido (Z2, de
+# lucky-tool-mtk-chr): el plano de construccion, paso 6, le da al borde de la
+# entrada un id por pedido y dos lineas, L1 al llegar y L2 al cerrar. La
+# auditoria escribe una sola, al cierre; con el id en la linea, las dos se
+# cruzan. El paquete no inventa uno: un id propio no cruzaria con nada.
+_ID_DEL_PEDIDO: contextvars.ContextVar[str | None] = contextvars.ContextVar(
+    "lucky_auditoria_id_del_pedido", default=None
+)
+_aviso_id_raro_dado = False
 _RAIZ_DEL_PROYECTO: str | None = None
 
 # Lo que puede ir en un nombre de archivo sin sorpresas en ningun sistema.
@@ -98,6 +108,42 @@ def olvidar_cliente_de_la_llamada(marca: contextvars.Token) -> None:
         _CLIENTE_DE_LA_LLAMADA.reset(marca)
     except (ValueError, RuntimeError):
         pass
+
+
+def anotar_id_del_pedido(valor: Any) -> contextvars.Token:
+    """El id que el borde del anfitrion le puso a ESTE pedido. Se suelta al terminar.
+
+    Lo llama el borde, alrededor de `call_next`, y tiene que ENVOLVER a la
+    auditoria: su `add_middleware` va antes. Si va adentro, suelta el id antes
+    de que la auditoria escriba, y la linea sale sin el.
+
+    Un valor sin forma de id no se anota, y se avisa una vez por proceso: va en
+    cada linea, y una cadena cualquiera la puede inflar o romper.
+    """
+    global _aviso_id_raro_dado
+    if isinstance(valor, str) and _NOMBRE_SEGURO.fullmatch(valor):
+        return _ID_DEL_PEDIDO.set(valor)
+    if not _aviso_id_raro_dado:
+        _aviso_id_raro_dado = True
+        # El tipo y no el valor: no se sabe que trae.
+        logging.getLogger(__name__).warning(
+            "AUDITORIA: un id de pedido sin forma de id (%s) no se anota",
+            type(valor).__name__,
+        )
+    return _ID_DEL_PEDIDO.set(None)
+
+
+def olvidar_id_del_pedido(marca: contextvars.Token) -> None:
+    """Deshace la anotacion de ese pedido. Nunca levanta."""
+    try:
+        _ID_DEL_PEDIDO.reset(marca)
+    except (ValueError, RuntimeError):
+        pass
+
+
+def id_del_pedido() -> str | None:
+    """El id del pedido en curso, si el borde del anfitrion lo anoto."""
+    return _ID_DEL_PEDIDO.get()
 
 
 def anotar_raiz_del_proyecto(ruta: str | None) -> None:

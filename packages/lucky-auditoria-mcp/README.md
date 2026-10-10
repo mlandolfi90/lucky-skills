@@ -60,6 +60,39 @@ Al mover un enganche de subclase a middleware, en el repo original, la
 declaración del nombre se cayó y nada falló — el registro escribió
 `mcp-sin-nombre-auditoria-…`, forma correcta y origen equivocado.
 
+**`destino`** (opcional, desde 0.10.0) es el sistema al que habla este MCP:
+`destino="routeros://chr-lab:22"`. Va en la cabecera de cada archivo, porque el
+proceso habla con uno solo; sin declararlo, la cabecera dice `"destino": null`.
+Es lo que pide el plano de construcción (F06, R-081): hasta 0.9.0 ni la línea
+ni la cabecera decían a qué sistema iban las llamadas. Se anota como **lugar**:
+`usuario:clave@`, `?consulta` y `#ancla` se recortan y se avisa, porque la
+cabecera circula más que la configuración de la que salió.
+
+**El id del pedido** (desde 0.10.0). El plano de construcción le da al borde de
+la entrada un id por pedido y dos líneas de log: L1 al llegar y L2 al cerrar.
+La auditoría escribe una sola, al cierre; con el id del borde en cada línea
+(`id_pedido`), las dos cosas se cruzan, y la llegada y el pedido cortado a
+mitad quedan en L1 y L2. El borde lo anota alrededor de `call_next`:
+
+```python
+from lucky_auditoria import identidad
+
+class IdDelPedido(Middleware):
+    async def on_call_tool(self, context, call_next):
+        pedido = uuid.uuid4().hex
+        marca = identidad.anotar_id_del_pedido(pedido)
+        try:
+            ...  # L1, call_next, L2
+        finally:
+            identidad.olvidar_id_del_pedido(marca)
+```
+
+El borde tiene que **envolver** a la auditoría: su `add_middleware` va antes que
+`instalar_auditoria`. Si va adentro, suelta el id antes de que la auditoría
+escriba, y la línea sale sin él (hay un test que lo mide). Un valor sin forma
+de id —letras, dígitos, `.`, `_` y `-`, hasta 128— no se anota, y se avisa una
+vez.
+
 **2.** El bloque en el `check` que el MCP ya tiene:
 
 ```python

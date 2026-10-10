@@ -274,3 +274,60 @@ class TestLaHerramientaNaceAuditada:
         # Nombra al producto, no a la sesion -por eso no sirve para atribuir-,
         # pero tiene que llegar: si es None, el gancho lo esta buscando mal.
         assert _lineas(auditor)[-1]["cliente"] is not None
+
+
+class TestElIdDelBordeCruzaLaCadena:
+    """Z2 de punta a punta, armado como lucky-tool-mtk-chr: su borde nace el id
+    del pedido, escribe L1 y L2, y la auditoria anota ese id en su linea."""
+
+    def _servidor_con_borde(self, tmp_path, monkeypatch, borde_primero):
+        from fastmcp.server.middleware import Middleware
+
+        class Borde(Middleware):
+            async def on_call_tool(self, context, call_next):
+                marca = identidad.anotar_id_del_pedido("pedido-7")
+                try:
+                    return await call_next(context)
+                finally:
+                    identidad.olvidar_id_del_pedido(marca)
+
+        proyecto = tmp_path / "el-repo-que-llamo"
+        proyecto.mkdir()
+        monkeypatch.setattr(identidad, "raiz_del_proyecto", lambda: str(proyecto))
+        config = tmp_path / "auditoria.toml"
+        config.write_text(CONFIG, encoding="utf-8")
+        mcp = FastMCP("mcp-con-borde")
+
+        @mcp.tool
+        def leer(name: str) -> str:
+            return json.dumps({"name": name})
+
+        if borde_primero:
+            mcp.add_middleware(Borde())
+        auditor = instalar_auditoria(
+            mcp, nombre="mcp-con-borde", config=config, destino="chr-lab"
+        )
+        if not borde_primero:
+            mcp.add_middleware(Borde())
+        monkeypatch.setenv(auditor.variable, "1")
+        return mcp, auditor
+
+    async def test_un_borde_que_envuelve_a_la_auditoria_le_pasa_su_id(
+        self, tmp_path, monkeypatch
+    ):
+        mcp, auditor = self._servidor_con_borde(tmp_path, monkeypatch, borde_primero=True)
+        async with Client(mcp) as c:
+            await c.call_tool("leer", {"name": "R1"})
+
+        texto = auditor.ruta().read_text(encoding="utf-8").splitlines()
+        assert json.loads(texto[0])["destino"] == "chr-lab"
+        assert json.loads(texto[-1])["id_pedido"] == "pedido-7"
+
+    async def test_un_borde_ADENTRO_de_la_auditoria_no_llega(self, tmp_path, monkeypatch):
+        # Lo que dice el README, medido: el borde suelta el id antes de que la
+        # auditoria escriba. Si un dia fastmcp cambia el orden, esto avisa.
+        mcp, auditor = self._servidor_con_borde(tmp_path, monkeypatch, borde_primero=False)
+        async with Client(mcp) as c:
+            await c.call_tool("leer", {"name": "R1"})
+
+        assert "id_pedido" not in _lineas(auditor)[-1]
