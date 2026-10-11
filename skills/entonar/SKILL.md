@@ -36,7 +36,7 @@ publicación, que es lo que la versiona y la hace reversible.
 - **La forma se lee de su archivo al activarla**, no se recita de memoria:
   una forma ajustada debe regir como quedó, no como se la recuerda.
 - **Jurisdicción: la ventana del humano.** Los mensajes entre sesiones los
-  gobierna `slack-coordinacion`; el estilo visual, `estilar`. Ésta habla
+  gobierna `enlazar-agentes`; el estilo visual, `estilar`. Ésta habla
   sólo del diálogo con el humano.
 - **Degradación declarada**: cada forma nombra dónde duele y qué hacer ahí.
   Si un contenido no entra sano en la forma activa, se declara la

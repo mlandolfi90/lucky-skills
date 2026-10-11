@@ -2,6 +2,9 @@
 
 Generado por publicar-skill; no editar a mano.
 
+## entonar 1.2.1 — 2026-10-11 — PATCH
+- 1.2.0 → 1.2.1 · QUALITY=PASS · autorizó human:vikingo
+
 ## slack-coordinacion 1.4.0 — 2026-10-11 — MINOR
 - 1.3.1 → 1.4.0 · QUALITY=PASS · autorizó human:vikingo
 
