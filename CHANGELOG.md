@@ -2,6 +2,9 @@
 
 Generado por publicar-skill; no editar a mano.
 
+## cargar-reglas 1.1.1 — 2026-10-11 — PATCH
+- 1.1.0 → 1.1.1 · QUALITY=PASS · autorizó human:vikingo
+
 ## entonar 1.2.1 — 2026-10-11 — PATCH
 - 1.2.0 → 1.2.1 · QUALITY=PASS · autorizó human:vikingo
 

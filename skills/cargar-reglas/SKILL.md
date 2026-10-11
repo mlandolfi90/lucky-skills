@@ -32,8 +32,8 @@ cumple siempre.
 3. Invocar `sextante` una vez, para dejar el comprobante fresco antes de
    que cualquier gate lo exija: casi todas las skills lo requieren y ninguna
    otra dice cuándo corre por primera vez.
-4. `entonar` y `delegar` leen sus defaults (`FORMA=`, `SPAWN=`) de
-   `REGLAS.md`; `modo-fixes` lee `PORTON=`.
+4. `entonar`, `delegar` y `enlazar-agentes` leen sus defaults (`FORMA=`,
+   `SPAWN=`, `CANALES=`) de `REGLAS.md`; `modo-fixes` lee `PORTON=`.
 
 ## Formato de REGLAS.md
 
