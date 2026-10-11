@@ -2,6 +2,9 @@
 
 Generado por publicar-skill; no editar a mano.
 
+## enlazar-agentes 1.0.0 — 2026-10-11 — INITIAL
+- 1.0.0 → 1.0.0 · QUALITY=PASS · autorizó human:vikingo
+
 ## entonar 1.2.0 — 2026-10-10 — MINOR
 - 1.1.1 → 1.2.0 · QUALITY=PASS · autorizó human:vikingo
 

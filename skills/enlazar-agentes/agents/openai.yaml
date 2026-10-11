@@ -1,0 +1,4 @@
+interface:
+  display_name: "Enlazar agentes"
+  short_description: "Habla con las otras sesiones por el canal que elegiste: directo, buzon o Slack"
+  default_prompt: "Usa $enlazar-agentes para mandar o leer mensajes entre sesiones por los canales activos."
