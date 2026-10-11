@@ -2,6 +2,9 @@
 
 Generado por publicar-skill; no editar a mano.
 
+## slack-coordinacion 1.4.0 — 2026-10-11 — MINOR
+- 1.3.1 → 1.4.0 · QUALITY=PASS · autorizó human:vikingo
+
 ## enlazar-agentes 1.0.0 — 2026-10-11 — INITIAL
 - 1.0.0 → 1.0.0 · QUALITY=PASS · autorizó human:vikingo
 
