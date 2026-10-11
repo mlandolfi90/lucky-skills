@@ -16,11 +16,13 @@
   cambiar): cada repo ignora `docs/buzon/inbox/` y `docs/buzon/outbox/` en
   git, así que el archivo es la única copia. Nada se mueve ni se borra; el
   estado vive en la bitácora.
-- **No es:** el único canal. Slack
-  ([slack-coordinacion](../../skills/slack-coordinacion/SKILL.md)) sirve para
-  que varias sesiones vean avances, pedidos y bloqueos; el directo
-  (`SendMessage`), para hablarle a una sesión abierta, sabiendo que el
-  2026-08-14 reportó éxito sin entregar. Un mensaje por cualquiera de esos
+- **No es:** el único canal. Los canales entre sesiones los gobierna
+  [enlazar-agentes](../../skills/enlazar-agentes/SKILL.md), y el procedimiento
+  de éste vive en su canal `buzon`: si este texto y aquél difieren, manda el
+  canal. Slack sirve para que varias sesiones vean avances, pedidos y
+  bloqueos; el directo (`SendMessage`), para hablarle a una sesión abierta,
+  sabiendo que el 2026-08-14 una herramienta de mensaje directo reportó éxito
+  sin entregar. Un mensaje por cualquiera de esos
   canales puede nombrar un `MSG_ID` del buzón y queda atado a la misma línea
   de tiempo.
 - **Ejemplo:** `lucky-skills/docs/buzon/inbox/` tiene las sugerencias que

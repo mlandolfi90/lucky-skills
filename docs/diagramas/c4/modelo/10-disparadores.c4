@@ -46,7 +46,7 @@ model {
   // ── El humano la nombra ────────────────────────────────────────────────
   pedido -[enciende]-> transversales.entonar 'nombra una forma, o pregunta cuáles hay'
   pedido -[enciende]-> transversales.delegar 'nombra un régimen, o antes de lanzar agentes'
-  pedido -[enciende]-> transversales.slack_coordinacion 'pide conversar o reportar en Slack'
+  pedido -[enciende]-> transversales.enlazar_agentes 'nombra canales, o pide mandar o leer un mensaje entre sesiones'
   pedido -[enciende]-> ubicarse.sextante 'dice "Sextante" o "ubicame"'
   pedido -[enciende]-> escalon.crisol 'pide Crisol'
   pedido -[enciende]-> construir.modo_fixes 'dice "modo fixes on"'

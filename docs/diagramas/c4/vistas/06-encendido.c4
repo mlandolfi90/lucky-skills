@@ -31,7 +31,7 @@ views {
     include pedido,
       transversales.entonar,
       transversales.delegar,
-      transversales.slack_coordinacion,
+      transversales.enlazar_agentes,
       ubicarse.sextante,
       escalon.crisol,
       construir.modo_fixes,

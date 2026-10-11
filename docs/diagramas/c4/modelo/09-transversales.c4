@@ -20,8 +20,8 @@ model {
       description 'El régimen de spawn de agentes que el humano eligió. Ningún agente sale sin resolverlo: sin régimen ni default, se declara REGIMEN=NONE.'
     }
 
-    slack_coordinacion = skill 'slack-coordinacion' {
-      description 'Coordina esta sesión con las otras sesiones del taller por Slack.'
+    enlazar_agentes = skill 'enlazar-agentes' {
+      description 'Comunica esta sesión con las otras por los canales que eligió el humano, desde un registro vivo: directo, buzón y Slack.'
     }
 
     documentar = skill 'documentar' {
